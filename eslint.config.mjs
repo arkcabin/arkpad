@@ -31,6 +31,13 @@ export default [
       },
     },
   },
+  // Disable strict any checking for core package (extensions use dynamic commands)
+  {
+    files: ["packages/core/src/**/*.ts"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+    },
+  },
   {
     files: ["apps/arkpad/src/**/*.{ts,tsx}"],
     languageOptions: {
