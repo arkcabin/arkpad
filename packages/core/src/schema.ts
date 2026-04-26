@@ -1,4 +1,4 @@
-import { Schema, Mark } from "prosemirror-model";
+import { Schema } from "prosemirror-model";
 import { schema as basicSchema } from "prosemirror-schema-basic";
 import { addListNodes } from "prosemirror-schema-list";
 

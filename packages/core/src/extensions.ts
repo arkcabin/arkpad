@@ -221,30 +221,27 @@ function createBlockquote(): Extension {
       setBlockquote: (state: any, dispatch: any) => {
         const { $from, $to } = state.selection;
         
-        // Check if entire selection is inside a blockquote
-        let startInQuote = false;
-        let endInQuote = false;
+        // Get block range to check
+        const range = $from.blockRange($to);
+        if (!range) {
+          return wrapIn(arkpadSchema.nodes.blockquote!)(state, dispatch);
+        }
         
-        for (let d = $from.depth; d > 0; d--) {
-          if ($from.node(d).type === arkpadSchema.nodes.blockquote) {
-            startInQuote = true;
+        // Check if we're inside a blockquote by looking at parent nodes
+        let inBlockquote = false;
+        for (let i = 1; i <= $from.depth; i++) {
+          const node = $from.node(i);
+          if (node?.type === arkpadSchema.nodes.blockquote) {
+            inBlockquote = true;
             break;
           }
         }
         
-        for (let d = $to.depth; d > 0; d--) {
-          if ($to.node(d).type === arkpadSchema.nodes.blockquote) {
-            endInQuote = true;
-            break;
-          }
-        }
-        
-        // If both start and end are in blockquote, unwrap
-        if (startInQuote && endInQuote) {
+        if (inBlockquote) {
+          // Already in blockquote - use setBlockType to convert to paragraph (simplified unwrap)
           return setBlockType(arkpadSchema.nodes.paragraph!)(state, dispatch);
         }
         
-        // Otherwise wrap in blockquote
         return wrapIn(arkpadSchema.nodes.blockquote!)(state, dispatch);
       },
     }),
