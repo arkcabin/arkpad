@@ -218,7 +218,21 @@ function createBlockquote(): Extension {
   return {
     name: "blockquote",
     addCommands: () => ({
-      setBlockquote: (state: any, dispatch: any) => wrapIn(arkpadSchema.nodes.blockquote!)(state, dispatch),
+      setBlockquote: (state: any, dispatch: any) => {
+        const { $from, $to } = state.selection;
+        const range = $from.blockRange($to);
+        
+        // Check if selection is already in a blockquote
+        for (let d = $from.depth; d > 0; d--) {
+          const node = $from.node(d);
+          if (node?.type === arkpadSchema.nodes.blockquote) {
+            // Already in blockquote - lift out (simplified: just unwrap by converting to paragraph)
+            return setBlockType(arkpadSchema.nodes.paragraph!)(state, dispatch);
+          }
+        }
+        // Not in blockquote - wrap in one
+        return wrapIn(arkpadSchema.nodes.blockquote!)(state, dispatch);
+      },
     }),
   };
 }
