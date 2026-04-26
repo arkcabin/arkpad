@@ -10,13 +10,6 @@
         "changelogFile": "CHANGELOG.md"
       }
     ],
-    [
-      "@semantic-release/npm",
-      {
-        "npmPublish": true,
-        "pkgRoot": "packages/core"
-      }
-    ],
     "@semantic-release/github"
   ]
 }
