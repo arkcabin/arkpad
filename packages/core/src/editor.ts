@@ -169,7 +169,7 @@ export class ArkpadEditor implements ArkpadEditorAPI {
 
   isActive(name: string, attrs: Record<string, any> = {}): boolean {
     const { state } = this.view;
-    const { from, $from, to, empty } = state.selection;
+    const { from, to, $from, empty } = state.selection;
 
     if (arkpadSchema.marks[name]) {
       if (empty) {
@@ -179,13 +179,17 @@ export class ArkpadEditor implements ArkpadEditorAPI {
     }
 
     if (arkpadSchema.nodes[name]) {
-      const node = empty ? $from.parent : state.doc.nodeAt(from);
-      if (node) {
-        if (name === "heading" && node.attrs.level === attrs.level) {
-          return true;
+      let isActive = false;
+      state.doc.nodesBetween(from, to, (node) => {
+        if (isActive) return false;
+        if (node.type === arkpadSchema.nodes[name]) {
+          const hasAttrs = Object.keys(attrs).every((key) => node.attrs[key] === attrs[key]);
+          if (hasAttrs) {
+            isActive = true;
+          }
         }
-        return node.type === arkpadSchema.nodes[name];
-      }
+      });
+      return isActive;
     }
 
     return false;
@@ -193,28 +197,40 @@ export class ArkpadEditor implements ArkpadEditorAPI {
 
   getAttributes(name: string): Record<string, any> | null {
     const { state } = this.view;
-    const { from, $from, to, empty } = state.selection;
+    const { from, to, $from, empty } = state.selection;
 
     if (arkpadSchema.marks[name]) {
-      if (empty) {
-        const mark = arkpadSchema.marks[name].isInSet(state.storedMarks || $from.marks());
+      const markType = arkpadSchema.marks[name];
+      const marks = empty ? ($from.marks() || state.storedMarks) : [];
+      
+      if (empty && marks) {
+        const mark = marks.find((m) => m.type === markType);
         return mark ? mark.attrs : null;
       }
-      let result: Record<string, any> | null = null;
+
+      let attrs: Record<string, any> | null = null;
       state.doc.nodesBetween(from, to, (node) => {
-        if (node.marks.length) {
-          const mark = node.marks.find((m) => m.type === arkpadSchema.marks[name]);
-          if (mark) result = mark.attrs;
-        }
+        const mark = node.marks.find((m) => m.type === markType);
+        if (mark) attrs = mark.attrs;
       });
-      return result;
+      return attrs;
     }
 
     if (arkpadSchema.nodes[name]) {
-      const node = empty ? $from.parent : state.doc.nodeAt(from);
-      if (node && node.type === arkpadSchema.nodes[name]) {
-        return node.attrs;
+      const nodeType = arkpadSchema.nodes[name];
+      let attrs: Record<string, any> | null = null;
+      
+      state.doc.nodesBetween(from, to, (node) => {
+        if (node.type === nodeType) {
+          attrs = node.attrs;
+        }
+      });
+
+      if (!attrs && empty && $from.parent.type === nodeType) {
+        attrs = $from.parent.attrs;
       }
+
+      return attrs;
     }
 
     return null;

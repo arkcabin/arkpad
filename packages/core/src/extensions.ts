@@ -229,20 +229,13 @@ function createHeading(): Extension {
   return {
     name: "heading",
     addCommands: () => ({
-      toggleHeading: (level: number) => (state: any, dispatch: any) =>
-        setBlockType(arkpadSchema.nodes.heading!, { level })(state, dispatch),
-      setHeading1: (state: any, dispatch: any) =>
-        setBlockType(arkpadSchema.nodes.heading!, { level: 1 })(state, dispatch),
-      setHeading2: (state: any, dispatch: any) =>
-        setBlockType(arkpadSchema.nodes.heading!, { level: 2 })(state, dispatch),
-      setHeading3: (state: any, dispatch: any) =>
-        setBlockType(arkpadSchema.nodes.heading!, { level: 3 })(state, dispatch),
-      setHeading4: (state: any, dispatch: any) =>
-        setBlockType(arkpadSchema.nodes.heading!, { level: 4 })(state, dispatch),
-      setHeading5: (state: any, dispatch: any) =>
-        setBlockType(arkpadSchema.nodes.heading!, { level: 5 })(state, dispatch),
-      setHeading6: (state: any, dispatch: any) =>
-        setBlockType(arkpadSchema.nodes.heading!, { level: 6 })(state, dispatch),
+      toggleHeading: (attrs: { level: number }) => setBlockType(arkpadSchema.nodes.heading!, attrs),
+      setHeading1: () => setBlockType(arkpadSchema.nodes.heading!, { level: 1 }),
+      setHeading2: () => setBlockType(arkpadSchema.nodes.heading!, { level: 2 }),
+      setHeading3: () => setBlockType(arkpadSchema.nodes.heading!, { level: 3 }),
+      setHeading4: () => setBlockType(arkpadSchema.nodes.heading!, { level: 4 }),
+      setHeading5: () => setBlockType(arkpadSchema.nodes.heading!, { level: 5 }),
+      setHeading6: () => setBlockType(arkpadSchema.nodes.heading!, { level: 6 }),
     }),
     addKeyboardShortcuts: () => ({
       "Mod-Alt-1": setBlockType(arkpadSchema.nodes.heading!, { level: 1 }),
@@ -345,7 +338,7 @@ function createBulletList(): Extension {
   return {
     name: "bulletList",
     addCommands: () => ({
-      toggleBulletList: (state: any, dispatch: any) => wrapInList(arkpadSchema.nodes.bullet_list!)(state, dispatch),
+      toggleBulletList: () => wrapInList(arkpadSchema.nodes.bullet_list!),
     }),
     addInputRules: () => [
       wrappingInputRule(/^\s*([-*+])\s$/, arkpadSchema.nodes.bullet_list!, (match) => ({})),
@@ -357,7 +350,7 @@ function createOrderedList(): Extension {
   return {
     name: "orderedList",
     addCommands: () => ({
-      toggleOrderedList: (state: any, dispatch: any) => wrapInList(arkpadSchema.nodes.ordered_list!)(state, dispatch),
+      toggleOrderedList: () => wrapInList(arkpadSchema.nodes.ordered_list!),
     }),
     addInputRules: () => [
       wrappingInputRule(/^\s*(\d+)\.\s$/, arkpadSchema.nodes.ordered_list!, (match) => ({ order: match[1] ? +match[1] : 1 })),
@@ -385,7 +378,7 @@ function createTaskList(): Extension {
   return {
     name: "taskList",
     addCommands: () => ({
-      toggleTaskList: (state: any, dispatch: any) => wrapInList(arkpadSchema.nodes.task_list!)(state, dispatch),
+      toggleTaskList: () => wrapInList(arkpadSchema.nodes.task_list!),
     }),
     addInputRules: () => [
       wrappingInputRule(/^\s*(\[[ xX]\])\s$/, arkpadSchema.nodes.task_list!),
@@ -397,7 +390,7 @@ function createTaskItem(): Extension {
   return {
     name: "taskItem",
     addCommands: () => ({
-      toggleTaskItem: (state: any, dispatch: any) => {
+      toggleTaskItem: () => (state: any, dispatch: any) => {
         const { $from } = state.selection;
         const node = $from.nodeAfter || $from.parent;
         if (node && (node.type === arkpadSchema.nodes.task_item || node.type === arkpadSchema.nodes.task_list)) {
