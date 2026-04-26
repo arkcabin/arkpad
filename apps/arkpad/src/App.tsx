@@ -32,6 +32,9 @@ export function App() {
           <button onClick={() => run("setHeading1")} type="button">H1</button>
           <button onClick={() => run("setHeading2")} type="button">H2</button>
           <button onClick={() => run("setHeading3")} type="button">H3</button>
+          <button onClick={() => run("setHeading4")} type="button">H4</button>
+          <button onClick={() => run("setHeading5")} type="button">H5</button>
+          <button onClick={() => run("setHeading6")} type="button">H6</button>
           <button onClick={() => run("setParagraph")} type="button">P</button>
           <span className="separator" />
           <button onClick={() => run("setBlockquote")} type="button">Quote</button>
