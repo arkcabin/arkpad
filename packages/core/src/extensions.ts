@@ -190,6 +190,12 @@ function createHeading(): Extension {
     addCommands: () => ({
       toggleHeading: (level: number) => (state: any, dispatch: any) =>
         setBlockType(arkpadSchema.nodes.heading!, { level })(state, dispatch),
+      setHeading1: (state: any, dispatch: any) =>
+        setBlockType(arkpadSchema.nodes.heading!, { level: 1 })(state, dispatch),
+      setHeading2: (state: any, dispatch: any) =>
+        setBlockType(arkpadSchema.nodes.heading!, { level: 2 })(state, dispatch),
+      setHeading3: (state: any, dispatch: any) =>
+        setBlockType(arkpadSchema.nodes.heading!, { level: 3 })(state, dispatch),
     }),
     addKeyboardShortcuts: () => ({
       "Mod-Alt-1": (state: any, dispatch: any) => setBlockType(arkpadSchema.nodes.heading!, { level: 1 })(state, dispatch),
