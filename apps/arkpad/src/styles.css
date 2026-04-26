@@ -1,0 +1,85 @@
+:root {
+  color-scheme: light;
+  font-family: "Space Grotesk", "Segoe UI", sans-serif;
+  line-height: 1.4;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(circle at top left, #f5f2e8 0%, #efe8d8 40%, #e5dcc8 100%);
+  color: #1f2933;
+}
+
+.page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 1rem;
+  padding: 1.5rem;
+}
+
+.panel {
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid #d7c9aa;
+  border-radius: 14px;
+  padding: 1rem;
+  box-shadow: 0 10px 30px rgba(80, 60, 30, 0.12);
+}
+
+.subtitle {
+  margin-top: 0;
+  color: #5a4a2b;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.toolbar button {
+  border: 1px solid #b3945c;
+  background: #fffdf7;
+  color: #3f2e10;
+  border-radius: 8px;
+  padding: 0.4rem 0.7rem;
+  cursor: pointer;
+}
+
+.toolbar button:hover {
+  background: #f8f2e4;
+}
+
+.editor {
+  border: 1px solid #ccb386;
+  border-radius: 10px;
+  padding: 0.75rem;
+  min-height: 280px;
+  background: #fff;
+}
+
+.editor .ProseMirror {
+  outline: none;
+  min-height: 250px;
+}
+
+pre {
+  margin: 0;
+  background: #fff;
+  border: 1px solid #ccb386;
+  border-radius: 10px;
+  padding: 0.75rem;
+  max-height: 70vh;
+  overflow: auto;
+}
+
+@media (max-width: 900px) {
+  .page {
+    grid-template-columns: 1fr;
+  }
+}
