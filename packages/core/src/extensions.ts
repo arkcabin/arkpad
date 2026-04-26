@@ -219,14 +219,32 @@ function createBlockquote(): Extension {
     name: "blockquote",
     addCommands: () => ({
       setBlockquote: (state: any, dispatch: any) => {
-        const { $from } = state.selection;
+        const { $from, $to } = state.selection;
         
-        // Check if inside a blockquote
+        // Check if entire selection is inside a blockquote
+        let startInQuote = false;
+        let endInQuote = false;
+        
         for (let d = $from.depth; d > 0; d--) {
           if ($from.node(d).type === arkpadSchema.nodes.blockquote) {
-            return setBlockType(arkpadSchema.nodes.paragraph!)(state, dispatch);
+            startInQuote = true;
+            break;
           }
         }
+        
+        for (let d = $to.depth; d > 0; d--) {
+          if ($to.node(d).type === arkpadSchema.nodes.blockquote) {
+            endInQuote = true;
+            break;
+          }
+        }
+        
+        // If both start and end are in blockquote, unwrap
+        if (startInQuote && endInQuote) {
+          return setBlockType(arkpadSchema.nodes.paragraph!)(state, dispatch);
+        }
+        
+        // Otherwise wrap in blockquote
         return wrapIn(arkpadSchema.nodes.blockquote!)(state, dispatch);
       },
     }),
