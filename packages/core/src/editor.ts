@@ -1,5 +1,5 @@
 import { DOMParser as PMDOMParser, DOMSerializer, Node as PMNode, type Schema } from "prosemirror-model";
-import { EditorState } from "prosemirror-state";
+import { EditorState, type Plugin } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
 
 import { arkpadSchema } from "./schema";
@@ -92,13 +92,13 @@ export class ArkpadEditor implements ArkpadEditorAPI {
   }
 
   private createState(content: ArkpadContent) {
+    const parsedDoc = parseContent(content, arkpadSchema);
+    const plugins = this.extensionManager.getPlugins();
+
     return EditorState.create({
       schema: arkpadSchema,
-      doc: parseContent(content, arkpadSchema),
-      plugins: [
-        ...this.extensionManager.inputRules,
-        ...this.extensionManager.proseMirrorPlugins,
-      ],
+      doc: parsedDoc,
+      plugins,
     });
   }
 
@@ -142,17 +142,19 @@ export class ArkpadEditor implements ArkpadEditorAPI {
     );
   }
 
-  runCommand(name: string): boolean {
+  runCommand(name: string, ...args: any[]): boolean {
     if (this.destroyed) return false;
 
     const command = this.commands[name];
     if (!command) return false;
 
-    return (command as (state: EditorState, dispatch?: Dispatch, view?: EditorView) => boolean)(
-      this.view.state,
-      this.view.dispatch,
-      this.view
-    );
+    const result = (command as any)(...args);
+
+    if (typeof result === "function") {
+      return result(this.view.state, this.view.dispatch, this.view);
+    }
+
+    return result;
   }
 
   canRunCommand(name: string): boolean {
@@ -163,6 +165,59 @@ export class ArkpadEditor implements ArkpadEditorAPI {
       undefined,
       this.view
     );
+  }
+
+  isActive(name: string, attrs: Record<string, any> = {}): boolean {
+    const { state } = this.view;
+    const { from, $from, to, empty } = state.selection;
+
+    if (arkpadSchema.marks[name]) {
+      if (empty) {
+        return !!arkpadSchema.marks[name].isInSet(state.storedMarks || $from.marks());
+      }
+      return state.doc.rangeHasMark(from, to, arkpadSchema.marks[name]);
+    }
+
+    if (arkpadSchema.nodes[name]) {
+      const node = empty ? $from.parent : state.doc.nodeAt(from);
+      if (node) {
+        if (name === "heading" && node.attrs.level === attrs.level) {
+          return true;
+        }
+        return node.type === arkpadSchema.nodes[name];
+      }
+    }
+
+    return false;
+  }
+
+  getAttributes(name: string): Record<string, any> | null {
+    const { state } = this.view;
+    const { from, $from, to, empty } = state.selection;
+
+    if (arkpadSchema.marks[name]) {
+      if (empty) {
+        const mark = arkpadSchema.marks[name].isInSet(state.storedMarks || $from.marks());
+        return mark ? mark.attrs : null;
+      }
+      let result: Record<string, any> | null = null;
+      state.doc.nodesBetween(from, to, (node) => {
+        if (node.marks.length) {
+          const mark = node.marks.find((m) => m.type === arkpadSchema.marks[name]);
+          if (mark) result = mark.attrs;
+        }
+      });
+      return result;
+    }
+
+    if (arkpadSchema.nodes[name]) {
+      const node = empty ? $from.parent : state.doc.nodeAt(from);
+      if (node && node.type === arkpadSchema.nodes[name]) {
+        return node.attrs;
+      }
+    }
+
+    return null;
   }
 
   setContent(content: ArkpadContent, emitUpdate = true) {

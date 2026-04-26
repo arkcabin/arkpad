@@ -1,9 +1,12 @@
-import { type Schema } from "prosemirror-model";
-import { type Plugin, type Transaction } from "prosemirror-state";
+import { type Schema, type Node as PMNode } from "prosemirror-model";
+import { Plugin, type Transaction } from "prosemirror-state";
 import { toggleMark, setBlockType, wrapIn } from "prosemirror-commands";
-import { wrapInList, sinkListItem, liftListItem } from "prosemirror-schema-list";
+import { wrapInList, sinkListItem, liftListItem, splitListItem } from "prosemirror-schema-list";
 import { history, undo, redo } from "prosemirror-history";
 import { keymap } from "prosemirror-keymap";
+import { baseKeymap } from "prosemirror-commands";
+import { inputRules, wrappingInputRule, textblockTypeInputRule } from "prosemirror-inputrules";
+import { placeholder as createPlaceholderPlugin } from "prosemirror-placeholder";
 
 import { arkpadSchema } from "./schema";
 
@@ -17,7 +20,7 @@ export interface Extension {
   getOptions?: () => Record<string, unknown>;
   addCommands?: () => Record<string, any>;
   addKeyboardShortcuts?: () => Record<string, any>;
-  addInputRules?: () => Plugin[];
+  addInputRules?: () => any[];
   addPasteRules?: () => Plugin[];
   addProseMirrorPlugins?: () => Plugin[];
 }
@@ -27,7 +30,7 @@ export class ExtensionManager {
   public extensions: Extension[] = [];
   public commands: Record<string, any> = {};
   public keyboardShortcuts: Record<string, any> = {};
-  public inputRules: Plugin[] = [];
+  public inputRules: any[] = [];
   public pasteRules: Plugin[] = [];
   public proseMirrorPlugins: Plugin[] = [];
 
@@ -43,10 +46,25 @@ export class ExtensionManager {
     this.commands = this.collectCommands();
     this.keyboardShortcuts = this.collectKeyboardShortcuts();
     this.inputRules = this.collectInputRules();
+    this.pasteRules = this.collectPasteRules();
+    this.proseMirrorPlugins = this.collectProseMirrorPlugins();
   }
 
   registerExtension(extension: Extension): void {
     this.extensions.push(extension);
+  }
+
+  get(name: string): Extension | undefined {
+    return this.extensions.find((ext) => ext.name === name);
+  }
+
+  getPlugins(): Plugin[] {
+    return [
+      inputRules({ rules: this.inputRules }),
+      keymap(this.keyboardShortcuts),
+      keymap(baseKeymap),
+      ...this.proseMirrorPlugins,
+    ];
   }
 
   private collectCommands() {
@@ -69,8 +87,8 @@ export class ExtensionManager {
     return shortcuts;
   }
 
-  private collectInputRules(): Plugin[] {
-    const rules: Plugin[] = [];
+  private collectInputRules(): any[] {
+    const rules: any[] = [];
     for (const ext of this.extensions) {
       if (ext.addInputRules) {
         rules.push(...ext.addInputRules());
@@ -79,8 +97,24 @@ export class ExtensionManager {
     return rules;
   }
 
-  get(name: string): Extension | undefined {
-    return this.extensions.find((ext) => ext.name === name);
+  private collectPasteRules(): Plugin[] {
+    const rules: Plugin[] = [];
+    for (const ext of this.extensions) {
+      if (ext.addPasteRules) {
+        rules.push(...ext.addPasteRules());
+      }
+    }
+    return rules;
+  }
+
+  private collectProseMirrorPlugins() {
+    const plugins: Plugin[] = [];
+    for (const ext of this.extensions) {
+      if (ext.addProseMirrorPlugins) {
+        plugins.push(...ext.addProseMirrorPlugins());
+      }
+    }
+    return plugins;
   }
 }
 
@@ -89,10 +123,10 @@ function createBold(): Extension {
   return {
     name: "bold",
     addCommands: () => ({
-      toggleBold: (state: any, dispatch: any) => toggleMark(arkpadSchema.marks.strong!)(state, dispatch),
+      toggleBold: () => toggleMark(arkpadSchema.marks.strong!),
     }),
     addKeyboardShortcuts: () => ({
-      "Mod-b": (state: any, dispatch: any) => toggleMark(arkpadSchema.marks.strong!)(state, dispatch),
+      "Mod-b": toggleMark(arkpadSchema.marks.strong!),
     }),
   };
 }
@@ -101,10 +135,10 @@ function createItalic(): Extension {
   return {
     name: "italic",
     addCommands: () => ({
-      toggleItalic: (state: any, dispatch: any) => toggleMark(arkpadSchema.marks.em!)(state, dispatch),
+      toggleItalic: () => toggleMark(arkpadSchema.marks.em!),
     }),
     addKeyboardShortcuts: () => ({
-      "Mod-i": (state: any, dispatch: any) => toggleMark(arkpadSchema.marks.em!)(state, dispatch),
+      "Mod-i": toggleMark(arkpadSchema.marks.em!),
     }),
   };
 }
@@ -113,7 +147,22 @@ function createStrike(): Extension {
   return {
     name: "strike",
     addCommands: () => ({
-      toggleStrike: (state: any, dispatch: any) => toggleMark(arkpadSchema.marks.strike!)(state, dispatch),
+      toggleStrike: () => toggleMark(arkpadSchema.marks.strike!),
+    }),
+    addKeyboardShortcuts: () => ({
+      "Mod-Shift-s": toggleMark(arkpadSchema.marks.strike!),
+    }),
+  };
+}
+
+function createUnderline(): Extension {
+  return {
+    name: "underline",
+    addCommands: () => ({
+      toggleUnderline: () => toggleMark(arkpadSchema.marks.underline!),
+    }),
+    addKeyboardShortcuts: () => ({
+      "Mod-u": toggleMark(arkpadSchema.marks.underline!),
     }),
   };
 }
@@ -122,10 +171,10 @@ function createCode(): Extension {
   return {
     name: "code",
     addCommands: () => ({
-      toggleCode: (state: any, dispatch: any) => toggleMark(arkpadSchema.marks.code!)(state, dispatch),
+      toggleCode: () => toggleMark(arkpadSchema.marks.code!),
     }),
     addKeyboardShortcuts: () => ({
-      "Mod-e": (state: any, dispatch: any) => toggleMark(arkpadSchema.marks.code!)(state, dispatch),
+      "Mod-e": toggleMark(arkpadSchema.marks.code!),
     }),
   };
 }
@@ -145,23 +194,15 @@ function createLink(): Extension {
         if (dispatch) dispatch(tr);
         return true;
       },
-      unsetLink: (state: any, dispatch: any) => {
-        const { $from, $to } = state.selection;
-        const tr = state.tr;
-        tr.removeMark($from.pos, $to.pos, arkpadSchema.marks.link!);
-        if (dispatch) dispatch(tr);
+      unsetLink: () => (state: any, dispatch: any) => {
+        const { from, to } = state.selection;
+        if (dispatch) dispatch(state.tr.removeMark(from, to, arkpadSchema.marks.link!));
         return true;
       },
+      toggleLink: (href: string) => toggleMark(arkpadSchema.marks.link!, { href }),
     }),
     addKeyboardShortcuts: () => ({
-      "Mod-k": (state: any, dispatch: any) => {
-        const mark = arkpadSchema.marks.link!.create({ href: "https://" });
-        const { $from, $to } = state.selection;
-        const tr = state.tr;
-        tr.addMark($from.pos, $to.pos, mark);
-        if (dispatch) dispatch(tr);
-        return true;
-      },
+      "Mod-k": toggleMark(arkpadSchema.marks.link!, { href: "https://" }),
     }),
   };
 }
@@ -175,7 +216,7 @@ function createParagraph(): Extension {
   return {
     name: "paragraph",
     addCommands: () => ({
-      setParagraph: (state: any, dispatch: any) => setBlockType(arkpadSchema.nodes.paragraph!)(state, dispatch),
+      setParagraph: () => setBlockType(arkpadSchema.nodes.paragraph!),
     }),
   };
 }
@@ -204,13 +245,16 @@ function createHeading(): Extension {
         setBlockType(arkpadSchema.nodes.heading!, { level: 6 })(state, dispatch),
     }),
     addKeyboardShortcuts: () => ({
-      "Mod-Alt-1": (state: any, dispatch: any) => setBlockType(arkpadSchema.nodes.heading!, { level: 1 })(state, dispatch),
-      "Mod-Alt-2": (state: any, dispatch: any) => setBlockType(arkpadSchema.nodes.heading!, { level: 2 })(state, dispatch),
-      "Mod-Alt-3": (state: any, dispatch: any) => setBlockType(arkpadSchema.nodes.heading!, { level: 3 })(state, dispatch),
-      "Mod-Alt-4": (state: any, dispatch: any) => setBlockType(arkpadSchema.nodes.heading!, { level: 4 })(state, dispatch),
-      "Mod-Alt-5": (state: any, dispatch: any) => setBlockType(arkpadSchema.nodes.heading!, { level: 5 })(state, dispatch),
-      "Mod-Alt-6": (state: any, dispatch: any) => setBlockType(arkpadSchema.nodes.heading!, { level: 6 })(state, dispatch),
+      "Mod-Alt-1": setBlockType(arkpadSchema.nodes.heading!, { level: 1 }),
+      "Mod-Alt-2": setBlockType(arkpadSchema.nodes.heading!, { level: 2 }),
+      "Mod-Alt-3": setBlockType(arkpadSchema.nodes.heading!, { level: 3 }),
+      "Mod-Alt-4": setBlockType(arkpadSchema.nodes.heading!, { level: 4 }),
+      "Mod-Alt-5": setBlockType(arkpadSchema.nodes.heading!, { level: 5 }),
+      "Mod-Alt-6": setBlockType(arkpadSchema.nodes.heading!, { level: 6 }),
     }),
+    addInputRules: () => [
+      textblockTypeInputRule(/^(#{1,6})\s$/, arkpadSchema.nodes.heading!, (match) => ({ level: match[1]?.length || 1 })),
+    ],
   };
 }
 
@@ -218,33 +262,14 @@ function createBlockquote(): Extension {
   return {
     name: "blockquote",
     addCommands: () => ({
-      setBlockquote: (state: any, dispatch: any) => {
-        const { $from, $to } = state.selection;
-        
-        // Get block range to check
-        const range = $from.blockRange($to);
-        if (!range) {
-          return wrapIn(arkpadSchema.nodes.blockquote!)(state, dispatch);
-        }
-        
-        // Check if we're inside a blockquote by looking at parent nodes
-        let inBlockquote = false;
-        for (let i = 1; i <= $from.depth; i++) {
-          const node = $from.node(i);
-          if (node?.type === arkpadSchema.nodes.blockquote) {
-            inBlockquote = true;
-            break;
-          }
-        }
-        
-        if (inBlockquote) {
-          // Already in blockquote - use setBlockType to convert to paragraph (simplified unwrap)
-          return setBlockType(arkpadSchema.nodes.paragraph!)(state, dispatch);
-        }
-        
-        return wrapIn(arkpadSchema.nodes.blockquote!)(state, dispatch);
-      },
+      setBlockquote: () => wrapIn(arkpadSchema.nodes.blockquote!),
     }),
+    addKeyboardShortcuts: () => ({
+      "Mod-Shift-b": wrapIn(arkpadSchema.nodes.blockquote!),
+    }),
+    addInputRules: () => [
+      wrappingInputRule(/^\s*>\s$/, arkpadSchema.nodes.blockquote!),
+    ],
   };
 }
 
@@ -252,8 +277,14 @@ function createCodeBlock(): Extension {
   return {
     name: "codeBlock",
     addCommands: () => ({
-      toggleCodeBlock: (state: any, dispatch: any) => setBlockType(arkpadSchema.nodes.code_block!)(state, dispatch),
+      toggleCodeBlock: () => setBlockType(arkpadSchema.nodes.code_block!),
     }),
+    addKeyboardShortcuts: () => ({
+      "Mod-Alt-c": setBlockType(arkpadSchema.nodes.code_block!),
+    }),
+    addInputRules: () => [
+      textblockTypeInputRule(/^```$/, arkpadSchema.nodes.code_block!),
+    ],
   };
 }
 
@@ -261,15 +292,22 @@ function createHardBreak(): Extension {
   return {
     name: "hardBreak",
     addCommands: () => ({
-      setHardBreak: (state: any, dispatch: any) => {
-        const { $from } = state.selection;
-        if ($from.parent.type.content.size === $from.parent.content.size) {
-          const node = arkpadSchema.nodes.hard_break!.create();
-          const tr = state.tr.insert($from.pos, node);
-          if (dispatch) dispatch(tr);
-          return true;
-        }
-        return false;
+      setHardBreak: () => (state: any, dispatch: any) => {
+        const node = arkpadSchema.nodes.hard_break!.create();
+        if (dispatch) dispatch(state.tr.replaceSelectionWith(node));
+        return true;
+      },
+    }),
+    addKeyboardShortcuts: () => ({
+      "Mod-Enter": () => (state: any, dispatch: any) => {
+        const node = arkpadSchema.nodes.hard_break!.create();
+        if (dispatch) dispatch(state.tr.replaceSelectionWith(node));
+        return true;
+      },
+      "Shift-Enter": () => (state: any, dispatch: any) => {
+        const node = arkpadSchema.nodes.hard_break!.create();
+        if (dispatch) dispatch(state.tr.replaceSelectionWith(node));
+        return true;
       },
     }),
   };
@@ -279,10 +317,9 @@ function createHorizontalRule(): Extension {
   return {
     name: "horizontalRule",
     addCommands: () => ({
-      setHorizontalRule: (state: any, dispatch: any) => {
+      setHorizontalRule: () => (state: any, dispatch: any) => {
         const node = arkpadSchema.nodes.horizontal_rule!.create();
-        const tr = state.tr.replaceSelectionWith(node);
-        if (dispatch) dispatch(tr);
+        if (dispatch) dispatch(state.tr.replaceSelectionWith(node));
         return true;
       },
     }),
@@ -293,18 +330,13 @@ function createImage(): Extension {
   return {
     name: "image",
     addCommands: () => ({
-      setImage: (src: string) => (state: any, dispatch: any) => {
-        const node = arkpadSchema.nodes.image!.create({ src });
+      setImage: (src: string, alt?: string, title?: string) => (state: any, dispatch: any) => {
+        const node = arkpadSchema.nodes.image!.create({ src, alt, title });
         const tr = state.tr.replaceSelectionWith(node);
         if (dispatch) dispatch(tr);
         return true;
       },
     }),
-    addPasteRules: () => {
-      // Note: Full clipboard handling requires additional ProseMirror plugins
-      // For now, images work via drag-drop or insert command
-      return [];
-    },
   };
 }
 
@@ -315,6 +347,9 @@ function createBulletList(): Extension {
     addCommands: () => ({
       toggleBulletList: (state: any, dispatch: any) => wrapInList(arkpadSchema.nodes.bullet_list!)(state, dispatch),
     }),
+    addInputRules: () => [
+      wrappingInputRule(/^\s*([-*+])\s$/, arkpadSchema.nodes.bullet_list!, (match) => ({})),
+    ],
   };
 }
 
@@ -324,6 +359,9 @@ function createOrderedList(): Extension {
     addCommands: () => ({
       toggleOrderedList: (state: any, dispatch: any) => wrapInList(arkpadSchema.nodes.ordered_list!)(state, dispatch),
     }),
+    addInputRules: () => [
+      wrappingInputRule(/^\s*(\d+)\.\s$/, arkpadSchema.nodes.ordered_list!, (match) => ({ order: match[1] ? +match[1] : 1 })),
+    ],
   };
 }
 
@@ -331,8 +369,14 @@ function createListItem(): Extension {
   return {
     name: "listItem",
     addCommands: () => ({
-      sinkListItem: (state: any, dispatch: any) => sinkListItem(arkpadSchema.nodes.list_item!)(state, dispatch),
-      liftListItem: (state: any, dispatch: any) => liftListItem(arkpadSchema.nodes.list_item!)(state, dispatch),
+      sinkListItem: () => sinkListItem(arkpadSchema.nodes.list_item!),
+      liftListItem: () => liftListItem(arkpadSchema.nodes.list_item!),
+      splitListItem: () => splitListItem(arkpadSchema.nodes.list_item!),
+    }),
+    addKeyboardShortcuts: () => ({
+      Enter: splitListItem(arkpadSchema.nodes.list_item!),
+      Tab: sinkListItem(arkpadSchema.nodes.list_item!),
+      "Shift-Tab": liftListItem(arkpadSchema.nodes.list_item!),
     }),
   };
 }
@@ -343,6 +387,9 @@ function createTaskList(): Extension {
     addCommands: () => ({
       toggleTaskList: (state: any, dispatch: any) => wrapInList(arkpadSchema.nodes.task_list!)(state, dispatch),
     }),
+    addInputRules: () => [
+      wrappingInputRule(/^\s*(\[[ xX]\])\s$/, arkpadSchema.nodes.task_list!),
+    ],
   };
 }
 
@@ -350,12 +397,26 @@ function createTaskItem(): Extension {
   return {
     name: "taskItem",
     addCommands: () => ({
-      toggleTaskItem: (state: any, dispatch: any) => setBlockType(arkpadSchema.nodes.task_item!)(state, dispatch),
+      toggleTaskItem: (state: any, dispatch: any) => {
+        const { $from } = state.selection;
+        const node = $from.nodeAfter || $from.parent;
+        if (node && (node.type === arkpadSchema.nodes.task_item || node.type === arkpadSchema.nodes.task_list)) {
+          const newAttrs = { ...node.attrs, checked: !node.attrs.checked };
+          const tr = state.tr.setNodeMarkup($from.pos, undefined, newAttrs);
+          if (dispatch) dispatch(tr);
+          return true;
+        }
+        return setBlockType(arkpadSchema.nodes.task_item!)(state, dispatch);
+      },
+    }),
+    addKeyboardShortcuts: () => ({
+      Enter: splitListItem(arkpadSchema.nodes.task_item!),
+      Tab: sinkListItem(arkpadSchema.nodes.task_item!),
+      "Shift-Tab": liftListItem(arkpadSchema.nodes.task_item!),
     }),
   };
 }
 
-// Make taskItem available but not in default StarterKit (requires schema support)
 export { createTaskItem };
 
 // UTILITY EXTENSIONS
@@ -363,17 +424,24 @@ function createHistory(): Extension {
   return {
     name: "history",
     addCommands: () => ({
-      undo: (state: any, dispatch: any) => undo(state, dispatch),
-      redo: (state: any, dispatch: any) => redo(state, dispatch),
+      undo: () => undo,
+      redo: () => redo,
     }),
-    addProseMirrorPlugins: () => [history(), keymap({ "Mod-z": undo, "Mod-y": redo, "Mod-Shift-z": redo })],
+    addKeyboardShortcuts: () => ({
+      "Mod-z": undo,
+      "Mod-y": redo,
+      "Mod-Shift-z": redo,
+    }),
+    addProseMirrorPlugins: () => [history()],
   };
 }
 
-function createPlaceholder(): Extension {
+function createPlaceholder(options: { placeholder?: string } = {}): Extension {
   return {
     name: "placeholder",
-    addProseMirrorPlugins: () => [],
+    addProseMirrorPlugins: () => [
+      createPlaceholderPlugin(options.placeholder || "Start writing..."),
+    ],
   };
 }
 
@@ -395,6 +463,7 @@ export const StarterKit: Extension[] = [
   createBulletList(),
   createOrderedList(),
   createTaskList(),
+  createTaskItem(),
   createListItem(),
   createCodeBlock(),
   createHardBreak(),
@@ -402,12 +471,13 @@ export const StarterKit: Extension[] = [
   createImage(),
   createBold(),
   createItalic(),
+  createUnderline(),
   createStrike(),
   createCode(),
   createLink(),
   createGapCursor(),
   createDropCursor(),
-  createPlaceholder(),
+  createPlaceholder({ placeholder: "Start writing..." }),
   createHistory(),
 ];
 

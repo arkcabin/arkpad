@@ -46,7 +46,9 @@ export interface ArkpadEditorAPI {
   getHTML(): string;
   getJSON(): ArkpadDocJSON;
   getText(): string;
-  runCommand(name: string): boolean;
+  isActive(name: string, attrs?: Record<string, any>): boolean;
+  getAttributes(name: string): Record<string, any> | null;
+  runCommand(name: string, ...args: any[]): boolean;
   canRunCommand(name: string): boolean;
   setContent(content: ArkpadContent, emitUpdate?: boolean): void;
   clearContent(emitUpdate?: boolean): void;
