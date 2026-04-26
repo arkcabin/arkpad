@@ -196,11 +196,20 @@ function createHeading(): Extension {
         setBlockType(arkpadSchema.nodes.heading!, { level: 2 })(state, dispatch),
       setHeading3: (state: any, dispatch: any) =>
         setBlockType(arkpadSchema.nodes.heading!, { level: 3 })(state, dispatch),
+      setHeading4: (state: any, dispatch: any) =>
+        setBlockType(arkpadSchema.nodes.heading!, { level: 4 })(state, dispatch),
+      setHeading5: (state: any, dispatch: any) =>
+        setBlockType(arkpadSchema.nodes.heading!, { level: 5 })(state, dispatch),
+      setHeading6: (state: any, dispatch: any) =>
+        setBlockType(arkpadSchema.nodes.heading!, { level: 6 })(state, dispatch),
     }),
     addKeyboardShortcuts: () => ({
       "Mod-Alt-1": (state: any, dispatch: any) => setBlockType(arkpadSchema.nodes.heading!, { level: 1 })(state, dispatch),
       "Mod-Alt-2": (state: any, dispatch: any) => setBlockType(arkpadSchema.nodes.heading!, { level: 2 })(state, dispatch),
       "Mod-Alt-3": (state: any, dispatch: any) => setBlockType(arkpadSchema.nodes.heading!, { level: 3 })(state, dispatch),
+      "Mod-Alt-4": (state: any, dispatch: any) => setBlockType(arkpadSchema.nodes.heading!, { level: 4 })(state, dispatch),
+      "Mod-Alt-5": (state: any, dispatch: any) => setBlockType(arkpadSchema.nodes.heading!, { level: 5 })(state, dispatch),
+      "Mod-Alt-6": (state: any, dispatch: any) => setBlockType(arkpadSchema.nodes.heading!, { level: 6 })(state, dispatch),
     }),
   };
 }
