@@ -1,19 +1,20 @@
 import React, { useEffect, useRef } from "react";
 
 import {
-  ArkpadEditor as CoreEditor,
+  ArkpadEditor,
   type ArkpadEditorOptions,
+  type ArkpadEditorAPI,
 } from "@arkpad/core";
 
 export interface ArkpadEditorReactProps {
   content?: string;
   className?: string;
   onChange?: (payload: { html: string; json: unknown }) => void;
-  onReady?: (editor: CoreEditor) => void;
+  onReady?: (editor: ArkpadEditorAPI) => void;
   options?: Omit<ArkpadEditorOptions, "element" | "content" | "onUpdate">;
 }
 
-export function ArkpadEditor({
+export function ArkpadEditorComponent({
   content,
   className,
   onChange,
@@ -21,18 +22,18 @@ export function ArkpadEditor({
   options,
 }: ArkpadEditorReactProps) {
   const hostRef = useRef<HTMLDivElement | null>(null);
-  const editorRef = useRef<CoreEditor | null>(null);
+  const editorRef = useRef<ArkpadEditor | null>(null);
 
   useEffect(() => {
     if (!hostRef.current) {
       return;
     }
 
-    const editor = new CoreEditor({
+    const editor = new ArkpadEditor({
       element: hostRef.current,
       content,
       ...options,
-      onUpdate: ({ html }) => {
+      onUpdate: ({ html }: { html: string }) => {
         onChange?.({ html, json: editor.getJSON() });
       },
     });

@@ -4,7 +4,6 @@ import { addListNodes } from "prosemirror-schema-list";
 
 const nodes = addListNodes(basicSchema.spec.nodes, "paragraph block*", "block");
 
-export const arkpadSchema = new Schema({
-  nodes,
-  marks: basicSchema.spec.marks,
-});
+const marks = basicSchema.spec.marks;
+
+export const arkpadSchema = new Schema({ nodes, marks });

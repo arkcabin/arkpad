@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 
-import { type ArkpadEditor as CoreEditor } from "@arkpad/core";
-import { ArkpadEditor } from "@arkpad/react";
+import { type ArkpadEditorAPI } from "@arkpad/core";
+import { ArkpadEditorComponent } from "@arkpad/react";
 
 export function App() {
-  const [editor, setEditor] = useState<CoreEditor | null>(null);
+  const [editor, setEditor] = useState<ArkpadEditorAPI | null>(null);
   const [html, setHtml] = useState("<p>Welcome to Arkpad.</p>");
 
   const run = (command: string) => {
@@ -24,18 +24,18 @@ export function App() {
         <div className="toolbar">
           <button onClick={() => run("toggleBold")} type="button">Bold</button>
           <button onClick={() => run("toggleItalic")} type="button">Italic</button>
-          <button onClick={() => run("setHeading1")} type="button">H1</button>
+          <button onClick={() => run("toggleHeading")} type="button">H1</button>
           <button onClick={() => run("setParagraph")} type="button">P</button>
-          <button onClick={() => run("bulletList")} type="button">List</button>
+          <button onClick={() => run("toggleBlockquote")} type="button">Quote</button>
           <button onClick={() => run("undo")} type="button">Undo</button>
           <button onClick={() => run("redo")} type="button">Redo</button>
         </div>
 
-        <ArkpadEditor
+        <ArkpadEditorComponent
           className="editor"
           content={html}
-          onReady={(instance) => setEditor(instance)}
-          onChange={({ html: nextHtml }) => setHtml(nextHtml)}
+          onReady={(instance: ArkpadEditorAPI) => setEditor(instance)}
+          onChange={({ html: nextHtml }: { html: string }) => setHtml(nextHtml)}
         />
       </section>
 
