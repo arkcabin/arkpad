@@ -122,25 +122,44 @@ export function App() {
           <ToolbarSeparator />
 
           <div className="toolbar-group">
-            <div className="toolbar-dropdown">
-              <button type="button" className="toolbar-dropdown-btn">
-                {isActive("heading", { level: 1 }) || isActive("heading", { level: 2 }) || isActive("heading", { level: 3 })
-                  ? `H${editor?.getAttributes("heading")?.level || 1}`
-                  : "Heading"}
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <polyline points="6 9 12 15 18 9"/>
-                </svg>
-              </button>
-              <div className="toolbar-dropdown-menu">
-                <button type="button" className="toolbar-dropdown-item" onClick={() => run("setParagraph")}>Paragraph</button>
-                <button type="button" className="toolbar-dropdown-item" onClick={() => run("setHeading1")}>Heading 1</button>
-                <button type="button" className="toolbar-dropdown-item" onClick={() => run("setHeading2")}>Heading 2</button>
-                <button type="button" className="toolbar-dropdown-item" onClick={() => run("setHeading3")}>Heading 3</button>
-                <button type="button" className="toolbar-dropdown-item" onClick={() => run("setHeading4")}>Heading 4</button>
-                <button type="button" className="toolbar-dropdown-item" onClick={() => run("setHeading5")}>Heading 5</button>
-                <button type="button" className="toolbar-dropdown-item" onClick={() => run("setHeading6")}>Heading 6</button>
-              </div>
-            </div>
+          <div className="toolbar-group">
+            <ToolbarButton
+              onClick={() => run("setParagraph")}
+              isActive={isActive("paragraph")}
+              title="Paragraph"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M4 7h16M4 12h16M4 17h10"/>
+              </svg>
+            </ToolbarButton>
+            <ToolbarButton
+              onClick={() => run("setHeading1")}
+              isActive={isActive("heading", { level: 1 })}
+              title="Heading 1"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M4 12h8M4 18V6M12 18V6M17 12l3-2v8"/>
+              </svg>
+            </ToolbarButton>
+            <ToolbarButton
+              onClick={() => run("setHeading2")}
+              isActive={isActive("heading", { level: 2 })}
+              title="Heading 2"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M4 12h8M4 18V6M12 18V6M21 18h-4c0-4 4-3 4-6 0-1.5-2-2.5-4-1"/>
+              </svg>
+            </ToolbarButton>
+            <ToolbarButton
+              onClick={() => run("setHeading3")}
+              isActive={isActive("heading", { level: 3 })}
+              title="Heading 3"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M4 12h8M4 18V6M12 18V6M17.5 10.5c.5 0 2.5-.5 2.5 1.5s-2 1.5-2.5 1.5c.5 0 2.5.5 2.5 2.5s-2 1.5-2.5 1.5"/>
+              </svg>
+            </ToolbarButton>
+          </div>
           </div>
 
           <ToolbarSeparator />
