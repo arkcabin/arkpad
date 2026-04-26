@@ -260,6 +260,11 @@ function createImage(): Extension {
         return true;
       },
     }),
+    addPasteRules: () => {
+      // Note: Full clipboard handling requires additional ProseMirror plugins
+      // For now, images work via drag-drop or insert command
+      return [];
+    },
   };
 }
 
