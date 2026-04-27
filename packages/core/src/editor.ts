@@ -77,10 +77,7 @@ export class ArkpadEditor implements ArkpadEditorAPI {
       dispatchTransaction: (transaction) => {
         const nextState = this.view.state.apply(transaction);
         this.view.updateState(nextState);
-
-        if (transaction.docChanged || transaction.selectionSet) {
-          this.emitUpdate(nextState);
-        }
+        this.emitUpdate(nextState);
       },
     });
 
@@ -169,13 +166,13 @@ export class ArkpadEditor implements ArkpadEditorAPI {
 
   isActive(name: string, attrs: Record<string, any> = {}): boolean {
     const { state } = this.view;
-    const { from, to, empty } = state.selection;
+    const { from, to, empty, $from } = state.selection;
 
     // Check for Marks (bold, italic, etc.)
     const markType = state.schema.marks[name];
     if (markType) {
       if (empty) {
-        return !!markType.isInSet(state.storedMarks || state.selection.$from.marks());
+        return !!markType.isInSet(state.storedMarks || $from.marks());
       }
       return state.doc.rangeHasMark(from, to, markType);
     }
@@ -183,22 +180,35 @@ export class ArkpadEditor implements ArkpadEditorAPI {
     // Check for Nodes (heading, blockquote, etc.)
     const nodeType = state.schema.nodes[name];
     if (nodeType) {
-      let isActive = false;
-
-      // For nodes, we check the parent of the selection or the nodes in range
-      state.doc.nodesBetween(from, to, (node) => {
-        if (isActive) return false;
+      // PRO-GRADE DEPTH CHECK: Look up the parent tree of the selection
+      for (let depth = $from.depth; depth >= 0; depth--) {
+        const node = $from.node(depth);
         if (node.type === nodeType) {
           const hasMatchingAttrs = Object.entries(attrs).every(
             ([key, value]) => node.attrs[key] === value
           );
           if (hasMatchingAttrs) {
-            isActive = true;
+            return true;
           }
         }
-      });
+      }
 
-      return isActive;
+      // Fallback: If it's a range selection, check if the range contains the node type
+      if (!empty) {
+        let foundInRange = false;
+        state.doc.nodesBetween(from, to, (node) => {
+          if (foundInRange) return false;
+          if (node.type === nodeType) {
+            const hasMatchingAttrs = Object.entries(attrs).every(
+              ([key, value]) => node.attrs[key] === value
+            );
+            if (hasMatchingAttrs) {
+              foundInRange = true;
+            }
+          }
+        });
+        return foundInRange;
+      }
     }
 
     return false;

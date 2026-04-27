@@ -61,6 +61,7 @@ const ToolbarSeparator = () => <div className="w-px h-6 bg-slate-200 mx-1" />;
 export function App() {
   const [editor, setEditor] = useState<ArkpadEditorAPI | null>(null);
   const [html, setHtml] = useState("<p>Welcome to <strong>Arkpad</strong> — the professional editor framework.</p><p>This demo now showcases <strong>every single extension</strong> in our library. Try them all out below!</p>");
+  const [, setPulse] = useState(0);
 
   const run = useCallback((command: string, value?: any) => {
     if (!editor) return;
@@ -208,6 +209,7 @@ export function App() {
             <ArkpadEditorComponent
               content={html}
               onReady={(instance: ArkpadEditorAPI) => setEditor(instance)}
+              onUpdate={() => setPulse(p => p + 1)}
               onChange={({ html: nextHtml }: { html: string }) => setHtml(nextHtml)}
             />
           </div>
