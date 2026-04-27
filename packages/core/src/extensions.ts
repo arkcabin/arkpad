@@ -229,7 +229,20 @@ function createHeading(): Extension {
   return {
     name: "heading",
     addCommands: () => ({
-      toggleHeading: (attrs: { level: number }) => setBlockType(arkpadSchema.nodes.heading!, attrs),
+      toggleHeading: (attrs: { level: number }) => (state: any, dispatch: any) => {
+        const { from, to } = state.selection;
+        let isHeading = false;
+        state.doc.nodesBetween(from, to, (node) => {
+          if (node.type === arkpadSchema.nodes.heading && node.attrs.level === attrs.level) {
+            isHeading = true;
+          }
+        });
+
+        if (isHeading) {
+          return setBlockType(arkpadSchema.nodes.paragraph!)(state, dispatch);
+        }
+        return setBlockType(arkpadSchema.nodes.heading!, attrs)(state, dispatch);
+      },
       setHeading1: () => setBlockType(arkpadSchema.nodes.heading!, { level: 1 }),
       setHeading2: () => setBlockType(arkpadSchema.nodes.heading!, { level: 2 }),
       setHeading3: () => setBlockType(arkpadSchema.nodes.heading!, { level: 3 }),
@@ -255,6 +268,20 @@ function createBlockquote(): Extension {
   return {
     name: "blockquote",
     addCommands: () => ({
+      toggleBlockquote: () => (state: any, dispatch: any) => {
+        const { from, to } = state.selection;
+        let isBlockquote = false;
+        state.doc.nodesBetween(from, to, (node) => {
+          if (node.type === arkpadSchema.nodes.blockquote) {
+            isBlockquote = true;
+          }
+        });
+
+        if (isBlockquote) {
+          return setBlockType(arkpadSchema.nodes.paragraph!)(state, dispatch);
+        }
+        return wrapIn(arkpadSchema.nodes.blockquote!)(state, dispatch);
+      },
       setBlockquote: () => wrapIn(arkpadSchema.nodes.blockquote!),
     }),
     addKeyboardShortcuts: () => ({
@@ -270,7 +297,20 @@ function createCodeBlock(): Extension {
   return {
     name: "codeBlock",
     addCommands: () => ({
-      toggleCodeBlock: () => setBlockType(arkpadSchema.nodes.code_block!),
+      toggleCodeBlock: () => (state: any, dispatch: any) => {
+        const { from, to } = state.selection;
+        let isCodeBlock = false;
+        state.doc.nodesBetween(from, to, (node) => {
+          if (node.type === arkpadSchema.nodes.code_block) {
+            isCodeBlock = true;
+          }
+        });
+
+        if (isCodeBlock) {
+          return setBlockType(arkpadSchema.nodes.paragraph!)(state, dispatch);
+        }
+        return setBlockType(arkpadSchema.nodes.code_block!)(state, dispatch);
+      },
     }),
     addKeyboardShortcuts: () => ({
       "Mod-Alt-c": setBlockType(arkpadSchema.nodes.code_block!),

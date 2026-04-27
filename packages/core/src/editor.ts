@@ -78,7 +78,7 @@ export class ArkpadEditor implements ArkpadEditorAPI {
         const nextState = this.view.state.apply(transaction);
         this.view.updateState(nextState);
 
-        if (transaction.docChanged) {
+        if (transaction.docChanged || transaction.selectionSet) {
           this.emitUpdate(nextState);
         }
       },
