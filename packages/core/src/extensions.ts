@@ -302,7 +302,23 @@ function createCodeBlock(): Extension {
   return {
     name: "codeBlock",
     addCommands: () => ({
-      toggleCodeBlock: () => setBlockType(arkpadSchema.nodes.codeBlock!),
+      toggleCodeBlock: () => (state: any, dispatch: any) => {
+        const { $from } = state.selection;
+        
+        // Use the same precise depth-checking as isActive
+        let isCodeBlock = false;
+        for (let depth = $from.depth; depth >= 0; depth--) {
+          if ($from.node(depth).type === arkpadSchema.nodes.codeBlock) {
+            isCodeBlock = true;
+            break;
+          }
+        }
+
+        if (isCodeBlock) {
+          return setBlockType(arkpadSchema.nodes.paragraph!)(state, dispatch);
+        }
+        return setBlockType(arkpadSchema.nodes.codeBlock!)(state, dispatch);
+      },
       setCodeBlock: () => setBlockType(arkpadSchema.nodes.codeBlock!),
     }),
     addKeyboardShortcuts: () => ({
