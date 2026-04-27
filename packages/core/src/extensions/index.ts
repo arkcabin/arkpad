@@ -13,6 +13,8 @@ import {
   createStrike,
   createCode,
   createLink,
+  createSuperscript,
+  createSubscript,
 } from "./marks";
 import {
   createHeading,
@@ -53,6 +55,8 @@ export const StarterKit: Extension[] = [
   createStrike(),
   createCode(),
   createLink(),
+  createSuperscript(),
+  createSubscript(),
   createPlaceholder({ placeholder: "Start writing..." }),
   createHistory(),
   createTextAlign(),

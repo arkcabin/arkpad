@@ -219,6 +219,18 @@ const marks = basicSchema.spec.marks.append({
       return ["a", node.attrs, 0];
     },
   },
+  superscript: {
+    parseDOM: [{ tag: "sup" }],
+    toDOM() {
+      return ["sup", 0];
+    },
+  },
+  subscript: {
+    parseDOM: [{ tag: "sub" }],
+    toDOM() {
+      return ["sub", 0];
+    },
+  },
 });
 
 export const arkpadSchema = new Schema({ nodes, marks });

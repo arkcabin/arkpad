@@ -29,6 +29,8 @@ import {
   AlignJustify,
   Indent,
   Outdent,
+  Superscript,
+  Subscript,
 } from "lucide-react";
 
 import { useArkpadEditor, ArkpadEditorContent, BubbleMenu, FloatingMenu } from "@arkpad/react";
@@ -126,6 +128,20 @@ export function App() {
               title="Strikethrough"
             >
               <Strikethrough className="w-4 h-4" />
+            </ToolbarButton>
+            <ToolbarButton
+              onClick={() => run("toggleSuperscript")}
+              isActive={isActive("superscript")}
+              title="Superscript"
+            >
+              <Superscript className="w-4 h-4" />
+            </ToolbarButton>
+            <ToolbarButton
+              onClick={() => run("toggleSubscript")}
+              isActive={isActive("subscript")}
+              title="Subscript"
+            >
+              <Subscript className="w-4 h-4" />
             </ToolbarButton>
             <ToolbarButton
               onClick={() => run("toggleCode")}
@@ -306,6 +322,18 @@ export function App() {
                   className={`p-2 rounded-xl hover:bg-white/10 transition-all ${isActive("em") ? "text-blue-400 bg-white/5" : "text-slate-300"}`}
                 >
                   <Italic className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => run("toggleSuperscript")}
+                  className={`p-2 rounded-xl hover:bg-white/10 transition-all ${isActive("superscript") ? "text-blue-400 bg-white/5" : "text-slate-300"}`}
+                >
+                  <Superscript className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => run("toggleSubscript")}
+                  className={`p-2 rounded-xl hover:bg-white/10 transition-all ${isActive("subscript") ? "text-blue-400 bg-white/5" : "text-slate-300"}`}
+                >
+                  <Subscript className="w-4 h-4" />
                 </button>
                 <div className="w-px h-4 bg-white/10 mx-1" />
                 <button

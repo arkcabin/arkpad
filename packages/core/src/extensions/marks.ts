@@ -73,3 +73,20 @@ export function createLink(): Extension {
     }),
   };
 }
+export function createSuperscript(): Extension {
+  return {
+    name: "superscript",
+    addCommands: () => ({
+      toggleSuperscript: () => toggleMark(arkpadSchema.marks.superscript!),
+    }),
+  };
+}
+
+export function createSubscript(): Extension {
+  return {
+    name: "subscript",
+    addCommands: () => ({
+      toggleSubscript: () => toggleMark(arkpadSchema.marks.subscript!),
+    }),
+  };
+}
