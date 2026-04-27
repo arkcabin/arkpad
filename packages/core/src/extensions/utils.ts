@@ -42,6 +42,7 @@ export function toggleBlock(type: any, attrs: Record<string, any> = {}) {
  */
 export function toggleList(listType: any, itemType: any) {
   return (state: any, dispatch: any) => {
+    console.log(`[Arkpad] Smart Toggle Active: switching to ${listType.name}`);
     const { $from, $to } = state.selection;
     const range = $from.blockRange($to);
     if (!range) return false;
@@ -68,12 +69,24 @@ export function toggleList(listType: any, itemType: any) {
           const listNode = state.doc.nodeAt(listPos);
           
           if (listNode) {
+            console.log(`[Arkpad] Converting ${listNode.type.name} to ${listType.name}`);
             const newItems: any[] = [];
-            listNode.forEach((child) => {
-              newItems.push(itemType.create(null, child.content));
-            });
-            const newList = listType.create(null, newItems);
-            dispatch(state.tr.replaceWith(listPos, listPos + listNode.nodeSize, newList));
+            
+            try {
+              listNode.forEach((child, offset, index) => {
+                console.log(`[Arkpad]   Child ${index}: ${child.type.name}`, child.attrs);
+                // Create new item using the target type but preserving the content
+                const newItem = itemType.create(null, child.content);
+                newItems.push(newItem);
+              });
+              
+              const newList = listType.create(null, newItems);
+              dispatch(state.tr.replaceWith(listPos, listPos + listNode.nodeSize, newList));
+            } catch (err) {
+              console.error("[Arkpad] Conversion failed:", err);
+              // Fallback: Just try to wrap/lift normally if deep conversion fails
+              return false;
+            }
           }
         }
         return true;
