@@ -95,7 +95,18 @@ export function App() {
             <ToolbarButton onClick={() => run("toggleUnderline")} isActive={isActive("underline")} title="Underline"><Underline className="w-4 h-4" /></ToolbarButton>
             <ToolbarButton onClick={() => run("toggleStrike")} isActive={isActive("strike")} title="Strikethrough"><Strikethrough className="w-4 h-4" /></ToolbarButton>
             <ToolbarButton onClick={() => run("toggleCode")} isActive={isActive("code")} title="Inline Code"><Code2 className="w-4 h-4" /></ToolbarButton>
-            <ToolbarButton onClick={() => run("toggleLink", "https://arkpad.dev")} isActive={isActive("link")} title="Link"><LinkIcon className="w-4 h-4" /></ToolbarButton>
+            <ToolbarButton 
+              onClick={() => {
+                const url = window.prompt("Enter URL:", "https://");
+                if (url) {
+                  editor.runCommand("toggleLink", url);
+                }
+              }} 
+              isActive={isActive("link")} 
+              title="Link"
+            >
+              <LinkIcon className="w-4 h-4" />
+            </ToolbarButton>
           </div>
 
           <ToolbarSeparator />
