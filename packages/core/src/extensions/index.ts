@@ -1,7 +1,34 @@
-import { createDocument, createParagraph, createText, createHardBreak, createHistory, createPlaceholder } from "./base";
-import { createBold, createItalic, createUnderline, createStrike, createCode, createLink } from "./marks";
-import { createHeading, createBlockquote, createCodeBlock, createHorizontalRule, createImage } from "./nodes";
-import { createBulletList, createOrderedList, createTaskList, createTaskItem, createListItem } from "./lists";
+import {
+  createDocument,
+  createParagraph,
+  createText,
+  createHardBreak,
+  createHistory,
+  createPlaceholder,
+} from "./base";
+import {
+  createBold,
+  createItalic,
+  createUnderline,
+  createStrike,
+  createCode,
+  createLink,
+} from "./marks";
+import {
+  createHeading,
+  createBlockquote,
+  createCodeBlock,
+  createHorizontalRule,
+  createImage,
+} from "./nodes";
+import {
+  createBulletList,
+  createOrderedList,
+  createTaskList,
+  createTaskItem,
+  createListItem,
+} from "./lists";
+import { createTextAlign } from "./alignment";
 import { Extension } from "../extensions-types";
 
 // STARTER KIT - bundles all common extensions
@@ -28,6 +55,7 @@ export const StarterKit: Extension[] = [
   createLink(),
   createPlaceholder({ placeholder: "Start writing..." }),
   createHistory(),
+  createTextAlign(),
 ];
 
 export function createDefaultExtensions(): Extension[] {
@@ -38,4 +66,5 @@ export * from "./base";
 export * from "./marks";
 export * from "./nodes";
 export * from "./lists";
+export * from "./alignment";
 export * from "./utils";

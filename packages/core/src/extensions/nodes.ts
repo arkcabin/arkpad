@@ -11,12 +11,23 @@ export function createHeading(): Extension {
       toggleHeading: (attrs: { level: number }) => (state: any, dispatch: any) => {
         return toggleBlock(state.schema.nodes.heading!, attrs)(state, dispatch);
       },
-      setHeading1: () => (state: any, dispatch: any) => setBlockType(state.schema.nodes.heading!, { level: 1 })(state, dispatch),
-      setHeading2: () => (state: any, dispatch: any) => setBlockType(state.schema.nodes.heading!, { level: 2 })(state, dispatch),
-      setHeading3: () => (state: any, dispatch: any) => setBlockType(state.schema.nodes.heading!, { level: 3 })(state, dispatch),
+      setHeading1: () => (state: any, dispatch: any) =>
+        setBlockType(state.schema.nodes.heading!, { level: 1 })(state, dispatch),
+      setHeading2: () => (state: any, dispatch: any) =>
+        setBlockType(state.schema.nodes.heading!, { level: 2 })(state, dispatch),
+      setHeading3: () => (state: any, dispatch: any) =>
+        setBlockType(state.schema.nodes.heading!, { level: 3 })(state, dispatch),
+      setHeading4: () => (state: any, dispatch: any) =>
+        setBlockType(state.schema.nodes.heading!, { level: 4 })(state, dispatch),
+      setHeading5: () => (state: any, dispatch: any) =>
+        setBlockType(state.schema.nodes.heading!, { level: 5 })(state, dispatch),
+      setHeading6: () => (state: any, dispatch: any) =>
+        setBlockType(state.schema.nodes.heading!, { level: 6 })(state, dispatch),
     }),
     addInputRules: (schema: Schema) => [
-      textblockTypeInputRule(/^(#{1,6})\s$/, schema.nodes.heading!, (match) => ({ level: match[1]?.length || 1 })),
+      textblockTypeInputRule(/^(#{1,6})\s$/, schema.nodes.heading!, (match) => ({
+        level: match[1]?.length || 1,
+      })),
     ],
   };
 }
@@ -40,9 +51,7 @@ export function createCodeBlock(): Extension {
         return toggleBlock(state.schema.nodes.codeBlock!)(state, dispatch);
       },
     }),
-    addInputRules: (schema: Schema) => [
-      textblockTypeInputRule(/^```$/, schema.nodes.codeBlock!),
-    ],
+    addInputRules: (schema: Schema) => [textblockTypeInputRule(/^```$/, schema.nodes.codeBlock!)],
   };
 }
 

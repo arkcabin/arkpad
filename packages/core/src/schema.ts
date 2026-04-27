@@ -8,14 +8,15 @@ const nodes = addListNodes(
     .update("paragraph", {
       content: "inline*",
       group: "block",
+      attrs: { align: { default: "left" } },
       parseDOM: [{ tag: "p" }],
-      toDOM() {
-        return ["p", 0];
+      toDOM(node) {
+        return ["p", { style: `text-align: ${node.attrs.align}` }, 0];
       },
     })
     .append({
       heading: {
-        attrs: { level: { default: 1 } },
+        attrs: { level: { default: 1 }, align: { default: "left" } },
         content: "inline*",
         group: "block",
         defining: true,
@@ -28,7 +29,7 @@ const nodes = addListNodes(
           { tag: "h6", attrs: { level: 6 } },
         ],
         toDOM(node) {
-          return ["h" + node.attrs.level, 0];
+          return ["h" + node.attrs.level, { style: `text-align: ${node.attrs.align}` }, 0];
         },
       },
       blockquote: {
@@ -116,9 +117,7 @@ const nodes = addListNodes(
           },
         ],
         toDOM(node) {
-          return node.attrs.order === 1
-            ? ["ol", 0]
-            : ["ol", { start: node.attrs.order }, 0];
+          return node.attrs.order === 1 ? ["ol", 0] : ["ol", { start: node.attrs.order }, 0];
         },
       },
       listItem: {
@@ -159,76 +158,67 @@ const nodes = addListNodes(
   "block"
 );
 
-const marks = basicSchema.spec.marks
-  .append({
-    strong: {
-      parseDOM: [
-        { tag: "strong" },
-        { tag: "b", getAttrs: (node: HTMLElement) => node.style.fontWeight !== "normal" && null },
-        { style: "font-weight", getAttrs: (value: string) => /^(bold(er)?|[5-9]\d{2,})$/.test(value) && null },
-      ],
-      toDOM() {
-        return ["strong", 0];
+const marks = basicSchema.spec.marks.append({
+  strong: {
+    parseDOM: [
+      { tag: "strong" },
+      { tag: "b", getAttrs: (node: HTMLElement) => node.style.fontWeight !== "normal" && null },
+      {
+        style: "font-weight",
+        getAttrs: (value: string) => /^(bold(er)?|[5-9]\d{2,})$/.test(value) && null,
       },
+    ],
+    toDOM() {
+      return ["strong", 0];
     },
-    em: {
-      parseDOM: [
-        { tag: "i" },
-        { tag: "em" },
-        { style: "font-style=italic" },
-      ],
-      toDOM() {
-        return ["em", 0];
-      },
+  },
+  em: {
+    parseDOM: [{ tag: "i" }, { tag: "em" }, { style: "font-style=italic" }],
+    toDOM() {
+      return ["em", 0];
     },
-    code: {
-      parseDOM: [{ tag: "code" }],
-      toDOM() {
-        return ["code", 0];
-      },
+  },
+  code: {
+    parseDOM: [{ tag: "code" }],
+    toDOM() {
+      return ["code", 0];
     },
-    strike: {
-      parseDOM: [
-        { tag: "s" },
-        { tag: "strike" },
-        { style: "text-decoration=line-through" },
-      ],
-      toDOM() {
-        return ["s", 0];
-      },
+  },
+  strike: {
+    parseDOM: [{ tag: "s" }, { tag: "strike" }, { style: "text-decoration=line-through" }],
+    toDOM() {
+      return ["s", 0];
     },
-    underline: {
-      parseDOM: [
-        { tag: "u" },
-        { style: "text-decoration=underline" },
-      ],
-      toDOM() {
-        return ["u", 0];
-      },
+  },
+  underline: {
+    parseDOM: [{ tag: "u" }, { style: "text-decoration=underline" }],
+    toDOM() {
+      return ["u", 0];
     },
-    link: {
-      attrs: {
-        href: {},
-        target: { default: null },
-        title: { default: null },
-      },
-      inclusive: false,
-      parseDOM: [
-        {
-          tag: "a[href]",
-          getAttrs(dom: HTMLElement) {
-            return {
-              href: dom.getAttribute("href"),
-              target: dom.getAttribute("target"),
-              title: dom.getAttribute("title"),
-            };
-          },
+  },
+  link: {
+    attrs: {
+      href: {},
+      target: { default: null },
+      title: { default: null },
+    },
+    inclusive: false,
+    parseDOM: [
+      {
+        tag: "a[href]",
+        getAttrs(dom: HTMLElement) {
+          return {
+            href: dom.getAttribute("href"),
+            target: dom.getAttribute("target"),
+            title: dom.getAttribute("title"),
+          };
         },
-      ],
-      toDOM(node) {
-        return ["a", node.attrs, 0];
       },
+    ],
+    toDOM(node) {
+      return ["a", node.attrs, 0];
     },
-  });
+  },
+});
 
 export const arkpadSchema = new Schema({ nodes, marks });
