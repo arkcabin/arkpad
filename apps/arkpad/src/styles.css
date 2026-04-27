@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@source "@arkpad/react";
+@source "../../../packages/react/src";
 
 @theme {
   --color-brand: #3b82f6;

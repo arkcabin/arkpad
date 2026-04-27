@@ -24,27 +24,41 @@ export class TaskView implements NodeView {
     const isChecked = node.attrs.checked;
 
     const container = document.createElement("li");
-    container.className = `task-item flex items-center list-none py-0 leading-none ${isChecked ? "checked" : ""}`;
+    container.className = "task-item flex items-center gap-3 list-none py-0 leading-none";
+    if (isChecked) container.classList.add("checked");
 
     this.checkboxContainer = document.createElement("div");
-    this.checkboxContainer.className = "flex-shrink-0 flex items-center justify-center";
+    // Pointer-events: none on the wrapper ensures clicks in the "gap" hit the text area
+    this.checkboxContainer.className = "flex-shrink-0 flex items-center justify-center select-none pointer-events-none";
+    this.checkboxContainer.contentEditable = "false";
     container.appendChild(this.checkboxContainer);
 
     const contentDOM = document.createElement("div");
-    contentDOM.className = `flex-1 min-w-0 transition-all duration-150 text-[16px] ${
-      isChecked ? "text-slate-400 line-through opacity-70" : "text-slate-800"
-    }`;
-    container.appendChild(contentDOM);
+    contentDOM.className = "flex-1 min-w-0 text-[16px] transition-[color,opacity,text-decoration] duration-150";
+    this.updateContentStyles(contentDOM, isChecked);
     this.contentDOM = contentDOM;
+    container.appendChild(contentDOM);
 
     this.dom = container;
     this.mountReact();
   }
 
+  private updateContentStyles(el: HTMLElement, isChecked: boolean) {
+    if (isChecked) {
+      el.classList.add("text-slate-400", "line-through", "opacity-70");
+      el.classList.remove("text-slate-800");
+    } else {
+      el.classList.remove("text-slate-400", "line-through", "opacity-70");
+      el.classList.add("text-slate-800");
+    }
+  }
+
   private mountReact() {
     this.reactRoot = createRoot(this.checkboxContainer);
     this.reactRoot.render(
-      <Checkbox checked={this.node.attrs.checked} onCheckedChange={this.handleChange} />
+      <div className="pointer-events-auto">
+        <Checkbox checked={this.node.attrs.checked} onCheckedChange={this.handleChange} />
+      </div>
     );
   }
 
@@ -58,37 +72,26 @@ export class TaskView implements NodeView {
       checked: isChecked,
     });
     this.view.dispatch(tr);
-
-    // Immediate visual feedback for "ultra-fast" feel
-    this.contentDOM.className = `flex-1 min-w-0 transition-all duration-150 text-[16px] ${
-      isChecked ? "text-slate-400 line-through opacity-70" : "text-slate-800"
-    }`;
   };
 
   update(node: PMNode): boolean {
     if (node.type !== this.node.type) return false;
 
-    if (this.node.attrs.checked !== node.attrs.checked && this.reactRoot) {
+    const isChecked = node.attrs.checked;
+    
+    if (this.node.attrs.checked !== isChecked && this.reactRoot) {
       this.reactRoot.render(
-        <Checkbox checked={node.attrs.checked} onCheckedChange={this.handleChange} />
+        <div className="pointer-events-auto">
+          <Checkbox checked={isChecked} onCheckedChange={this.handleChange} />
+        </div>
       );
-
-      // Update content styles
-      this.contentDOM.className = `flex-1 min-w-0 transition-all duration-150 text-[16px] ${
-        node.attrs.checked ? "text-slate-400 line-through opacity-70" : "text-slate-800"
-      }`;
     }
 
     this.node = node;
-    this.dom.className = `task-item flex items-center list-none py-0 leading-none ${
-      node.attrs.checked ? "checked" : ""
-    }`;
+    this.dom.classList.toggle("checked", isChecked);
+    this.updateContentStyles(this.contentDOM, isChecked);
+    
     return true;
-  }
-
-  stopEvent(event: Event) {
-    // Capture clicks/events inside the checkbox so they don't move the PM selection
-    return this.checkboxContainer.contains(event.target as Node);
   }
 
   destroy() {
