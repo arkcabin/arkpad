@@ -5,11 +5,11 @@
   --editor-bg: #ffffff;
   --editor-text: #09090b;
   --editor-text-muted: #71717a;
-  --editor-border: #e4e4e7;
-  --editor-toolbar-bg: #f4f4f5;
-  --editor-btn-hover: #e4e4e7;
+  --editor-border: #f4f4f5;
+  --editor-toolbar-bg: #ffffff;
+  --editor-btn-hover: #f4f4f5;
   --editor-btn-text: #3f3f46;
-  --editor-btn-active-bg: #ffffff;
+  --editor-btn-active-bg: #f4f4f5;
   --editor-btn-active-text: #09090b;
   --editor-marker: #a1a1aa;
   --editor-marker-bullet: #3b82f6;
@@ -25,11 +25,11 @@
   --editor-bg: #09090b;
   --editor-text: #fafafa;
   --editor-text-muted: #a1a1aa;
-  --editor-border: #27272a;
-  --editor-toolbar-bg: #18181b;
-  --editor-btn-hover: #27272a;
+  --editor-border: #18181b;
+  --editor-toolbar-bg: #09090b;
+  --editor-btn-hover: #18181b;
   --editor-btn-text: #a1a1aa;
-  --editor-btn-active-bg: #27272a;
+  --editor-btn-active-bg: #18181b;
   --editor-btn-active-text: #fafafa;
   --editor-marker: #3f3f46;
   --editor-marker-bullet: #60a5fa;
@@ -222,24 +222,18 @@
     background-color: var(--editor-border);
   }
 
-  .editor-wrapper {
-    background-color: var(--editor-bg);
-    border-color: var(--editor-border);
-    @apply rounded-[2.5rem] shadow-[0_20px_80px_rgba(0,0,0,0.06)] overflow-hidden flex flex-col border transition-all duration-300;
-  }
-
   .toolbar-wrapper {
     background-color: var(--editor-toolbar-bg);
     border-color: var(--editor-border);
-    @apply flex flex-wrap items-center gap-0.5 p-2 border-b sticky top-0 z-30 backdrop-blur-sm transition-all duration-300;
+    @apply flex flex-wrap items-center gap-0.5 p-2 border-b sticky top-0 z-30 transition-all duration-300;
   }
 
   .toolbar-group {
-    @apply flex items-center gap-0.5 px-1 transition-all duration-300;
+    @apply flex items-center gap-0.5 px-2 transition-all duration-300;
   }
 
   .toolbar-btn {
-    @apply inline-flex items-center justify-center w-8 h-8 rounded-md transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center w-8 h-8 rounded transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed;
     color: var(--editor-btn-text);
   }
 
@@ -251,6 +245,16 @@
   .toolbar-btn.active {
     background-color: var(--editor-btn-active-bg);
     color: var(--editor-btn-active-text);
-    @apply shadow-sm;
+  }
+
+  .toolbar-separator {
+    @apply w-px h-5 mx-2;
+    background-color: var(--editor-border);
+  }
+
+  .editor-wrapper {
+    background-color: var(--editor-bg);
+    border-color: var(--editor-border);
+    @apply rounded-xl overflow-hidden flex flex-col border transition-all duration-300;
   }
 }

@@ -12,6 +12,7 @@
     "@arkpad/core": "0.1.0",
     "@arkpad/react": "0.1.0",
     "@tailwindcss/vite": "^4.1.13",
+    "class-variance-authority": "^0.7.1",
     "lucide-react": "^0.542.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"
