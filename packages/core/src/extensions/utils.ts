@@ -65,7 +65,16 @@ export function toggleList(listType: any, itemType: any) {
         // Different type: Switch it
         if (dispatch) {
           const listPos = $from.before(listDepth);
-          dispatch(state.tr.setNodeMarkup(listPos, listType));
+          const listNode = state.doc.nodeAt(listPos);
+          
+          if (listNode) {
+            const newItems: any[] = [];
+            listNode.forEach((child) => {
+              newItems.push(itemType.create(null, child.content));
+            });
+            const newList = listType.create(null, newItems);
+            dispatch(state.tr.replaceWith(listPos, listPos + listNode.nodeSize, newList));
+          }
         }
         return true;
       }

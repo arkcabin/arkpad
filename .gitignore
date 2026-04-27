@@ -7,6 +7,6 @@ coverage/
 packages/*/dist/
 apps/*/dist/
 
-.agents/
+# .agents/
 .idea/
 .vscode/
