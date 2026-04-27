@@ -40,7 +40,7 @@ const nodes = addListNodes(
           return ["blockquote", 0];
         },
       },
-      code_block: {
+      codeBlock: {
         content: "text*",
         marks: "",
         group: "block",
@@ -52,7 +52,7 @@ const nodes = addListNodes(
           return ["pre", ["code", 0]];
         },
       },
-      horizontal_rule: {
+      horizontalRule: {
         group: "block",
         attrs: {},
         parseDOM: [{ tag: "hr" }],
@@ -60,7 +60,7 @@ const nodes = addListNodes(
           return ["hr"];
         },
       },
-      hard_break: {
+      hardBreak: {
         inline: true,
         group: "inline",
         selectable: false,
@@ -95,17 +95,17 @@ const nodes = addListNodes(
           return ["img", node.attrs];
         },
       },
-      bullet_list: {
-        content: "list_item+",
+      bulletList: {
+        content: "listItem+",
         group: "block",
         parseDOM: [{ tag: "ul" }],
         toDOM() {
           return ["ul", 0];
         },
       },
-      ordered_list: {
+      orderedList: {
         attrs: { order: { default: 1 } },
-        content: "list_item+",
+        content: "listItem+",
         group: "block",
         parseDOM: [
           {
@@ -121,7 +121,7 @@ const nodes = addListNodes(
             : ["ol", { start: node.attrs.order }, 0];
         },
       },
-      list_item: {
+      listItem: {
         content: "paragraph block*",
         parseDOM: [{ tag: "li" }],
         toDOM() {
@@ -129,15 +129,15 @@ const nodes = addListNodes(
         },
         defining: true,
       },
-      task_list: {
-        content: "task_item+",
+      taskList: {
+        content: "taskItem+",
         group: "block",
         parseDOM: [{ tag: "ul.task-list" }],
         toDOM() {
           return ["ul", { class: "task-list" }, 0];
         },
       },
-      task_item: {
+      taskItem: {
         attrs: { checked: { default: false } },
         content: "paragraph block*",
         group: "block",

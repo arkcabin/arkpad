@@ -11,7 +11,6 @@ import { placeholder as createPlaceholderPlugin } from "prosemirror-placeholder"
 import { arkpadSchema } from "./schema";
 
 type Dispatch = (tr: Transaction) => void;
-
 export type { Dispatch };
 
 export interface Extension {
@@ -118,6 +117,21 @@ export class ExtensionManager {
   }
 }
 
+// HELPER: toggleList
+function toggleList(listType: any, itemType: any) {
+  return (state: any, dispatch: any) => {
+    const { $from, $to } = state.selection;
+    const range = $from.blockRange($to);
+    if (!range) return false;
+
+    const parentList = range.parent.type === listType;
+    if (parentList) {
+      return liftListItem(itemType)(state, dispatch);
+    }
+    return wrapInList(listType)(state, dispatch);
+  };
+}
+
 // MARK EXTENSIONS
 function createBold(): Extension {
   return {
@@ -172,6 +186,7 @@ function createCode(): Extension {
     name: "code",
     addCommands: () => ({
       toggleCode: () => toggleMark(arkpadSchema.marks.code!),
+      setCode: () => toggleMark(arkpadSchema.marks.code!),
     }),
     addKeyboardShortcuts: () => ({
       "Mod-e": toggleMark(arkpadSchema.marks.code!),
@@ -247,16 +262,12 @@ function createHeading(): Extension {
       setHeading2: () => setBlockType(arkpadSchema.nodes.heading!, { level: 2 }),
       setHeading3: () => setBlockType(arkpadSchema.nodes.heading!, { level: 3 }),
       setHeading4: () => setBlockType(arkpadSchema.nodes.heading!, { level: 4 }),
-      setHeading5: () => setBlockType(arkpadSchema.nodes.heading!, { level: 5 }),
-      setHeading6: () => setBlockType(arkpadSchema.nodes.heading!, { level: 6 }),
     }),
     addKeyboardShortcuts: () => ({
       "Mod-Alt-1": setBlockType(arkpadSchema.nodes.heading!, { level: 1 }),
       "Mod-Alt-2": setBlockType(arkpadSchema.nodes.heading!, { level: 2 }),
       "Mod-Alt-3": setBlockType(arkpadSchema.nodes.heading!, { level: 3 }),
       "Mod-Alt-4": setBlockType(arkpadSchema.nodes.heading!, { level: 4 }),
-      "Mod-Alt-5": setBlockType(arkpadSchema.nodes.heading!, { level: 5 }),
-      "Mod-Alt-6": setBlockType(arkpadSchema.nodes.heading!, { level: 6 }),
     }),
     addInputRules: () => [
       textblockTypeInputRule(/^(#{1,6})\s$/, arkpadSchema.nodes.heading!, (match) => ({ level: match[1]?.length || 1 })),
@@ -271,18 +282,9 @@ function createBlockquote(): Extension {
       toggleBlockquote: () => (state: any, dispatch: any) => {
         const { $from, $to } = state.selection;
         const range = $from.blockRange($to);
-        
         if (!range) return false;
-
-        // Check if the selection is already wrapped in a blockquote
         const isBlockquote = range.parent.type === arkpadSchema.nodes.blockquote;
-
-        if (isBlockquote) {
-          // If it is, lift it out of the blockquote
-          return lift(state, dispatch);
-        }
-        
-        // Otherwise wrap it
+        if (isBlockquote) return lift(state, dispatch);
         return wrapIn(arkpadSchema.nodes.blockquote!)(state, dispatch);
       },
       setBlockquote: () => wrapIn(arkpadSchema.nodes.blockquote!),
@@ -300,26 +302,14 @@ function createCodeBlock(): Extension {
   return {
     name: "codeBlock",
     addCommands: () => ({
-      toggleCodeBlock: () => (state: any, dispatch: any) => {
-        const { from, to } = state.selection;
-        let isCodeBlock = false;
-        state.doc.nodesBetween(from, to, (node) => {
-          if (node.type === arkpadSchema.nodes.code_block) {
-            isCodeBlock = true;
-          }
-        });
-
-        if (isCodeBlock) {
-          return setBlockType(arkpadSchema.nodes.paragraph!)(state, dispatch);
-        }
-        return setBlockType(arkpadSchema.nodes.code_block!)(state, dispatch);
-      },
+      toggleCodeBlock: () => setBlockType(arkpadSchema.nodes.codeBlock!),
+      setCodeBlock: () => setBlockType(arkpadSchema.nodes.codeBlock!),
     }),
     addKeyboardShortcuts: () => ({
-      "Mod-Alt-c": setBlockType(arkpadSchema.nodes.code_block!),
+      "Mod-Alt-c": setBlockType(arkpadSchema.nodes.codeBlock!),
     }),
     addInputRules: () => [
-      textblockTypeInputRule(/^```$/, arkpadSchema.nodes.code_block!),
+      textblockTypeInputRule(/^```$/, arkpadSchema.nodes.codeBlock!),
     ],
   };
 }
@@ -329,21 +319,21 @@ function createHardBreak(): Extension {
     name: "hardBreak",
     addCommands: () => ({
       setHardBreak: () => (state: any, dispatch: any) => {
-        const node = arkpadSchema.nodes.hard_break!.create();
+        const node = arkpadSchema.nodes.hardBreak!.create();
         if (dispatch) dispatch(state.tr.replaceSelectionWith(node));
         return true;
       },
     }),
     addKeyboardShortcuts: () => ({
-      "Mod-Enter": () => (state: any, dispatch: any) => {
-        const node = arkpadSchema.nodes.hard_break!.create();
-        if (dispatch) dispatch(state.tr.replaceSelectionWith(node));
-        return true;
+      "Mod-Enter": (state, dispatch) => {
+         const node = arkpadSchema.nodes.hardBreak!.create();
+         if (dispatch) dispatch(state.tr.replaceSelectionWith(node));
+         return true;
       },
-      "Shift-Enter": () => (state: any, dispatch: any) => {
-        const node = arkpadSchema.nodes.hard_break!.create();
-        if (dispatch) dispatch(state.tr.replaceSelectionWith(node));
-        return true;
+      "Shift-Enter": (state, dispatch) => {
+         const node = arkpadSchema.nodes.hardBreak!.create();
+         if (dispatch) dispatch(state.tr.replaceSelectionWith(node));
+         return true;
       },
     }),
   };
@@ -354,11 +344,14 @@ function createHorizontalRule(): Extension {
     name: "horizontalRule",
     addCommands: () => ({
       setHorizontalRule: () => (state: any, dispatch: any) => {
-        const node = arkpadSchema.nodes.horizontal_rule!.create();
+        const node = arkpadSchema.nodes.horizontalRule!.create();
         if (dispatch) dispatch(state.tr.replaceSelectionWith(node));
         return true;
       },
     }),
+    addInputRules: () => [
+      wrappingInputRule(/^(?:---|___\s|\*\*\*\s)$/, arkpadSchema.nodes.horizontalRule!),
+    ],
   };
 }
 
@@ -381,10 +374,13 @@ function createBulletList(): Extension {
   return {
     name: "bulletList",
     addCommands: () => ({
-      toggleBulletList: () => wrapInList(arkpadSchema.nodes.bullet_list!),
+      toggleBulletList: () => toggleList(arkpadSchema.nodes.bulletList!, arkpadSchema.nodes.listItem!),
+    }),
+    addKeyboardShortcuts: () => ({
+      "Mod-Shift-8": toggleList(arkpadSchema.nodes.bulletList!, arkpadSchema.nodes.listItem!),
     }),
     addInputRules: () => [
-      wrappingInputRule(/^\s*([-*+])\s$/, arkpadSchema.nodes.bullet_list!, (match) => ({})),
+      wrappingInputRule(/^\s*([-+*])\s$/, arkpadSchema.nodes.bulletList!),
     ],
   };
 }
@@ -393,10 +389,13 @@ function createOrderedList(): Extension {
   return {
     name: "orderedList",
     addCommands: () => ({
-      toggleOrderedList: () => wrapInList(arkpadSchema.nodes.ordered_list!),
+      toggleOrderedList: () => toggleList(arkpadSchema.nodes.orderedList!, arkpadSchema.nodes.listItem!),
+    }),
+    addKeyboardShortcuts: () => ({
+      "Mod-Shift-7": toggleList(arkpadSchema.nodes.orderedList!, arkpadSchema.nodes.listItem!),
     }),
     addInputRules: () => [
-      wrappingInputRule(/^\s*(\d+)\.\s$/, arkpadSchema.nodes.ordered_list!, (match) => ({ order: match[1] ? +match[1] : 1 })),
+      wrappingInputRule(/^\s*(\d+)\.\s$/, arkpadSchema.nodes.orderedList!, (match) => ({ order: +match[1]! })),
     ],
   };
 }
@@ -405,14 +404,14 @@ function createListItem(): Extension {
   return {
     name: "listItem",
     addCommands: () => ({
-      sinkListItem: () => sinkListItem(arkpadSchema.nodes.list_item!),
-      liftListItem: () => liftListItem(arkpadSchema.nodes.list_item!),
-      splitListItem: () => splitListItem(arkpadSchema.nodes.list_item!),
+      sinkListItem: () => sinkListItem(arkpadSchema.nodes.listItem!),
+      liftListItem: () => liftListItem(arkpadSchema.nodes.listItem!),
+      splitListItem: () => splitListItem(arkpadSchema.nodes.listItem!),
     }),
     addKeyboardShortcuts: () => ({
-      Enter: splitListItem(arkpadSchema.nodes.list_item!),
-      Tab: sinkListItem(arkpadSchema.nodes.list_item!),
-      "Shift-Tab": liftListItem(arkpadSchema.nodes.list_item!),
+      Enter: splitListItem(arkpadSchema.nodes.listItem!),
+      Tab: sinkListItem(arkpadSchema.nodes.listItem!),
+      "Shift-Tab": liftListItem(arkpadSchema.nodes.listItem!),
     }),
   };
 }
@@ -421,10 +420,10 @@ function createTaskList(): Extension {
   return {
     name: "taskList",
     addCommands: () => ({
-      toggleTaskList: () => wrapInList(arkpadSchema.nodes.task_list!),
+      toggleTaskList: () => toggleList(arkpadSchema.nodes.taskList!, arkpadSchema.nodes.taskItem!),
     }),
     addInputRules: () => [
-      wrappingInputRule(/^\s*(\[[ xX]\])\s$/, arkpadSchema.nodes.task_list!),
+      wrappingInputRule(/^\s*(\[ \])\s$/, arkpadSchema.nodes.taskList!),
     ],
   };
 }
@@ -436,24 +435,22 @@ function createTaskItem(): Extension {
       toggleTaskItem: () => (state: any, dispatch: any) => {
         const { $from } = state.selection;
         const node = $from.nodeAfter || $from.parent;
-        if (node && (node.type === arkpadSchema.nodes.task_item || node.type === arkpadSchema.nodes.task_list)) {
+        if (node && (node.type === arkpadSchema.nodes.taskItem || node.type === arkpadSchema.nodes.taskList)) {
           const newAttrs = { ...node.attrs, checked: !node.attrs.checked };
           const tr = state.tr.setNodeMarkup($from.pos, undefined, newAttrs);
           if (dispatch) dispatch(tr);
           return true;
         }
-        return setBlockType(arkpadSchema.nodes.task_item!)(state, dispatch);
+        return false;
       },
     }),
     addKeyboardShortcuts: () => ({
-      Enter: splitListItem(arkpadSchema.nodes.task_item!),
-      Tab: sinkListItem(arkpadSchema.nodes.task_item!),
-      "Shift-Tab": liftListItem(arkpadSchema.nodes.task_item!),
+      Enter: splitListItem(arkpadSchema.nodes.taskItem!),
+      Tab: sinkListItem(arkpadSchema.nodes.taskItem!),
+      "Shift-Tab": liftListItem(arkpadSchema.nodes.taskItem!),
     }),
   };
 }
-
-export { createTaskItem };
 
 // UTILITY EXTENSIONS
 function createHistory(): Extension {
