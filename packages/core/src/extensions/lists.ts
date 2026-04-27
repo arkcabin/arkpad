@@ -41,18 +41,66 @@ export function createListItem(): Extension {
         liftListItem(state.schema.nodes.listItem!)(state, dispatch),
       splitListItem: () => (state: any, dispatch: any) =>
         splitListItem(state.schema.nodes.listItem!)(state, dispatch),
-      indentList: () => (state: any, dispatch: any) =>
-        sinkListItem(state.schema.nodes.listItem!)(state, dispatch),
-      outdentList: () => (state: any, dispatch: any) =>
-        liftListItem(state.schema.nodes.listItem!)(state, dispatch),
+      indentList: () => (state: any, dispatch: any) => {
+        const { $from } = state.selection;
+        const listItem = state.schema.nodes.listItem;
+        const taskItem = state.schema.nodes.taskItem;
+
+        let depth = $from.depth;
+        while (depth > 0) {
+          const node = $from.node(depth);
+          if (node.type === listItem) return sinkListItem(listItem)(state, dispatch);
+          if (node.type === taskItem) return sinkListItem(taskItem)(state, dispatch);
+          depth--;
+        }
+        return false;
+      },
+      outdentList: () => (state: any, dispatch: any) => {
+        const { $from } = state.selection;
+        const listItem = state.schema.nodes.listItem;
+        const taskItem = state.schema.nodes.taskItem;
+
+        let depth = $from.depth;
+        while (depth > 0) {
+          const node = $from.node(depth);
+          if (node.type === listItem) return liftListItem(listItem)(state, dispatch);
+          if (node.type === taskItem) return liftListItem(taskItem)(state, dispatch);
+          depth--;
+        }
+        return false;
+      },
     }),
     addKeyboardShortcuts: () => ({
       Enter: (state: any, dispatch: any) =>
         splitListItem(state.schema.nodes.listItem!)(state, dispatch),
-      Tab: (state: any, dispatch: any) =>
-        sinkListItem(state.schema.nodes.listItem!)(state, dispatch),
-      "Shift-Tab": (state: any, dispatch: any) =>
-        liftListItem(state.schema.nodes.listItem!)(state, dispatch),
+      Tab: (state: any, dispatch: any) => {
+        const { $from } = state.selection;
+        const listItem = state.schema.nodes.listItem;
+        const taskItem = state.schema.nodes.taskItem;
+
+        let depth = $from.depth;
+        while (depth > 0) {
+          const node = $from.node(depth);
+          if (node.type === listItem) return sinkListItem(listItem)(state, dispatch);
+          if (node.type === taskItem) return sinkListItem(taskItem)(state, dispatch);
+          depth--;
+        }
+        return false;
+      },
+      "Shift-Tab": (state: any, dispatch: any) => {
+        const { $from } = state.selection;
+        const listItem = state.schema.nodes.listItem;
+        const taskItem = state.schema.nodes.taskItem;
+
+        let depth = $from.depth;
+        while (depth > 0) {
+          const node = $from.node(depth);
+          if (node.type === listItem) return liftListItem(listItem)(state, dispatch);
+          if (node.type === taskItem) return liftListItem(taskItem)(state, dispatch);
+          depth--;
+        }
+        return false;
+      },
     }),
   };
 }
@@ -68,9 +116,7 @@ export function createTaskList(): Extension {
         );
       },
     }),
-    addInputRules: (schema) => [
-      wrappingInputRule(/^\[\s?\]\s$/, schema.nodes.taskList!)
-    ]
+    addInputRules: (schema) => [wrappingInputRule(/^\[\s?\]\s$/, schema.nodes.taskList!)],
   };
 }
 
@@ -94,7 +140,7 @@ export function createTaskItem(): Extension {
       Enter: (state: any, dispatch: any) => {
         const { $from, $to } = state.selection;
         if (!$from.sameParent($to) || $from.parent.type.name !== "paragraph") return false;
-        
+
         const taskItem = state.schema.nodes.taskItem;
         if (!taskItem) return false;
 
@@ -139,4 +185,3 @@ export function createTaskItem(): Extension {
     }),
   };
 }
-
