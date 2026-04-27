@@ -24,7 +24,7 @@ export class TaskView implements NodeView {
     const isChecked = node.attrs.checked;
 
     const container = document.createElement("li");
-    container.className = "task-item flex items-start gap-3 list-none py-0 leading-none";
+    container.className = "task-item flex items-start gap-2 list-none py-0 leading-none";
     if (isChecked) container.classList.add("checked");
 
     this.checkboxContainer = document.createElement("div");
@@ -45,7 +45,7 @@ export class TaskView implements NodeView {
 
   private updateContentStyles(el: HTMLElement, isChecked: boolean, node: PMNode) {
     const align = node.firstChild?.attrs.align || "left";
-    
+
     // Apply alignment classes
     el.classList.remove("text-left", "text-center", "text-right", "text-justify");
     el.classList.add(`text-${align}`);
@@ -85,7 +85,7 @@ export class TaskView implements NodeView {
     if (node.type !== this.node.type) return false;
 
     const isChecked = node.attrs.checked;
-    
+
     if (this.node.attrs.checked !== isChecked && this.reactRoot) {
       this.reactRoot.render(
         <div className="pointer-events-auto">
@@ -97,7 +97,7 @@ export class TaskView implements NodeView {
     this.node = node;
     this.dom.classList.toggle("checked", isChecked);
     this.updateContentStyles(this.contentDOM, isChecked, node);
-    
+
     return true;
   }
 

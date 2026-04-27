@@ -57,11 +57,11 @@
 
   .ProseMirror ul,
   .ProseMirror ol {
-    @apply pl-6 mb-4 list-outside;
+    @apply !pl-0 !mb-4 !list-none;
   }
 
   .ProseMirror li {
-    @apply mb-1;
+    @apply flex items-start !gap-2 !mb-1;
   }
 
   .ProseMirror hr {
@@ -81,12 +81,24 @@
     content: attr(data-placeholder);
   }
 
-  /* List Styles */
-  .ProseMirror ul {
-    @apply list-disc;
+  /* Bullet List Marker */
+  .ProseMirror ul li::before {
+    content: "";
+    @apply flex-shrink-0 w-1.5 h-1.5 rounded-full bg-blue-500 mt-[12px] ml-1;
   }
+
+  /* Ordered List Marker */
   .ProseMirror ol {
-    @apply list-decimal;
+    counter-reset: arkpad-counter;
+  }
+
+  .ProseMirror ol li {
+    counter-increment: arkpad-counter;
+  }
+
+  .ProseMirror ol li::before {
+    content: counter(arkpad-counter) ".";
+    @apply flex-shrink-0 w-4 flex items-center justify-start text-slate-400 font-mono text-sm mt-[4px] select-none;
   }
 
   /* Task List Styles */
@@ -95,7 +107,7 @@
   }
 
   .task-item {
-    @apply !list-none flex items-center gap-3 !mb-0;
+    @apply !list-none flex items-start !gap-2 !mb-1;
   }
 
   /* Ensure paragraphs inside task items don't have large margins */
@@ -111,9 +123,7 @@
 
 @layer components {
   .toolbar-btn {
-    @apply inline-flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-200 
-           hover:bg-slate-100 active:bg-slate-200 text-slate-600 hover:text-slate-900 
-           disabled:opacity-30 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-200 hover:bg-slate-100 active:bg-slate-200 text-slate-600 hover:text-slate-900 disabled:opacity-30 disabled:cursor-not-allowed;
   }
 
   .toolbar-btn.active {
