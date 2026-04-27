@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Bold,
   Italic,
@@ -15,7 +15,7 @@ import {
   ListOrdered,
   Type,
   Sparkles,
-  Code2,
+  Code,
   Terminal,
   Quote,
   Minus,
@@ -31,6 +31,10 @@ import {
   Outdent,
   Superscript,
   Subscript,
+  Sun,
+  Moon,
+  Plus,
+  ChevronDown,
 } from "lucide-react";
 
 import { useArkpadEditor, ArkpadEditorContent, BubbleMenu, FloatingMenu } from "@arkpad/react";
@@ -62,9 +66,27 @@ const ToolbarButton = ({
   </button>
 );
 
-const ToolbarSeparator = () => <div className="w-px h-6 bg-slate-200 mx-1" />;
+const ToolbarSeparator = () => <div className="toolbar-separator" />;
 
 export function App() {
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("arkpad-theme");
+      return saved === "dark" || (!saved && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("arkpad-theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("arkpad-theme", "light");
+    }
+  }, [isDark]);
+
   // THE NEW CLEAN API: Simple, Declarative, and Auto-Reactive
   const editor = useArkpadEditor({
     content:
@@ -82,25 +104,12 @@ export function App() {
   const canRedo = editor.canRunCommand("redo");
 
   return (
-    <div className="min-h-screen bg-[#f8f9fc] py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col gap-8">
-      {/* <header className="flex flex-col items-center text-center gap-3">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-bold tracking-wider uppercase border border-blue-100/50 shadow-sm">
-          <Sparkles className="w-3 h-3" />
-          Simplest API Ever
-        </div>
-        <h1 className="text-5xl font-black tracking-tight text-slate-900 sm:text-6xl">
-          Ark<span className="text-blue-600">pad</span>{" "}
-          <span className="font-light text-slate-400">Easy</span>
-        </h1>
-        <p className="text-lg text-slate-500 max-w-2xl font-medium leading-relaxed">
-          One hook. Total control. Zero boilerplate.
-        </p>
-      </header> */}
-
-      <div className="bg-white rounded-[2.5rem] shadow-[0_20px_80px_rgba(0,0,0,0.06)] border border-slate-200/60 overflow-hidden flex flex-col">
+    <div className="min-h-screen bg-[#fafafa] dark:bg-[#000000] py-8 md:py-12 px-4 transition-colors duration-300">
+      <div className="max-w-[1200px] mx-auto">
+        <div className="editor-wrapper border-none shadow-xl">
         {/* Toolbar */}
-        <div className="flex flex-wrap items-center gap-1.5 p-3 bg-slate-50/80 border-b border-slate-200/60 sticky top-0 z-30 backdrop-blur-sm">
-          <div className="flex items-center gap-1 bg-white p-1 rounded-2xl shadow-sm border border-slate-200/40">
+        <div className="toolbar-wrapper">
+          <div className="toolbar-group">
             <ToolbarButton
               onClick={() => run("toggleBold")}
               isActive={isActive("strong")}
@@ -130,25 +139,11 @@ export function App() {
               <Strikethrough className="w-4 h-4" />
             </ToolbarButton>
             <ToolbarButton
-              onClick={() => run("toggleSuperscript")}
-              isActive={isActive("superscript")}
-              title="Superscript"
-            >
-              <Superscript className="w-4 h-4" />
-            </ToolbarButton>
-            <ToolbarButton
-              onClick={() => run("toggleSubscript")}
-              isActive={isActive("subscript")}
-              title="Subscript"
-            >
-              <Subscript className="w-4 h-4" />
-            </ToolbarButton>
-            <ToolbarButton
               onClick={() => run("toggleCode")}
               isActive={isActive("code")}
               title="Inline Code"
             >
-              <Code2 className="w-4 h-4" />
+              <Code className="w-4 h-4" />
             </ToolbarButton>
             <ToolbarButton
               onClick={() => {
@@ -162,17 +157,35 @@ export function App() {
             >
               <LinkIcon className="w-4 h-4" />
             </ToolbarButton>
+            <ToolbarSeparator />
+            <ToolbarButton
+              onClick={() => run("toggleSuperscript")}
+              isActive={isActive("superscript")}
+              title="Superscript"
+            >
+              <Superscript className="w-4 h-4" />
+            </ToolbarButton>
+            <ToolbarButton
+              onClick={() => run("toggleSubscript")}
+              isActive={isActive("subscript")}
+              title="Subscript"
+            >
+              <Subscript className="w-4 h-4" />
+            </ToolbarButton>
           </div>
 
           <ToolbarSeparator />
 
-          <div className="flex items-center gap-1 bg-white p-1 rounded-2xl shadow-sm border border-slate-200/40">
+          <div className="toolbar-group">
             <ToolbarButton
               onClick={() => run("toggleHeading", { level: 1 })}
               isActive={isActive("heading", { level: 1 })}
               title="H1"
             >
-              <Heading1 className="w-4 h-4" />
+              <div className="flex items-center gap-0.5">
+                <span className="text-xs font-bold">H</span>
+                <ChevronDown className="w-3 h-3 opacity-50" />
+              </div>
             </ToolbarButton>
             <ToolbarButton
               onClick={() => run("toggleHeading", { level: 2 })}
@@ -193,13 +206,22 @@ export function App() {
               isActive={isActive("heading", { level: 4 })}
               title="H4"
             >
-              <Heading4 className="w-4 h-4" />
+              <span className="text-xs font-bold">H4</span>
             </ToolbarButton>
           </div>
 
           <ToolbarSeparator />
 
-          <div className="flex items-center gap-1 bg-white p-1 rounded-2xl shadow-sm border border-slate-200/40">
+          <div className="toolbar-group">
+            <button className="toolbar-btn gap-1 px-2 w-auto text-xs font-medium">
+              <Plus className="w-3.5 h-3.5" />
+              Add
+            </button>
+          </div>
+
+          <ToolbarSeparator />
+
+          <div className="toolbar-group">
             <ToolbarButton
               onClick={() => run("setTextAlignLeft")}
               isActive={isActive("paragraph", { align: "left" })}
@@ -232,7 +254,7 @@ export function App() {
 
           <ToolbarSeparator />
 
-          <div className="flex items-center gap-1 bg-white p-1 rounded-2xl shadow-sm border border-slate-200/40">
+          <div className="toolbar-group">
             <ToolbarButton
               onClick={() => run("toggleBlockquote")}
               isActive={isActive("blockquote")}
@@ -260,7 +282,7 @@ export function App() {
 
           <ToolbarSeparator />
 
-          <div className="flex items-center gap-1 bg-white p-1 rounded-2xl shadow-sm border border-slate-200/40">
+          <div className="toolbar-group">
             <ToolbarButton
               onClick={() => run("toggleBulletList")}
               isActive={isActive("bulletList")}
@@ -296,7 +318,7 @@ export function App() {
 
           <div className="flex-1 min-w-4" />
 
-          <div className="flex items-center gap-1 bg-white p-1 rounded-2xl shadow-sm border border-slate-200/40">
+          <div className="toolbar-group">
             <ToolbarButton onClick={() => run("undo")} disabled={!canUndo} title="Undo">
               <Undo2 className="w-4 h-4" />
             </ToolbarButton>
@@ -304,10 +326,19 @@ export function App() {
               <Redo2 className="w-4 h-4" />
             </ToolbarButton>
           </div>
+
+          <div className="toolbar-group">
+            <ToolbarButton
+              onClick={() => setIsDark(!isDark)}
+              title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            >
+              {isDark ? <Sun className="w-4 h-4 stroke-[1.5]" /> : <Moon className="w-4 h-4 stroke-[1.5]" />}
+            </ToolbarButton>
+          </div>
         </div>
 
         {/* Editor Area */}
-        <div className="flex-1 p-10 md:p-24 min-h-[700px] relative">
+        <div className="flex-1 p-10 md:p-24 min-h-[700px] relative transition-all duration-300">
           <div className="max-w-3xl mx-auto">
             <BubbleMenu editor={editor}>
               <div className="flex items-center gap-1 bg-slate-900 text-white p-1.5 rounded-2xl shadow-2xl border border-white/10 animate-in fade-in zoom-in-95 duration-200">
@@ -379,6 +410,7 @@ export function App() {
         <div className="flex items-center gap-4">
           <span>{editor.getHTML().length} Characters</span>
         </div>
+      </div>
       </div>
     </div>
   );

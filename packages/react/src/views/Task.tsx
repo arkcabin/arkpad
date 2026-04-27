@@ -52,11 +52,11 @@ export class TaskView implements NodeView {
 
     // Apply checkmark styles
     if (isChecked) {
-      el.classList.add("text-slate-400", "line-through", "opacity-70");
-      el.classList.remove("text-slate-800");
+      el.style.color = "var(--editor-text-muted)";
+      el.classList.add("line-through", "opacity-70");
     } else {
-      el.classList.remove("text-slate-400", "line-through", "opacity-70");
-      el.classList.add("text-slate-800");
+      el.style.color = "var(--editor-text)";
+      el.classList.remove("line-through", "opacity-70");
     }
   }
 

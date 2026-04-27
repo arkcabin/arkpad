@@ -1,20 +1,57 @@
 @import "tailwindcss";
 @source "../../../packages/react/src";
 
-@theme {
-  --color-brand: #3b82f6;
-  --color-brand-dark: #2563eb;
-  --color-editor-bg: #ffffff;
-  --color-editor-border: #e2e8f0;
-  --color-editor-hover: #f1f5f9;
+:root {
+  --editor-bg: #ffffff;
+  --editor-text: #09090b;
+  --editor-text-muted: #71717a;
+  --editor-border: #e4e4e7;
+  --editor-toolbar-bg: #f4f4f5;
+  --editor-btn-hover: #e4e4e7;
+  --editor-btn-text: #3f3f46;
+  --editor-btn-active-bg: #ffffff;
+  --editor-btn-active-text: #09090b;
+  --editor-marker: #a1a1aa;
+  --editor-marker-bullet: #3b82f6;
+  --editor-code-bg: #f4f4f5;
+  --editor-code-text: #2563eb;
+  --editor-pre-bg: #09090b;
+  --editor-pre-text: #fafafa;
   --font-sans: "Inter", system-ui, sans-serif;
-  --font-mono: "Fira Code", monospace;
+  --font-mono: "Geist Mono", "Fira Code", monospace;
+}
+
+.dark {
+  --editor-bg: #09090b;
+  --editor-text: #fafafa;
+  --editor-text-muted: #a1a1aa;
+  --editor-border: #27272a;
+  --editor-toolbar-bg: #18181b;
+  --editor-btn-hover: #27272a;
+  --editor-btn-text: #a1a1aa;
+  --editor-btn-active-bg: #27272a;
+  --editor-btn-active-text: #fafafa;
+  --editor-marker: #3f3f46;
+  --editor-marker-bullet: #60a5fa;
+  --editor-code-bg: #27272a;
+  --editor-code-text: #60a5fa;
+  --editor-pre-bg: #000000;
+  --editor-pre-text: #fafafa;
+}
+
+@theme {
+  --color-brand: var(--editor-marker-bullet);
+  --color-brand-dark: #2563eb;
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
 }
 
 @layer base {
   body {
-    @apply bg-slate-50 text-slate-900 antialiased;
-    background: radial-gradient(circle at top right, #f1f5f9, #e2e8f0);
+    @apply antialiased transition-colors duration-300;
+    background-color: var(--editor-bg);
+    color: var(--editor-text);
+    background: radial-gradient(circle at top right, var(--editor-toolbar-bg), var(--editor-bg));
   }
 
   /* ProseMirror Base Styles */
@@ -28,27 +65,36 @@
   }
 
   .ProseMirror h1 {
-    @apply text-4xl font-extrabold mb-6 tracking-tight text-slate-900;
+    @apply text-4xl font-extrabold mb-6 tracking-tight;
+    color: var(--editor-text);
   }
 
   .ProseMirror h2 {
-    @apply text-2xl font-bold mb-4 tracking-tight text-slate-800;
+    @apply text-2xl font-bold mb-4 tracking-tight opacity-90;
+    color: var(--editor-text);
   }
 
   .ProseMirror h3 {
-    @apply text-xl font-bold mb-3 text-slate-800;
+    @apply text-xl font-bold mb-3 opacity-80;
+    color: var(--editor-text);
   }
 
   .ProseMirror blockquote {
-    @apply border-l-4 border-slate-300 pl-4 mb-4 italic text-slate-600;
+    @apply border-l-4 pl-4 mb-4 italic;
+    border-color: var(--editor-border);
+    color: var(--editor-text-muted);
   }
 
   .ProseMirror pre {
-    @apply bg-slate-900 text-slate-100 p-4 rounded-xl mb-4 overflow-x-auto font-mono text-sm shadow-lg;
+    @apply p-4 rounded-xl mb-4 overflow-x-auto font-mono text-sm shadow-lg;
+    background-color: var(--editor-pre-bg);
+    color: var(--editor-pre-text);
   }
 
   .ProseMirror code {
-    @apply bg-slate-100 px-1.5 py-0.5 rounded-md font-mono text-[0.9em] text-blue-600;
+    @apply px-1.5 py-0.5 rounded-md font-mono text-[0.9em];
+    background-color: var(--editor-code-bg);
+    color: var(--editor-code-text);
   }
 
   .ProseMirror pre code {
@@ -69,7 +115,8 @@
   }
 
   .ProseMirror hr {
-    @apply border-t-2 border-slate-200 my-8;
+    @apply border-t-2 my-8;
+    border-color: var(--editor-border);
   }
 
   .ProseMirror img {
@@ -77,18 +124,27 @@
   }
 
   .ProseMirror a {
-    @apply text-blue-600 underline underline-offset-4 decoration-2 decoration-blue-200 hover:decoration-blue-400 transition-colors;
+    @apply underline underline-offset-4 decoration-2 transition-colors;
+    color: var(--editor-marker-bullet);
+    text-decoration-color: var(--editor-marker-bullet);
+    opacity: 0.8;
+  }
+  .ProseMirror a:hover {
+    opacity: 1;
   }
 
   .ProseMirror p.is-editor-empty:first-child::before {
-    @apply text-slate-400 float-left h-0 pointer-events-none;
+    @apply float-left h-0 pointer-events-none;
+    color: var(--editor-text-muted);
     content: attr(data-placeholder);
   }
 
   /* Bullet List Marker */
   .ProseMirror ul li > p:first-child::before {
     content: "";
-    @apply flex-shrink-0 w-1.5 h-1.5 rounded-full bg-blue-500 mt-[12px] ml-1 shadow-[0_0_6px_rgba(59,130,246,0.4)];
+    @apply flex-shrink-0 w-1.5 h-1.5 rounded-full mt-[12px] ml-1;
+    background-color: var(--editor-marker-bullet);
+    box-shadow: 0 0 6px var(--editor-marker-bullet);
   }
 
   /* Ordered List Marker */
@@ -102,7 +158,8 @@
 
   .ProseMirror ol > li > p:first-child::before {
     content: counter(arkpad-counter) ".";
-    @apply flex-shrink-0 w-4 flex items-center justify-start text-slate-400 font-mono text-sm mt-[4px] select-none;
+    @apply flex-shrink-0 w-4 flex items-center justify-start font-mono text-sm mt-[4px] select-none;
+    color: var(--editor-marker);
   }
 
   /* Task List Styles */
@@ -130,11 +187,19 @@
 
 @layer components {
   .toolbar-btn {
-    @apply inline-flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-200 hover:bg-slate-100 active:bg-slate-200 text-slate-600 hover:text-slate-900 disabled:opacity-30 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed;
+    color: var(--editor-btn-text);
+  }
+
+  .toolbar-btn:hover:not(:disabled) {
+    background-color: var(--editor-btn-hover);
+    color: var(--editor-text);
   }
 
   .toolbar-btn.active {
-    @apply bg-blue-50 text-blue-600 shadow-sm ring-1 ring-blue-100;
+    background-color: var(--editor-btn-active-bg);
+    color: var(--editor-btn-active-text);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   }
 
   .toolbar-btn svg {
@@ -142,6 +207,39 @@
   }
 
   .toolbar-separator {
-    @apply w-px h-6 bg-slate-200 mx-1.5;
+    @apply w-px h-6 mx-1.5;
+    background-color: var(--editor-border);
+  }
+
+  .editor-wrapper {
+    background-color: var(--editor-bg);
+    border-color: var(--editor-border);
+    @apply rounded-[2.5rem] shadow-[0_20px_80px_rgba(0,0,0,0.06)] overflow-hidden flex flex-col border transition-all duration-300;
+  }
+
+  .toolbar-wrapper {
+    background-color: var(--editor-toolbar-bg);
+    border-color: var(--editor-border);
+    @apply flex flex-wrap items-center gap-0.5 p-2 border-b sticky top-0 z-30 backdrop-blur-sm transition-all duration-300;
+  }
+
+  .toolbar-group {
+    @apply flex items-center gap-0.5 px-1 transition-all duration-300;
+  }
+
+  .toolbar-btn {
+    @apply inline-flex items-center justify-center w-8 h-8 rounded-md transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed;
+    color: var(--editor-btn-text);
+  }
+
+  .toolbar-btn:hover:not(:disabled) {
+    background-color: var(--editor-btn-hover);
+    color: var(--editor-text);
+  }
+
+  .toolbar-btn.active {
+    background-color: var(--editor-btn-active-bg);
+    color: var(--editor-btn-active-text);
+    @apply shadow-sm;
   }
 }
