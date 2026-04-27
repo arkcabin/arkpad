@@ -18,21 +18,6 @@ function setAlignCommand(align: TextAlign) {
 
       state.doc.nodesBetween(from, to, (node, pos) => {
         if (node.isTextblock) {
-          // Dynamic Notion-style fix: Disable alignment if the text block is inside ANY list
-          // This prevents layout jumping/flickering and matches professional editor behavior.
-          const $pos = state.doc.resolve(pos);
-          let isInsideList = false;
-          for (let i = $pos.depth; i > 0; i--) {
-            if ($pos.node(i).type.name.toLowerCase().includes("list")) {
-              isInsideList = true;
-              break;
-            }
-          }
-
-          if (isInsideList) {
-            return;
-          }
-
           const attrs = { ...node.attrs, align };
           tr.setNodeMarkup(pos, node.type, attrs);
         }

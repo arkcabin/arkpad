@@ -24,18 +24,18 @@ export class TaskView implements NodeView {
     const isChecked = node.attrs.checked;
 
     const container = document.createElement("li");
-    container.className = "task-item flex items-center gap-3 list-none py-0 leading-none";
+    container.className = "task-item flex items-start gap-3 list-none py-0 leading-none";
     if (isChecked) container.classList.add("checked");
 
     this.checkboxContainer = document.createElement("div");
-    // Pointer-events: none on the wrapper ensures clicks in the "gap" hit the text area
-    this.checkboxContainer.className = "flex-shrink-0 flex items-center justify-center select-none pointer-events-none";
+    // Pointer-events: none ensures clicks in the "gap" hit the text area
+    this.checkboxContainer.className = "flex-shrink-0 flex items-center justify-center select-none pointer-events-none mt-[2px]";
     this.checkboxContainer.contentEditable = "false";
     container.appendChild(this.checkboxContainer);
 
     const contentDOM = document.createElement("div");
-    contentDOM.className = "flex-1 min-w-0 text-[16px] transition-[color,opacity,text-decoration] duration-150";
-    this.updateContentStyles(contentDOM, isChecked);
+    contentDOM.className = "flex-1 min-w-0 text-[16px]";
+    this.updateContentStyles(contentDOM, isChecked, node);
     this.contentDOM = contentDOM;
     container.appendChild(contentDOM);
 
@@ -43,7 +43,14 @@ export class TaskView implements NodeView {
     this.mountReact();
   }
 
-  private updateContentStyles(el: HTMLElement, isChecked: boolean) {
+  private updateContentStyles(el: HTMLElement, isChecked: boolean, node: PMNode) {
+    const align = node.firstChild?.attrs.align || "left";
+    
+    // Apply alignment classes
+    el.classList.remove("text-left", "text-center", "text-right", "text-justify");
+    el.classList.add(`text-${align}`);
+
+    // Apply checkmark styles
     if (isChecked) {
       el.classList.add("text-slate-400", "line-through", "opacity-70");
       el.classList.remove("text-slate-800");
@@ -89,7 +96,7 @@ export class TaskView implements NodeView {
 
     this.node = node;
     this.dom.classList.toggle("checked", isChecked);
-    this.updateContentStyles(this.contentDOM, isChecked);
+    this.updateContentStyles(this.contentDOM, isChecked, node);
     
     return true;
   }
