@@ -53,7 +53,18 @@ export class ExtensionManager {
     const commands: Record<string, any> = {};
     for (const ext of this.extensions) {
       if (ext.addCommands) {
-        Object.assign(commands, ext.addCommands());
+        const extCommands = ext.addCommands();
+        Object.keys(extCommands).forEach((key) => {
+          if (commands[key]) {
+            const prevCommand = commands[key];
+            const newCommand = extCommands[key];
+            commands[key] = (...args: any[]) => (state: any, dispatch: any, view: any) => {
+              return newCommand(...args)(state, dispatch, view) || prevCommand(...args)(state, dispatch, view);
+            };
+          } else {
+            commands[key] = extCommands[key];
+          }
+        });
       }
     }
     return commands;
@@ -63,7 +74,18 @@ export class ExtensionManager {
     const shortcuts: Record<string, any> = {};
     for (const ext of this.extensions) {
       if (ext.addKeyboardShortcuts) {
-        Object.assign(shortcuts, ext.addKeyboardShortcuts(schema));
+        const extShortcuts = ext.addKeyboardShortcuts(schema);
+        Object.keys(extShortcuts).forEach((key) => {
+          if (shortcuts[key]) {
+            const prevCommand = shortcuts[key];
+            const newCommand = extShortcuts[key];
+            shortcuts[key] = (state: any, dispatch: any, view: any) => {
+              return newCommand(state, dispatch, view) || prevCommand(state, dispatch, view);
+            };
+          } else {
+            shortcuts[key] = extShortcuts[key];
+          }
+        });
       }
     }
     return shortcuts;

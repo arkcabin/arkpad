@@ -1,9 +1,19 @@
-import { DOMParser as PMDOMParser, DOMSerializer, Node as PMNode, type Schema } from "prosemirror-model";
+import {
+  DOMParser as PMDOMParser,
+  DOMSerializer,
+  Node as PMNode,
+  type Schema,
+} from "prosemirror-model";
 import { EditorState, type Plugin } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
 
 import { arkpadSchema } from "./schema";
-import { ExtensionManager, createDefaultExtensions, type Extension, type Dispatch } from "./extensions";
+import {
+  ExtensionManager,
+  createDefaultExtensions,
+  type Extension,
+  type Dispatch,
+} from "./extensions";
 import type {
   ArkpadCommandRegistry,
   ArkpadContent,
@@ -32,6 +42,7 @@ function resolveEditorOptions(options: ArkpadEditorOptions) {
     content: options.content ?? "<p></p>",
     editable: options.editable ?? true,
     extensions: options.extensions ?? [],
+    nodeViews: options.nodeViews ?? {},
     autofocus: options.autofocus ?? false,
     onCreate: options.onCreate,
     onUpdate: options.onUpdate,
@@ -47,6 +58,7 @@ export class ArkpadEditor implements ArkpadEditorAPI {
   private readonly onCreate?: ArkpadEditorOptions["onCreate"];
   private readonly onUpdate?: ArkpadEditorOptions["onUpdate"];
   private readonly onDestroy?: ArkpadEditorOptions["onDestroy"];
+  private readonly nodeViews: Record<string, any>;
 
   private editable: boolean;
   private view: EditorView;
@@ -60,6 +72,7 @@ export class ArkpadEditor implements ArkpadEditorAPI {
     this.onCreate = resolved.onCreate;
     this.onUpdate = resolved.onUpdate;
     this.onDestroy = resolved.onDestroy;
+    this.nodeViews = resolved.nodeViews;
 
     const extensionManager = new ExtensionManager(arkpadSchema, [
       ...createDefaultExtensions(),
@@ -74,6 +87,7 @@ export class ArkpadEditor implements ArkpadEditorAPI {
     this.view = new EditorView(this.element, {
       state,
       editable: () => this.editable,
+      nodeViews: this.nodeViews,
       dispatchTransaction: (transaction) => {
         const nextState = this.view.state.apply(transaction);
         this.view.updateState(nextState);
@@ -132,11 +146,7 @@ export class ArkpadEditor implements ArkpadEditorAPI {
   }
 
   getText(): string {
-    return this.view.state.doc.textBetween(
-      0,
-      this.view.state.doc.content.size,
-      "\n\n"
-    );
+    return this.view.state.doc.textBetween(0, this.view.state.doc.content.size, "\n\n");
   }
 
   runCommand(name: string, ...args: any[]): boolean {
@@ -220,8 +230,8 @@ export class ArkpadEditor implements ArkpadEditorAPI {
 
     if (arkpadSchema.marks[name]) {
       const markType = arkpadSchema.marks[name];
-      const marks = empty ? ($from.marks() || state.storedMarks) : [];
-      
+      const marks = empty ? $from.marks() || state.storedMarks : [];
+
       if (empty && marks) {
         const mark = marks.find((m) => m.type === markType);
         return mark ? mark.attrs : null;
@@ -238,7 +248,7 @@ export class ArkpadEditor implements ArkpadEditorAPI {
     if (arkpadSchema.nodes[name]) {
       const nodeType = arkpadSchema.nodes[name];
       let attrs: Record<string, any> | null = null;
-      
+
       state.doc.nodesBetween(from, to, (node) => {
         if (node.type === nodeType) {
           attrs = node.attrs;

@@ -1,4 +1,5 @@
 import type { Command, EditorState, Plugin } from "prosemirror-state";
+import type { Node as PMNode } from "prosemirror-model";
 
 export type ArkpadDocJSON = Record<string, unknown>;
 export type ArkpadContent = string | ArkpadDocJSON;
@@ -12,19 +13,34 @@ export interface ArkpadExtension {
   commands?: Partial<ArkpadCommandRegistry>;
 }
 
+export interface NodeViewConstructor {
+  new (node: PMNode, view: any, getPos: () => number | undefined, decorations: any): NodeView;
+}
+
+export interface NodeView {
+  dom: globalThis.Node;
+  contentDOM?: globalThis.Node;
+  update?(node: PMNode, decorations: any): boolean;
+  destroy(): void;
+  ignoreMutation?(mutation: MutationRecord): boolean;
+}
+
 export interface ArkpadEditorOptions {
   element: HTMLElement;
   content?: ArkpadContent;
   editable?: boolean;
   extensions?: ArkpadExtension[];
+  nodeViews?: Record<string, NodeViewConstructor>;
   autofocus?: boolean;
   onCreate?: (editor: ArkpadEditorAPI) => void;
   onUpdate?: (payload: ArkpadUpdatePayload) => void;
   onDestroy?: (editor: ArkpadEditorAPI) => void;
 }
 
-export interface ResolvedArkpadEditorOptions
-  extends Omit<ArkpadEditorOptions, "content" | "extensions"> {
+export interface ResolvedArkpadEditorOptions extends Omit<
+  ArkpadEditorOptions,
+  "content" | "extensions"
+> {
   content: ArkpadContent;
   extensions: ArkpadExtension[];
   editable: boolean;

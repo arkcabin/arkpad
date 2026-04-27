@@ -1,4 +1,5 @@
 import { sinkListItem, liftListItem, splitListItem } from "prosemirror-schema-list";
+import { wrappingInputRule } from "prosemirror-inputrules";
 import { Extension } from "../extensions-types";
 import { toggleList } from "./utils";
 
@@ -67,6 +68,9 @@ export function createTaskList(): Extension {
         );
       },
     }),
+    addInputRules: (schema) => [
+      wrappingInputRule(/^\[\s?\]\s$/, schema.nodes.taskList!)
+    ]
   };
 }
 
@@ -87,8 +91,47 @@ export function createTaskItem(): Extension {
       },
     }),
     addKeyboardShortcuts: () => ({
-      Enter: (state: any, dispatch: any) =>
-        splitListItem(state.schema.nodes.taskItem!)(state, dispatch),
+      Enter: (state: any, dispatch: any) => {
+        const { $from, $to } = state.selection;
+        if (!$from.sameParent($to) || $from.parent.type.name !== "paragraph") return false;
+        
+        const taskItem = state.schema.nodes.taskItem;
+        if (!taskItem) return false;
+
+        // Check if we are inside a taskItem
+        let depth = $from.depth;
+        while (depth > 0) {
+          if ($from.node(depth).type === taskItem) break;
+          depth--;
+        }
+
+        if (depth === 0) return false;
+
+        // If current task item is empty, lift it instead of splitting
+        if ($from.parent.content.size === 0) {
+          return liftListItem(taskItem)(state, dispatch);
+        }
+
+        return splitListItem(taskItem, { checked: false })(state, dispatch);
+      },
+      Backspace: (state: any, dispatch: any) => {
+        const { $from, $to } = state.selection;
+        if (!$from.sameParent($to) || $from.parentOffset !== 0) return false;
+
+        const taskItem = state.schema.nodes.taskItem;
+        if (!taskItem) return false;
+
+        let depth = $from.depth;
+        while (depth > 0) {
+          if ($from.node(depth).type === taskItem) break;
+          depth--;
+        }
+
+        if (depth === 0) return false;
+
+        // Turn back into paragraph if at the start
+        return liftListItem(taskItem)(state, dispatch);
+      },
       Tab: (state: any, dispatch: any) =>
         sinkListItem(state.schema.nodes.taskItem!)(state, dispatch),
       "Shift-Tab": (state: any, dispatch: any) =>
@@ -96,3 +139,4 @@ export function createTaskItem(): Extension {
     }),
   };
 }
+

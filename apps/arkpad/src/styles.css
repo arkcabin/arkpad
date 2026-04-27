@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@source "@arkpad/react";
 
 @theme {
   --color-brand: #3b82f6;
@@ -6,8 +7,8 @@
   --color-editor-bg: #ffffff;
   --color-editor-border: #e2e8f0;
   --color-editor-hover: #f1f5f9;
-  --font-sans: 'Inter', system-ui, sans-serif;
-  --font-mono: 'Fira Code', monospace;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "Fira Code", monospace;
 }
 
 @layer base {
@@ -19,6 +20,7 @@
   /* ProseMirror Base Styles */
   .ProseMirror {
     @apply outline-none min-h-[400px] text-lg leading-relaxed;
+    white-space: pre-wrap;
   }
 
   .ProseMirror p {
@@ -53,7 +55,8 @@
     @apply bg-transparent p-0 text-inherit;
   }
 
-  .ProseMirror ul, .ProseMirror ol {
+  .ProseMirror ul,
+  .ProseMirror ol {
     @apply pl-6 mb-4 list-outside;
   }
 
@@ -79,20 +82,30 @@
   }
 
   /* List Styles */
-  .ProseMirror ul { @apply list-disc; }
-  .ProseMirror ol { @apply list-decimal; }
+  .ProseMirror ul {
+    @apply list-disc;
+  }
+  .ProseMirror ol {
+    @apply list-decimal;
+  }
 
   /* Task List Styles */
   .task-list {
-    @apply list-none pl-0;
+    @apply !list-none !pl-0;
   }
 
   .task-item {
-    @apply flex items-start gap-3 mb-1;
+    @apply !list-none flex items-center gap-3 !mb-0;
   }
 
-  .task-item input[type="checkbox"] {
-    @apply mt-1.5 w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer;
+  /* Ensure paragraphs inside task items don't have large margins */
+  .task-item p {
+    @apply !m-0 !leading-snug;
+  }
+
+  /* Ensure no default bullets show up in task lists */
+  .task-list li::before {
+    @apply !content-none;
   }
 }
 
