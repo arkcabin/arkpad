@@ -51,11 +51,10 @@ const ToolbarButton = ({
     onClick={onClick}
     disabled={disabled}
     title={title}
-    className={`w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-200 ${
-      isActive
-        ? "bg-blue-600 text-white shadow-md shadow-blue-200"
-        : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
-    } ${disabled ? "opacity-30 cursor-not-allowed" : "active:scale-90"}`}
+    className={`w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-200 ${isActive
+      ? "bg-blue-600 text-white shadow-md shadow-blue-200"
+      : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+      } ${disabled ? "opacity-30 cursor-not-allowed" : "active:scale-90"}`}
   >
     {children}
   </button>
@@ -67,7 +66,7 @@ export function App() {
   // THE NEW CLEAN API: Simple, Declarative, and Auto-Reactive
   const editor = useArkpadEditor({
     content:
-      "<p>Welcome to <strong>Arkpad</strong> — now with the simplest API ever.</p><p>We have introduced the <code>useArkpadEditor</code> hook to make your life easy.</p>",
+      "<p>Welcome to <strong>Test</strong> — now with the simplest API ever.</p><p>We have introduced the <code>useArkpadEditor</code> hook to make your life easy.</p>",
   });
 
   if (!editor) {
@@ -82,7 +81,7 @@ export function App() {
 
   return (
     <div className="min-h-screen bg-[#f8f9fc] py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col gap-8">
-      <header className="flex flex-col items-center text-center gap-3">
+      {/* <header className="flex flex-col items-center text-center gap-3">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-bold tracking-wider uppercase border border-blue-100/50 shadow-sm">
           <Sparkles className="w-3 h-3" />
           Simplest API Ever
@@ -94,7 +93,7 @@ export function App() {
         <p className="text-lg text-slate-500 max-w-2xl font-medium leading-relaxed">
           One hook. Total control. Zero boilerplate.
         </p>
-      </header>
+      </header> */}
 
       <div className="bg-white rounded-[2.5rem] shadow-[0_20px_80px_rgba(0,0,0,0.06)] border border-slate-200/60 overflow-hidden flex flex-col">
         {/* Toolbar */}
