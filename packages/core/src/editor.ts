@@ -14,6 +14,8 @@ import {
   type Extension,
   type Dispatch,
 } from "./extensions";
+import { markdownToHtml } from "./extensions/markdown/parser";
+import { defaultMarkdownSerializer } from "./extensions/markdown/serializer";
 import type {
   ArkpadCommandRegistry,
   ArkpadContent,
@@ -29,8 +31,15 @@ function parseHtmlContent(content: string, schema: Schema) {
   return parser.parse(element);
 }
 
-function parseContent(content: ArkpadContent, schema: Schema) {
+function parseContent(
+  content: ArkpadContent,
+  schema: Schema,
+  format?: "html" | "markdown" | "json"
+) {
   if (typeof content === "string") {
+    if (format === "markdown" || /^[#*_\-+>=\s]|^\d+\. /m.test(content)) {
+      return parseHtmlContent(markdownToHtml(content), schema);
+    }
     return parseHtmlContent(content, schema);
   }
   return PMNode.fromJSON(schema, content);
@@ -114,7 +123,11 @@ export class ArkpadEditor implements ArkpadEditorAPI {
   }
 
   private refreshState(content: ArkpadContent = this.view.state.doc.toJSON()) {
-    const nextState = this.createState(content);
+    const nextState = EditorState.create({
+      schema: arkpadSchema,
+      doc: parseContent(content, arkpadSchema),
+      plugins: this.extensionManager.getPlugins(),
+    });
     this.view.updateState(nextState);
     return nextState;
   }
@@ -147,6 +160,10 @@ export class ArkpadEditor implements ArkpadEditorAPI {
 
   getText(): string {
     return this.view.state.doc.textBetween(0, this.view.state.doc.content.size, "\n\n");
+  }
+
+  getMarkdown(): string {
+    return defaultMarkdownSerializer.serialize(this.view.state.doc);
   }
 
   runCommand(name: string, ...args: any[]): boolean {
@@ -265,15 +282,22 @@ export class ArkpadEditor implements ArkpadEditorAPI {
     return null;
   }
 
-  setContent(content: ArkpadContent, emitUpdate = true) {
-    const nextState = this.refreshState(content);
+  setContent(content: ArkpadContent, format?: "html" | "markdown" | "json", emitUpdate = true) {
+    const parsedDoc = parseContent(content, arkpadSchema, format);
+    const state = this.view.state;
+    const nextState = EditorState.create({
+      schema: arkpadSchema,
+      doc: parsedDoc,
+      plugins: state.plugins,
+    });
+    this.view.updateState(nextState);
     if (emitUpdate) {
       this.emitUpdate(nextState);
     }
   }
 
   clearContent(emitUpdate = true) {
-    this.setContent("<p></p>", emitUpdate);
+    this.setContent("<p></p>", undefined, emitUpdate);
   }
 
   focus() {

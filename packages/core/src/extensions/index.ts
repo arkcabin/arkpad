@@ -31,6 +31,7 @@ import {
   createTaskItem,
   createListItem,
 } from "./lists";
+import { createMarkdownPaste } from "./markdown";
 import { createTextAlign } from "./alignment";
 import { Extension } from "../extensions-types";
 
@@ -61,6 +62,7 @@ export const StarterKit: Extension[] = [
   createHighlight(),
   createPlaceholder({ placeholder: "Start writing..." }),
   createHistory(),
+  createMarkdownPaste(),
   createTextAlign(),
 ];
 

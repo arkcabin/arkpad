@@ -61,12 +61,13 @@ export interface ArkpadEditorAPI {
   getState(): EditorState;
   getHTML(): string;
   getJSON(): ArkpadDocJSON;
+  getMarkdown(): string;
   getText(): string;
   isActive(name: string, attrs?: Record<string, any>): boolean;
   getAttributes(name: string): Record<string, any> | null;
   runCommand(name: string, ...args: any[]): boolean;
   canRunCommand(name: string): boolean;
-  setContent(content: ArkpadContent, emitUpdate?: boolean): void;
+  setContent(content: ArkpadContent, format?: 'html' | 'markdown' | 'json', emitUpdate?: boolean): void;
   clearContent(emitUpdate?: boolean): void;
   focus(): void;
   blur(): void;

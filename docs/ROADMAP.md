@@ -4,14 +4,18 @@ This document outlines the multi-phase plan to transform Arkpad into a world-cla
 
 ---
 
-## Phase 1: Dynamic Formatting (Implemented ✅)
-*   **Highlight Mark**: Aesthetic yellow-background emphasis for text.
+## Phase 1: Dynamic Formatting & UI (Implemented ✅)
+*   **Minimalist Flat UI**: Clean, professional, shadow-less interface with a refined toolbar.
+*   **Modular Markdown System**: 
+    -   **`parser`**: Robust Markdown-to-HTML engine for pasting and initialization.
+    -   **`serializer`**: Full document-to-Markdown conversion for data export.
+*   **Full Format Flexibility**: Support for JSON, HTML, and Markdown/MDX in `setContent` and data output.
 *   **Markdown Input Rules**: Instant "type-to-format" triggers:
     *   `# `, `## `, etc. → Headings.
     *   `> ` → Blockquote.
     *   `- `, `* `, `1. ` → Lists.
     *   `[ ] `, `[x] ` → Task Lists.
-    *   `---` → Horizontal Rule.
+    *   `---`, `***`, `___` → Horizontal Rules.
     *   `**bold**`, `_italic_`, `~~strike~~`, `` `code` ``, `==highlight==`.
 
 ---
