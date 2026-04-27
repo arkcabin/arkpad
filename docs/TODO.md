@@ -37,3 +37,7 @@
 ## Future Enhancements
 
 - [ ] Data Export: Support structured rendering for multiple formats (HTML, JSON AST, and Markdown/MDX serialization).
+- [ ] Slash Commands: Implement a floating menu triggered by `/` for rapid block insertion.
+- [ ] AI Layer: Provide specialized hooks (`onAIRequest`) for LLM-powered features.
+- [ ] Collaboration: Add support for Yjs bindings for real-time multiplayer editing.
+- [ ] Advanced Theming: Fully document Dark Mode and Tailwind theme customization.

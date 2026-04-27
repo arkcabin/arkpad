@@ -4,6 +4,11 @@ import { Schema } from "prosemirror-model";
 import { Extension } from "../extensions-types";
 import { toggleBlock } from "./utils";
 
+function getAlignAttrs(state: any) {
+  const { $from } = state.selection;
+  return { align: $from.parent.attrs?.align || "left" };
+}
+
 export function createHeading(): Extension {
   return {
     name: "heading",
@@ -12,17 +17,35 @@ export function createHeading(): Extension {
         return toggleBlock(state.schema.nodes.heading!, attrs)(state, dispatch);
       },
       setHeading1: () => (state: any, dispatch: any) =>
-        setBlockType(state.schema.nodes.heading!, { level: 1 })(state, dispatch),
+        setBlockType(state.schema.nodes.heading!, { level: 1, align: getAlignAttrs(state).align })(
+          state,
+          dispatch
+        ),
       setHeading2: () => (state: any, dispatch: any) =>
-        setBlockType(state.schema.nodes.heading!, { level: 2 })(state, dispatch),
+        setBlockType(state.schema.nodes.heading!, { level: 2, align: getAlignAttrs(state).align })(
+          state,
+          dispatch
+        ),
       setHeading3: () => (state: any, dispatch: any) =>
-        setBlockType(state.schema.nodes.heading!, { level: 3 })(state, dispatch),
+        setBlockType(state.schema.nodes.heading!, { level: 3, align: getAlignAttrs(state).align })(
+          state,
+          dispatch
+        ),
       setHeading4: () => (state: any, dispatch: any) =>
-        setBlockType(state.schema.nodes.heading!, { level: 4 })(state, dispatch),
+        setBlockType(state.schema.nodes.heading!, { level: 4, align: getAlignAttrs(state).align })(
+          state,
+          dispatch
+        ),
       setHeading5: () => (state: any, dispatch: any) =>
-        setBlockType(state.schema.nodes.heading!, { level: 5 })(state, dispatch),
+        setBlockType(state.schema.nodes.heading!, { level: 5, align: getAlignAttrs(state).align })(
+          state,
+          dispatch
+        ),
       setHeading6: () => (state: any, dispatch: any) =>
-        setBlockType(state.schema.nodes.heading!, { level: 6 })(state, dispatch),
+        setBlockType(state.schema.nodes.heading!, { level: 6, align: getAlignAttrs(state).align })(
+          state,
+          dispatch
+        ),
     }),
     addInputRules: (schema: Schema) => [
       textblockTypeInputRule(/^(#{1,6})\s$/, schema.nodes.heading!, (match) => ({

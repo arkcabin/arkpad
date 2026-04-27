@@ -47,10 +47,10 @@ const nodes = addListNodes(
         group: "block",
         code: true,
         defining: true,
-        attrs: { language: { default: "" } },
+        attrs: { language: { default: "" }, align: { default: "left" } },
         parseDOM: [{ tag: "pre", preserveWhitespace: "full" }],
-        toDOM() {
-          return ["pre", ["code", 0]];
+        toDOM(node) {
+          return ["pre", { style: `text-align: ${node.attrs.align}` }, ["code", 0]];
         },
       },
       horizontalRule: {

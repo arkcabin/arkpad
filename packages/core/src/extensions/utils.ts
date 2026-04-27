@@ -7,7 +7,7 @@ import { wrapInList, liftListItem } from "prosemirror-schema-list";
 export function toggleBlock(type: any, attrs: Record<string, any> = {}) {
   return (state: any, dispatch: any) => {
     const { $from } = state.selection;
-    
+
     let isActive = false;
     for (let depth = $from.depth; depth >= 0; depth--) {
       const node = $from.node(depth);
@@ -21,16 +21,18 @@ export function toggleBlock(type: any, attrs: Record<string, any> = {}) {
     }
 
     if (isActive) {
-      if (type.name === 'blockquote') {
+      if (type.name === "blockquote") {
         return lift(state, dispatch);
       }
-      return setBlockType(state.schema.nodes.paragraph!)(state, dispatch);
+      return setBlockType(state.schema.nodes.paragraph!, {
+        align: $from.parent.attrs.align || "left",
+      })(state, dispatch);
     }
-    
-    if (type.name === 'blockquote') {
+
+    if (type.name === "blockquote") {
       return wrapIn(type)(state, dispatch);
     }
-    
+
     return setBlockType(type, attrs)(state, dispatch);
   };
 }
@@ -48,7 +50,7 @@ export function toggleList(listType: any, itemType: any) {
     let listDepth = -1;
     for (let d = $from.depth; d >= 0; d--) {
       const node = $from.node(d);
-      if (node.type.name.toLowerCase().includes('list')) {
+      if (node.type.name.toLowerCase().includes("list")) {
         listDepth = d;
         break;
       }
