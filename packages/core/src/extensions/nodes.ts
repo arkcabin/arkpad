@@ -1,5 +1,5 @@
 import { setBlockType } from "prosemirror-commands";
-import { textblockTypeInputRule } from "prosemirror-inputrules";
+import { textblockTypeInputRule, wrappingInputRule, InputRule } from "prosemirror-inputrules";
 import { Schema } from "prosemirror-model";
 import { Extension } from "../extensions-types";
 import { toggleBlock } from "./utils";
@@ -63,6 +63,7 @@ export function createBlockquote(): Extension {
         return toggleBlock(state.schema.nodes.blockquote!)(state, dispatch);
       },
     }),
+    addInputRules: (schema: Schema) => [wrappingInputRule(/^\s*>\s$/, schema.nodes.blockquote!)],
   };
 }
 
@@ -88,6 +89,16 @@ export function createHorizontalRule(): Extension {
         return true;
       },
     }),
+    addInputRules: (schema: Schema) => [
+      new InputRule(/^(?:---|___\s|\*\*\*\s)$/, (state, match, start, end) => {
+        const { tr } = state;
+        const node = schema.nodes.horizontalRule!.create();
+        if (match[0]) {
+          tr.replaceWith(start, end, node);
+        }
+        return tr;
+      }),
+    ],
   };
 }
 

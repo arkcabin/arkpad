@@ -14,6 +14,7 @@ export function createBulletList(): Extension {
         );
       },
     }),
+    addInputRules: (schema) => [wrappingInputRule(/^\s*([-*])\s$/, schema.nodes.bulletList!)],
   };
 }
 
@@ -28,6 +29,14 @@ export function createOrderedList(): Extension {
         );
       },
     }),
+    addInputRules: (schema) => [
+      wrappingInputRule(
+        /^(\d+)\.\s$/,
+        schema.nodes.orderedList!,
+        (match) => ({ order: +match[1]! }),
+        (match, node) => node.childCount + node.attrs.order === +match[1]!
+      ),
+    ],
   };
 }
 
@@ -116,7 +125,10 @@ export function createTaskList(): Extension {
         );
       },
     }),
-    addInputRules: (schema) => [wrappingInputRule(/^\[\s?\]\s$/, schema.nodes.taskList!)],
+    addInputRules: (schema) => [
+      wrappingInputRule(/^\[\s?\]\s$/, schema.nodes.taskList!),
+      wrappingInputRule(/^\[x\]\s$/, schema.nodes.taskList!, { checked: true }),
+    ],
   };
 }
 

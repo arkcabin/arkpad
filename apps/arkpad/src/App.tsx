@@ -15,6 +15,7 @@ import {
   ListOrdered,
   Type,
   Sparkles,
+  Highlighter,
   Code,
   Terminal,
   Quote,
@@ -156,6 +157,14 @@ export function App() {
               title="Link"
             >
               <LinkIcon className="w-4 h-4" />
+            </ToolbarButton>
+            <ToolbarSeparator />
+            <ToolbarButton
+              onClick={() => run("toggleHighlight")}
+              isActive={isActive("highlight")}
+              title="Highlight"
+            >
+              <Highlighter className="w-4 h-4" />
             </ToolbarButton>
             <ToolbarSeparator />
             <ToolbarButton
@@ -342,6 +351,12 @@ export function App() {
           <div className="max-w-3xl mx-auto">
             <BubbleMenu editor={editor}>
               <div className="flex items-center gap-1 bg-slate-900 text-white p-1.5 rounded-2xl shadow-2xl border border-white/10 animate-in fade-in zoom-in-95 duration-200">
+                <button
+                  onClick={() => run("toggleHighlight")}
+                  className={`p-2 rounded-xl hover:bg-white/10 transition-all ${isActive("highlight") ? "text-yellow-400 bg-white/5" : "text-slate-300"}`}
+                >
+                  <Highlighter className="w-4 h-4" />
+                </button>
                 <button
                   onClick={() => run("toggleBold")}
                   className={`p-2 rounded-xl hover:bg-white/10 transition-all ${isActive("strong") ? "text-blue-400 bg-white/5" : "text-slate-300"}`}

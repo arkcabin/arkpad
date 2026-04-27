@@ -1,36 +1,43 @@
-# Arkpad Roadmap
+# Arkpad Premium Roadmap
 
-## Phase 1 - Core (Weeks 1-2)
+This document outlines the multi-phase plan to transform Arkpad into a world-class, professional writing environment.
 
-- Core editor package scaffold
-- Extension API contracts
-- Basic document schema
+---
 
-## Phase 2 - Features (Weeks 3-4)
+## Phase 1: Dynamic Formatting (Implemented ✅)
+*   **Highlight Mark**: Aesthetic yellow-background emphasis for text.
+*   **Markdown Input Rules**: Instant "type-to-format" triggers:
+    *   `# `, `## `, etc. → Headings.
+    *   `> ` → Blockquote.
+    *   `- `, `* `, `1. ` → Lists.
+    *   `[ ] `, `[x] ` → Task Lists.
+    *   `---` → Horizontal Rule.
+    *   `**bold**`, `_italic_`, `~~strike~~`, `` `code` ``, `==highlight==`.
 
-- Commands and keymaps
-- History support
-- Serialization and parsing
+---
 
-## Phase 3 - Integrations (Weeks 5-6)
+## Phase 2: Polish & Productivity (Planned)
+*   **Smart Typography**: Automatic conversion of standard character patterns:
+    *   `(c)` → `©`, `(tm)` → `™`.
+    *   `--` → `—` (em-dash).
+    *   `"quote"` → `“quote”` (smart curly quotes).
+*   **Enhanced Status Bar**: Real-time writing metrics in the footer:
+    *   Word Count.
+    *   Estimated Reading Time.
+    *   Auto-save status indicator.
 
-- React adapter
-- Starter UI components
-- Arkpad application
+---
 
-## Phase 4 - Stabilization (Weeks 7-8)
+## Phase 3: Advanced Structure (Planned)
+*   **Table Support**: Full table manipulation capabilities:
+    *   Insert Table (Grid-based selection).
+    *   Add/Remove Rows & Columns.
+    *   Header Row support.
+    *   Cell background colors.
 
-- Test coverage and performance pass
-- API docs and examples
-- Beta release
+---
 
-## Phase 5 - Future Extensions
-
-- Multi-format Export Pipelines (HTML, JSON AST, Markdown/MDX)
-
-## Phase 6 - The Competitive Edge
-
-- **Slash Commands (`/`)**: Interactive block insertion menu (Notion-style).
-- **AI-Native Hooks**: Seamless integration for Gemini/LLM text transformations.
-- **Collaborative Sync**: First-class support for Yjs/Automerge (Multiplayer editing).
-- **Premium Theming**: Automated Dark Mode support via Shadcn/Tailwind.
+## Phase 4: Block Mechanics (Planned)
+*   **Notion-style Drag Handles**: Visual handles on the left side of blocks for easy reordering.
+*   **Slash Command (/)**: A searchable menu to quickly insert blocks without using the toolbar.
+*   **Multi-Block Selection**: Dragging over multiple blocks to select, delete, or move them as a group.

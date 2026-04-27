@@ -1,5 +1,27 @@
 import { setBlockType, lift, wrapIn } from "prosemirror-commands";
 import { wrapInList, liftListItem } from "prosemirror-schema-list";
+import { type MarkType } from "prosemirror-model";
+import { InputRule } from "prosemirror-inputrules";
+
+export function markInputRule(regexp: RegExp, markType: MarkType, getAttrs?: (match: any) => any) {
+  return new InputRule(regexp, (state, match, start, end) => {
+    const { tr } = state;
+    const m = match.length - 1;
+
+    if (match[m]) {
+      const textStart = start + match[0].indexOf(match[m]);
+      const textEnd = textStart + match[m].length;
+      const attrs = getAttrs ? getAttrs(match) : null;
+
+      tr.addMark(textStart, textEnd, markType.create(attrs));
+      tr.delete(textEnd, end);
+      tr.delete(start, textStart);
+      tr.removeStoredMark(markType);
+    }
+
+    return tr;
+  });
+}
 
 /**
  * Smart toggle for block nodes.

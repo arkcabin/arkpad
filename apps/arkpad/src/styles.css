@@ -79,6 +79,17 @@
     color: var(--editor-text);
   }
 
+  .ProseMirror mark {
+    background-color: #fef08a;
+    color: #854d0e;
+    @apply rounded-[4px] px-1;
+  }
+
+  .dark .ProseMirror mark {
+    background-color: #fde047;
+    color: #1a1a1a;
+  }
+
   .ProseMirror blockquote {
     @apply border-l-4 pl-4 mb-4 italic;
     border-color: var(--editor-border);

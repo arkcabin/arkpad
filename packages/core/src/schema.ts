@@ -231,6 +231,12 @@ const marks = basicSchema.spec.marks.append({
       return ["sub", 0];
     },
   },
+  highlight: {
+    parseDOM: [{ tag: "mark" }],
+    toDOM() {
+      return ["mark", 0];
+    },
+  },
 });
 
 export const arkpadSchema = new Schema({ nodes, marks });
