@@ -1,6 +1,6 @@
 import { type Schema, type Node as PMNode } from "prosemirror-model";
 import { Plugin, type Transaction } from "prosemirror-state";
-import { toggleMark, setBlockType, wrapIn } from "prosemirror-commands";
+import { toggleMark, setBlockType, wrapIn, lift } from "prosemirror-commands";
 import { wrapInList, sinkListItem, liftListItem, splitListItem } from "prosemirror-schema-list";
 import { history, undo, redo } from "prosemirror-history";
 import { keymap } from "prosemirror-keymap";
@@ -269,17 +269,20 @@ function createBlockquote(): Extension {
     name: "blockquote",
     addCommands: () => ({
       toggleBlockquote: () => (state: any, dispatch: any) => {
-        const { from, to } = state.selection;
-        let isBlockquote = false;
-        state.doc.nodesBetween(from, to, (node) => {
-          if (node.type === arkpadSchema.nodes.blockquote) {
-            isBlockquote = true;
-          }
-        });
+        const { $from, $to } = state.selection;
+        const range = $from.blockRange($to);
+        
+        if (!range) return false;
+
+        // Check if the selection is already wrapped in a blockquote
+        const isBlockquote = range.parent.type === arkpadSchema.nodes.blockquote;
 
         if (isBlockquote) {
-          return setBlockType(arkpadSchema.nodes.paragraph!)(state, dispatch);
+          // If it is, lift it out of the blockquote
+          return lift(state, dispatch);
         }
+        
+        // Otherwise wrap it
         return wrapIn(arkpadSchema.nodes.blockquote!)(state, dispatch);
       },
       setBlockquote: () => wrapIn(arkpadSchema.nodes.blockquote!),

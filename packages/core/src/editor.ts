@@ -169,26 +169,35 @@ export class ArkpadEditor implements ArkpadEditorAPI {
 
   isActive(name: string, attrs: Record<string, any> = {}): boolean {
     const { state } = this.view;
-    const { from, to, $from, empty } = state.selection;
+    const { from, to, empty } = state.selection;
 
-    if (arkpadSchema.marks[name]) {
+    // Check for Marks (bold, italic, etc.)
+    const markType = state.schema.marks[name];
+    if (markType) {
       if (empty) {
-        return !!arkpadSchema.marks[name].isInSet(state.storedMarks || $from.marks());
+        return !!markType.isInSet(state.storedMarks || state.selection.$from.marks());
       }
-      return state.doc.rangeHasMark(from, to, arkpadSchema.marks[name]);
+      return state.doc.rangeHasMark(from, to, markType);
     }
 
-    if (arkpadSchema.nodes[name]) {
+    // Check for Nodes (heading, blockquote, etc.)
+    const nodeType = state.schema.nodes[name];
+    if (nodeType) {
       let isActive = false;
+
+      // For nodes, we check the parent of the selection or the nodes in range
       state.doc.nodesBetween(from, to, (node) => {
         if (isActive) return false;
-        if (node.type === arkpadSchema.nodes[name]) {
-          const hasAttrs = Object.keys(attrs).every((key) => node.attrs[key] === attrs[key]);
-          if (hasAttrs) {
+        if (node.type === nodeType) {
+          const hasMatchingAttrs = Object.entries(attrs).every(
+            ([key, value]) => node.attrs[key] === value
+          );
+          if (hasMatchingAttrs) {
             isActive = true;
           }
         }
       });
+
       return isActive;
     }
 
