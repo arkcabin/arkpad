@@ -27,6 +27,8 @@ import {
   AlignCenter,
   AlignRight,
   AlignJustify,
+  Indent,
+  Outdent,
 } from "lucide-react";
 
 import { useArkpadEditor, ArkpadEditorContent, BubbleMenu, FloatingMenu } from "@arkpad/react";
@@ -264,6 +266,16 @@ export function App() {
               title="Task List"
             >
               <CheckSquare className="w-4 h-4" />
+            </ToolbarButton>
+            <ToolbarButton onClick={() => run("indentList")} isActive={false} title="Indent (Tab)">
+              <Indent className="w-4 h-4" />
+            </ToolbarButton>
+            <ToolbarButton
+              onClick={() => run("outdentList")}
+              isActive={false}
+              title="Outdent (Shift+Tab)"
+            >
+              <Outdent className="w-4 h-4" />
             </ToolbarButton>
           </div>
 

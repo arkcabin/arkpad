@@ -1,5 +1,3 @@
-import { setBlockType } from "prosemirror-commands";
-import { arkpadSchema } from "../schema";
 import { Extension } from "../extensions-types";
 
 export const TEXT_ALIGN = {
@@ -13,41 +11,18 @@ type TextAlign = (typeof TEXT_ALIGN)[keyof typeof TEXT_ALIGN];
 
 function setAlignCommand(align: TextAlign) {
   return (state: any, dispatch: any) => {
-    const { $from, to } = state.selection;
-    let canSetAlign = false;
-
-    state.doc.nodesBetween($from.pos, to, (node) => {
-      if (
-        node.type.isTextblock &&
-        node.type.canBeSetWithAttribute(arkpadSchema.nodes.paragraph!, "align")
-      ) {
-        canSetAlign = true;
-        return false;
-      }
-    });
-
-    if (!canSetAlign) {
-      for (let d = $from.depth; d >= 0; d--) {
-        const node = $from.node(d);
-        if (
-          node.isTextblock &&
-          node.type.canBeSetWithAttribute(arkpadSchema.nodes.paragraph!, "align")
-        ) {
-          canSetAlign = true;
-          break;
-        }
-      }
-    }
-
-    if (!canSetAlign) return false;
+    const { from, to } = state.selection;
 
     if (dispatch) {
       const tr = state.tr;
-      state.doc.nodesBetween($from.pos, to, (node, pos) => {
+
+      state.doc.nodesBetween(from, to, (node, pos) => {
         if (node.isTextblock) {
-          tr.setNodeMarkup(pos, undefined, { ...node.attrs, align });
+          const attrs = { ...node.attrs, align };
+          tr.setNodeMarkup(pos, node.type, attrs);
         }
       });
+
       dispatch(tr);
     }
     return true;

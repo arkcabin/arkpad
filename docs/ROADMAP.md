@@ -23,3 +23,7 @@
 - Test coverage and performance pass
 - API docs and examples
 - Beta release
+
+## Phase 5 - Future Extensions
+
+- Multi-format Export Pipelines (HTML, JSON AST, Markdown/MDX)
