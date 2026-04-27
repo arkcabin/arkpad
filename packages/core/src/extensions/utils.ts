@@ -51,7 +51,8 @@ export function toggleList(listType: any, itemType: any) {
     let listDepth = -1;
     for (let d = $from.depth; d >= 0; d--) {
       const node = $from.node(d);
-      if (node.type.name.toLowerCase().includes("list")) {
+      const name = node.type.name.toLowerCase();
+      if (name.includes("list") && !name.includes("item")) {
         listDepth = d;
         break;
       }
