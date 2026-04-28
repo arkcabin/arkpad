@@ -13,9 +13,9 @@ export interface ArkpadExtension {
   commands?: Partial<ArkpadCommandRegistry>;
 }
 
-export interface NodeViewConstructor {
-  new (node: PMNode, view: any, getPos: () => number | undefined, decorations: any): NodeView;
-}
+export type NodeViewConstructor =
+  | (new (node: PMNode, view: any, getPos: () => number | undefined, decorations: any) => NodeView)
+  | ((node: PMNode, view: any, getPos: () => number | undefined, decorations: any) => NodeView);
 
 export interface NodeView {
   dom: globalThis.Node;

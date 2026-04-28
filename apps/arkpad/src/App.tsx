@@ -30,6 +30,7 @@ import {
   Moon,
   Plus,
   ChevronDown,
+  Highlighter,
 } from "lucide-react";
 
 import { useArkpadEditor, ArkpadEditorContent, BubbleMenu, FloatingMenu } from "@arkpad/react";
