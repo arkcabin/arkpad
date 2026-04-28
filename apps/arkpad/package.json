@@ -2,6 +2,7 @@
   "name": "@arkpad/app",
   "private": true,
   "version": "1.4.0",
+  "author": "ArkCabin",
   "type": "module",
   "scripts": {
     "dev": "vite",

@@ -1,33 +1,52 @@
 # @arkpad/react
 
-React components and hooks for the Arkpad rich text editor.
+**Premium React Components & Hooks for Arkpad.**
 
-## Features
+`@arkpad/react` provides the official React integration for the Arkpad ecosystem. It features optimized hooks and components designed to bring the power of ProseMirror into your React application with zero friction.
 
-- **useArkpadEditor**: Easy-to-use hook for managing editor state.
-- **ArkpadEditorContent**: Component to render the editor.
-- **BubbleMenu & FloatingMenu**: Built-in components for contextual menus.
+---
 
-## Installation
+## ✨ Features
+
+- 🪝 **`useArkpadEditor`** — A powerful hook that manages the editor lifecycle and reactive state.
+- 🖼️ **`ArkpadEditorContent`** — A high-performance component for rendering your editor instance.
+- 🫧 **Contextual Menus** — Built-in support for Bubble and Floating menus out of the box.
+- ⚡ **Optimized Rendering** — Minimizes re-renders for a silky-smooth editing experience.
+
+---
+
+## 📦 Installation
 
 ```bash
 npm install @arkpad/react @arkpad/core
 ```
 
-## Usage
+---
+
+## 🚀 Quick Start
+
+Build a professional editor in just a few lines of code:
 
 ```tsx
 import { useArkpadEditor, ArkpadEditorContent } from '@arkpad/react';
+import { StarterKit } from '@arkpad/core';
 
 function App() {
   const editor = useArkpadEditor({
-    content: '<p>Hello React!</p>',
+    extensions: [StarterKit],
+    content: '<h1>Build with Arkpad + React</h1><p>Start your journey here.</p>',
   });
 
-  return <ArkpadEditorContent editor={editor} />;
+  return (
+    <div className="editor-shell">
+      <ArkpadEditorContent editor={editor} />
+    </div>
+  );
 }
 ```
 
-## License
+---
 
-MIT
+## 📄 License
+
+MIT © [ArkCabin](https://github.com/arkcabin)
