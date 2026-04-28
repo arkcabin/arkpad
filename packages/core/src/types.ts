@@ -85,5 +85,6 @@ export interface ArkpadEditorAPI {
   isEditable(): boolean;
   registerExtension(extension: ArkpadExtension): void;
   registerExtensions(extensions: ArkpadExtension[]): void;
+  subscribe(callback: (editor: ArkpadEditorAPI) => void): () => void;
   destroy(): void;
 }

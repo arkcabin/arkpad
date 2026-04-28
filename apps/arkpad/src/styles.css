@@ -112,17 +112,18 @@
     @apply bg-transparent p-0 text-inherit;
   }
 
+  /* Robust List Styles - Avoiding Flexbox-Caret Bugs */
   .ProseMirror ul,
   .ProseMirror ol {
-    @apply !pl-0 !mb-4 !list-none;
+    @apply !pl-8 !mb-4 !list-none;
   }
 
   .ProseMirror li {
-    @apply mb-1 !list-none;
+    @apply relative mb-1 !list-none;
   }
 
-  .ProseMirror li > p:first-child {
-    @apply flex items-start !gap-2 !m-0;
+  .ProseMirror li > p {
+    @apply !m-0;
   }
 
   .ProseMirror hr {
@@ -150,15 +151,15 @@
     content: attr(data-placeholder);
   }
 
-  /* Bullet List Marker */
-  .ProseMirror ul li > p:first-child::before {
+  /* Bullet List Marker - Absolute Positioned */
+  .ProseMirror ul li::before {
     content: "";
-    @apply flex-shrink-0 w-1.5 h-1.5 rounded-full mt-[12px] ml-1;
+    @apply absolute -left-5 top-[0.7em] w-1.5 h-1.5 rounded-full pointer-events-none;
     background-color: var(--editor-marker-bullet);
     box-shadow: 0 0 6px var(--editor-marker-bullet);
   }
 
-  /* Ordered List Marker */
+  /* Ordered List Marker - Absolute Positioned */
   .ProseMirror ol {
     counter-reset: arkpad-counter;
   }
@@ -167,9 +168,9 @@
     counter-increment: arkpad-counter;
   }
 
-  .ProseMirror ol > li > p:first-child::before {
+  .ProseMirror ol > li::before {
     content: counter(arkpad-counter) ".";
-    @apply flex-shrink-0 w-4 flex items-center justify-start font-mono text-sm mt-[4px] select-none;
+    @apply absolute -left-8 top-[0.1em] w-6 flex items-center justify-end font-mono text-sm select-none pointer-events-none;
     color: var(--editor-marker);
   }
 
@@ -182,17 +183,15 @@
     @apply !list-none flex items-start !gap-2 !mb-1;
   }
 
-  /* Ensure paragraphs inside task items don't have large margins */
   .task-item p {
     @apply !m-0 !leading-snug;
   }
 
-  /* Ensure no default bullets show up in task lists */
   /* Nested Indentation */
   .ProseMirror li > ul,
   .ProseMirror li > ol,
   .ProseMirror li > .task-list {
-    @apply !pl-6 !mt-2;
+    @apply !mt-2;
   }
 }
 
@@ -230,26 +229,6 @@
 
   .toolbar-group {
     @apply flex items-center gap-0.5 px-2 transition-all duration-300;
-  }
-
-  .toolbar-btn {
-    @apply inline-flex items-center justify-center w-8 h-8 rounded transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed;
-    color: var(--editor-btn-text);
-  }
-
-  .toolbar-btn:hover:not(:disabled) {
-    background-color: var(--editor-btn-hover);
-    color: var(--editor-text);
-  }
-
-  .toolbar-btn.active {
-    background-color: var(--editor-btn-active-bg);
-    color: var(--editor-btn-active-text);
-  }
-
-  .toolbar-separator {
-    @apply w-px h-5 mx-2;
-    background-color: var(--editor-border);
   }
 
   .editor-wrapper {

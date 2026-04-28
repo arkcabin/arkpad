@@ -20,6 +20,7 @@ import type {
   ArkpadDocJSON,
   ArkpadEditorAPI,
   ArkpadEditorOptions,
+  ArkpadUpdatePayload,
 } from "./types";
 import { parseContent, resolveEditorOptions } from "./utils";
 
@@ -41,6 +42,7 @@ export class ArkpadEditor implements ArkpadEditorAPI {
   private editable: boolean;
   private view: EditorView;
   private destroyed = false;
+  private listeners = new Set<(editor: ArkpadEditorAPI) => void>();
 
   constructor(options: ArkpadEditorOptions) {
     const resolved = resolveEditorOptions(options);
@@ -103,13 +105,18 @@ export class ArkpadEditor implements ArkpadEditorAPI {
   }
 
   private emitUpdate(state: EditorState) {
-    this.onUpdate?.({
+    const payload: ArkpadUpdatePayload = {
       editor: this,
       state,
       html: this.getHTML(),
       json: this.getJSON(),
       text: this.getText(),
-    });
+    };
+
+    this.onUpdate?.(payload);
+
+    // Notify all subscribers
+    this.listeners.forEach((listener) => listener(this));
   }
 
   /**
@@ -293,12 +300,25 @@ export class ArkpadEditor implements ArkpadEditorAPI {
   }
 
   /**
+   * Subscribes to editor updates.
+   * @param callback The function to call on update.
+   * @returns A cleanup function to unsubscribe.
+   */
+  subscribe(callback: (editor: ArkpadEditorAPI) => void): () => void {
+    this.listeners.add(callback);
+    return () => {
+      this.listeners.delete(callback);
+    };
+  }
+
+  /**
    * Destroys the editor instance.
    */
   destroy() {
     if (this.destroyed) return;
 
     this.destroyed = true;
+    this.listeners.clear();
     this.view.destroy();
     this.onDestroy?.(this);
   }
