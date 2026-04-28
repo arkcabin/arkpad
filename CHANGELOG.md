@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/arkcabin/arkpad/compare/v1.5.2...v1.6.0) (2026-04-28)
+
+
+### Features
+
+* switch to npm Trusted Publishing (OIDC) with provenance ([f455440](https://github.com/arkcabin/arkpad/commit/f455440b0e1828421d507caf5b1944479846c6b2))
+
 ## [1.5.2](https://github.com/arkcabin/arkpad/compare/v1.5.1...v1.5.2) (2026-04-28)
 
 
