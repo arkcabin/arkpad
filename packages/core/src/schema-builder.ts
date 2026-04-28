@@ -53,8 +53,8 @@ export class SchemaBuilder {
 
     globals.forEach((global) => {
       global.types.forEach((type: string) => {
-        if (enhancedNodes.has(type)) {
-          const nodeSpec = enhancedNodes.get(type);
+        const nodeSpec = enhancedNodes.get(type);
+        if (nodeSpec) {
           enhancedNodes = enhancedNodes.update(type, {
             ...nodeSpec,
             attrs: {
@@ -89,7 +89,44 @@ export class SchemaBuilder {
   }
 
   private enhanceMarks(marks: any, globals: any[]) {
-    // Similar logic for marks
-    return marks;
+    let enhancedMarks = marks;
+
+    globals.forEach((global) => {
+      global.types.forEach((type: string) => {
+        const markSpec = enhancedMarks.get(type);
+        if (markSpec) {
+          enhancedMarks = enhancedMarks.update(type, {
+            ...markSpec,
+            attrs: {
+              ...markSpec.attrs,
+              ...Object.fromEntries(
+                Object.entries(global.attributes).map(([key, attr]: [string, any]) => [
+                  key,
+                  { default: attr.default },
+                ])
+              ),
+            },
+            renderHTML: (mark: any) => {
+              const dom = markSpec.renderHTML(mark);
+              
+              Object.entries(global.attributes).forEach(([key, attr]: [string, any]) => {
+                if (attr.renderHTML) {
+                  const rendered = attr.renderHTML(mark.attrs);
+                  if (rendered) {
+                    Object.assign(dom[1], rendered);
+                  }
+                } else if (mark.attrs[key] !== undefined && mark.attrs[key] !== null) {
+                  dom[1][key] = mark.attrs[key];
+                }
+              });
+
+              return dom;
+            }
+          });
+        }
+      });
+    });
+
+    return enhancedMarks;
   }
 }
