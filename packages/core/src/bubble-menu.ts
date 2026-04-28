@@ -1,6 +1,6 @@
 import { EditorState, Plugin, PluginKey } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
-import { Extension } from "./extensions";
+import { Extension } from "./extensions/Extension";
 
 export interface BubbleMenuPluginProps {
   editor: any;
@@ -100,7 +100,7 @@ export class BubbleMenuView {
 }
 
 export const BubbleMenu = (options: BubbleMenuPluginProps): Extension => {
-  return {
+  return Extension.create({
     name: "bubbleMenu",
     addProseMirrorPlugins: () => [
       new Plugin({
@@ -108,5 +108,5 @@ export const BubbleMenu = (options: BubbleMenuPluginProps): Extension => {
         view: (view) => new BubbleMenuView({ ...options, view }),
       }),
     ],
-  };
+  });
 };

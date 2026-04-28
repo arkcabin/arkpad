@@ -1,7 +1,7 @@
 import { setBlockType } from "prosemirror-commands";
 import { textblockTypeInputRule, wrappingInputRule, InputRule } from "prosemirror-inputrules";
 import { Schema } from "prosemirror-model";
-import { ArkpadExtension as Extension } from "../types";
+import { Extension } from "./Extension";
 import { toggleBlock } from "./utils";
 
 function getAlignAttrs(state: any) {
@@ -10,7 +10,7 @@ function getAlignAttrs(state: any) {
 }
 
 export function createHeading(): Extension {
-  return {
+  return Extension.create({
     name: "heading",
     addCommands: () => ({
       toggleHeading: (attrs: { level: number }) => (state: any, dispatch: any) => {
@@ -52,11 +52,11 @@ export function createHeading(): Extension {
         level: match[1]?.length || 1,
       })),
     ],
-  };
+  });
 }
 
 export function createBlockquote(): Extension {
-  return {
+  return Extension.create({
     name: "blockquote",
     addCommands: () => ({
       toggleBlockquote: () => (state: any, dispatch: any) => {
@@ -64,11 +64,11 @@ export function createBlockquote(): Extension {
       },
     }),
     addInputRules: (schema: Schema) => [wrappingInputRule(/^\s*>\s$/, schema.nodes.blockquote!)],
-  };
+  });
 }
 
 export function createCodeBlock(): Extension {
-  return {
+  return Extension.create({
     name: "codeBlock",
     addCommands: () => ({
       toggleCodeBlock: () => (state: any, dispatch: any) => {
@@ -76,11 +76,11 @@ export function createCodeBlock(): Extension {
       },
     }),
     addInputRules: (schema: Schema) => [textblockTypeInputRule(/^```$/, schema.nodes.codeBlock!)],
-  };
+  });
 }
 
 export function createHorizontalRule(): Extension {
-  return {
+  return Extension.create({
     name: "horizontalRule",
     addCommands: () => ({
       setHorizontalRule: () => (state: any, dispatch: any) => {
@@ -99,11 +99,11 @@ export function createHorizontalRule(): Extension {
         return tr;
       }),
     ],
-  };
+  });
 }
 
 export function createImage(): Extension {
-  return {
+  return Extension.create({
     name: "image",
     addCommands: () => ({
       setImage: (options: string | { src: string; alt?: string; title?: string }) => (
@@ -117,5 +117,5 @@ export function createImage(): Extension {
         return true;
       },
     }),
-  };
+  });
 }

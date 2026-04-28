@@ -1,6 +1,8 @@
 import { nanoid } from "nanoid";
-import { Plugin, PluginKey } from "prosemirror-state";
-import { ArkpadExtension as Extension } from "../types";
+import { Plugin, PluginKey, Transaction } from "prosemirror-state";
+import { Node as PMNode } from "prosemirror-model";
+import { EditorView } from "prosemirror-view";
+import { Extension } from "./Extension";
 
 export interface UniqueIdOptions {
   attributeName: string;
@@ -14,8 +16,8 @@ const pluginKey = new PluginKey("unique-id");
 const defaultTypes = ["paragraph", "heading", "blockquote", "codeBlock", "listItem", "taskItem"];
 
 function ensureUniqueId(
-  tr: import("prosemirror-state").Transaction,
-  doc: any,
+  tr: Transaction,
+  doc: PMNode,
   pos: number,
   attributeName: string,
   types: string[],
@@ -23,7 +25,7 @@ function ensureUniqueId(
   seenIds: Set<string>
 ): boolean {
   const node = doc.nodeAt(pos);
-  if (!node || !types.includes(node.type.name) || !node.isBlock) {
+  if (!node || !types || !types.includes(node.type.name) || !node.isBlock) {
     return false;
   }
 
@@ -40,8 +42,8 @@ function ensureUniqueId(
 }
 
 function scanDocForIds(
-  tr: import("prosemirror-state").Transaction,
-  doc: any,
+  tr: Transaction,
+  doc: PMNode,
   attributeName: string,
   types: string[],
   generateId: () => string
@@ -49,7 +51,11 @@ function scanDocForIds(
   let modified = false;
   const seenIds = new Set<string>();
 
-  doc.descendants((node: any, pos: number) => {
+  if (!types || !Array.isArray(types)) {
+    return false;
+  }
+
+  doc.descendants((node: PMNode, pos: number) => {
     if (types.includes(node.type.name) && node.isBlock) {
       const id = node.attrs[attributeName];
       if (!id || seenIds.has(id)) {
@@ -68,170 +74,187 @@ function scanDocForIds(
   return modified;
 }
 
-export function createUniqueId(options?: Partial<UniqueIdOptions>): Extension {
-  const attributeName = options?.attributeName || "id";
-  const types = options?.types || defaultTypes;
-  const generateId = options?.generateId || (() => nanoid(10));
-  const idleScanInterval = options?.idleScanInterval ?? 5000;
+export const UniqueId = Extension.create({
+  name: "uniqueId",
 
-  return {
-    name: "uniqueId",
+  addOptions() {
+    return {
+      attributeName: "id",
+      types: defaultTypes,
+      generateId: () => nanoid(10),
+      idleScanInterval: 5000,
+    };
+  },
 
-    addGlobalAttributes() {
-      return [
-        {
-          types,
-          attributes: {
-            [attributeName]: {
-              default: null,
-              parseHTML: (element: HTMLElement) =>
-                element.getAttribute(attributeName) ||
-                element.getAttribute(`data-${attributeName}`),
-              renderHTML: (attributes: Record<string, any>) => {
-                if (!attributes[attributeName]) return {};
-                return {
-                  [attributeName]: attributes[attributeName],
-                  [`data-${attributeName}`]: attributes[attributeName],
-                };
-              },
+  addGlobalAttributes() {
+    const { attributeName, types } = this.options;
+
+    return [
+      {
+        types,
+        attributes: {
+          [attributeName]: {
+            default: null,
+            parseHTML: (element: HTMLElement) =>
+              element.getAttribute(attributeName) ||
+              element.getAttribute(`data-${attributeName}`),
+            renderHTML: (attributes: Record<string, any>) => {
+              if (!attributes[attributeName]) return {};
+              return {
+                [attributeName]: attributes[attributeName],
+                [`data-${attributeName}`]: attributes[attributeName],
+              };
             },
           },
         },
-      ];
-    },
+      },
+    ];
+  },
 
-    addProseMirrorPlugins() {
-      let idleScanTimer: ReturnType<typeof setInterval> | null = null;
-      let pendingIdleScan = false;
-      let lastDocSize = 0;
+  addProseMirrorPlugins() {
+    const { attributeName, types, generateId, idleScanInterval } = this.options;
 
-      const scheduleIdleScan = (editorView: any) => {
-        if (pendingIdleScan) return;
-        pendingIdleScan = true;
+    let idleScanTimer: ReturnType<typeof setInterval> | null = null;
+    let pendingIdleScan = false;
+    let lastDocSize = 0;
 
-        if ("requestIdleCallback" in window) {
-          requestIdleCallback(
-            () => {
-              pendingIdleScan = false;
-              if (editorView.isDestroyed) return;
-              const tr = editorView.state.tr;
-              if (scanDocForIds(tr, editorView.state.doc, attributeName, types, generateId)) {
-                editorView.dispatch(tr);
-              }
-            },
-            { timeout: 2000 }
-          );
-        } else {
-          setTimeout(() => {
+    const scheduleIdleScan = (editorView: EditorView) => {
+      if (pendingIdleScan) return;
+      pendingIdleScan = true;
+
+      if ("requestIdleCallback" in window) {
+        requestIdleCallback(
+          () => {
             pendingIdleScan = false;
-            if (editorView.isDestroyed) return;
+            if ((editorView as any).isDestroyed) return;
             const tr = editorView.state.tr;
             if (scanDocForIds(tr, editorView.state.doc, attributeName, types, generateId)) {
               editorView.dispatch(tr);
             }
-          }, 100);
-        }
-      };
+          },
+          { timeout: 2000 }
+        );
+      } else {
+        setTimeout(() => {
+          pendingIdleScan = false;
+          if ((editorView as any).isDestroyed) return;
+          const tr = editorView.state.tr;
+          if (scanDocForIds(tr, editorView.state.doc, attributeName, types, generateId)) {
+            editorView.dispatch(tr);
+          }
+        }, 100);
+      }
+    };
 
-      const startIdleScan = (editorView: any) => {
-        if (idleScanTimer) clearInterval(idleScanTimer);
-        idleScanTimer = setInterval(() => {
-          if (editorView.isDestroyed) return;
-          if (editorView.state.doc.content.size === lastDocSize) return;
-          lastDocSize = editorView.state.doc.content.size;
-          scheduleIdleScan(editorView);
-        }, idleScanInterval);
-      };
+    const startIdleScan = (editorView: EditorView) => {
+      if (idleScanTimer) clearInterval(idleScanTimer);
+      idleScanTimer = setInterval(() => {
+        if ((editorView as any).isDestroyed) return;
+        if (editorView.state.doc.content.size === lastDocSize) return;
+        lastDocSize = editorView.state.doc.content.size;
+        scheduleIdleScan(editorView);
+      }, idleScanInterval);
+    };
 
-      const stopIdleScan = () => {
-        if (idleScanTimer) {
-          clearInterval(idleScanTimer);
-          idleScanTimer = null;
-        }
-      };
+    const stopIdleScan = () => {
+      if (idleScanTimer) {
+        clearInterval(idleScanTimer);
+        idleScanTimer = null;
+      }
+    };
 
-      return [
-        new Plugin({
-          key: pluginKey,
+    return [
+      new Plugin({
+        key: pluginKey,
 
-          appendTransaction(transactions, oldState, newState) {
-            if (!transactions.some((tr) => tr.docChanged)) {
-              return null;
-            }
+        appendTransaction(transactions, oldState, newState) {
+          if (!transactions.some((tr) => tr.docChanged)) {
+            return null;
+          }
 
-            const tr = newState.tr;
-            let modified = false;
-            const seenIds = new Set<string>();
+          const tr = newState.tr;
+          let modified = false;
+          const seenIds = new Set<string>();
 
-            transactions.forEach((transaction) => {
-              transaction.steps.forEach((step) => {
-                const map = step.getMap();
-                map.forEach((_from: number, _to: number, newFrom: number, newTo: number) => {
-                  newState.doc.nodesBetween(newFrom, newTo, (node: any, pos: number) => {
-                    if (
-                      ensureUniqueId(
-                        tr,
-                        newState.doc,
-                        pos,
-                        attributeName,
-                        types,
-                        generateId,
-                        seenIds
-                      )
-                    ) {
-                      modified = true;
-                    }
-                    return true;
-                  });
+          transactions.forEach((transaction) => {
+            transaction.steps.forEach((step) => {
+              const map = step.getMap();
+              map.forEach((_from: number, _to: number, newFrom: number, newTo: number) => {
+                newState.doc.nodesBetween(newFrom, newTo, (node: PMNode, pos: number) => {
+                  if (
+                    ensureUniqueId(
+                      tr,
+                      newState.doc,
+                      pos,
+                      attributeName,
+                      types,
+                      generateId,
+                      seenIds
+                    )
+                  ) {
+                    modified = true;
+                  }
+                  return true;
                 });
               });
             });
+          });
 
-            if (modified) {
-              lastDocSize = newState.doc.content.size;
+          if (modified) {
+            lastDocSize = newState.doc.content.size;
+          }
+
+          return modified ? tr : null;
+        },
+
+        view(editorView) {
+          requestAnimationFrame(() => {
+            if ((editorView as any).isDestroyed) return;
+
+            const tr = editorView.state.tr;
+            if (scanDocForIds(tr, editorView.state.doc, attributeName, types, generateId)) {
+              editorView.dispatch(tr);
             }
 
-            return modified ? tr : null;
-          },
+            lastDocSize = editorView.state.doc.content.size;
+            startIdleScan(editorView);
+          });
 
-          view(editorView) {
-            requestAnimationFrame(() => {
-              if (editorView.isDestroyed) return;
+          const handleBlur = () => {
+            if ((editorView as any).isDestroyed) return;
+            const tr = editorView.state.tr;
+            if (scanDocForIds(tr, editorView.state.doc, attributeName, types, generateId)) {
+              editorView.dispatch(tr);
+            }
+          };
 
-              const tr = editorView.state.tr;
-              if (scanDocForIds(tr, editorView.state.doc, attributeName, types, generateId)) {
-                editorView.dispatch(tr);
+          const handleDestroy = () => {
+            stopIdleScan();
+          };
+
+          return {
+            update(view: EditorView) {
+              if (!view.hasFocus()) {
+                handleBlur();
               }
+            },
+            destroy() {
+              handleDestroy();
+            },
+          };
+        },
+      }),
+    ];
+  },
+});
 
-              lastDocSize = editorView.state.doc.content.size;
-              startIdleScan(editorView);
-            });
-
-            const handleBlur = () => {
-              if (editorView.isDestroyed) return;
-              const tr = editorView.state.tr;
-              if (scanDocForIds(tr, editorView.state.doc, attributeName, types, generateId)) {
-                editorView.dispatch(tr);
-              }
-            };
-
-            const handleDestroy = () => {
-              stopIdleScan();
-            };
-
-            return {
-              update(view: any) {
-                if (!view.hasFocus()) {
-                  handleBlur();
-                }
-              },
-              destroy() {
-                handleDestroy();
-              },
-            };
-          },
-        }),
-      ];
+export function createUniqueId(options?: Partial<UniqueIdOptions>) {
+  return UniqueId.extend({
+    addOptions() {
+      return {
+        ...this.parent?.("addOptions"),
+        ...options,
+      };
     },
-  };
+  });
 }

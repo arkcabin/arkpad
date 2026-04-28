@@ -1,4 +1,4 @@
-import { ArkpadExtension as Extension } from "../types";
+import { Extension } from "./Extension";
 
 export interface CharacterCountOptions {
   limit?: number;
@@ -9,8 +9,14 @@ export interface CharacterCountStorage {
   words: number;
 }
 
-export const CharacterCount: Extension = {
+export const CharacterCount = Extension.create<CharacterCountOptions, CharacterCountStorage>({
   name: "characterCount",
+
+  addOptions() {
+    return {
+      limit: undefined,
+    };
+  },
 
   addStorage() {
     return {
@@ -21,17 +27,15 @@ export const CharacterCount: Extension = {
 
   onUpdate({ editor }) {
     const text = editor.getText();
-    if (this.storage) {
-      this.storage.characters = text.length;
-      
-      // Super fast word count using regex matchAll without creating massive arrays
-      let wordCount = 0;
-      const matches = text.matchAll(/\S+/g);
-      while (!matches.next().done) {
-        wordCount++;
-      }
-      
-      this.storage.words = wordCount;
+    this.storage.characters = text.length;
+    
+    // Super fast word count using regex matchAll without creating massive arrays
+    let wordCount = 0;
+    const matches = text.matchAll(/\S+/g);
+    while (!matches.next().done) {
+      wordCount++;
     }
+    
+    this.storage.words = wordCount;
   },
-};
+});

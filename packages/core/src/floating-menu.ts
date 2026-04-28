@@ -1,6 +1,6 @@
 import { EditorState, Plugin, PluginKey } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
-import { Extension } from "./extensions";
+import { Extension } from "./extensions/Extension";
 
 export interface FloatingMenuPluginProps {
   editor: any;
@@ -87,7 +87,7 @@ export class FloatingMenuView {
 }
 
 export const FloatingMenu = (options: FloatingMenuPluginProps): Extension => {
-  return {
+  return Extension.create({
     name: "floatingMenu",
     addProseMirrorPlugins: () => [
       new Plugin({
@@ -95,5 +95,5 @@ export const FloatingMenu = (options: FloatingMenuPluginProps): Extension => {
         view: (view) => new FloatingMenuView({ ...options, view }),
       }),
     ],
-  };
+  });
 };

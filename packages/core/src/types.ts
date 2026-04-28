@@ -53,15 +53,36 @@ export interface ChainedCommands {
   [key: string]: any;
 }
 
-export interface ArkpadExtension {
+export interface ExtensionContext<Options = any, Storage = any> {
+  editor: ArkpadEditorAPI;
+  options: Options;
+  storage: Storage;
   name: string;
-  plugins?: Plugin[];
-  commands?: Partial<ArkpadCommandRegistry>;
-  addStorage?: () => Record<string, any>;
-  addGlobalAttributes?: () => {
+  parent?: (methodName: string, ...args: any[]) => any;
+}
+
+export interface ExtensionConfig<Options = any, Storage = any> {
+  name: string;
+  priority?: number;
+  addOptions?: () => Options;
+  addStorage?: (this: ExtensionContext<Options, Storage>) => Storage;
+  addGlobalAttributes?: (this: ExtensionContext<Options, Storage>) => {
     types: string[];
     attributes: Record<string, { default: any; parseHTML?: (element: HTMLElement) => any; renderHTML?: (attributes: Record<string, any>) => any }>;
   }[];
+  addCommands?: (this: ExtensionContext<Options, Storage>) => Partial<ArkpadCommandRegistry>;
+  addKeyboardShortcuts?: (this: ExtensionContext<Options, Storage>, schema: any) => Record<string, any>;
+  addInputRules?: (this: ExtensionContext<Options, Storage>, schema: any) => any[];
+  addPasteRules?: (this: ExtensionContext<Options, Storage>, schema: any) => Plugin[];
+  addProseMirrorPlugins?: (this: ExtensionContext<Options, Storage>, schema: any) => Plugin[];
+  onUpdate?: (this: ExtensionContext<Options, Storage>, props: { editor: ArkpadEditorAPI }) => void;
+  [key: string]: any;
+}
+
+export interface ArkpadExtension {
+  name: string;
+  init?: (editor: ArkpadEditorAPI) => void;
+  addGlobalAttributes?: () => any[];
   addCommands?: () => Partial<ArkpadCommandRegistry>;
   addKeyboardShortcuts?: (schema: any) => Record<string, any>;
   addInputRules?: (schema: any) => any[];
@@ -69,11 +90,9 @@ export interface ArkpadExtension {
   addProseMirrorPlugins?: (schema: any) => Plugin[];
   onUpdate?: (props: { editor: ArkpadEditorAPI }) => void;
   storage?: any;
+  options?: any;
+  extend?: (config: Partial<ExtensionConfig>) => ArkpadExtension;
 }
-
-export const Extension = {
-  create: (config: ArkpadExtension): ArkpadExtension => config,
-};
 
 export type NodeViewConstructor =
   | (new (

@@ -1,11 +1,14 @@
+import { 
+  ArkpadExtension, 
+  ArkpadCommandRegistry,
+  ArkpadCommand,
+} from "../types";
 import { type Schema } from "prosemirror-model";
-import { Plugin } from "prosemirror-state";
+import { Plugin, EditorState, Transaction } from "prosemirror-state";
 import { keymap } from "prosemirror-keymap";
 import { baseKeymap } from "prosemirror-commands";
 import { inputRules } from "prosemirror-inputrules";
-import { ArkpadExtension as Extension, type ArkpadCommandRegistry, type Dispatch } from "./types";
-
-export type { Extension, Dispatch };
+import { EditorView } from "prosemirror-view";
 
 /**
  * ExtensionManager coordinates all editor extensions, collecting their commands,
@@ -13,7 +16,7 @@ export type { Extension, Dispatch };
  */
 export class ExtensionManager {
   public schema: Schema;
-  public extensions: Extension[] = [];
+  public extensions: ArkpadExtension[] = [];
   public commands: ArkpadCommandRegistry = {};
   public storage: Record<string, any> = {};
   public keyboardShortcuts: Record<string, any> = {};
@@ -21,7 +24,7 @@ export class ExtensionManager {
   public pasteRules: Plugin[] = [];
   public proseMirrorPlugins: Plugin[] = [];
 
-  constructor(schema: Schema, extensions: Extension[] = []) {
+  constructor(schema: Schema, extensions: ArkpadExtension[] = []) {
     this.schema = schema;
     this.registerExtensions(extensions);
   }
@@ -29,7 +32,7 @@ export class ExtensionManager {
   /**
    * Registers multiple extensions at once and rebuilds the editor configuration.
    */
-  registerExtensions(extensions: Extension[]): void {
+  registerExtensions(extensions: ArkpadExtension[]): void {
     for (const extension of extensions) {
       this.registerExtension(extension);
     }
@@ -41,22 +44,16 @@ export class ExtensionManager {
   }
 
   /**
-   * Registers a single extension and initializes its storage.
+   * Registers a single extension.
    */
-  registerExtension(extension: Extension): void {
+  registerExtension(extension: ArkpadExtension): void {
     this.extensions.push(extension);
-
-    if (extension.addStorage) {
-      this.storage[extension.name] = extension.addStorage();
-      // Bind storage to extension for easy access
-      (extension as any).storage = this.storage[extension.name];
-    }
+    
+    // The ArkpadEditor will call init() on each extension later
+    // to provide the editor instance and setup storage.
   }
 
-  /**
-   * Finds an extension by its name.
-   */
-  get(name: string): Extension | undefined {
+  get(name: string): ArkpadExtension | undefined {
     return this.extensions.find((ext) => ext.name === name);
   }
 
@@ -76,23 +73,27 @@ export class ExtensionManager {
    * Aggregates commands from all registered extensions.
    * If multiple extensions define the same command, they are chained.
    */
-  private collectCommands() {
-    const commands: Record<string, any> = {};
+  private collectCommands(): Record<string, ArkpadCommand> {
+    const commands: Record<string, ArkpadCommand> = {};
 
     for (const ext of this.extensions) {
       if (!ext.addCommands) continue;
-
       const extCommands = ext.addCommands();
       Object.keys(extCommands).forEach((key) => {
+        const newCommand = extCommands[key];
+        if (!newCommand) return;
+
         if (commands[key]) {
-          const prevCommand = commands[key];
-          const newCommand = extCommands[key];
+          const prevCommand = commands[key]!;
           commands[key] =
             (...args: any[]) =>
-            (state: any, dispatch: any, view: any) => {
-              const run = (cmd: any) => {
+            (state: EditorState, dispatch?: (tr: Transaction) => void, view?: EditorView) => {
+              const run = (cmd: ArkpadCommand) => {
                 if (typeof cmd !== "function") return false;
-                const result = cmd(...args);
+                
+                // We cast to any here because ArkpadCommand is a union of signatures,
+                // and we need to call it with dynamic arguments.
+                const result = (cmd as any)(...args);
                 if (typeof result === "function") return result(state, dispatch, view);
                 return result;
               };
@@ -102,7 +103,7 @@ export class ExtensionManager {
               return newResult || prevResult;
             };
         } else {
-          commands[key] = extCommands[key];
+          commands[key] = newCommand;
         }
       });
     }
@@ -113,22 +114,23 @@ export class ExtensionManager {
   /**
    * Aggregates keyboard shortcuts from all registered extensions.
    */
-  private collectKeyboardShortcuts(schema: Schema) {
+  private collectKeyboardShortcuts(schema: Schema): Record<string, any> {
     const shortcuts: Record<string, any> = {};
 
     for (const ext of this.extensions) {
       if (!ext.addKeyboardShortcuts) continue;
-
       const extShortcuts = ext.addKeyboardShortcuts(schema);
       Object.keys(extShortcuts).forEach((key) => {
+        const newCommand = extShortcuts[key];
+        if (!newCommand) return;
+
         if (shortcuts[key]) {
           const prevCommand = shortcuts[key];
-          const newCommand = extShortcuts[key];
-          shortcuts[key] = (state: any, dispatch: any, view: any) => {
+          shortcuts[key] = (state: EditorState, dispatch?: (tr: Transaction) => void, view?: EditorView) => {
             return newCommand(state, dispatch, view) || prevCommand(state, dispatch, view);
           };
         } else {
-          shortcuts[key] = extShortcuts[key];
+          shortcuts[key] = newCommand;
         }
       });
     }
@@ -175,5 +177,3 @@ export class ExtensionManager {
     return plugins;
   }
 }
-
-export * from "./extensions/index";

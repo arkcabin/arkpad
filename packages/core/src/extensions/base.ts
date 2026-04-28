@@ -3,10 +3,10 @@ import { placeholder as createPlaceholderPlugin } from "prosemirror-placeholder"
 import { setBlockType } from "prosemirror-commands";
 import { TextSelection } from "prosemirror-state";
 import { arkpadSchema } from "../schema";
-import { ArkpadExtension as Extension } from "../types";
+import { Extension } from "./Extension";
 
 export function createDocument(): Extension {
-  return {
+  return Extension.create({
     name: "doc",
     addCommands: () => ({
       /**
@@ -39,24 +39,24 @@ export function createDocument(): Extension {
         return true;
       },
     }),
-  };
+  });
 }
 
 export function createParagraph(): Extension {
-  return {
+  return Extension.create({
     name: "paragraph",
     addCommands: () => ({
       setParagraph: () => setBlockType(arkpadSchema.nodes.paragraph!),
     }),
-  };
+  });
 }
 
 export function createText(): Extension {
-  return { name: "text", addCommands: () => ({}) };
+  return Extension.create({ name: "text", addCommands: () => ({}) });
 }
 
 export function createHardBreak(): Extension {
-  return {
+  return Extension.create({
     name: "hardBreak",
     addCommands: () => ({
       setHardBreak: () => (state: any, dispatch: any) => {
@@ -77,11 +77,11 @@ export function createHardBreak(): Extension {
         return true;
       },
     }),
-  };
+  });
 }
 
 export function createHistory(): Extension {
-  return {
+  return Extension.create({
     name: "history",
     addCommands: () => ({
       undo: () => undo,
@@ -93,14 +93,14 @@ export function createHistory(): Extension {
       "Mod-Shift-z": redo,
     }),
     addProseMirrorPlugins: () => [history()],
-  };
+  });
 }
 
 export function createPlaceholder(options: { placeholder?: string } = {}): Extension {
-  return {
+  return Extension.create({
     name: "placeholder",
     addProseMirrorPlugins: () => [
       createPlaceholderPlugin(options.placeholder || "Start writing..."),
     ],
-  };
+  });
 }

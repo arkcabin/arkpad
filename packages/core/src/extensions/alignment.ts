@@ -1,4 +1,4 @@
-import { ArkpadExtension as Extension } from "../types";
+import { Extension } from "./Extension";
 import { setTextAlign } from "./utils";
 
 export const TEXT_ALIGN = {
@@ -11,7 +11,7 @@ export const TEXT_ALIGN = {
 export type TextAlign = (typeof TEXT_ALIGN)[keyof typeof TEXT_ALIGN];
 
 export function createTextAlign(): Extension {
-  return {
+  return Extension.create({
     name: "textAlign",
     addCommands: () => ({
       /**
@@ -36,5 +36,5 @@ export function createTextAlign(): Extension {
       "Mod-Shift-e": () => setTextAlign(TEXT_ALIGN.CENTER),
       "Mod-Shift-r": () => setTextAlign(TEXT_ALIGN.RIGHT),
     }),
-  };
+  });
 }

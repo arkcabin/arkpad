@@ -52,6 +52,8 @@ export class SchemaBuilder {
     let enhancedNodes = nodes;
 
     globals.forEach((global) => {
+      if (!global.types) return;
+
       global.types.forEach((type: string) => {
         const nodeSpec = enhancedNodes.get(type);
         if (nodeSpec) {
@@ -65,18 +67,20 @@ export class SchemaBuilder {
               const dom = nodeSpec.toDOM(node);
               
               // Apply global attributes to the DOM
-              Object.keys(global.attributes).forEach(key => {
-                const attr = global.attributes[key];
-                if (attr.renderHTML) {
-                  const rendered = attr.renderHTML(node.attrs);
-                  if (rendered) {
-                    Object.assign(dom[1], rendered);
+              if (dom && dom[1]) {
+                Object.keys(global.attributes || {}).forEach(key => {
+                  const attr = global.attributes[key];
+                  if (attr && attr.renderHTML) {
+                    const rendered = attr.renderHTML(node.attrs);
+                    if (rendered) {
+                      Object.assign(dom[1], rendered);
+                    }
+                  } else if (node.attrs[key] !== undefined && node.attrs[key] !== null) {
+                     // Default: add as attribute if not null
+                     dom[1][key] = node.attrs[key];
                   }
-                } else if (node.attrs[key] !== undefined && node.attrs[key] !== null) {
-                   // Default: add as attribute if not null
-                   dom[1][key] = node.attrs[key];
-                }
-              });
+                });
+              }
 
               return dom;
             }
@@ -92,6 +96,8 @@ export class SchemaBuilder {
     let enhancedMarks = marks;
 
     globals.forEach((global) => {
+      if (!global.types) return;
+
       global.types.forEach((type: string) => {
         const markSpec = enhancedMarks.get(type);
         if (markSpec) {
@@ -100,7 +106,7 @@ export class SchemaBuilder {
             attrs: {
               ...markSpec.attrs,
               ...Object.fromEntries(
-                Object.entries(global.attributes).map(([key, attr]: [string, any]) => [
+                Object.entries(global.attributes || {}).map(([key, attr]: [string, any]) => [
                   key,
                   { default: attr.default },
                 ])
@@ -109,16 +115,18 @@ export class SchemaBuilder {
             renderHTML: (mark: any) => {
               const dom = markSpec.renderHTML(mark);
               
-              Object.entries(global.attributes).forEach(([key, attr]: [string, any]) => {
-                if (attr.renderHTML) {
-                  const rendered = attr.renderHTML(mark.attrs);
-                  if (rendered) {
-                    Object.assign(dom[1], rendered);
+              if (dom && dom[1]) {
+                Object.entries(global.attributes || {}).forEach(([key, attr]: [string, any]) => {
+                  if (attr && attr.renderHTML) {
+                    const rendered = attr.renderHTML(mark.attrs);
+                    if (rendered) {
+                      Object.assign(dom[1], rendered);
+                    }
+                  } else if (mark.attrs[key] !== undefined && mark.attrs[key] !== null) {
+                    dom[1][key] = mark.attrs[key];
                   }
-                } else if (mark.attrs[key] !== undefined && mark.attrs[key] !== null) {
-                  dom[1][key] = mark.attrs[key];
-                }
-              });
+                });
+              }
 
               return dom;
             }

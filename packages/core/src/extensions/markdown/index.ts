@@ -1,10 +1,10 @@
-import { ArkpadExtension as Extension } from "../../types";
+import { Extension } from "../Extension";
 import { Plugin, PluginKey } from "prosemirror-state";
 import { DOMParser, Slice } from "prosemirror-model";
 import { markdownToHtml } from "./parser";
 
 export function createMarkdownPaste(): Extension {
-  return {
+  return Extension.create({
     name: "markdownPaste",
     addProseMirrorPlugins: () => [
       new Plugin({
@@ -48,5 +48,5 @@ export function createMarkdownPaste(): Extension {
         },
       }),
     ],
-  };
+  });
 }
