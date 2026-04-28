@@ -1,3 +1,10 @@
+## [1.6.2](https://github.com/arkcabin/arkpad/compare/v1.6.1...v1.6.2) (2026-04-28)
+
+
+### Bug Fixes
+
+* enable OIDC registry handshake in CI ([f31e618](https://github.com/arkcabin/arkpad/commit/f31e618ccf6b6190852083ab7eab656dcfa74134))
+
 ## [1.6.1](https://github.com/arkcabin/arkpad/compare/v1.6.0...v1.6.1) (2026-04-28)
 
 
