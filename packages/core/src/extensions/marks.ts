@@ -1,6 +1,7 @@
 import { toggleMark } from "prosemirror-commands";
 import { arkpadSchema } from "../schema";
 import { Extension } from "../extensions-types";
+import { markInputRule } from "./utils";
 
 export function createBold(): Extension {
   return {
@@ -11,6 +12,9 @@ export function createBold(): Extension {
     addKeyboardShortcuts: () => ({
       "Mod-b": toggleMark(arkpadSchema.marks.strong!),
     }),
+    addInputRules: (schema) => [
+      markInputRule(/(?:\*\*|__)([^*_]+)(?:\*\*|__)$/, schema.marks.strong!),
+    ],
   };
 }
 
@@ -23,6 +27,9 @@ export function createItalic(): Extension {
     addKeyboardShortcuts: () => ({
       "Mod-i": toggleMark(arkpadSchema.marks.em!),
     }),
+    addInputRules: (schema) => [
+      markInputRule(/(?:^|[^*_])(?:\*|_)([^*_]+)(?:\*|_)$/, schema.marks.em!),
+    ],
   };
 }
 
@@ -35,6 +42,9 @@ export function createStrike(): Extension {
     addKeyboardShortcuts: () => ({
       "Mod-Shift-s": toggleMark(arkpadSchema.marks.strike!),
     }),
+    addInputRules: (schema) => [
+      markInputRule(/(?:~~)([^~]+)(?:~~)$/, schema.marks.strike!),
+    ],
   };
 }
 
@@ -59,6 +69,9 @@ export function createCode(): Extension {
     addKeyboardShortcuts: () => ({
       "Mod-e": toggleMark(arkpadSchema.marks.code!),
     }),
+    addInputRules: (schema) => [
+      markInputRule(/(?:^|[^`])(?:\`)([^\`]+)(?:\`)$/, schema.marks.code!),
+    ],
   };
 }
 
@@ -71,5 +84,33 @@ export function createLink(): Extension {
     addKeyboardShortcuts: () => ({
       "Mod-k": toggleMark(arkpadSchema.marks.link!, { href: "https://" }),
     }),
+  };
+}
+export function createSuperscript(): Extension {
+  return {
+    name: "superscript",
+    addCommands: () => ({
+      toggleSuperscript: () => toggleMark(arkpadSchema.marks.superscript!),
+    }),
+  };
+}
+
+export function createSubscript(): Extension {
+  return {
+    name: "subscript",
+    addCommands: () => ({
+      toggleSubscript: () => toggleMark(arkpadSchema.marks.subscript!),
+    }),
+  };
+}
+export function createHighlight(): Extension {
+  return {
+    name: "highlight",
+    addCommands: () => ({
+      toggleHighlight: () => toggleMark(arkpadSchema.marks.highlight!),
+    }),
+    addInputRules: (schema) => [
+      markInputRule(/(?:==)([^=]+)(?:==)$/, schema.marks.highlight!),
+    ],
   };
 }

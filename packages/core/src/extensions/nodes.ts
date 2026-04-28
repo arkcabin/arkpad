@@ -1,8 +1,13 @@
 import { setBlockType } from "prosemirror-commands";
-import { textblockTypeInputRule } from "prosemirror-inputrules";
+import { textblockTypeInputRule, wrappingInputRule, InputRule } from "prosemirror-inputrules";
 import { Schema } from "prosemirror-model";
 import { Extension } from "../extensions-types";
 import { toggleBlock } from "./utils";
+
+function getAlignAttrs(state: any) {
+  const { $from } = state.selection;
+  return { align: $from.parent.attrs?.align || "left" };
+}
 
 export function createHeading(): Extension {
   return {
@@ -11,12 +16,41 @@ export function createHeading(): Extension {
       toggleHeading: (attrs: { level: number }) => (state: any, dispatch: any) => {
         return toggleBlock(state.schema.nodes.heading!, attrs)(state, dispatch);
       },
-      setHeading1: () => (state: any, dispatch: any) => setBlockType(state.schema.nodes.heading!, { level: 1 })(state, dispatch),
-      setHeading2: () => (state: any, dispatch: any) => setBlockType(state.schema.nodes.heading!, { level: 2 })(state, dispatch),
-      setHeading3: () => (state: any, dispatch: any) => setBlockType(state.schema.nodes.heading!, { level: 3 })(state, dispatch),
+      setHeading1: () => (state: any, dispatch: any) =>
+        setBlockType(state.schema.nodes.heading!, { level: 1, align: getAlignAttrs(state).align })(
+          state,
+          dispatch
+        ),
+      setHeading2: () => (state: any, dispatch: any) =>
+        setBlockType(state.schema.nodes.heading!, { level: 2, align: getAlignAttrs(state).align })(
+          state,
+          dispatch
+        ),
+      setHeading3: () => (state: any, dispatch: any) =>
+        setBlockType(state.schema.nodes.heading!, { level: 3, align: getAlignAttrs(state).align })(
+          state,
+          dispatch
+        ),
+      setHeading4: () => (state: any, dispatch: any) =>
+        setBlockType(state.schema.nodes.heading!, { level: 4, align: getAlignAttrs(state).align })(
+          state,
+          dispatch
+        ),
+      setHeading5: () => (state: any, dispatch: any) =>
+        setBlockType(state.schema.nodes.heading!, { level: 5, align: getAlignAttrs(state).align })(
+          state,
+          dispatch
+        ),
+      setHeading6: () => (state: any, dispatch: any) =>
+        setBlockType(state.schema.nodes.heading!, { level: 6, align: getAlignAttrs(state).align })(
+          state,
+          dispatch
+        ),
     }),
     addInputRules: (schema: Schema) => [
-      textblockTypeInputRule(/^(#{1,6})\s$/, schema.nodes.heading!, (match) => ({ level: match[1]?.length || 1 })),
+      textblockTypeInputRule(/^(#{1,6})\s$/, schema.nodes.heading!, (match) => ({
+        level: match[1]?.length || 1,
+      })),
     ],
   };
 }
@@ -29,6 +63,7 @@ export function createBlockquote(): Extension {
         return toggleBlock(state.schema.nodes.blockquote!)(state, dispatch);
       },
     }),
+    addInputRules: (schema: Schema) => [wrappingInputRule(/^\s*>\s$/, schema.nodes.blockquote!)],
   };
 }
 
@@ -40,9 +75,7 @@ export function createCodeBlock(): Extension {
         return toggleBlock(state.schema.nodes.codeBlock!)(state, dispatch);
       },
     }),
-    addInputRules: (schema: Schema) => [
-      textblockTypeInputRule(/^```$/, schema.nodes.codeBlock!),
-    ],
+    addInputRules: (schema: Schema) => [textblockTypeInputRule(/^```$/, schema.nodes.codeBlock!)],
   };
 }
 
@@ -56,6 +89,16 @@ export function createHorizontalRule(): Extension {
         return true;
       },
     }),
+    addInputRules: (schema: Schema) => [
+      new InputRule(/^(?:---|___\s|\*\*\*\s)$/, (state, match, start, end) => {
+        const { tr } = state;
+        const node = schema.nodes.horizontalRule!.create();
+        if (match[0]) {
+          tr.replaceWith(start, end, node);
+        }
+        return tr;
+      }),
+    ],
   };
 }
 

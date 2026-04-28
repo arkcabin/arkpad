@@ -1,24 +1,63 @@
 @import "tailwindcss";
+@source "../../../packages/react/src";
+
+:root {
+  --editor-bg: #ffffff;
+  --editor-text: #09090b;
+  --editor-text-muted: #71717a;
+  --editor-border: #f4f4f5;
+  --editor-toolbar-bg: #ffffff;
+  --editor-btn-hover: #f4f4f5;
+  --editor-btn-text: #3f3f46;
+  --editor-btn-active-bg: #f4f4f5;
+  --editor-btn-active-text: #09090b;
+  --editor-marker: #a1a1aa;
+  --editor-marker-bullet: #3b82f6;
+  --editor-code-bg: #f4f4f5;
+  --editor-code-text: #2563eb;
+  --editor-pre-bg: #09090b;
+  --editor-pre-text: #fafafa;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "Geist Mono", "Fira Code", monospace;
+}
+
+.dark {
+  --editor-bg: #09090b;
+  --editor-text: #fafafa;
+  --editor-text-muted: #a1a1aa;
+  --editor-border: #18181b;
+  --editor-toolbar-bg: #09090b;
+  --editor-btn-hover: #18181b;
+  --editor-btn-text: #a1a1aa;
+  --editor-btn-active-bg: #18181b;
+  --editor-btn-active-text: #fafafa;
+  --editor-marker: #3f3f46;
+  --editor-marker-bullet: #60a5fa;
+  --editor-code-bg: #27272a;
+  --editor-code-text: #60a5fa;
+  --editor-pre-bg: #000000;
+  --editor-pre-text: #fafafa;
+}
 
 @theme {
-  --color-brand: #3b82f6;
+  --color-brand: var(--editor-marker-bullet);
   --color-brand-dark: #2563eb;
-  --color-editor-bg: #ffffff;
-  --color-editor-border: #e2e8f0;
-  --color-editor-hover: #f1f5f9;
-  --font-sans: 'Inter', system-ui, sans-serif;
-  --font-mono: 'Fira Code', monospace;
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
 }
 
 @layer base {
   body {
-    @apply bg-slate-50 text-slate-900 antialiased;
-    background: radial-gradient(circle at top right, #f1f5f9, #e2e8f0);
+    @apply antialiased transition-colors duration-300;
+    background-color: var(--editor-bg);
+    color: var(--editor-text);
+    background: radial-gradient(circle at top right, var(--editor-toolbar-bg), var(--editor-bg));
   }
 
   /* ProseMirror Base Styles */
   .ProseMirror {
     @apply outline-none min-h-[400px] text-lg leading-relaxed;
+    white-space: pre-wrap;
   }
 
   .ProseMirror p {
@@ -26,43 +65,69 @@
   }
 
   .ProseMirror h1 {
-    @apply text-4xl font-extrabold mb-6 tracking-tight text-slate-900;
+    @apply text-4xl font-extrabold mb-6 tracking-tight;
+    color: var(--editor-text);
   }
 
   .ProseMirror h2 {
-    @apply text-2xl font-bold mb-4 tracking-tight text-slate-800;
+    @apply text-2xl font-bold mb-4 tracking-tight opacity-90;
+    color: var(--editor-text);
   }
 
   .ProseMirror h3 {
-    @apply text-xl font-bold mb-3 text-slate-800;
+    @apply text-xl font-bold mb-3 opacity-80;
+    color: var(--editor-text);
+  }
+
+  .ProseMirror mark {
+    background-color: #fef08a;
+    color: #854d0e;
+    @apply rounded-[4px] px-1;
+  }
+
+  .dark .ProseMirror mark {
+    background-color: #fde047;
+    color: #1a1a1a;
   }
 
   .ProseMirror blockquote {
-    @apply border-l-4 border-slate-300 pl-4 mb-4 italic text-slate-600;
+    @apply border-l-4 pl-4 mb-4 italic;
+    border-color: var(--editor-border);
+    color: var(--editor-text-muted);
   }
 
   .ProseMirror pre {
-    @apply bg-slate-900 text-slate-100 p-4 rounded-xl mb-4 overflow-x-auto font-mono text-sm shadow-lg;
+    @apply p-4 rounded-xl mb-4 overflow-x-auto font-mono text-sm shadow-lg;
+    background-color: var(--editor-pre-bg);
+    color: var(--editor-pre-text);
   }
 
   .ProseMirror code {
-    @apply bg-slate-100 px-1.5 py-0.5 rounded-md font-mono text-[0.9em] text-blue-600;
+    @apply px-1.5 py-0.5 rounded-md font-mono text-[0.9em];
+    background-color: var(--editor-code-bg);
+    color: var(--editor-code-text);
   }
 
   .ProseMirror pre code {
     @apply bg-transparent p-0 text-inherit;
   }
 
-  .ProseMirror ul, .ProseMirror ol {
-    @apply pl-6 mb-4 list-outside;
+  .ProseMirror ul,
+  .ProseMirror ol {
+    @apply !pl-0 !mb-4 !list-none;
   }
 
   .ProseMirror li {
-    @apply mb-1;
+    @apply mb-1 !list-none;
+  }
+
+  .ProseMirror li > p:first-child {
+    @apply flex items-start !gap-2 !m-0;
   }
 
   .ProseMirror hr {
-    @apply border-t-2 border-slate-200 my-8;
+    @apply border-t-2 my-8;
+    border-color: var(--editor-border);
   }
 
   .ProseMirror img {
@@ -70,41 +135,82 @@
   }
 
   .ProseMirror a {
-    @apply text-blue-600 underline underline-offset-4 decoration-2 decoration-blue-200 hover:decoration-blue-400 transition-colors;
+    @apply underline underline-offset-4 decoration-2 transition-colors;
+    color: var(--editor-marker-bullet);
+    text-decoration-color: var(--editor-marker-bullet);
+    opacity: 0.8;
+  }
+  .ProseMirror a:hover {
+    opacity: 1;
   }
 
   .ProseMirror p.is-editor-empty:first-child::before {
-    @apply text-slate-400 float-left h-0 pointer-events-none;
+    @apply float-left h-0 pointer-events-none;
+    color: var(--editor-text-muted);
     content: attr(data-placeholder);
   }
 
-  /* List Styles */
-  .ProseMirror ul { @apply list-disc; }
-  .ProseMirror ol { @apply list-decimal; }
+  /* Bullet List Marker */
+  .ProseMirror ul li > p:first-child::before {
+    content: "";
+    @apply flex-shrink-0 w-1.5 h-1.5 rounded-full mt-[12px] ml-1;
+    background-color: var(--editor-marker-bullet);
+    box-shadow: 0 0 6px var(--editor-marker-bullet);
+  }
+
+  /* Ordered List Marker */
+  .ProseMirror ol {
+    counter-reset: arkpad-counter;
+  }
+
+  .ProseMirror ol li {
+    counter-increment: arkpad-counter;
+  }
+
+  .ProseMirror ol > li > p:first-child::before {
+    content: counter(arkpad-counter) ".";
+    @apply flex-shrink-0 w-4 flex items-center justify-start font-mono text-sm mt-[4px] select-none;
+    color: var(--editor-marker);
+  }
 
   /* Task List Styles */
   .task-list {
-    @apply list-none pl-0;
+    @apply !list-none !pl-0;
   }
 
   .task-item {
-    @apply flex items-start gap-3 mb-1;
+    @apply !list-none flex items-start !gap-2 !mb-1;
   }
 
-  .task-item input[type="checkbox"] {
-    @apply mt-1.5 w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer;
+  /* Ensure paragraphs inside task items don't have large margins */
+  .task-item p {
+    @apply !m-0 !leading-snug;
+  }
+
+  /* Ensure no default bullets show up in task lists */
+  /* Nested Indentation */
+  .ProseMirror li > ul,
+  .ProseMirror li > ol,
+  .ProseMirror li > .task-list {
+    @apply !pl-6 !mt-2;
   }
 }
 
 @layer components {
   .toolbar-btn {
-    @apply inline-flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-200 
-           hover:bg-slate-100 active:bg-slate-200 text-slate-600 hover:text-slate-900 
-           disabled:opacity-30 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed;
+    color: var(--editor-btn-text);
+  }
+
+  .toolbar-btn:hover:not(:disabled) {
+    background-color: var(--editor-btn-hover);
+    color: var(--editor-text);
   }
 
   .toolbar-btn.active {
-    @apply bg-blue-50 text-blue-600 shadow-sm ring-1 ring-blue-100;
+    background-color: var(--editor-btn-active-bg);
+    color: var(--editor-btn-active-text);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   }
 
   .toolbar-btn svg {
@@ -112,6 +218,43 @@
   }
 
   .toolbar-separator {
-    @apply w-px h-6 bg-slate-200 mx-1.5;
+    @apply w-px h-6 mx-1.5;
+    background-color: var(--editor-border);
+  }
+
+  .toolbar-wrapper {
+    background-color: var(--editor-toolbar-bg);
+    border-color: var(--editor-border);
+    @apply flex flex-wrap items-center gap-0.5 p-2 border-b sticky top-0 z-30 transition-all duration-300;
+  }
+
+  .toolbar-group {
+    @apply flex items-center gap-0.5 px-2 transition-all duration-300;
+  }
+
+  .toolbar-btn {
+    @apply inline-flex items-center justify-center w-8 h-8 rounded transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed;
+    color: var(--editor-btn-text);
+  }
+
+  .toolbar-btn:hover:not(:disabled) {
+    background-color: var(--editor-btn-hover);
+    color: var(--editor-text);
+  }
+
+  .toolbar-btn.active {
+    background-color: var(--editor-btn-active-bg);
+    color: var(--editor-btn-active-text);
+  }
+
+  .toolbar-separator {
+    @apply w-px h-5 mx-2;
+    background-color: var(--editor-border);
+  }
+
+  .editor-wrapper {
+    background-color: var(--editor-bg);
+    border-color: var(--editor-border);
+    @apply rounded-xl overflow-hidden flex flex-col border transition-all duration-300;
   }
 }

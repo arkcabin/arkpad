@@ -32,11 +32,14 @@ Arkpad is organized as modular layers so teams can extend behavior without modif
 - packages/react
 - apps/arkpad
 
-## Key Design Decisions
+## Key Design Decisions & Developer Experience (DX)
 
-- Headless-first architecture for flexibility.
-- Typed extension contracts for safety.
-- Clear separation of state and presentation.
+- **Headless-first Architecture**: Arkpad is completely decoupled from the UI. The core engine handles the complex state, leaving developers completely free to build their own UI.
+- **"Bring Your Own UI" (BYOUI)**: By passing a custom `nodeViews` object, developers can inject their own React components (like shadcn/ui) directly into the editor with just a single configuration file.
+- **NodeView Standard Pattern**: All high-fidelity block extensions (Checkboxes, Media, AI widgets) follow the "Shadcn + React NodeView" bridge pattern for maximum flexibility and premium UX.
+- **Zero-Boilerplate Setup**: Using the `useArkpadEditor` hook, a developer can mount a fully functional, reactive rich-text editor in a single React component file within seconds.
+- **Typed extension contracts for safety**.
+- **Clear separation of state and presentation**.
 
 ## Risks
 

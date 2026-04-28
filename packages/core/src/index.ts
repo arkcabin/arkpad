@@ -11,4 +11,6 @@ export type {
   ArkpadEditorAPI,
   ArkpadEditorOptions,
   ArkpadUpdatePayload,
+  NodeView,
+  NodeViewConstructor,
 } from "./types";

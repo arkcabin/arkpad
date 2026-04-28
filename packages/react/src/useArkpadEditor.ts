@@ -1,19 +1,30 @@
-import { useState, useEffect } from 'react';
-import { ArkpadEditor, ArkpadEditorOptions, ArkpadEditorAPI } from '@arkpad/core';
+import { useState, useEffect } from "react";
+import { ArkpadEditor, type ArkpadEditorOptions, type ArkpadEditorAPI } from "@arkpad/core";
+import { TaskView } from "./views/Task";
 
-export interface UseArkpadEditorOptions extends Partial<ArkpadEditorOptions> {}
+export type UseArkpadEditorOptions = {
+  useShadcnTaskItems?: boolean;
+} & Omit<ArkpadEditorOptions, "nodeViews" | "element">;
 
 export function useArkpadEditor(options: UseArkpadEditorOptions = {}) {
   const [editor, setEditor] = useState<ArkpadEditorAPI | null>(null);
   const [, setPulse] = useState(0);
 
   useEffect(() => {
-    // Create editor instance without an element initially
+    const nodeViews: Record<string, any> = {};
+
+    if (options.useShadcnTaskItems !== false) {
+      // Pass a factory function instead of class directly
+      nodeViews.taskItem = (node: any, view: any, getPos: any) =>
+        new TaskView(node, view, getPos);
+    }
+
     const instance = new ArkpadEditor({
       ...options,
-      element: document.createElement('div'), // Placeholder until attached
+      nodeViews,
+      element: document.createElement("div"),
       onUpdate: (payload) => {
-        setPulse(p => p + 1);
+        setPulse((p) => p + 1);
         options.onUpdate?.(payload);
       },
     });
