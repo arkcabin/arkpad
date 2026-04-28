@@ -7,8 +7,16 @@
     "prosemirror",
     "editor",
     "rich-text",
-    "wysiwyg",
-    "arkpad"
+    "arkpad",
+    "headless",
+    "modular",
+    "component",
+    "hooks",
+    "tiptap",
+    "block-editor",
+    "notion-style",
+    "blog-editor",
+    "rich-text-editor"
   ],
   "author": "ArkCabin",
   "repository": {
