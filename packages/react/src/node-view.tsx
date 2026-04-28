@@ -52,6 +52,7 @@ export class ReactNodeView implements NodeView {
     reactContainer.setAttribute("data-react-container", "");
     reactContainer.style.display = "flex";
     reactContainer.style.alignItems = "center";
+    reactContainer.style.cursor = "pointer";
     this.dom.appendChild(reactContainer);
 
     // If the node has content, create a contentDOM element

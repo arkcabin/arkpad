@@ -16,7 +16,7 @@ export const TaskItemComponent: React.FC<ReactNodeViewProps> = ({ node, updateAt
 
   return (
     <div
-      className="flex-shrink-0 flex items-center justify-center select-none"
+      className="flex-shrink-0 flex items-center justify-center select-none cursor-pointer"
       contentEditable={false}
     >
       <Checkbox checked={isChecked} onCheckedChange={handleChange} size="md" />
