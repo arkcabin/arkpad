@@ -36,12 +36,12 @@ export class FloatingMenuView {
     
     setTimeout(() => {
       if (this.view && !this.view.isDestroyed) {
-        this.update(this.view, this.view.state);
+        this.update(this.view);
       }
     }, 0);
   }
 
-  update(view: EditorView, lastState?: EditorState) {
+  update(view: EditorView) {
     if (!view || view.isDestroyed) return;
     const { state } = view;
 
@@ -77,7 +77,7 @@ export class FloatingMenuView {
       this.element.style.top = `${coords.top}px`;
       this.element.style.left = `${coords.left - padding}px`;
       this.element.style.transform = 'translateY(-50%)';
-    } catch (e) {
+    } catch {
       // Ignore
     }
   }

@@ -79,17 +79,27 @@ interface ArkpadEditorOptions {
 |---------|----------|-------------|
 | `toggleBold` | Mod+B | Toggle bold |
 | `toggleItalic` | Mod+I | Toggle italic |
+| `toggleUnderline` | Mod+U | Toggle underline |
 | `toggleStrike` | Mod+Shift+S | Toggle strikethrough |
 | `toggleCode` | Mod+E | Toggle inline code |
+| `toggleHighlight` | - | Toggle highlight |
+| `toggleSuperscript` | - | Toggle superscript |
+| `toggleSubscript` | - | Toggle subscript |
 
 ### Block formatting
 
 | Command | Shortcut | Description |
 |---------|----------|-------------|
 | `setParagraph` | - | Set paragraph block |
-| `toggleHeading` | Mod+Alt+1/2/3 | Set heading (1-3) |
+| `toggleHeading` | Mod+Alt+1/2/3 | Set heading (1-6) |
 | `toggleBlockquote` | Mod+Shift+B | Toggle blockquote |
 | `toggleCodeBlock` | Mod+Alt+C | Toggle code block |
+| `toggleBulletList` | Mod+Shift+8 | Toggle bullet list |
+| `toggleOrderedList` | Mod+Shift+7 | Toggle ordered list |
+| `toggleTaskList` | Mod+Shift+9 | Toggle task list |
+| `toggleTaskItem` | - | Toggle task checkbox |
+| `setHorizontalRule` | - | Insert horizontal rule |
+| `setImage` | - | Insert image |
 
 ### History
 
@@ -186,13 +196,12 @@ The core package contains:
 Arkpad is designed to grow into a full editor platform:
 
 - **Link** - Add/edit hyperlinks
-- **Image** - Add images with resizing
-- **Placeholder** - Empty state placeholder
+- **Image** - Add images with resizing (Resizing coming soon)
 - **CharacterCount** - Word/character count
 - **Table** - Table support
-- **TaskList** - Todo/checklist items
 - **Collaboration** - Real-time editing (Y.js)
 - **Slash Commands** - Command menu
+- **Drag Handles** - Notion-style block handles
 
 ---
 

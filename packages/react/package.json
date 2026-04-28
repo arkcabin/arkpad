@@ -1,6 +1,7 @@
 {
   "name": "@arkpad/react",
   "version": "0.1.0",
+  "description": "React components and hooks for the Arkpad rich text editor.",
   "type": "module",
   "exports": {
     ".": {

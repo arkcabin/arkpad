@@ -8,7 +8,7 @@ export const TEXT_ALIGN = {
   JUSTIFY: "justify",
 } as const;
 
-type TextAlign = (typeof TEXT_ALIGN)[keyof typeof TEXT_ALIGN];
+export type TextAlign = (typeof TEXT_ALIGN)[keyof typeof TEXT_ALIGN];
 
 export function createTextAlign(): Extension {
   return {

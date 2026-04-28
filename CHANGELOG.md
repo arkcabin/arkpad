@@ -1,0 +1,37 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+## [0.1.0] - 2026-04-28
+
+### Added
+- **TaskList Extension**: Full support for interactive checklists with `[ ]` and `[x]` markdown triggers.
+- **Underline & Strike Marks**: Added support for underlined and strikethrough text.
+- **Superscript & Subscript**: Added support for super/subscript marks.
+- **Highlight**: Added text highlighting support.
+- **Text Alignment**: Added commands for left, center, right, and justify alignment.
+- **Husky Integration**: Automated linting on git commit for better code quality.
+- **Selection Utilities**: New helpers for `isActive` and `getAttributes` to simplify toolbar building.
+
+### Fixed
+- **Task List Merging**: Fixed a bug where backspacing at the start of a task item didn't correctly merge with the previous item.
+- **Checkbox Protection**: Prevented accidental deletion of task markers when backspacing into text.
+- **Alignment Consistency**: Standardized `textAlign` attributes across all supported block nodes (Paragraph, Heading, etc.).
+- **ProseMirror Type Errors**: Resolved TypeScript issues with Fragment mapping in list toggling logic.
+
+### Improved
+- **Task List CSS**: Adjusted vertical alignment of checkboxes to better match text baselines.
+- **Command Robustness**: Upgraded `toggleTaskItem` to find the correct parent node regardless of cursor depth.
+- **Markdown Serialization**: Improved consistency of markdown export for lists and tasks.
+- **Documentation**: Updated API reference with all recently implemented commands and features.
+
+---
+
+## [0.1.0-alpha] - 2026-04-20
+
+### Added
+- Initial framework structure with `@arkpad/core` and `@arkpad/react`.
+- Basic Markdown parsing and serialization.
+- Bubble and Floating menu components.
+- Support for Bold, Italic, Code, and Link marks.
+- Support for Headings, Blockquotes, and Code Blocks.

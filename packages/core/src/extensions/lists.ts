@@ -1,6 +1,7 @@
 import { sinkListItem, liftListItem, splitListItem } from "prosemirror-schema-list";
 import { wrappingInputRule } from "prosemirror-inputrules";
 import { Extension } from "../extensions-types";
+import { type Node as PMNode } from "prosemirror-model";
 import { toggleList } from "./utils";
 
 export function createBulletList(): Extension {
@@ -139,7 +140,7 @@ export function createTaskItem(): Extension {
       toggleTaskItem: () => (state: any, dispatch: any) => {
         const { $from } = state.selection;
         let depth = $from.depth;
-        let taskItemNode: any = null;
+        let taskItemNode: PMNode | null = null;
         let taskItemPos = -1;
 
         while (depth > 0) {

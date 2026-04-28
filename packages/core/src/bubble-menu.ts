@@ -34,12 +34,12 @@ export class BubbleMenuView {
     
     setTimeout(() => {
       if (this.view && !this.view.isDestroyed) {
-        this.update(this.view, this.view.state);
+        this.update(this.view);
       }
     }, 0);
   }
 
-  update(view: EditorView, lastState?: EditorState) {
+  update(view: EditorView) {
     if (!view || view.isDestroyed) return;
     
     const { state } = view;
@@ -76,6 +76,7 @@ export class BubbleMenuView {
       const start = this.view.coordsAtPos(from);
       const end = this.view.coordsAtPos(to);
 
+
       const left = (start.left + end.left) / 2;
       const top = start.top;
 
@@ -94,7 +95,7 @@ export class BubbleMenuView {
       this.element.style.top = `${posTop}px`;
       this.element.style.left = `${left}px`;
       this.element.style.transform = transform;
-    } catch (e) {
+    } catch {
       // Ignore
     }
   }

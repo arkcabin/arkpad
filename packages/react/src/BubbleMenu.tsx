@@ -1,12 +1,18 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { BubbleMenu as BubbleMenuExtension, ArkpadEditorAPI } from '@arkpad/core';
+import { EditorState } from 'prosemirror-state';
 
 export interface BubbleMenuProps {
   editor: ArkpadEditorAPI | null;
   children: React.ReactNode;
   className?: string;
-  shouldShow?: (props: any) => boolean;
+  shouldShow?: (props: {
+    state: EditorState;
+    from: number;
+    to: number;
+    empty: boolean;
+  }) => boolean;
 }
 
 export const BubbleMenu: React.FC<BubbleMenuProps> = ({ 
@@ -15,7 +21,6 @@ export const BubbleMenu: React.FC<BubbleMenuProps> = ({
   className = '',
   shouldShow
 }) => {
-  const [mounted, setMounted] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -33,7 +38,6 @@ export const BubbleMenu: React.FC<BubbleMenuProps> = ({
     });
 
     editor.registerExtension(extension);
-    setMounted(true);
 
     return () => {
       // Cleanup

@@ -44,7 +44,7 @@ export function markdownToHtml(markdown: string): string {
   html = html.replace(/<\/blockquote><blockquote>/g, "");
 
   // Lists (Bullet)
-  html = html.replace(/^[\*\+-] (.*$)/gim, "<ul><li><p>$1</p></li></ul>");
+  html = html.replace(/^[*+-] (.*$)/gim, "<ul><li><p>$1</p></li></ul>");
   // Lists (Ordered)
   html = html.replace(/^\d+\. (.*$)/gim, "<ol><li><p>$1</p></li></ol>");
   

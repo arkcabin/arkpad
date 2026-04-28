@@ -19,7 +19,6 @@ export class TaskView implements NodeView {
     this.view = view;
     this.getPos = getPos;
 
-    console.log("TaskView created, getPos:", typeof getPos, "pos:", getPos());
 
     const isChecked = node.attrs.checked;
 

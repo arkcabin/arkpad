@@ -4,7 +4,7 @@ import {
   Node as PMNode,
   type Schema,
 } from "prosemirror-model";
-import { EditorState, type Plugin } from "prosemirror-state";
+import { EditorState } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
 
 import { arkpadSchema } from "./schema";

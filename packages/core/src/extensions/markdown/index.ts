@@ -16,8 +16,7 @@ export function createMarkdownPaste(): Extension {
 
             if (!text) return false;
 
-            // Simple heuristic to see if it's markdown
-            const isMarkdown = /^(#+|[\*\+-] |\[[ x]\] |> |==|\*\*|_|~~|`|---|___|\*\*\*)/m.test(
+            const isMarkdown = /^(#+|[*+-] |\[[ x]\] |> |==|\*\*|_|~~|`|---|___|\*\*\*)/m.test(
               text
             );
 

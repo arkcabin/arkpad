@@ -24,9 +24,10 @@ export class MarkdownSerializer {
         return this.serializeText(node);
       case "paragraph":
         return this.serializeChildren(node) + "\n\n";
-      case "heading":
+      case "heading": {
         const level = node.attrs.level || 1;
         return "#".repeat(level) + " " + this.serializeChildren(node) + "\n\n";
+      }
       case "blockquote":
         return "> " + this.serializeChildren(node).replace(/\n/g, "\n> ") + "\n\n";
       case "bulletList":
@@ -34,21 +35,23 @@ export class MarkdownSerializer {
       case "orderedList":
         return this.serializeList(node, (i) => `${i + (node.attrs.order || 1)}. `);
       case "listItem":
-      case "taskItem":
+      case "taskItem": {
         let prefix = "";
         if (node.type.name === "taskItem") {
           prefix = node.attrs.checked ? "[x] " : "[ ] ";
         }
         return prefix + this.serializeChildren(node);
+      }
       case "codeBlock":
         return "```\n" + node.textContent + "\n```\n\n";
       case "horizontalRule":
         return "---\n\n";
-      case "image":
+      case "image": {
         const alt = node.attrs.alt || "";
         const src = node.attrs.src || "";
         const title = node.attrs.title ? ` "${node.attrs.title}"` : "";
         return `![${alt}](${src}${title})\n\n`;
+      }
       case "hardBreak":
         return "\n";
       default:

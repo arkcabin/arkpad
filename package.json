@@ -2,7 +2,7 @@
   "name": "arkpad",
   "private": true,
   "version": "0.1.0",
-  "description": "Arkpad workspace",
+  "description": "A high-performance, modular rich text editor framework built on ProseMirror with a Tiptap-inspired API.",
   "license": "MIT",
   "packageManager": "npm@10.8.2",
   "engines": {
@@ -23,7 +23,8 @@
     "format:check": "prettier . --check",
     "release": "semantic-release",
     "release:dry": "semantic-release --dry-run",
-    "check": "npm run typecheck && npm run lint && npm run build"
+    "check": "npm run typecheck && npm run lint && npm run build",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -37,6 +38,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.5.0",
+    "husky": "^9.1.7",
     "jiti": "^2.6.1",
     "prettier": "^3.8.3",
     "semantic-release": "^25.0.3",

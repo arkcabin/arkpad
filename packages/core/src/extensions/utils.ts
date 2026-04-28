@@ -166,8 +166,6 @@ export function toggleList(listType: NodeType, itemType: NodeType) {
     const range = $from.blockRange($to);
     if (!range) return false;
 
-    const parentList = range.parent;
-
     // Search for the list node at all depths
     let listDepth = -1;
     for (let d = $from.depth; d >= 0; d--) {

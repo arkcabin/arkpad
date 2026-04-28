@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { ArkpadEditor, type ArkpadEditorOptions, type ArkpadEditorAPI } from "@arkpad/core";
+import { type Node as PMNode } from "prosemirror-model";
+import { type EditorView } from "prosemirror-view";
 import { TaskView } from "./views/Task";
 
 export type UseArkpadEditorOptions = {
@@ -11,11 +13,11 @@ export function useArkpadEditor(options: UseArkpadEditorOptions = {}) {
   const [, setPulse] = useState(0);
 
   useEffect(() => {
-    const nodeViews: Record<string, any> = {};
+    const nodeViews: Record<string, (node: PMNode, view: EditorView, getPos: () => number | undefined) => TaskView> = {};
 
     if (options.useShadcnTaskItems !== false) {
       // Pass a factory function instead of class directly
-      nodeViews.taskItem = (node: any, view: any, getPos: any) =>
+      nodeViews.taskItem = (node: PMNode, view: EditorView, getPos: () => number | undefined) =>
         new TaskView(node, view, getPos);
     }
 

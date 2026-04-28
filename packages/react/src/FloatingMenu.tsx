@@ -1,12 +1,16 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { FloatingMenu as FloatingMenuExtension, ArkpadEditorAPI } from '@arkpad/core';
+import { EditorState, EditorView } from 'prosemirror-state';
 
 export interface FloatingMenuProps {
   editor: ArkpadEditorAPI | null;
   children: React.ReactNode;
   className?: string;
-  shouldShow?: (props: any) => boolean;
+  shouldShow?: (props: {
+    state: EditorState;
+    view: EditorView;
+  }) => boolean;
 }
 
 export const FloatingMenu: React.FC<FloatingMenuProps> = ({ 
@@ -15,7 +19,6 @@ export const FloatingMenu: React.FC<FloatingMenuProps> = ({
   className = '',
   shouldShow
 }) => {
-  const [mounted, setMounted] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -31,7 +34,6 @@ export const FloatingMenu: React.FC<FloatingMenuProps> = ({
     });
 
     editor.registerExtension(extension);
-    setMounted(true);
 
     return () => {
       // Cleanup

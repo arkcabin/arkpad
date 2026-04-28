@@ -43,7 +43,7 @@ export function createStrike(): Extension {
       "Mod-Shift-s": toggleMark(arkpadSchema.marks.strike!),
     }),
     addInputRules: (schema) => [
-      markInputRule(/(?:~~)([^~]+)(?:~~)$/, schema.marks.strike!),
+      markInputRule(/~~([^~]+)~~$/, schema.marks.strike!),
     ],
   };
 }
@@ -70,7 +70,7 @@ export function createCode(): Extension {
       "Mod-e": toggleMark(arkpadSchema.marks.code!),
     }),
     addInputRules: (schema) => [
-      markInputRule(/(?:^|[^`])(?:\`)([^\`]+)(?:\`)$/, schema.marks.code!),
+      markInputRule(/(?:^|[^`])`([^`]+)`$/, schema.marks.code!),
     ],
   };
 }
@@ -110,7 +110,7 @@ export function createHighlight(): Extension {
       toggleHighlight: () => toggleMark(arkpadSchema.marks.highlight!),
     }),
     addInputRules: (schema) => [
-      markInputRule(/(?:==)([^=]+)(?:==)$/, schema.marks.highlight!),
+      markInputRule(/==([^=]+)==$/, schema.marks.highlight!),
     ],
   };
 }
