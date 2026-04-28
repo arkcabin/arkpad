@@ -1,3 +1,11 @@
+## [1.5.1](https://github.com/arkcabin/arkpad/compare/v1.5.0...v1.5.1) (2026-04-28)
+
+
+### Bug Fixes
+
+* improve npm publish diagnostics and enforce public access ([3d5fbcf](https://github.com/arkcabin/arkpad/commit/3d5fbcf8997520ed114333c5468bb6fe86ab77ac))
+* include all package.json files in release assets to prevent CI 404 ([a8c7142](https://github.com/arkcabin/arkpad/commit/a8c71427a1dacfc0a4d747eaf1459a3a2d3cfed2))
+
 # [1.5.0](https://github.com/arkcabin/arkpad/compare/v1.4.0...v1.5.0) (2026-04-28)
 
 
