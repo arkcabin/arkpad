@@ -20,6 +20,7 @@ export class ExtensionManager {
   public inputRules: any[] = [];
   public pasteRules: Plugin[] = [];
   public proseMirrorPlugins: Plugin[] = [];
+  public storage: Record<string, any> = {};
 
   constructor(schema: Schema, extensions: Extension[] = []) {
     this.schema = schema;
@@ -38,6 +39,20 @@ export class ExtensionManager {
     this.inputRules = this.collectInputRules(this.schema);
     this.pasteRules = this.collectPasteRules(this.schema);
     this.proseMirrorPlugins = this.collectProseMirrorPlugins(this.schema);
+    this.storage = this.collectStorage();
+  }
+
+  /**
+   * Aggregates storage from all registered extensions.
+   */
+  private collectStorage(): Record<string, any> {
+    const storage: Record<string, any> = {};
+    for (const ext of this.extensions) {
+      if (ext.addStorage) {
+        storage[ext.name] = ext.addStorage();
+      }
+    }
+    return storage;
   }
 
   /**

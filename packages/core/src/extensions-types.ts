@@ -12,4 +12,5 @@ export interface Extension {
   addInputRules?: (schema: Schema) => any[];
   addPasteRules?: (schema: Schema) => Plugin[];
   addProseMirrorPlugins?: (schema: Schema) => Plugin[];
+  addStorage?: () => Record<string, any>;
 }

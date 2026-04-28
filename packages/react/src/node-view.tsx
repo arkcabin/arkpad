@@ -103,8 +103,16 @@ export class ReactNodeView implements NodeView {
       return false;
     }
 
+    // Check if attributes or content changed
+    const attrsChanged = JSON.stringify(this.node.attrs) !== JSON.stringify(node.attrs);
+    const contentChanged = !this.node.content.eq(node.content);
+
     this.node = node;
-    this.render();
+
+    if (attrsChanged || contentChanged) {
+      this.render();
+    }
+
     return true;
   }
 
@@ -115,9 +123,25 @@ export class ReactNodeView implements NodeView {
     }
   }
 
+  public stopEvent(event: Event) {
+    if (!this.dom) return false;
+
+    // Allow events to bubble up if they are inside the content area
+    if (this.contentDOM?.contains(event.target as HTMLElement)) {
+      return false;
+    }
+
+    return true;
+  }
+
   public ignoreMutation(mutation: ViewMutationRecord) {
-    // Ignore mutations inside our React-managed DOM
-    return this.dom.contains(mutation.target);
+    // If the mutation is in the content area, don't ignore it
+    if (this.contentDOM?.contains(mutation.target)) {
+      return false;
+    }
+
+    // Ignore all other mutations (managed by React)
+    return true;
   }
 }
 

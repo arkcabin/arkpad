@@ -34,6 +34,7 @@ export class ArkpadEditor implements ArkpadEditorAPI {
   public readonly element: HTMLElement;
   public commands: ArkpadCommandRegistry;
   public extensionManager: ExtensionManager;
+  public readonly storage: Record<string, any>;
 
   private readonly onCreate?: ArkpadEditorOptions["onCreate"];
   private readonly onUpdate?: ArkpadEditorOptions["onUpdate"];
@@ -72,6 +73,7 @@ export class ArkpadEditor implements ArkpadEditorAPI {
 
     this.extensionManager = extensionManager;
     this.commands = extensionManager.commands as unknown as ArkpadCommandRegistry;
+    this.storage = extensionManager.storage;
 
     const state = this.createState(resolved.content);
 

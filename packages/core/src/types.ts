@@ -1,6 +1,6 @@
 import type { Command, EditorState, Plugin, Transaction } from "prosemirror-state";
 import type { Node as PMNode } from "prosemirror-model";
-import type { EditorView, NodeView, ViewMutationRecord } from "prosemirror-view";
+import type { EditorView, NodeView } from "prosemirror-view";
 
 export type ArkpadDocJSON = Record<string, unknown>;
 export type ArkpadContent = string | ArkpadDocJSON;
@@ -8,11 +8,39 @@ export type ArkpadContent = string | ArkpadDocJSON;
 export type ArkpadCommand = Command;
 export type ArkpadCommandRegistry = Record<string, ArkpadCommand>;
 
-/**
- * Interface for chained commands.
- * Allows calling multiple commands in a single transaction.
- */
 export interface ChainedCommands {
+  /**
+   * Focuses the editor at the specified position.
+   */
+  focus(position?: "start" | "end" | number | null): ChainedCommands;
+
+  /**
+   * Inserts the given content at the current selection.
+   */
+  insertContent(content: ArkpadContent, format?: "html" | "markdown" | "json"): ChainedCommands;
+
+  /**
+   * Scrolls the current selection into view.
+   */
+  scrollIntoView(): ChainedCommands;
+
+  /**
+   * Sets metadata on the current transaction.
+   */
+  setMeta(key: any, value: any): ChainedCommands;
+
+  /**
+   * Runs a custom command function.
+   */
+  command(
+    fn: (props: {
+      state: EditorState;
+      tr: Transaction;
+      dispatch?: (tr: Transaction) => void;
+      view?: EditorView;
+    }) => boolean
+  ): ChainedCommands;
+
   /**
    * Executes the collected commands.
    */
@@ -36,8 +64,18 @@ export interface ArkpadExtension {
 }
 
 export type NodeViewConstructor =
-  | (new (node: PMNode, view: EditorView, getPos: () => number | undefined, decorations: any) => NodeView)
-  | ((node: PMNode, view: EditorView, getPos: () => number | undefined, decorations: any) => NodeView);
+  | (new (
+      node: PMNode,
+      view: EditorView,
+      getPos: () => number | undefined,
+      decorations: any
+    ) => NodeView)
+  | ((
+      node: PMNode,
+      view: EditorView,
+      getPos: () => number | undefined,
+      decorations: any
+    ) => NodeView);
 
 export interface SelectionUpdatePayload {
   editor: ArkpadEditorAPI;
