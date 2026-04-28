@@ -138,10 +138,22 @@ export function createTaskItem(): Extension {
     addCommands: () => ({
       toggleTaskItem: () => (state: any, dispatch: any) => {
         const { $from } = state.selection;
-        const node = $from.nodeAfter || $from.parent;
-        if (node && (node.type.name === "taskItem" || node.type.name === "taskList")) {
-          const newAttrs = { ...node.attrs, checked: !node.attrs.checked };
-          const tr = state.tr.setNodeMarkup($from.pos, undefined, newAttrs);
+        let depth = $from.depth;
+        let taskItemNode: any = null;
+        let taskItemPos = -1;
+
+        while (depth > 0) {
+          if ($from.node(depth).type.name === "taskItem") {
+            taskItemNode = $from.node(depth);
+            taskItemPos = $from.before(depth);
+            break;
+          }
+          depth--;
+        }
+
+        if (taskItemNode) {
+          const newAttrs = { ...taskItemNode.attrs, checked: !taskItemNode.attrs.checked };
+          const tr = state.tr.setNodeMarkup(taskItemPos, undefined, newAttrs);
           if (dispatch) dispatch(tr);
           return true;
         }
@@ -187,13 +199,20 @@ export function createTaskItem(): Extension {
 
         if (depth === 0) return false;
 
-        // Turn back into paragraph if at the start
+        // If it's not the first item in the list, let the default behavior (merging) happen
+        const index = $from.index(depth - 1);
+        if (index > 0) {
+          return false;
+        }
+
+        // Only lift if the item is empty (to avoid accidentally removing the checkbox while editing text)
+        if ($from.parent.content.size > 0) {
+          return false;
+        }
+
+        // Turn back into paragraph if at the start of the first item and it's empty
         return liftListItem(taskItem)(state, dispatch);
       },
-      Tab: (state: any, dispatch: any) =>
-        sinkListItem(state.schema.nodes.taskItem!)(state, dispatch),
-      "Shift-Tab": (state: any, dispatch: any) =>
-        liftListItem(state.schema.nodes.taskItem!)(state, dispatch),
     }),
   };
 }

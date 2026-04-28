@@ -29,7 +29,7 @@ export class TaskView implements NodeView {
 
     this.checkboxContainer = document.createElement("div");
     // Pointer-events: none ensures clicks in the "gap" hit the text area
-    this.checkboxContainer.className = "flex-shrink-0 flex items-center justify-center select-none pointer-events-none mt-[2px]";
+    this.checkboxContainer.className = "flex-shrink-0 flex items-center justify-center select-none pointer-events-none mt-[3px]";
     this.checkboxContainer.contentEditable = "false";
     container.appendChild(this.checkboxContainer);
 

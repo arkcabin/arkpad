@@ -13,6 +13,10 @@ import {
   createDefaultExtensions,
   type Extension,
   type Dispatch,
+  isMarkActive,
+  isNodeActive,
+  getMarkAttributes,
+  getNodeAttributes,
 } from "./extensions";
 import { markdownToHtml } from "./extensions/markdown/parser";
 import { defaultMarkdownSerializer } from "./extensions/markdown/serializer";
@@ -193,49 +197,17 @@ export class ArkpadEditor implements ArkpadEditorAPI {
 
   isActive(name: string, attrs: Record<string, any> = {}): boolean {
     const { state } = this.view;
-    const { from, to, empty, $from } = state.selection;
 
     // Check for Marks (bold, italic, etc.)
     const markType = state.schema.marks[name];
     if (markType) {
-      if (empty) {
-        return !!markType.isInSet(state.storedMarks || $from.marks());
-      }
-      return state.doc.rangeHasMark(from, to, markType);
+      return isMarkActive(state, markType);
     }
 
     // Check for Nodes (heading, blockquote, etc.)
     const nodeType = state.schema.nodes[name];
     if (nodeType) {
-      // PRO-GRADE DEPTH CHECK: Look up the parent tree of the selection
-      for (let depth = $from.depth; depth >= 0; depth--) {
-        const node = $from.node(depth);
-        if (node.type === nodeType) {
-          const hasMatchingAttrs = Object.entries(attrs).every(
-            ([key, value]) => node.attrs[key] === value
-          );
-          if (hasMatchingAttrs) {
-            return true;
-          }
-        }
-      }
-
-      // Fallback: If it's a range selection, check if the range contains the node type
-      if (!empty) {
-        let foundInRange = false;
-        state.doc.nodesBetween(from, to, (node) => {
-          if (foundInRange) return false;
-          if (node.type === nodeType) {
-            const hasMatchingAttrs = Object.entries(attrs).every(
-              ([key, value]) => node.attrs[key] === value
-            );
-            if (hasMatchingAttrs) {
-              foundInRange = true;
-            }
-          }
-        });
-        return foundInRange;
-      }
+      return isNodeActive(state, nodeType, attrs);
     }
 
     return false;
@@ -243,40 +215,15 @@ export class ArkpadEditor implements ArkpadEditorAPI {
 
   getAttributes(name: string): Record<string, any> | null {
     const { state } = this.view;
-    const { from, to, $from, empty } = state.selection;
 
-    if (arkpadSchema.marks[name]) {
-      const markType = arkpadSchema.marks[name];
-      const marks = empty ? $from.marks() || state.storedMarks : [];
-
-      if (empty && marks) {
-        const mark = marks.find((m) => m.type === markType);
-        return mark ? mark.attrs : null;
-      }
-
-      let attrs: Record<string, any> | null = null;
-      state.doc.nodesBetween(from, to, (node) => {
-        const mark = node.marks.find((m) => m.type === markType);
-        if (mark) attrs = mark.attrs;
-      });
-      return attrs;
+    const markType = state.schema.marks[name];
+    if (markType) {
+      return getMarkAttributes(state, markType);
     }
 
-    if (arkpadSchema.nodes[name]) {
-      const nodeType = arkpadSchema.nodes[name];
-      let attrs: Record<string, any> | null = null;
-
-      state.doc.nodesBetween(from, to, (node) => {
-        if (node.type === nodeType) {
-          attrs = node.attrs;
-        }
-      });
-
-      if (!attrs && empty && $from.parent.type === nodeType) {
-        attrs = $from.parent.attrs;
-      }
-
-      return attrs;
+    const nodeType = state.schema.nodes[name];
+    if (nodeType) {
+      return getNodeAttributes(state, nodeType);
     }
 
     return null;

@@ -1,4 +1,5 @@
 import { Extension } from "../extensions-types";
+import { setTextAlign } from "./utils";
 
 export const TEXT_ALIGN = {
   LEFT: "left",
@@ -9,39 +10,19 @@ export const TEXT_ALIGN = {
 
 type TextAlign = (typeof TEXT_ALIGN)[keyof typeof TEXT_ALIGN];
 
-function setAlignCommand(align: TextAlign) {
-  return (state: any, dispatch: any) => {
-    const { from, to } = state.selection;
-
-    if (dispatch) {
-      const tr = state.tr;
-
-      state.doc.nodesBetween(from, to, (node, pos) => {
-        if (node.isTextblock) {
-          const attrs = { ...node.attrs, align };
-          tr.setNodeMarkup(pos, node.type, attrs);
-        }
-      });
-
-      dispatch(tr);
-    }
-    return true;
-  };
-}
-
 export function createTextAlign(): Extension {
   return {
     name: "textAlign",
     addCommands: () => ({
-      setTextAlignLeft: () => setAlignCommand(TEXT_ALIGN.LEFT),
-      setTextAlignCenter: () => setAlignCommand(TEXT_ALIGN.CENTER),
-      setTextAlignRight: () => setAlignCommand(TEXT_ALIGN.RIGHT),
-      setTextAlignJustify: () => setAlignCommand(TEXT_ALIGN.JUSTIFY),
+      setTextAlignLeft: () => setTextAlign(TEXT_ALIGN.LEFT),
+      setTextAlignCenter: () => setTextAlign(TEXT_ALIGN.CENTER),
+      setTextAlignRight: () => setTextAlign(TEXT_ALIGN.RIGHT),
+      setTextAlignJustify: () => setTextAlign(TEXT_ALIGN.JUSTIFY),
     }),
     addKeyboardShortcuts: () => ({
-      "Mod-Shift-l": () => setAlignCommand(TEXT_ALIGN.LEFT),
-      "Mod-Shift-e": () => setAlignCommand(TEXT_ALIGN.CENTER),
-      "Mod-Shift-r": () => setAlignCommand(TEXT_ALIGN.RIGHT),
+      "Mod-Shift-l": () => setTextAlign(TEXT_ALIGN.LEFT),
+      "Mod-Shift-e": () => setTextAlign(TEXT_ALIGN.CENTER),
+      "Mod-Shift-r": () => setTextAlign(TEXT_ALIGN.RIGHT),
     }),
   };
 }
