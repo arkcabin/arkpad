@@ -89,7 +89,7 @@ export interface ArkpadEditorAPI {
   isActive(name: string, attrs?: Record<string, any>): boolean;
   getAttributes(name: string): Record<string, any> | null;
   runCommand(name: string, ...args: any[]): boolean;
-  canRunCommand(name: string): boolean;
+  canRunCommand(name: string, ...args: any[]): boolean;
   
   /**
    * Returns a command chain to execute multiple commands in a single transaction.

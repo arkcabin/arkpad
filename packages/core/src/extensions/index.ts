@@ -16,6 +16,7 @@ import {
   createSuperscript,
   createSubscript,
   createHighlight,
+  createClearFormatting,
 } from "./marks";
 import {
   createHeading,
@@ -63,6 +64,7 @@ export const Essentials: Extension[] = [
   createSuperscript(),
   createSubscript(),
   createHighlight(),
+  createClearFormatting(),
   createPlaceholder({ placeholder: "Start writing..." }),
   createHistory(),
   createMarkdownPaste(),

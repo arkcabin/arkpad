@@ -108,3 +108,26 @@ export function createHighlight(): Extension {
     addInputRules: (schema) => [markInputRule(/==([^=]+)==$/, schema.marks.highlight!)],
   };
 }
+
+/**
+ * Extension to clear all marks (formatting).
+ */
+export function createClearFormatting(): Extension {
+  return {
+    name: "clearFormatting",
+    addCommands: () => ({
+      unsetAllMarks: () => (state: any, dispatch: any) => {
+        const { selection } = state;
+        const { from, to, empty } = selection;
+
+        if (empty) return false;
+        if (dispatch) {
+          const tr = state.tr;
+          tr.removeMark(from, to);
+          dispatch(tr);
+        }
+        return true;
+      },
+    }),
+  };
+}

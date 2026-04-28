@@ -106,8 +106,12 @@ export function createImage(): Extension {
   return {
     name: "image",
     addCommands: () => ({
-      setImage: (src: string, alt?: string, title?: string) => (state: any, dispatch: any) => {
-        const node = state.schema.nodes.image!.create({ src, alt, title });
+      setImage: (options: string | { src: string; alt?: string; title?: string }) => (
+        state: any,
+        dispatch: any
+      ) => {
+        const attrs = typeof options === "string" ? { src: options } : options;
+        const node = state.schema.nodes.image!.create(attrs);
         const tr = state.tr.replaceSelectionWith(node);
         if (dispatch) dispatch(tr);
         return true;

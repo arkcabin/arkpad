@@ -7,7 +7,6 @@ import {
   ExtensionManager,
   createEssentials,
   type Extension,
-  type Dispatch,
   isMarkActive,
   isNodeActive,
   getMarkAttributes,
@@ -183,16 +182,17 @@ export class ArkpadEditor implements ArkpadEditorAPI {
   }
 
   /**
-   * Checks if a command can be executed.
+   * Checks if a command can be executed without actually running it.
    */
-  canRunCommand(name: string): boolean {
+  canRunCommand(name: string, ...args: any[]): boolean {
     const command = this.commands[name];
     if (!command) return false;
-    return (command as (state: EditorState, dispatch?: Dispatch, view?: EditorView) => boolean)(
-      this.view.state,
-      undefined,
-      this.view
-    );
+
+    try {
+      return (command as any)(...args)(this.view.state, undefined, this.view);
+    } catch {
+      return false;
+    }
   }
 
   /**
