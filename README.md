@@ -1,100 +1,76 @@
-# Arkpad
+# Arkpad (by AgentEdit)
 
 **The High-Performance, Modular Foundation for Modern Rich Text Creation.**
 
-Arkpad is an enterprise-grade rich text editor framework built on top of ProseMirror. It provides a sophisticated, developer-first API designed for building powerful, reliable, and highly customizable editing experiences without the overhead of traditional editors.
-
----
-
-## ✨ Why Arkpad?
-
-- 🚀 **Extreme Performance** — Optimized for large documents and complex state transitions.
-- 🧩 **Purely Modular** — Zero-bloat architecture; only include the extensions you need.
-- 🛡️ **Type-Safe by Design** — First-class TypeScript support for a robust developer experience.
-- 🎨 **Headless & Unstyled** — Complete creative freedom over your UI and UX.
-- 🌐 **Framework Ready** — Native React support with optimized hooks and components.
-
----
-
-## 📦 Packages
-
-Arkpad is distributed as a suite of specialized packages for maximum flexibility:
-
-| Package | Purpose | Version |
-| :--- | :--- | :--- |
-| [`@arkpad/core`](./packages/core) | The core engine & ProseMirror abstraction | ![npm](https://img.shields.io/npm/v/@arkpad/core?color=blue&style=flat-square) |
-| [`@arkpad/react`](./packages/react) | Premium React components & hooks | ![npm](https://img.shields.io/npm/v/@arkpad/react?color=blue&style=flat-square) |
+Arkpad is an enterprise-grade rich text editor framework built on top of ProseMirror. It provides a sophisticated, developer-first API designed for building powerful, reliable, and highly customizable editing experiences.
 
 ---
 
 ## 🚀 Quick Start
 
-### Installation
-
-Get started in seconds by installing the core or React-specific package:
+### 1. Installation
 
 ```bash
-# For React applications
 npm install @arkpad/react @arkpad/core
-
-# For Vanilla JS or other frameworks
-npm install @arkpad/core
 ```
 
-### React Implementation
+### 2. Full React Implementation (with Toolbar)
 
-Arkpad provides a seamless React integration via the `useArkpadEditor` hook, ensuring perfect synchronization between editor state and your component tree.
+Building a full UI is easy. Use the `ArkpadEditor` instance via the `useArkpadEditor` hook to check state and run commands.
 
 ```tsx
-import { useArkpadEditor, ArkpadEditorContent } from '@arkpad/react'
-import { StarterKit } from '@arkpad/core'
+import { useArkpadEditor, ArkpadEditorContent } from "@arkpad/react";
+import { Essentials } from "@arkpad/core";
 
-function App() {
+function MyEditor() {
   const editor = useArkpadEditor({
-    extensions: [StarterKit],
-    content: '<h1>Build something beautiful.</h1><p>Arkpad makes it easy.</p>',
-    onUpdate: ({ editor }) => {
-      console.log('Content changed:', editor.getHTML())
-    }
-  })
+    extensions: [Essentials],
+    content: "<h1>Hello Arkpad</h1><p>Start building your custom UI.</p>",
+  });
+
+  if (!editor) return null;
 
   return (
     <div className="editor-container">
+      {/* Toolbar */}
+      <div className="toolbar">
+        <button 
+          onClick={() => editor.runCommand("toggleBold")}
+          className={editor.isActive("strong") ? "is-active" : ""}
+        >
+          Bold
+        </button>
+        <button 
+          onClick={() => editor.runCommand("toggleHeading", { level: 2 })}
+          className={editor.isActive("heading", { level: 2 }) ? "is-active" : ""}
+        >
+          H2
+        </button>
+        <button onClick={() => editor.runCommand("undo")}>Undo</button>
+      </div>
+
+      {/* Editor Surface */}
       <ArkpadEditorContent editor={editor} />
     </div>
-  )
+  );
 }
 ```
 
-### Vanilla JavaScript
+---
 
-```ts
-import { ArkpadEditor } from '@arkpad/core'
-import { StarterKit } from '@arkpad/core'
+## ✨ Features
 
-const editor = new ArkpadEditor({
-  element: document.querySelector('#editor')!,
-  extensions: [StarterKit],
-  content: '<p>The future of editing is here.</p>',
-})
-```
+- 🚀 **Extreme Performance** — Optimized for large documents.
+- 🧩 **Purely Modular** — Only include what you use.
+- 🛡️ **Type-Safe** — First-class TypeScript support.
+- 🎨 **Headless** — You have 100% control over the CSS/UI.
 
 ---
 
-## 🛠️ Built for Customization
+## 📖 Learn More
 
-Arkpad isn't just an editor; it's a toolkit. Whether you're building a simple blog or a complex collaborative suite, Arkpad provides the primitives you need to succeed.
-
-- [x] Custom Node & Mark Views
-- [x] Powerful Command Pattern
-- [x] Advanced Schema Definition
-- [x] Real-time Collaboration Support (via Y.js)
-
----
-
-## 📄 License
-
-Arkpad is proudly open-source under the [MIT License](./LICENSE).
+*   **[Complete Developer Guide](./docs/COMPLETE_GUIDE.md)** — Deep dive into the API and advanced features.
+*   **[Roadmap](./docs/ROADMAP.md)** — See where we are headed with Agentic AI.
 
 ---
 

@@ -1,20 +1,8 @@
-import {
-  baseKeymap,
-  setBlockType,
-  toggleMark,
-} from "prosemirror-commands";
+import { baseKeymap, setBlockType, toggleMark } from "prosemirror-commands";
 import { history, redo, undo } from "prosemirror-history";
-import {
-  inputRules,
-  textblockTypeInputRule,
-  wrappingInputRule,
-} from "prosemirror-inputrules";
+import { inputRules, textblockTypeInputRule, wrappingInputRule } from "prosemirror-inputrules";
 import { keymap } from "prosemirror-keymap";
-import {
-  liftListItem,
-  sinkListItem,
-  wrapInList,
-} from "prosemirror-schema-list";
+import { liftListItem, sinkListItem, wrapInList } from "prosemirror-schema-list";
 import type { Command, Plugin } from "prosemirror-state";
 
 import { arkpadSchema } from "./schema";

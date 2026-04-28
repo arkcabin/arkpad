@@ -203,7 +203,9 @@ export function toggleList(listType: NodeType, itemType: NodeType) {
             });
 
             const newList = listType.create(currentList.attrs, items);
-            dispatch(tr.replaceWith(listPos, listPos + listNode.nodeSize, newList).scrollIntoView());
+            dispatch(
+              tr.replaceWith(listPos, listPos + listNode.nodeSize, newList).scrollIntoView()
+            );
           }
         }
         return true;
@@ -225,10 +227,12 @@ export function setTextAlign(align: string) {
 
     state.doc.nodesBetween(from, to, (node, pos) => {
       if (node.isTextblock) {
-        const type = node.type;
-        if (type.spec.attrs && type.spec.attrs.align) {
-          tr.setNodeMarkup(pos, undefined, { ...node.attrs, align });
-          modified = true;
+        // More robust check for align attribute existence
+        if (node.type.spec.attrs && "align" in node.type.spec.attrs) {
+          if (node.attrs.align !== align) {
+            tr.setNodeMarkup(pos, undefined, { ...node.attrs, align });
+            modified = true;
+          }
         }
       }
     });

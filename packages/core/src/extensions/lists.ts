@@ -1,11 +1,11 @@
 import { sinkListItem, liftListItem, splitListItem } from "prosemirror-schema-list";
 import { wrappingInputRule } from "prosemirror-inputrules";
-import { Extension } from "../extensions-types";
+import { Extension } from "./Extension";
 import { type Node as PMNode } from "prosemirror-model";
 import { toggleList } from "./utils";
 
 export function createBulletList(): Extension {
-  return {
+  return Extension.create({
     name: "bulletList",
     addCommands: () => ({
       toggleBulletList: () => (state: any, dispatch: any) => {
@@ -16,11 +16,11 @@ export function createBulletList(): Extension {
       },
     }),
     addInputRules: (schema) => [wrappingInputRule(/^\s*([-*])\s$/, schema.nodes.bulletList!)],
-  };
+  });
 }
 
 export function createOrderedList(): Extension {
-  return {
+  return Extension.create({
     name: "orderedList",
     addCommands: () => ({
       toggleOrderedList: () => (state: any, dispatch: any) => {
@@ -38,11 +38,11 @@ export function createOrderedList(): Extension {
         (match, node) => node.childCount + node.attrs.order === +match[1]!
       ),
     ],
-  };
+  });
 }
 
 export function createListItem(): Extension {
-  return {
+  return Extension.create({
     name: "listItem",
     addCommands: () => ({
       sinkListItem: () => (state: any, dispatch: any) =>
@@ -112,11 +112,11 @@ export function createListItem(): Extension {
         return false;
       },
     }),
-  };
+  });
 }
 
 export function createTaskList(): Extension {
-  return {
+  return Extension.create({
     name: "taskList",
     addCommands: () => ({
       toggleTaskList: () => (state: any, dispatch: any) => {
@@ -130,11 +130,11 @@ export function createTaskList(): Extension {
       wrappingInputRule(/^\[\s?\]\s$/, schema.nodes.taskList!),
       wrappingInputRule(/^\[x\]\s$/, schema.nodes.taskList!, { checked: true }),
     ],
-  };
+  });
 }
 
 export function createTaskItem(): Extension {
-  return {
+  return Extension.create({
     name: "taskItem",
     addCommands: () => ({
       toggleTaskItem: () => (state: any, dispatch: any) => {
@@ -215,5 +215,5 @@ export function createTaskItem(): Extension {
         return liftListItem(taskItem)(state, dispatch);
       },
     }),
-  };
+  });
 }

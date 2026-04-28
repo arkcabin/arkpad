@@ -33,7 +33,7 @@ const Checkbox = React.forwardRef<React.ElementRef<typeof CheckboxPrimitive.Root
       className={cn(
         "peer shrink-0 border border-slate-300 transition-colors flex items-center justify-center",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2",
-        "disabled:cursor-not-allowed disabled:opacity-50",
+        "disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer",
         "data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 data-[state=checked]:text-white",
         sizeVariants[size],
         className
@@ -49,9 +49,9 @@ const Checkbox = React.forwardRef<React.ElementRef<typeof CheckboxPrimitive.Root
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
-            d="M10 3L4.5 8.5L2 6"
+            d="M10 3.5L4.5 9L2 6.5"
             stroke="currentColor"
-            strokeWidth="2"
+            strokeWidth="2.5"
             strokeLinecap="round"
             strokeLinejoin="round"
           />

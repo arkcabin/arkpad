@@ -22,20 +22,15 @@
     "lint": "eslint .",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
-    "release": "semantic-release",
-    "release:dry": "semantic-release --dry-run",
+    "release": "changeset publish",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
     "check": "npm run typecheck && npm run lint && npm run build",
     "prepare": "husky"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@semantic-release/changelog": "^6.0.3",
-    "@semantic-release/commit-analyzer": "^13.0.1",
-    "@semantic-release/exec": "^7.1.0",
-    "@semantic-release/git": "^10.0.1",
-    "@semantic-release/github": "^12.0.6",
-    "@semantic-release/npm": "^13.1.5",
-    "@semantic-release/release-notes-generator": "^14.1.0",
+    "@changesets/cli": "^2.27.12",
     "eslint": "^10.2.1",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
@@ -43,7 +38,6 @@
     "husky": "^9.1.7",
     "jiti": "^2.6.1",
     "prettier": "^3.8.3",
-    "semantic-release": "^25.0.3",
     "typescript-eslint": "^8.59.0"
   }
 }

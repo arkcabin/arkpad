@@ -1,25 +1,20 @@
-import { EditorState, Plugin, PluginKey } from 'prosemirror-state';
-import { EditorView } from 'prosemirror-view';
-import { Extension } from './extensions';
+import { EditorState, Plugin, PluginKey } from "prosemirror-state";
+import { EditorView } from "prosemirror-view";
+import { Extension } from "./extensions/Extension";
 
 export interface BubbleMenuPluginProps {
   editor: any;
   element: HTMLElement;
-  shouldShow?: (props: {
-    state: EditorState;
-    from: number;
-    to: number;
-    empty: boolean;
-  }) => boolean;
+  shouldShow?: (props: { state: EditorState; from: number; to: number; empty: boolean }) => boolean;
 }
 
-export const BubbleMenuPluginKey = new PluginKey('bubbleMenu');
+export const BubbleMenuPluginKey = new PluginKey("bubbleMenu");
 
 export class BubbleMenuView {
   public editor: any;
   public element: HTMLElement;
   public view: EditorView;
-  public shouldShow: BubbleMenuPluginProps['shouldShow'];
+  public shouldShow: BubbleMenuPluginProps["shouldShow"];
 
   constructor(props: BubbleMenuPluginProps & { view: EditorView }) {
     this.editor = props.editor;
@@ -27,11 +22,11 @@ export class BubbleMenuView {
     this.view = props.view;
     this.shouldShow = props.shouldShow || (({ empty }) => !empty);
 
-    this.element.style.position = 'fixed';
-    this.element.style.zIndex = '1000';
-    this.element.style.visibility = 'hidden';
-    this.element.style.display = 'none';
-    
+    this.element.style.position = "fixed";
+    this.element.style.zIndex = "1000";
+    this.element.style.visibility = "hidden";
+    this.element.style.display = "none";
+
     setTimeout(() => {
       if (this.view && !this.view.isDestroyed) {
         this.update(this.view);
@@ -41,7 +36,7 @@ export class BubbleMenuView {
 
   update(view: EditorView) {
     if (!view || view.isDestroyed) return;
-    
+
     const { state } = view;
     const { selection } = state;
     const { from, to, empty } = selection;
@@ -55,27 +50,26 @@ export class BubbleMenuView {
 
   show() {
     if (!this.element) return;
-    this.element.style.display = 'flex';
-    this.element.style.visibility = 'visible';
+    this.element.style.display = "flex";
+    this.element.style.visibility = "visible";
     this.updatePosition();
   }
 
   hide() {
     if (!this.element) return;
-    this.element.style.display = 'none';
-    this.element.style.visibility = 'hidden';
+    this.element.style.display = "none";
+    this.element.style.visibility = "hidden";
   }
 
   updatePosition() {
     if (!this.view || this.view.isDestroyed || !this.element) return;
-    
+
     const { selection } = this.view.state;
     const { from, to } = selection;
 
     try {
       const start = this.view.coordsAtPos(from);
       const end = this.view.coordsAtPos(to);
-
 
       const left = (start.left + end.left) / 2;
       const top = start.top;
@@ -85,11 +79,11 @@ export class BubbleMenuView {
       const menuHeight = this.element.offsetHeight || 40;
 
       let posTop = top - padding;
-      let transform = 'translateX(-50%) translateY(-100%)';
+      let transform = "translateX(-50%) translateY(-100%)";
 
       if (top - menuHeight - padding < headerHeight) {
         posTop = end.bottom + padding;
-        transform = 'translateX(-50%) translateY(0)';
+        transform = "translateX(-50%) translateY(0)";
       }
 
       this.element.style.top = `${posTop}px`;
@@ -106,13 +100,13 @@ export class BubbleMenuView {
 }
 
 export const BubbleMenu = (options: BubbleMenuPluginProps): Extension => {
-  return {
-    name: 'bubbleMenu',
+  return Extension.create({
+    name: "bubbleMenu",
     addProseMirrorPlugins: () => [
       new Plugin({
         key: BubbleMenuPluginKey,
         view: (view) => new BubbleMenuView({ ...options, view }),
       }),
     ],
-  };
+  });
 };

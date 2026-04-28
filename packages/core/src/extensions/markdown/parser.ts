@@ -47,18 +47,21 @@ export function markdownToHtml(markdown: string): string {
   html = html.replace(/^[*+-] (.*$)/gim, "<ul><li><p>$1</p></li></ul>");
   // Lists (Ordered)
   html = html.replace(/^\d+\. (.*$)/gim, "<ol><li><p>$1</p></li></ol>");
-  
+
   // Merge consecutive lists of same type
   html = html.replace(/<\/ul><ul>/g, "");
   html = html.replace(/<\/ol><ol>/g, "");
 
   // Paragraphs (for lines that are not already tagged)
-  html = html.split("\n").map(line => {
-    const trimmed = line.trim();
-    if (trimmed.length === 0) return "";
-    if (trimmed.startsWith("<") && (trimmed.endsWith(">") || trimmed.includes("/>"))) return line;
-    return `<p>${line}</p>`;
-  }).join("");
+  html = html
+    .split("\n")
+    .map((line) => {
+      const trimmed = line.trim();
+      if (trimmed.length === 0) return "";
+      if (trimmed.startsWith("<") && (trimmed.endsWith(">") || trimmed.includes("/>"))) return line;
+      return `<p>${line}</p>`;
+    })
+    .join("");
 
   return html;
 }

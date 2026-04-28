@@ -7,28 +7,28 @@ Arkpad is a ProseMirror-based rich text editor framework. It provides a small, s
 ### Core
 
 ```ts
-import { ArkpadEditor } from '@arkpad/core'
+import { ArkpadEditor } from "@arkpad/core";
 
 const editor = new ArkpadEditor({
-  element: document.querySelector('#editor')!,
-  content: '<p>Hello World</p>',
+  element: document.querySelector("#editor")!,
+  content: "<p>Hello World</p>",
   autofocus: true,
-})
+});
 ```
 
 ### React
 
 ```tsx
-import { ArkpadEditorComponent } from '@arkpad/react'
+import { ArkpadEditorComponent } from "@arkpad/react";
 
 function App() {
   return (
     <ArkpadEditorComponent
       content="<p>Write here</p>"
       onChange={({ html, json }) => console.log(html)}
-      onReady={(editor) => console.log('Ready!')}
+      onReady={(editor) => console.log("Ready!")}
     />
-  )
+  );
 }
 ```
 
@@ -36,21 +36,21 @@ function App() {
 
 ## Editor Methods
 
-| Method | Description |
-|--------|------------|
-| `getState()` | Get current ProseMirror state |
-| `getHTML()` | Serialize document to HTML |
-| `getJSON()` | Serialize document to JSON |
-| `getText()` | Extract plain text |
-| `runCommand(name)` | Run a command by name |
-| `canRunCommand(name)` | Check if command can run |
-| `setContent(content)` | Replace document content |
-| `clearContent()` | Reset to empty paragraph |
-| `focus()` / `blur()` | Control focus |
-| `setEditable(boolean)` | Toggle editability |
-| `registerExtension(ext)` | Add runtime extension |
-| `registerExtensions(exts)` | Add multiple extensions |
-| `destroy()` | Cleanup editor |
+| Method                     | Description                   |
+| -------------------------- | ----------------------------- |
+| `getState()`               | Get current ProseMirror state |
+| `getHTML()`                | Serialize document to HTML    |
+| `getJSON()`                | Serialize document to JSON    |
+| `getText()`                | Extract plain text            |
+| `runCommand(name)`         | Run a command by name         |
+| `canRunCommand(name)`      | Check if command can run      |
+| `setContent(content)`      | Replace document content      |
+| `clearContent()`           | Reset to empty paragraph      |
+| `focus()` / `blur()`       | Control focus                 |
+| `setEditable(boolean)`     | Toggle editability            |
+| `registerExtension(ext)`   | Add runtime extension         |
+| `registerExtensions(exts)` | Add multiple extensions       |
+| `destroy()`                | Cleanup editor                |
 
 ---
 
@@ -58,14 +58,14 @@ function App() {
 
 ```ts
 interface ArkpadEditorOptions {
-  element: HTMLElement          // Required: DOM element to mount
-  content?: string | object    // Initial content (HTML or JSON)
-  editable?: boolean          // Default: true
-  extensions?: Extension[]   // Custom extensions
-  autofocus?: boolean         // Focus on mount
-  onCreate?: (editor) => void
-  onUpdate?: (payload) => void
-  onDestroy?: (editor) => void
+  element: HTMLElement; // Required: DOM element to mount
+  content?: string | object; // Initial content (HTML or JSON)
+  editable?: boolean; // Default: true
+  extensions?: Extension[]; // Custom extensions
+  autofocus?: boolean; // Focus on mount
+  onCreate?: (editor) => void;
+  onUpdate?: (payload) => void;
+  onDestroy?: (editor) => void;
 }
 ```
 
@@ -75,38 +75,38 @@ interface ArkpadEditorOptions {
 
 ### Text Formatting
 
-| Command | Shortcut | Description |
-|---------|----------|-------------|
-| `toggleBold` | Mod+B | Toggle bold |
-| `toggleItalic` | Mod+I | Toggle italic |
-| `toggleUnderline` | Mod+U | Toggle underline |
-| `toggleStrike` | Mod+Shift+S | Toggle strikethrough |
-| `toggleCode` | Mod+E | Toggle inline code |
-| `toggleHighlight` | - | Toggle highlight |
-| `toggleSuperscript` | - | Toggle superscript |
-| `toggleSubscript` | - | Toggle subscript |
+| Command             | Shortcut    | Description          |
+| ------------------- | ----------- | -------------------- |
+| `toggleBold`        | Mod+B       | Toggle bold          |
+| `toggleItalic`      | Mod+I       | Toggle italic        |
+| `toggleUnderline`   | Mod+U       | Toggle underline     |
+| `toggleStrike`      | Mod+Shift+S | Toggle strikethrough |
+| `toggleCode`        | Mod+E       | Toggle inline code   |
+| `toggleHighlight`   | -           | Toggle highlight     |
+| `toggleSuperscript` | -           | Toggle superscript   |
+| `toggleSubscript`   | -           | Toggle subscript     |
 
 ### Block formatting
 
-| Command | Shortcut | Description |
-|---------|----------|-------------|
-| `setParagraph` | - | Set paragraph block |
-| `toggleHeading` | Mod+Alt+1/2/3 | Set heading (1-6) |
-| `toggleBlockquote` | Mod+Shift+B | Toggle blockquote |
-| `toggleCodeBlock` | Mod+Alt+C | Toggle code block |
-| `toggleBulletList` | Mod+Shift+8 | Toggle bullet list |
-| `toggleOrderedList` | Mod+Shift+7 | Toggle ordered list |
-| `toggleTaskList` | Mod+Shift+9 | Toggle task list |
-| `toggleTaskItem` | - | Toggle task checkbox |
-| `setHorizontalRule` | - | Insert horizontal rule |
-| `setImage` | - | Insert image |
+| Command             | Shortcut      | Description            |
+| ------------------- | ------------- | ---------------------- |
+| `setParagraph`      | -             | Set paragraph block    |
+| `toggleHeading`     | Mod+Alt+1/2/3 | Set heading (1-6)      |
+| `toggleBlockquote`  | Mod+Shift+B   | Toggle blockquote      |
+| `toggleCodeBlock`   | Mod+Alt+C     | Toggle code block      |
+| `toggleBulletList`  | Mod+Shift+8   | Toggle bullet list     |
+| `toggleOrderedList` | Mod+Shift+7   | Toggle ordered list    |
+| `toggleTaskList`    | Mod+Shift+9   | Toggle task list       |
+| `toggleTaskItem`    | -             | Toggle task checkbox   |
+| `setHorizontalRule` | -             | Insert horizontal rule |
+| `setImage`          | -             | Insert image           |
 
 ### History
 
 | Command | Shortcut |
-|---------|----------|
-| `undo` | Mod+Z |
-| `redo` | Mod+Y |
+| ------- | -------- |
+| `undo`  | Mod+Z    |
+| `redo`  | Mod+Y    |
 
 ---
 
@@ -116,12 +116,12 @@ interface ArkpadEditorOptions {
 
 ```ts
 interface Extension {
-  name: string
-  addCommands?: () => Record<string, Command>
-  addKeyboardShortcuts?: () => Record<string, Command>
-  addInputRules?: () => Plugin[]
-  addPasteRules?: () => Plugin[]
-  addProseMirrorPlugins?: () => Plugin[]
+  name: string;
+  addCommands?: () => Record<string, Command>;
+  addKeyboardShortcuts?: () => Record<string, Command>;
+  addInputRules?: () => Plugin[];
+  addPasteRules?: () => Plugin[];
+  addProseMirrorPlugins?: () => Plugin[];
 }
 ```
 
@@ -130,41 +130,43 @@ interface Extension {
 ```ts
 function createHighlight() {
   return {
-    name: 'highlight',
+    name: "highlight",
     addCommands: () => ({
       toggleHighlight: (state, dispatch) => {
         // Custom toggle logic
-        return true
+        return true;
       },
     }),
     addKeyboardShortcuts: () => ({
-      'Mod-Shift-h': () => ({ state, dispatch }) => {
-        // Toggle highlight
-        return true
-      },
+      "Mod-Shift-h":
+        () =>
+        ({ state, dispatch }) => {
+          // Toggle highlight
+          return true;
+        },
     }),
-  }
+  };
 }
 
 // Register it
-editor.registerExtension(createHighlight())
+editor.registerExtension(createHighlight());
 
 // Run it
-editor.runCommand('toggleHighlight')
+editor.runCommand("toggleHighlight");
 ```
 
 ---
 
 ## Keyboard Shortcuts
 
-| Shortcut | Action |
-|---------|--------|
-| Mod+B | Bold |
-| Mod+I | Italic |
-| Mod+U | Underline |
-| Mod+E | Code |
-| Mod+Z | Undo |
-| Mod+Y | Redo |
+| Shortcut  | Action    |
+| --------- | --------- |
+| Mod+B     | Bold      |
+| Mod+I     | Italic    |
+| Mod+U     | Underline |
+| Mod+E     | Code      |
+| Mod+Z     | Undo      |
+| Mod+Y     | Redo      |
 | Mod+Alt+1 | Heading 1 |
 | Mod+Alt+2 | Heading 2 |
 | Mod+Alt+3 | Heading 3 |
@@ -186,7 +188,6 @@ The core package contains:
 - `ArkpadEditor` - Main editor class
 - `arkpadSchema` - ProseMirror schema
 - `ExtensionManager` - Manages extensions
-- `createDefaultExtensions()` - Built-in extensions
 - Type definitions
 
 ---

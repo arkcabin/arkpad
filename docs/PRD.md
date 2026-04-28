@@ -43,7 +43,7 @@ Arkpad will provide a modern, extensible rich-text editing library that is easy 
 
 - Time to first editor render < 5 minutes for new developers.
 - Integration in at least one Arkpad app.
-- >= 80% unit test coverage in core package.
+- > = 80% unit test coverage in core package.
 
 ## 8. Milestones
 

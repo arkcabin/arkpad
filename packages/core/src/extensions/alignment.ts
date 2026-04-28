@@ -1,4 +1,4 @@
-import { Extension } from "../extensions-types";
+import { Extension } from "./Extension";
 import { setTextAlign } from "./utils";
 
 export const TEXT_ALIGN = {
@@ -11,9 +11,21 @@ export const TEXT_ALIGN = {
 export type TextAlign = (typeof TEXT_ALIGN)[keyof typeof TEXT_ALIGN];
 
 export function createTextAlign(): Extension {
-  return {
+  return Extension.create({
     name: "textAlign",
     addCommands: () => ({
+      /**
+       * Set text alignment for the current block.
+       * Handles both direct string and object arguments.
+       */
+      setTextAlign: (args: string | { align: string }) => {
+        const align = typeof args === "string" ? args : args.align;
+        return setTextAlign(align);
+      },
+
+      /**
+       * Convenience commands for common alignments.
+       */
       setTextAlignLeft: () => setTextAlign(TEXT_ALIGN.LEFT),
       setTextAlignCenter: () => setTextAlign(TEXT_ALIGN.CENTER),
       setTextAlignRight: () => setTextAlign(TEXT_ALIGN.RIGHT),
@@ -24,5 +36,5 @@ export function createTextAlign(): Extension {
       "Mod-Shift-e": () => setTextAlign(TEXT_ALIGN.CENTER),
       "Mod-Shift-r": () => setTextAlign(TEXT_ALIGN.RIGHT),
     }),
-  };
+  });
 }

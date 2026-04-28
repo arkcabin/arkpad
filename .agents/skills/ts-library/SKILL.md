@@ -84,13 +84,13 @@ Patterns for authoring high-quality TypeScript libraries, extracted from studyin
 
 ```ts
 // tsdown.config.ts
-import { defineConfig } from 'tsdown'
+import { defineConfig } from "tsdown";
 
 export default defineConfig({
-  entry: ['src/index.ts'],
-  format: ['esm', 'cjs'],
+  entry: ["src/index.ts"],
+  format: ["esm", "cjs"],
   dts: true,
-})
+});
 ```
 
 ## Key Principles

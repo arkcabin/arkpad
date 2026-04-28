@@ -10,12 +10,7 @@ const tsconfigRootDir = dirname(fileURLToPath(import.meta.url));
 
 export default [
   {
-    ignores: [
-      "**/dist/**",
-      "**/node_modules/**",
-      "**/*.d.ts",
-      "**/.agents/**",
-    ],
+    ignores: ["**/dist/**", "**/node_modules/**", "**/*.d.ts", "**/.agents/**"],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
@@ -52,10 +47,7 @@ export default [
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
-      "react-refresh/only-export-components": [
-        "warn",
-        { allowConstantExport: true },
-      ],
+      "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
       "@typescript-eslint/no-explicit-any": "off",
     },
   },

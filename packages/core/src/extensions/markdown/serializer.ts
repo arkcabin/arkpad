@@ -69,7 +69,7 @@ export class MarkdownSerializer {
 
   private serializeText(node: PMNode): string {
     let text = node.text || "";
-    
+
     node.marks.forEach((mark) => {
       switch (mark.type.name) {
         case "strong":

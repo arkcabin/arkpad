@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Bold,
   Italic,
@@ -24,16 +24,28 @@ import {
   AlignJustify,
   Indent,
   Outdent,
-  Superscript,
-  Subscript,
+  Superscript as SuperscriptIcon,
+  Subscript as SubscriptIcon,
   Sun,
   Moon,
-  Plus,
-  ChevronDown,
   Highlighter,
+  Eraser,
+  Search,
+  Replace,
+  MousePointer2,
+  Lock,
+  Unlock,
+  Plus,
 } from "lucide-react";
 
-import { useArkpadEditor, ArkpadEditorContent, BubbleMenu, FloatingMenu } from "@arkpad/react";
+import {
+  useArkpadEditor,
+  ArkpadEditorContent,
+  useEditorState,
+  ArkpadProvider,
+} from "@arkpad/react";
+import { CharacterCount } from "@arkpad/core";
+import type { ArkpadEditorAPI } from "@arkpad/core";
 
 interface ToolbarButtonProps {
   onClick: () => void;
@@ -41,23 +53,79 @@ interface ToolbarButtonProps {
   disabled?: boolean;
   children: React.ReactNode;
   title?: string;
+  variant?: "default" | "danger" | "success" | "brand";
 }
 
 const ToolbarButton = React.forwardRef<HTMLButtonElement, ToolbarButtonProps>(
-  ({ onClick, isActive, disabled, children, title }, ref) => (
+  ({ onClick, isActive, disabled, children, title, variant = "default" }, ref) => (
     <button
       ref={ref}
+      onMouseDown={(e) => e.preventDefault()}
       onClick={onClick}
       disabled={disabled}
       title={title}
-      className={`toolbar-btn ${isActive ? "active" : ""}`}
+      className={`toolbar-btn ${isActive ? "active" : ""} variant-${variant}`}
     >
       {children}
     </button>
   )
 );
 
-const ToolbarSeparator = () => <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1" />;
+function MenuButton({
+  editor,
+  command,
+  name,
+  attrs,
+  children,
+  title,
+}: {
+  editor: ArkpadEditorAPI;
+  command: string;
+  name: string;
+  attrs?: any;
+  children: React.ReactNode;
+  title?: string;
+}) {
+  const active = useEditorState(editor, (s) => s.isActive(name, attrs));
+  const disabled = useEditorState(editor, (s) => !s.canRunCommand(command, attrs));
+
+  return (
+    <ToolbarButton
+      onClick={() => editor.runCommand(command, attrs)}
+      isActive={!!active}
+      disabled={disabled ?? false}
+      title={title}
+    >
+      {children}
+    </ToolbarButton>
+  );
+}
+
+const ToolbarSeparator = () => (
+  <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1 opacity-50" />
+);
+
+function EditorFooter({ editor, isLocked }: { editor: ArkpadEditorAPI; isLocked: boolean }) {
+  const characters = useEditorState(editor, (s) => s.storage.characterCount?.characters ?? 0);
+  const words = useEditorState(editor, (s) => s.storage.characterCount?.words ?? 0);
+
+  return (
+    <div className="editor-footer">
+      <div className="footer-left">
+        <span className={isLocked ? "text-red-500 animate-pulse" : "text-green-500"}>
+          {isLocked ? "Middleware Locked" : "System Online"}
+        </span>
+        <span>{characters} Characters</span>
+        <span>{words} Words</span>
+        <span className="text-brand opacity-60 font-black">FRAMEWORK PARITY: 100%</span>
+      </div>
+      <div className="footer-right">
+        <span>Production Grade Headless Engine</span>
+        <span>Refreshed 2026</span>
+      </div>
+    </div>
+  );
+}
 
 export function App() {
   const [isDark, setIsDark] = useState(() => {
@@ -70,6 +138,13 @@ export function App() {
     return false;
   });
 
+  const [isLocked, setIsLocked] = useState(false);
+  const isLockedRef = useRef(isLocked);
+
+  useEffect(() => {
+    isLockedRef.current = isLocked;
+  }, [isLocked]);
+
   useEffect(() => {
     if (isDark) {
       document.documentElement.classList.add("dark");
@@ -80,363 +155,368 @@ export function App() {
     }
   }, [isDark]);
 
-  // THE NEW CLEAN API: Simple, Declarative, and Auto-Reactive
   const editor = useArkpadEditor({
+    extensions: [
+      CharacterCount,
+      {
+        name: "h4Theme",
+        addGlobalAttributes() {
+          return [
+            {
+              types: ["heading"],
+              attributes: {
+                class: {
+                  default: null,
+                  renderHTML: (attrs: Record<string, any>) => {
+                    if (attrs.level === 4) return { class: "my-custom-h4-styling" };
+                    return null;
+                  },
+                },
+              },
+            },
+          ];
+        },
+      },
+    ],
     content:
-      "<p>Welcome to <strong>Test</strong> — now with the simplest API ever.</p><p>We have introduced the <code>useArkpadEditor</code> hook to make your life easy.</p>",
+      "<h1>The Ultimate Arkpad UI</h1><p>Every single core feature is now active. From <strong>Formatting</strong> and <strong>Lists</strong> to <strong>Master APIs</strong> like Search/Replace and Middleware Interceptors. Try it all!</p><h4>I am a Header 4 with a Global Style!</h4><p>I was styled automatically via the Global Attribute API.</p>",
+    onInterceptor: () => {
+      if (isLockedRef.current) {
+        console.warn("Arkpad: Transaction blocked by Interceptor Middleware.");
+        return false;
+      }
+      return true;
+    },
+    onSelectionUpdate: ({ coords }) => {
+      console.log("Selection moved to:", coords);
+    },
+    onPaste: ({ event }) => {
+      console.log("Content pasted:", event.clipboardData?.getData("text/plain"));
+    },
   });
+
+  // Expose editor to window for console debugging
+  useEffect(() => {
+    if (editor && typeof window !== "undefined") {
+      (window as any).editor = editor;
+    }
+  }, [editor]);
 
   if (!editor) {
     return null;
   }
 
-  const run = (command: string, value?: any) => editor.runCommand(command, value);
-  const isActive = (name: string, attrs?: Record<string, any>) => editor.isActive(name, attrs);
-
-  const canUndo = editor.canRunCommand("undo");
-  const canRedo = editor.canRunCommand("redo");
-
   return (
-    <div className="min-h-screen bg-[#fafafa] dark:bg-[#000000] py-8 md:py-12 px-4 transition-colors duration-300">
-      <div className="max-w-[1200px] mx-auto">
-        <div className="editor-wrapper border-slate-200/50 dark:border-slate-800/50 shadow-sm">
-          {/* Toolbar */}
-          <div className="toolbar-wrapper">
-            <div className="toolbar-group">
-              <ToolbarButton
-                onClick={() => run("toggleBold")}
-                isActive={isActive("strong")}
-                title="Bold"
-              >
-                <Bold className="w-4 h-4" />
-              </ToolbarButton>
-              <ToolbarButton
-                onClick={() => run("toggleItalic")}
-                isActive={isActive("em")}
-                title="Italic"
-              >
-                <Italic className="w-4 h-4" />
-              </ToolbarButton>
-              <ToolbarButton
-                onClick={() => run("toggleUnderline")}
-                isActive={isActive("underline")}
-                title="Underline"
-              >
-                <Underline className="w-4 h-4" />
-              </ToolbarButton>
-              <ToolbarButton
-                onClick={() => run("toggleStrike")}
-                isActive={isActive("strike")}
-                title="Strikethrough"
-              >
-                <Strikethrough className="w-4 h-4" />
-              </ToolbarButton>
-              <ToolbarButton
-                onClick={() => run("toggleCode")}
-                isActive={isActive("code")}
-                title="Inline Code"
-              >
-                <Code className="w-4 h-4" />
-              </ToolbarButton>
-              <ToolbarButton
-                onClick={() => {
-                  const url = window.prompt("Enter URL:", "https://");
-                  if (url) {
-                    editor.runCommand("toggleLink", url);
-                  }
-                }}
-                isActive={isActive("link")}
-                title="Link"
-              >
-                <LinkIcon className="w-4 h-4" />
-              </ToolbarButton>
-          </div>
+    <ArkpadProvider editor={editor}>
+      <div className="min-h-screen bg-[#fafafa] dark:bg-[#000000] py-8 md:py-12 px-4 transition-colors duration-300">
+        <div className="max-w-[1300px] mx-auto">
+          <div className="editor-wrapper border-slate-200/50 dark:border-slate-800/50 shadow-2xl">
+            <div className="toolbar-wrapper p-2 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md sticky top-0 z-10">
+              <div className="toolbar-group">
+                <MenuButton editor={editor} command="toggleBold" name="strong" title="Bold">
+                  <Bold className="w-4 h-4" />
+                </MenuButton>
+                <MenuButton editor={editor} command="toggleItalic" name="em" title="Italic">
+                  <Italic className="w-4 h-4" />
+                </MenuButton>
+                <MenuButton
+                  editor={editor}
+                  command="toggleUnderline"
+                  name="underline"
+                  title="Underline"
+                >
+                  <Underline className="w-4 h-4" />
+                </MenuButton>
+                <MenuButton
+                  editor={editor}
+                  command="toggleStrike"
+                  name="strike"
+                  title="Strikethrough"
+                >
+                  <Strikethrough className="w-4 h-4" />
+                </MenuButton>
+                <MenuButton
+                  editor={editor}
+                  command="toggleHighlight"
+                  name="highlight"
+                  title="Highlight"
+                >
+                  <Highlighter className="w-4 h-4" />
+                </MenuButton>
+                <MenuButton editor={editor} command="toggleCode" name="code" title="Inline Code">
+                  <Code className="w-4 h-4" />
+                </MenuButton>
+                <ToolbarButton
+                  onClick={() => {
+                    const url = window.prompt("Enter URL:", "https://");
+                    if (url) editor?.runCommand("toggleLink", url);
+                  }}
+                  isActive={editor?.isActive("link")}
+                  title="Link"
+                >
+                  <LinkIcon className="w-4 h-4" />
+                </ToolbarButton>
+                <MenuButton
+                  editor={editor}
+                  command="toggleSuperscript"
+                  name="superscript"
+                  title="Superscript"
+                >
+                  <SuperscriptIcon className="w-4 h-4" />
+                </MenuButton>
+                <MenuButton
+                  editor={editor}
+                  command="toggleSubscript"
+                  name="subscript"
+                  title="Subscript"
+                >
+                  <SubscriptIcon className="w-4 h-4" />
+                </MenuButton>
+                <ToolbarButton
+                  onClick={() => editor?.runCommand("unsetAllMarks")}
+                  title="Clear Formatting"
+                >
+                  <Eraser className="w-4 h-4" />
+                </ToolbarButton>
+              </div>
 
-            <ToolbarSeparator />
+              <ToolbarSeparator />
 
-            <div className="toolbar-group">
-              <ToolbarButton
-                onClick={() => run("toggleHighlight")}
-                isActive={isActive("highlight")}
-                title="Highlight"
-              >
-                <Highlighter className="w-4 h-4" />
-              </ToolbarButton>
-          </div>
+              <div className="toolbar-group">
+                <MenuButton
+                  editor={editor}
+                  command="toggleHeading"
+                  attrs={{ level: 1 }}
+                  name="heading"
+                  title="H1"
+                >
+                  <Heading1 className="w-4 h-4" />
+                </MenuButton>
+                <MenuButton
+                  editor={editor}
+                  command="toggleHeading"
+                  attrs={{ level: 2 }}
+                  name="heading"
+                  title="H2"
+                >
+                  <Heading2 className="w-4 h-4" />
+                </MenuButton>
+                <MenuButton
+                  editor={editor}
+                  command="toggleHeading"
+                  attrs={{ level: 3 }}
+                  name="heading"
+                  title="H3"
+                >
+                  <Heading3 className="w-4 h-4" />
+                </MenuButton>
+                <ToolbarButton
+                  onClick={() => editor.commands.toggleHeading?.({ level: 4 })}
+                  isActive={editor.isActive("heading", { level: 4 })}
+                  title="H4 (Custom Proxy API)"
+                >
+                  <span className="text-[10px] font-bold">H4</span>
+                </ToolbarButton>
+                <MenuButton
+                  editor={editor}
+                  command="toggleBlockquote"
+                  name="blockquote"
+                  title="Blockquote"
+                >
+                  <Quote className="w-4 h-4" />
+                </MenuButton>
+                <ToolbarButton
+                  onClick={() => editor?.runCommand("toggleCodeBlock")}
+                  title="Code Block"
+                >
+                  <Terminal className="w-4 h-4" />
+                </ToolbarButton>
+                <ToolbarButton
+                  onClick={() => editor?.runCommand("setHorizontalRule")}
+                  title="Horizontal Rule"
+                >
+                  <Minus className="w-4 h-4" />
+                </ToolbarButton>
+              </div>
 
-            <ToolbarSeparator />
+              <ToolbarSeparator />
 
-            <div className="toolbar-group">
-              <ToolbarButton
-                onClick={() => run("toggleSuperscript")}
-                isActive={isActive("superscript")}
-                title="Superscript"
-              >
-                <Superscript className="w-4 h-4" />
-              </ToolbarButton>
-              <ToolbarButton
-                onClick={() => run("toggleSubscript")}
-                isActive={isActive("subscript")}
-                title="Subscript"
-              >
-                <Subscript className="w-4 h-4" />
-              </ToolbarButton>
-          </div>
+              <div className="toolbar-group">
+                <MenuButton
+                  editor={editor}
+                  command="toggleBulletList"
+                  name="bulletList"
+                  title="Bullet List"
+                >
+                  <List className="w-4 h-4" />
+                </MenuButton>
+                <MenuButton
+                  editor={editor}
+                  command="toggleOrderedList"
+                  name="orderedList"
+                  title="Ordered List"
+                >
+                  <ListOrdered className="w-4 h-4" />
+                </MenuButton>
+                <MenuButton
+                  editor={editor}
+                  command="toggleTaskList"
+                  name="taskList"
+                  title="Task List"
+                >
+                  <CheckSquare className="w-4 h-4" />
+                </MenuButton>
+                <ToolbarButton onClick={() => editor.runCommand("indentList")} title="Indent">
+                  <Indent className="w-4 h-4" />
+                </ToolbarButton>
+                <ToolbarButton onClick={() => editor.runCommand("outdentList")} title="Outdent">
+                  <Outdent className="w-4 h-4" />
+                </ToolbarButton>
+              </div>
 
-            <ToolbarSeparator />
+              <ToolbarSeparator />
 
-            <div className="toolbar-group">
-              <ToolbarButton
-                onClick={() => run("toggleHeading", { level: 1 })}
-                isActive={isActive("heading", { level: 1 })}
-                title="H1"
-              >
-                <div className="flex items-center gap-0.5">
-                  <span className="text-xs font-bold">H</span>
-                  <ChevronDown className="w-3 h-3 opacity-50" />
-                </div>
-              </ToolbarButton>
-              <ToolbarButton
-                onClick={() => run("toggleHeading", { level: 2 })}
-                isActive={isActive("heading", { level: 2 })}
-                title="H2"
-              >
-                <Heading2 className="w-4 h-4" />
-              </ToolbarButton>
-              <ToolbarButton
-                onClick={() => run("toggleHeading", { level: 3 })}
-                isActive={isActive("heading", { level: 3 })}
-                title="H3"
-              >
-                <Heading3 className="w-4 h-4" />
-              </ToolbarButton>
-              <ToolbarButton
-                onClick={() => run("toggleHeading", { level: 4 })}
-                isActive={isActive("heading", { level: 4 })}
-                title="H4"
-              >
-                <span className="text-xs font-bold">H4</span>
-              </ToolbarButton>
-          </div>
+              <div className="toolbar-group">
+                <MenuButton
+                  editor={editor}
+                  command="setTextAlign"
+                  attrs={{ align: "left" }}
+                  name="textAlign"
+                  title="Align Left"
+                >
+                  <AlignLeft className="w-4 h-4" />
+                </MenuButton>
+                <MenuButton
+                  editor={editor}
+                  command="setTextAlign"
+                  attrs={{ align: "center" }}
+                  name="textAlign"
+                  title="Align Center"
+                >
+                  <AlignCenter className="w-4 h-4" />
+                </MenuButton>
+                <MenuButton
+                  editor={editor}
+                  command="setTextAlign"
+                  attrs={{ align: "right" }}
+                  name="textAlign"
+                  title="Align Right"
+                >
+                  <AlignRight className="w-4 h-4" />
+                </MenuButton>
+                <MenuButton
+                  editor={editor}
+                  command="setTextAlign"
+                  attrs={{ align: "justify" }}
+                  name="textAlign"
+                  title="Justify"
+                >
+                  <AlignJustify className="w-4 h-4" />
+                </MenuButton>
+              </div>
 
-            <ToolbarSeparator />
+              <ToolbarSeparator />
 
-            <div className="toolbar-group">
-              <button className="inline-flex items-center gap-1 px-3 h-8 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors">
-                <Plus className="w-3.5 h-3.5" />
-                Add
-              </button>
-          </div>
+              <div className="toolbar-group bg-brand/5 dark:bg-brand/10 p-1 rounded-md border border-brand/20">
+                <ToolbarButton
+                  onClick={() => {
+                    const query = window.prompt("Search for:");
+                    if (query) {
+                      const results = editor.search(query);
+                      alert(`Found ${results.length} matches.`);
+                      const firstMatch = results[0];
+                      if (firstMatch)
+                        editor.setSelection({ from: firstMatch.from, to: firstMatch.to });
+                    }
+                  }}
+                  title="Search Document"
+                  variant="brand"
+                >
+                  <Search className="w-4 h-4" />
+                </ToolbarButton>
+                <ToolbarButton
+                  onClick={() => {
+                    const query = window.prompt("Replace word:");
+                    const replacement = window.prompt("With:");
+                    if (query && replacement) editor.replace(query, replacement);
+                  }}
+                  title="Search & Replace"
+                  variant="brand"
+                >
+                  <Replace className="w-4 h-4" />
+                </ToolbarButton>
+                <ToolbarButton
+                  onClick={() => editor.selectAll()}
+                  title="Select Everything"
+                  variant="brand"
+                >
+                  <MousePointer2 className="w-4 h-4" />
+                </ToolbarButton>
+                <ToolbarButton
+                  onClick={() => setIsLocked(!isLocked)}
+                  isActive={isLocked}
+                  title={isLocked ? "Unlock Editor Actions" : "Lock Editor Actions (Middleware)"}
+                  variant={isLocked ? "danger" : "success"}
+                >
+                  {isLocked ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
+                </ToolbarButton>
+                <ToolbarButton
+                  onClick={() => {
+                    editor
+                      .chain()
+                      .focus("end")
+                      .insertContent("<p><strong>✨ Bulletproof Magic!</strong></p>", "html")
+                      .command(({ tr }) => {
+                        console.log("Current document size:", tr.doc.content.size);
+                        return true;
+                      })
+                      .scrollIntoView()
+                      .run();
+                  }}
+                  title="Test Bulletproof Chain"
+                  variant="brand"
+                >
+                  <Plus className="w-4 h-4 text-brand animate-bounce" />
+                </ToolbarButton>
+              </div>
 
-            <ToolbarSeparator />
+              <div className="flex-grow" />
 
-            <div className="toolbar-group">
-              <ToolbarButton
-                onClick={() => run("setTextAlignLeft")}
-                isActive={isActive("paragraph", { align: "left" })}
-                title="Align Left"
-              >
-                <AlignLeft className="w-4 h-4" />
-              </ToolbarButton>
-              <ToolbarButton
-                onClick={() => run("setTextAlignCenter")}
-                isActive={isActive("paragraph", { align: "center" })}
-                title="Align Center"
-              >
-                <AlignCenter className="w-4 h-4" />
-              </ToolbarButton>
-              <ToolbarButton
-                onClick={() => run("setTextAlignRight")}
-                isActive={isActive("paragraph", { align: "right" })}
-                title="Align Right"
-              >
-                <AlignRight className="w-4 h-4" />
-              </ToolbarButton>
-              <ToolbarButton
-                onClick={() => run("setTextAlignJustify")}
-                isActive={isActive("paragraph", { align: "justify" })}
-                title="Justify"
-              >
-                <AlignJustify className="w-4 h-4" />
-              </ToolbarButton>
-          </div>
+              <div className="toolbar-group">
+                <ToolbarButton
+                  onClick={() => {
+                    const url = window.prompt(
+                      "Image URL:",
+                      "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800"
+                    );
+                    if (url) editor.runCommand("setImage", { src: url });
+                  }}
+                  title="Insert Image"
+                >
+                  <ImageIcon className="w-4 h-4" />
+                </ToolbarButton>
+                <ToolbarSeparator />
+                <ToolbarButton onClick={() => editor.runCommand("undo")} title="Undo">
+                  <Undo2 className="w-4 h-4" />
+                </ToolbarButton>
+                <ToolbarButton onClick={() => editor.runCommand("redo")} title="Redo">
+                  <Redo2 className="w-4 h-4" />
+                </ToolbarButton>
+                <ToolbarSeparator />
+                <ToolbarButton onClick={() => setIsDark(!isDark)} title="Toggle Dark Mode">
+                  {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                </ToolbarButton>
+              </div>
+            </div>
 
-            <ToolbarSeparator />
-
-            <div className="toolbar-group">
-              <ToolbarButton
-                onClick={() => run("toggleBlockquote")}
-                isActive={isActive("blockquote")}
-                title="Blockquote"
-              >
-                <Quote className="w-4 h-4" />
-              </ToolbarButton>
-              <ToolbarButton
-                onClick={() => run("toggleCodeBlock")}
-                isActive={isActive("codeBlock")}
-                title="Code Block"
-              >
-                <Terminal className="w-4 h-4" />
-              </ToolbarButton>
-              <ToolbarButton onClick={() => run("setHorizontalRule")} title="Horizontal Rule">
-                <Minus className="w-4 h-4" />
-              </ToolbarButton>
-              <ToolbarButton
-                onClick={() => run("setImage", "https://picsum.photos/1200/600")}
-                title="Insert Image"
-              >
-                <ImageIcon className="w-4 h-4" />
-              </ToolbarButton>
-          </div>
-
-            <ToolbarSeparator />
-
-            <div className="toolbar-group">
-              <ToolbarButton
-                onClick={() => run("toggleBulletList")}
-                isActive={isActive("bulletList")}
-                title="Bullet List"
-              >
-                <List className="w-4 h-4" />
-              </ToolbarButton>
-              <ToolbarButton
-                onClick={() => run("toggleOrderedList")}
-                isActive={isActive("orderedList")}
-                title="Ordered List"
-              >
-                <ListOrdered className="w-4 h-4" />
-              </ToolbarButton>
-              <ToolbarButton
-                onClick={() => run("toggleTaskList")}
-                isActive={isActive("taskList")}
-                title="Task List"
-              >
-                <CheckSquare className="w-4 h-4" />
-              </ToolbarButton>
-              <ToolbarButton
-                onClick={() => run("indentList")}
-                isActive={false}
-                title="Indent (Tab)"
-              >
-                <Indent className="w-4 h-4" />
-              </ToolbarButton>
-              <ToolbarButton
-                onClick={() => run("outdentList")}
-                isActive={false}
-                title="Outdent (Shift+Tab)"
-              >
-                <Outdent className="w-4 h-4" />
-              </ToolbarButton>
-          </div>
-
-            <div className="flex-1 min-w-4" />
-
-            <div className="toolbar-group">
-              <ToolbarButton onClick={() => run("undo")} disabled={!canUndo} title="Undo">
-                <Undo2 className="w-4 h-4" />
-              </ToolbarButton>
-              <ToolbarButton onClick={() => run("redo")} disabled={!canRedo} title="Redo">
-                <Redo2 className="w-4 h-4" />
-              </ToolbarButton>
-          </div>
-
-            <ToolbarSeparator />
-
-            <div className="toolbar-group">
-              <ToolbarButton
-                onClick={() => setIsDark(!isDark)}
-                title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
-              >
-                {isDark ? (
-                  <Sun className="w-4 h-4 stroke-[1.5]" />
-                ) : (
-                  <Moon className="w-4 h-4 stroke-[1.5]" />
-                )}
-              </ToolbarButton>
-          </div>
-          </div>
-
-          {/* Editor Area */}
-          <div className="flex-1 p-10 md:p-24 min-h-[700px] relative transition-all duration-300">
-            <div className="max-w-3xl mx-auto">
-              <BubbleMenu editor={editor}>
-                <div className="flex items-center gap-1 bg-slate-900 text-white p-1.5 rounded-2xl shadow-2xl border border-white/10 animate-in fade-in zoom-in-95 duration-200">
-                  <button
-                    onClick={() => run("toggleHighlight")}
-                    className={`p-2 rounded-xl hover:bg-white/10 transition-all ${isActive("highlight") ? "text-yellow-400 bg-white/5" : "text-slate-300"}`}
-                  >
-                    <Highlighter className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => run("toggleBold")}
-                    className={`p-2 rounded-xl hover:bg-white/10 transition-all ${isActive("strong") ? "text-blue-400 bg-white/5" : "text-slate-300"}`}
-                  >
-                    <Bold className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => run("toggleItalic")}
-                    className={`p-2 rounded-xl hover:bg-white/10 transition-all ${isActive("em") ? "text-blue-400 bg-white/5" : "text-slate-300"}`}
-                  >
-                    <Italic className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => run("toggleSuperscript")}
-                    className={`p-2 rounded-xl hover:bg-white/10 transition-all ${isActive("superscript") ? "text-blue-400 bg-white/5" : "text-slate-300"}`}
-                  >
-                    <Superscript className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => run("toggleSubscript")}
-                    className={`p-2 rounded-xl hover:bg-white/10 transition-all ${isActive("subscript") ? "text-blue-400 bg-white/5" : "text-slate-300"}`}
-                  >
-                    <Subscript className="w-4 h-4" />
-                  </button>
-                  <div className="w-px h-4 bg-white/10 mx-1" />
-                  <button
-                    onClick={() => run("toggleLink", "https://")}
-                    className={`p-2 rounded-xl hover:bg-white/10 transition-all ${isActive("link") ? "text-blue-400 bg-white/5" : "text-slate-300"}`}
-                  >
-                    <LinkIcon className="w-4 h-4" />
-                  </button>
-                </div>
-              </BubbleMenu>
-
-              <FloatingMenu editor={editor}>
-                <div className="flex items-center bg-white rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.1)] border border-slate-200 p-1 animate-in fade-in slide-in-from-left-4 duration-300">
-                  <button
-                    onClick={() => run("toggleHeading", { level: 1 })}
-                    className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-50 text-slate-400 hover:text-blue-600 transition-all"
-                  >
-                    <Heading1 className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => run("toggleBulletList")}
-                    className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-50 text-slate-400 hover:text-blue-600 transition-all"
-                  >
-                    <List className="w-4 h-4" />
-                  </button>
-                </div>
-              </FloatingMenu>
-
-              {/* THE NEW CLEAN MOUNT COMPONENT */}
-              <ArkpadEditorContent editor={editor} />
+            <div className="editor-body">
+              <ArkpadEditorContent editor={editor} className="arkpad-container p-4 md:p-8 lg:p-12" />
             </div>
           </div>
-        </div>
 
-        <div className="flex items-center justify-between px-8 py-3 bg-white rounded-full shadow-sm border border-slate-200/60 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-          <div className="flex items-center gap-4">
-            <span className="flex items-center gap-1.5">
-              <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" /> Hook Enabled
-            </span>
-            <span>&bull;</span>
-            <span>ProseMirror Core</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <span>{editor.getHTML().length} Characters</span>
-          </div>
+          <EditorFooter editor={editor} isLocked={isLocked} />
         </div>
       </div>
-    </div>
+    </ArkpadProvider>
   );
 }
