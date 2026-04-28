@@ -12,7 +12,7 @@
   "author": "ArkCabin",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/arkcabin/arkpad.git",
+    "url": "https://github.com/arkcabin/arkpad",
     "directory": "packages/core"
   },
   "bugs": {
