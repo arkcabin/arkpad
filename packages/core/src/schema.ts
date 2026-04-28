@@ -9,9 +9,17 @@ const nodes = addListNodes(
       content: "inline*",
       group: "block",
       attrs: { align: { default: "left" } },
-      parseDOM: [{ tag: "p" }],
+      parseDOM: [
+        {
+          tag: "p",
+          getAttrs: (dom: HTMLElement) => ({
+            align: dom.style.textAlign || dom.getAttribute("data-align") || "left",
+          }),
+        },
+      ],
       toDOM(node) {
-        return ["p", { style: `text-align: ${node.attrs.align}` }, 0];
+        const { align } = node.attrs;
+        return ["p", { "data-align": align, style: align !== "left" ? `text-align: ${align}` : null }, 0];
       },
     })
     .append({
@@ -21,15 +29,20 @@ const nodes = addListNodes(
         group: "block",
         defining: true,
         parseDOM: [
-          { tag: "h1", attrs: { level: 1 } },
-          { tag: "h2", attrs: { level: 2 } },
-          { tag: "h3", attrs: { level: 3 } },
-          { tag: "h4", attrs: { level: 4 } },
-          { tag: "h5", attrs: { level: 5 } },
-          { tag: "h6", attrs: { level: 6 } },
+          { tag: "h1", getAttrs: (dom: HTMLElement) => ({ level: 1, align: dom.style.textAlign || dom.getAttribute("data-align") || "left" }) },
+          { tag: "h2", getAttrs: (dom: HTMLElement) => ({ level: 2, align: dom.style.textAlign || dom.getAttribute("data-align") || "left" }) },
+          { tag: "h3", getAttrs: (dom: HTMLElement) => ({ level: 3, align: dom.style.textAlign || dom.getAttribute("data-align") || "left" }) },
+          { tag: "h4", getAttrs: (dom: HTMLElement) => ({ level: 4, align: dom.style.textAlign || dom.getAttribute("data-align") || "left" }) },
+          { tag: "h5", getAttrs: (dom: HTMLElement) => ({ level: 5, align: dom.style.textAlign || dom.getAttribute("data-align") || "left" }) },
+          { tag: "h6", getAttrs: (dom: HTMLElement) => ({ level: 6, align: dom.style.textAlign || dom.getAttribute("data-align") || "left" }) },
         ],
         toDOM(node) {
-          return ["h" + node.attrs.level, { style: `text-align: ${node.attrs.align}` }, 0];
+          const { level, align } = node.attrs;
+          return [
+            "h" + level,
+            { "data-align": align, style: align !== "left" ? `text-align: ${align}` : null },
+            0,
+          ];
         },
       },
       blockquote: {
@@ -48,9 +61,20 @@ const nodes = addListNodes(
         code: true,
         defining: true,
         attrs: { language: { default: "" }, align: { default: "left" } },
-        parseDOM: [{ tag: "pre", preserveWhitespace: "full" }],
+        parseDOM: [{ 
+          tag: "pre", 
+          preserveWhitespace: "full",
+          getAttrs: (dom: HTMLElement) => ({
+            align: dom.style.textAlign || dom.getAttribute("data-align") || "left",
+          }),
+        }],
         toDOM(node) {
-          return ["pre", { style: `text-align: ${node.attrs.align}` }, ["code", 0]];
+          const { align } = node.attrs;
+          return [
+            "pre",
+            { "data-align": align, style: align !== "left" ? `text-align: ${align}` : null },
+            ["code", 0],
+          ];
         },
       },
       horizontalRule: {

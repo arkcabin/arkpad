@@ -112,6 +112,12 @@
     @apply bg-transparent p-0 text-inherit;
   }
 
+  /* Alignment Support */
+  .ProseMirror [data-align="left"] { text-align: left; }
+  .ProseMirror [data-align="center"] { text-align: center; }
+  .ProseMirror [data-align="right"] { text-align: right; }
+  .ProseMirror [data-align="justify"] { text-align: justify; }
+
   /* Robust List Styles - Avoiding Flexbox-Caret Bugs */
   .ProseMirror ul,
   .ProseMirror ol {

@@ -14,6 +14,18 @@ export function createTextAlign(): Extension {
   return {
     name: "textAlign",
     addCommands: () => ({
+      /**
+       * Set text alignment for the current block.
+       * Handles both direct string and object arguments.
+       */
+      setTextAlign: (args: string | { align: string }) => {
+        const align = typeof args === "string" ? args : args.align;
+        return setTextAlign(align);
+      },
+
+      /**
+       * Convenience commands for common alignments.
+       */
       setTextAlignLeft: () => setTextAlign(TEXT_ALIGN.LEFT),
       setTextAlignCenter: () => setTextAlign(TEXT_ALIGN.CENTER),
       setTextAlignRight: () => setTextAlign(TEXT_ALIGN.RIGHT),
