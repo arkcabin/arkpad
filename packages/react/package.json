@@ -1,7 +1,25 @@
 {
   "name": "@arkpad/react",
-  "version": "0.1.0",
+  "version": "1.3.0",
   "description": "React components and hooks for the Arkpad rich text editor.",
+  "keywords": [
+    "react",
+    "prosemirror",
+    "editor",
+    "rich-text",
+    "wysiwyg",
+    "arkpad"
+  ],
+  "author": "ArkCabin",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arkcabin/arkpad.git",
+    "directory": "packages/react"
+  },
+  "bugs": {
+    "url": "https://github.com/arkcabin/arkpad/issues"
+  },
+  "homepage": "https://github.com/arkcabin/arkpad/tree/main/packages/react#readme",
   "publishConfig": {
     "access": "public"
   },
@@ -25,7 +43,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@arkpad/core": "0.1.0",
+    "@arkpad/core": "1.3.0",
     "@radix-ui/react-checkbox": "^1.3.1",
     "clsx": "^2.1.1",
     "react": "^19.1.1",

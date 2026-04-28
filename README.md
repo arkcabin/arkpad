@@ -33,15 +33,14 @@ const editor = new ArkpadEditor({
 ### React
 
 ```tsx
-import { ArkpadEditorComponent } from '@arkpad/react'
+import { useArkpadEditor, ArkpadEditorContent } from '@arkpad/react'
 
 function App() {
-  return (
-    <ArkpadEditorComponent
-      content="<p>Write here...</p>"
-      onChange={({ html }) => console.log(html)}
-    />
-  )
+  const editor = useArkpadEditor({
+    content: '<p>Write here...</p>',
+  })
+
+  return <ArkpadEditorContent editor={editor} />
 }
 ```
 

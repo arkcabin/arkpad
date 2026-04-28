@@ -19,7 +19,7 @@
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "npm version ${nextRelease.version} --workspaces --no-git-tag-version",
+        "prepareCmd": "node scripts/sync-versions.js ${nextRelease.version}",
         "publishCmd": "npm publish -w @arkpad/core && npm publish -w @arkpad/react"
       }
     ],
