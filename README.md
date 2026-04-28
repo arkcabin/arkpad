@@ -20,10 +20,10 @@ Arkpad is an enterprise-grade rich text editor framework built on top of ProseMi
 
 Arkpad is distributed as a suite of specialized packages for maximum flexibility:
 
-| Package | Purpose | Version |
-| :--- | :--- | :--- |
-| [`@arkpad/core`](./packages/core) | The core engine & ProseMirror abstraction | ![npm](https://img.shields.io/npm/v/@arkpad/core?color=blue&style=flat-square) |
-| [`@arkpad/react`](./packages/react) | Premium React components & hooks | ![npm](https://img.shields.io/npm/v/@arkpad/react?color=blue&style=flat-square) |
+| Package                             | Purpose                                   | Version                                                                         |
+| :---------------------------------- | :---------------------------------------- | :------------------------------------------------------------------------------ |
+| [`@arkpad/core`](./packages/core)   | The core engine & ProseMirror abstraction | ![npm](https://img.shields.io/npm/v/@arkpad/core?color=blue&style=flat-square)  |
+| [`@arkpad/react`](./packages/react) | Premium React components & hooks          | ![npm](https://img.shields.io/npm/v/@arkpad/react?color=blue&style=flat-square) |
 
 ---
 
@@ -46,37 +46,37 @@ npm install @arkpad/core
 Arkpad provides a seamless React integration via the `useArkpadEditor` hook, ensuring perfect synchronization between editor state and your component tree.
 
 ```tsx
-import { useArkpadEditor, ArkpadEditorContent } from '@arkpad/react'
-import { StarterKit } from '@arkpad/core'
+import { useArkpadEditor, ArkpadEditorContent } from "@arkpad/react";
+import { StarterKit } from "@arkpad/core";
 
 function App() {
   const editor = useArkpadEditor({
     extensions: [StarterKit],
-    content: '<h1>Build something beautiful.</h1><p>Arkpad makes it easy.</p>',
+    content: "<h1>Build something beautiful.</h1><p>Arkpad makes it easy.</p>",
     onUpdate: ({ editor }) => {
-      console.log('Content changed:', editor.getHTML())
-    }
-  })
+      console.log("Content changed:", editor.getHTML());
+    },
+  });
 
   return (
     <div className="editor-container">
       <ArkpadEditorContent editor={editor} />
     </div>
-  )
+  );
 }
 ```
 
 ### Vanilla JavaScript
 
 ```ts
-import { ArkpadEditor } from '@arkpad/core'
-import { StarterKit } from '@arkpad/core'
+import { ArkpadEditor } from "@arkpad/core";
+import { StarterKit } from "@arkpad/core";
 
 const editor = new ArkpadEditor({
-  element: document.querySelector('#editor')!,
+  element: document.querySelector("#editor")!,
   extensions: [StarterKit],
-  content: '<p>The future of editing is here.</p>',
-})
+  content: "<p>The future of editing is here.</p>",
+});
 ```
 
 ---

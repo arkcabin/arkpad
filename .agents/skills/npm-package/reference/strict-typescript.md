@@ -39,10 +39,10 @@ Use `module: "nodenext"` for all published packages. Not `"bundler"`.
 
     // Interop
     "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
   },
   "include": ["src"],
-  "exclude": ["node_modules", "dist"]
+  "exclude": ["node_modules", "dist"],
 }
 ```
 
@@ -154,14 +154,14 @@ Use ESLint exclusively for type-aware rules that Biome cannot provide. Biome han
 ### eslint.config.ts
 
 ```typescript
-import tseslint from 'typescript-eslint';
+import tseslint from "typescript-eslint";
 
 export default tseslint.config(
   {
-    ignores: ['dist/', 'node_modules/', '*.config.*'],
+    ignores: ["dist/", "node_modules/", "*.config.*"],
   },
   {
-    files: ['src/**/*.ts'],
+    files: ["src/**/*.ts"],
     extends: [tseslint.configs.strictTypeChecked],
     languageOptions: {
       parserOptions: {
@@ -171,27 +171,27 @@ export default tseslint.config(
     },
     rules: {
       // Disable rules that Biome already covers
-      '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-unused-vars': 'off',
-      '@typescript-eslint/no-non-null-assertion': 'off',
-      '@typescript-eslint/consistent-type-imports': 'off',
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-unused-vars": "off",
+      "@typescript-eslint/no-non-null-assertion": "off",
+      "@typescript-eslint/consistent-type-imports": "off",
 
       // Keep the type-aware rules that Biome can't do
-      '@typescript-eslint/no-misused-promises': 'error',
-      '@typescript-eslint/await-thenable': 'error',
-      '@typescript-eslint/no-floating-promises': 'error',
-      '@typescript-eslint/no-unsafe-assignment': 'error',
-      '@typescript-eslint/no-unsafe-return': 'error',
-      '@typescript-eslint/no-unsafe-call': 'error',
-      '@typescript-eslint/no-unsafe-member-access': 'error',
-      '@typescript-eslint/no-unsafe-argument': 'error',
-      '@typescript-eslint/no-unnecessary-condition': 'error',
-      '@typescript-eslint/strict-boolean-expressions': 'warn',
-      '@typescript-eslint/prefer-readonly': 'error',
-      '@typescript-eslint/require-await': 'error',
-      '@typescript-eslint/return-await': ['error', 'always'],
+      "@typescript-eslint/no-misused-promises": "error",
+      "@typescript-eslint/await-thenable": "error",
+      "@typescript-eslint/no-floating-promises": "error",
+      "@typescript-eslint/no-unsafe-assignment": "error",
+      "@typescript-eslint/no-unsafe-return": "error",
+      "@typescript-eslint/no-unsafe-call": "error",
+      "@typescript-eslint/no-unsafe-member-access": "error",
+      "@typescript-eslint/no-unsafe-argument": "error",
+      "@typescript-eslint/no-unnecessary-condition": "error",
+      "@typescript-eslint/strict-boolean-expressions": "warn",
+      "@typescript-eslint/prefer-readonly": "error",
+      "@typescript-eslint/require-await": "error",
+      "@typescript-eslint/return-await": ["error", "always"],
     },
-  },
+  }
 );
 ```
 
@@ -222,16 +222,16 @@ Vitest is the testing framework. It provides test isolation (each file in its ow
 ### vitest.config.ts
 
 ```typescript
-import { defineConfig } from 'vitest/config';
+import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
     globals: false,
     coverage: {
-      provider: 'v8',
-      reporter: ['text', 'lcov'],
-      include: ['src/**/*.ts'],
-      exclude: ['src/**/*.test.ts', 'src/**/*.d.ts'],
+      provider: "v8",
+      reporter: ["text", "lcov"],
+      include: ["src/**/*.ts"],
+      exclude: ["src/**/*.test.ts", "src/**/*.d.ts"],
       thresholds: {
         branches: 80,
         functions: 80,
@@ -239,7 +239,7 @@ export default defineConfig({
         statements: 80,
       },
     },
-    include: ['src/**/*.test.ts'],
+    include: ["src/**/*.test.ts"],
     typecheck: {
       enabled: true,
     },

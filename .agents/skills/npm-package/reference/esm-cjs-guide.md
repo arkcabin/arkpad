@@ -79,11 +79,17 @@ Default exports behave differently between CJS and ESM. A CJS consumer doing `co
 
 ```typescript
 // PREFER
-export function doThing(): void { /* ... */ }
-export const CONFIG = { /* ... */ };
+export function doThing(): void {
+  /* ... */
+}
+export const CONFIG = {
+  /* ... */
+};
 
 // AVOID as primary API surface
-export default class MyThing { /* ... */ }
+export default class MyThing {
+  /* ... */
+}
 ```
 
 ### Changes to `exports` Are Semver-Major
@@ -99,6 +105,7 @@ When Node.js loads both a CJS and ESM copy of the same package (e.g., one depend
 - Side effects run twice
 
 **Solutions (in order of preference):**
+
 1. Ship ESM-only — no hazard possible
 2. Use `module-sync` condition — both `import` and `require` resolve to the same ESM file
 3. Use a stateless API design where duplicate instantiation doesn't matter

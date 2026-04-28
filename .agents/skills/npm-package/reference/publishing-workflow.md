@@ -103,11 +103,11 @@ npm Trusted Publishing eliminates long-lived npm tokens. Configure it on npmjs.c
 name: Release
 on:
   push:
-    tags: ['v*']
+    tags: ["v*"]
 
 permissions:
   contents: read
-  id-token: write  # Required for OIDC
+  id-token: write # Required for OIDC
 
 jobs:
   publish:
@@ -119,8 +119,8 @@ jobs:
       - run: bun run build
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
-          registry-url: 'https://registry.npmjs.org'
+          node-version: "22"
+          registry-url: "https://registry.npmjs.org"
       - run: npm publish --provenance --access public
 ```
 

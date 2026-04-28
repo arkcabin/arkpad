@@ -10,9 +10,9 @@ pnpm add -D eslint @antfu/eslint-config
 
 ```js
 // eslint.config.mjs
-import antfu from '@antfu/eslint-config'
+import antfu from "@antfu/eslint-config";
 
-export default antfu()
+export default antfu();
 ```
 
 ```json
@@ -22,15 +22,15 @@ export default antfu()
 ## Configuration Options
 
 ```js
-import antfu from '@antfu/eslint-config'
+import antfu from "@antfu/eslint-config";
 
 export default antfu({
-  type: 'lib',        // 'lib' for libraries, 'app' for applications
-  ignores: ['**/fixtures', '**/dist'],
-  stylistic: { indent: 2, quotes: 'single' },
-  typescript: true,   // Auto-detected
-  vue: true,          // Auto-detected
-})
+  type: "lib", // 'lib' for libraries, 'app' for applications
+  ignores: ["**/fixtures", "**/dist"],
+  stylistic: { indent: 2, quotes: "single" },
+  typescript: true, // Auto-detected
+  vue: true, // Auto-detected
+});
 ```
 
 ## Framework Support
@@ -52,11 +52,11 @@ For files ESLint doesn't handle natively:
 ```js
 export default antfu({
   formatters: {
-    css: true,      // Prettier for CSS/LESS/SCSS
-    html: true,     // Prettier for HTML
-    markdown: 'prettier' // or 'dprint'
-  }
-})
+    css: true, // Prettier for CSS/LESS/SCSS
+    html: true, // Prettier for HTML
+    markdown: "prettier", // or 'dprint'
+  },
+});
 // Requires: pnpm add -D eslint-plugin-format
 ```
 
@@ -66,18 +66,20 @@ export default antfu({
 
 ```js
 export default antfu(
-  { /* config options */ },
-  { rules: { 'style/semi': ['error', 'never'] } }
-)
+  {
+    /* config options */
+  },
+  { rules: { "style/semi": ["error", "never"] } }
+);
 ```
 
 ### Per-integration
 
 ```js
 export default antfu({
-  vue: { overrides: { 'vue/operator-linebreak': ['error', 'before'] } },
-  typescript: { overrides: { 'ts/consistent-type-definitions': ['error', 'interface'] } },
-})
+  vue: { overrides: { "vue/operator-linebreak": ["error", "before"] } },
+  typescript: { overrides: { "ts/consistent-type-definitions": ["error", "interface"] } },
+});
 ```
 
 ## Plugin Prefix Renaming
@@ -98,8 +100,8 @@ export default antfu({
 
 ```js
 export default antfu({
-  typescript: { tsconfigPath: 'tsconfig.json' },
-})
+  typescript: { tsconfigPath: "tsconfig.json" },
+});
 ```
 
 ## VS Code Settings
@@ -108,13 +110,16 @@ export default antfu({
 {
   "prettier.enable": false,
   "editor.formatOnSave": false,
-  "editor.codeActionsOnSave": { "source.fixAll.eslint": "explicit", "source.organizeImports": "never" },
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "never",
+  },
   "eslint.rules.customizations": [
     { "rule": "style/*", "severity": "off", "fixable": true },
     { "rule": "format/*", "severity": "off", "fixable": true },
     { "rule": "*-indent", "severity": "off", "fixable": true },
-    { "rule": "*-spacing", "severity": "off", "fixable": true }
+    { "rule": "*-spacing", "severity": "off", "fixable": true },
   ],
-  "eslint.validate": ["javascript", "typescript", "vue", "html", "markdown", "json", "yaml"]
+  "eslint.validate": ["javascript", "typescript", "vue", "html", "markdown", "json", "yaml"],
 }
 ```

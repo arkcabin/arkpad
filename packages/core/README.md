@@ -28,16 +28,16 @@ npm install @arkpad/core
 Initialize the editor core in any JavaScript environment:
 
 ```typescript
-import { ArkpadEditor, StarterKit } from '@arkpad/core';
+import { ArkpadEditor, StarterKit } from "@arkpad/core";
 
 const editor = new ArkpadEditor({
-  element: document.querySelector('#editor')!,
+  element: document.querySelector("#editor")!,
   extensions: [StarterKit],
-  content: '<h2>Engineered for Excellence.</h2><p>Start building with Arkpad core.</p>',
+  content: "<h2>Engineered for Excellence.</h2><p>Start building with Arkpad core.</p>",
   onUpdate({ editor }) {
     const html = editor.getHTML();
     // Handle content updates
-  }
+  },
 });
 ```
 

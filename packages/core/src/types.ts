@@ -11,6 +11,11 @@ export interface ArkpadExtension {
   name: string;
   plugins?: Plugin[];
   commands?: Partial<ArkpadCommandRegistry>;
+  addCommands?: () => Partial<ArkpadCommandRegistry>;
+  addKeyboardShortcuts?: (schema: any) => Record<string, any>;
+  addInputRules?: (schema: any) => any[];
+  addPasteRules?: (schema: any) => Plugin[];
+  addProseMirrorPlugins?: (schema: any) => Plugin[];
 }
 
 export type NodeViewConstructor =
@@ -39,10 +44,11 @@ export interface ArkpadEditorOptions {
 
 export interface ResolvedArkpadEditorOptions extends Omit<
   ArkpadEditorOptions,
-  "content" | "extensions"
+  "content" | "extensions" | "nodeViews"
 > {
   content: ArkpadContent;
   extensions: ArkpadExtension[];
+  nodeViews: Record<string, NodeViewConstructor>;
   editable: boolean;
   autofocus: boolean;
 }
@@ -67,7 +73,11 @@ export interface ArkpadEditorAPI {
   getAttributes(name: string): Record<string, any> | null;
   runCommand(name: string, ...args: any[]): boolean;
   canRunCommand(name: string): boolean;
-  setContent(content: ArkpadContent, format?: 'html' | 'markdown' | 'json', emitUpdate?: boolean): void;
+  setContent(
+    content: ArkpadContent,
+    format?: "html" | "markdown" | "json",
+    emitUpdate?: boolean
+  ): void;
   clearContent(emitUpdate?: boolean): void;
   focus(): void;
   blur(): void;

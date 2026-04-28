@@ -1,10 +1,6 @@
 import React, { useEffect, useRef } from "react";
 
-import {
-  ArkpadEditor,
-  type ArkpadEditorOptions,
-  type ArkpadEditorAPI,
-} from "@arkpad/core";
+import { ArkpadEditor, type ArkpadEditorOptions, type ArkpadEditorAPI } from "@arkpad/core";
 
 export interface ArkpadEditorReactProps {
   content?: string;
@@ -37,7 +33,7 @@ export function ArkpadEditorComponent({
       content,
       ...options,
       onUpdate: ({ html }: { html: string }) => {
-        setPulse(p => p + 1);
+        setPulse((p) => p + 1);
         onUpdate?.({ editor });
         onChange?.({ html, json: editor.getJSON() });
       },

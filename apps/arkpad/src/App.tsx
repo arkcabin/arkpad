@@ -150,7 +150,7 @@ export function App() {
               >
                 <LinkIcon className="w-4 h-4" />
               </ToolbarButton>
-          </div>
+            </div>
 
             <ToolbarSeparator />
 
@@ -162,7 +162,7 @@ export function App() {
               >
                 <Highlighter className="w-4 h-4" />
               </ToolbarButton>
-          </div>
+            </div>
 
             <ToolbarSeparator />
 
@@ -181,7 +181,7 @@ export function App() {
               >
                 <Subscript className="w-4 h-4" />
               </ToolbarButton>
-          </div>
+            </div>
 
             <ToolbarSeparator />
 
@@ -217,7 +217,7 @@ export function App() {
               >
                 <span className="text-xs font-bold">H4</span>
               </ToolbarButton>
-          </div>
+            </div>
 
             <ToolbarSeparator />
 
@@ -226,7 +226,7 @@ export function App() {
                 <Plus className="w-3.5 h-3.5" />
                 Add
               </button>
-          </div>
+            </div>
 
             <ToolbarSeparator />
 
@@ -259,7 +259,7 @@ export function App() {
               >
                 <AlignJustify className="w-4 h-4" />
               </ToolbarButton>
-          </div>
+            </div>
 
             <ToolbarSeparator />
 
@@ -287,7 +287,7 @@ export function App() {
               >
                 <ImageIcon className="w-4 h-4" />
               </ToolbarButton>
-          </div>
+            </div>
 
             <ToolbarSeparator />
 
@@ -327,7 +327,7 @@ export function App() {
               >
                 <Outdent className="w-4 h-4" />
               </ToolbarButton>
-          </div>
+            </div>
 
             <div className="flex-1 min-w-4" />
 
@@ -338,7 +338,7 @@ export function App() {
               <ToolbarButton onClick={() => run("redo")} disabled={!canRedo} title="Redo">
                 <Redo2 className="w-4 h-4" />
               </ToolbarButton>
-          </div>
+            </div>
 
             <ToolbarSeparator />
 
@@ -353,7 +353,7 @@ export function App() {
                   <Moon className="w-4 h-4 stroke-[1.5]" />
                 )}
               </ToolbarButton>
-          </div>
+            </div>
           </div>
 
           {/* Editor Area */}

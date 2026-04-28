@@ -28,13 +28,13 @@ npm install @arkpad/react @arkpad/core
 Build a professional editor in just a few lines of code:
 
 ```tsx
-import { useArkpadEditor, ArkpadEditorContent } from '@arkpad/react';
-import { StarterKit } from '@arkpad/core';
+import { useArkpadEditor, ArkpadEditorContent } from "@arkpad/react";
+import { StarterKit } from "@arkpad/core";
 
 function App() {
   const editor = useArkpadEditor({
     extensions: [StarterKit],
-    content: '<h1>Build with Arkpad + React</h1><p>Start your journey here.</p>',
+    content: "<h1>Build with Arkpad + React</h1><p>Start your journey here.</p>",
   });
 
   return (

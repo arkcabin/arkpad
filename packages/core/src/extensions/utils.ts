@@ -203,7 +203,9 @@ export function toggleList(listType: NodeType, itemType: NodeType) {
             });
 
             const newList = listType.create(currentList.attrs, items);
-            dispatch(tr.replaceWith(listPos, listPos + listNode.nodeSize, newList).scrollIntoView());
+            dispatch(
+              tr.replaceWith(listPos, listPos + listNode.nodeSize, newList).scrollIntoView()
+            );
           }
         }
         return true;

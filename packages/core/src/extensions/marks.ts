@@ -42,9 +42,7 @@ export function createStrike(): Extension {
     addKeyboardShortcuts: () => ({
       "Mod-Shift-s": toggleMark(arkpadSchema.marks.strike!),
     }),
-    addInputRules: (schema) => [
-      markInputRule(/~~([^~]+)~~$/, schema.marks.strike!),
-    ],
+    addInputRules: (schema) => [markInputRule(/~~([^~]+)~~$/, schema.marks.strike!)],
   };
 }
 
@@ -69,9 +67,7 @@ export function createCode(): Extension {
     addKeyboardShortcuts: () => ({
       "Mod-e": toggleMark(arkpadSchema.marks.code!),
     }),
-    addInputRules: (schema) => [
-      markInputRule(/(?:^|[^`])`([^`]+)`$/, schema.marks.code!),
-    ],
+    addInputRules: (schema) => [markInputRule(/(?:^|[^`])`([^`]+)`$/, schema.marks.code!)],
   };
 }
 
@@ -109,8 +105,6 @@ export function createHighlight(): Extension {
     addCommands: () => ({
       toggleHighlight: () => toggleMark(arkpadSchema.marks.highlight!),
     }),
-    addInputRules: (schema) => [
-      markInputRule(/==([^=]+)==$/, schema.marks.highlight!),
-    ],
+    addInputRules: (schema) => [markInputRule(/==([^=]+)==$/, schema.marks.highlight!)],
   };
 }

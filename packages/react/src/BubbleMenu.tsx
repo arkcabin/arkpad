@@ -1,25 +1,20 @@
-import React, { useEffect, useRef } from 'react';
-import { createPortal } from 'react-dom';
-import { BubbleMenu as BubbleMenuExtension, ArkpadEditorAPI } from '@arkpad/core';
-import { EditorState } from 'prosemirror-state';
+import React, { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
+import { BubbleMenu as BubbleMenuExtension, ArkpadEditorAPI } from "@arkpad/core";
+import { EditorState } from "prosemirror-state";
 
 export interface BubbleMenuProps {
   editor: ArkpadEditorAPI | null;
   children: React.ReactNode;
   className?: string;
-  shouldShow?: (props: {
-    state: EditorState;
-    from: number;
-    to: number;
-    empty: boolean;
-  }) => boolean;
+  shouldShow?: (props: { state: EditorState; from: number; to: number; empty: boolean }) => boolean;
 }
 
-export const BubbleMenu: React.FC<BubbleMenuProps> = ({ 
-  editor, 
-  children, 
-  className = '',
-  shouldShow
+export const BubbleMenu: React.FC<BubbleMenuProps> = ({
+  editor,
+  children,
+  className = "",
+  shouldShow,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -45,18 +40,18 @@ export const BubbleMenu: React.FC<BubbleMenuProps> = ({
   }, [editor]);
 
   // Use a portal to render at the document body to avoid CSS transform issues
-  if (typeof document === 'undefined') return null;
+  if (typeof document === "undefined") return null;
 
   return createPortal(
-    <div 
-      ref={containerRef} 
+    <div
+      ref={containerRef}
       className={className}
-      style={{ 
-        position: 'fixed', 
-        visibility: 'hidden', 
+      style={{
+        position: "fixed",
+        visibility: "hidden",
         zIndex: 1000,
-        pointerEvents: 'auto',
-        display: 'none'
+        pointerEvents: "auto",
+        display: "none",
       }}
     >
       {children}

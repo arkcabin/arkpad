@@ -10,6 +10,7 @@ Build and publish npm packages using Bun as the primary runtime and toolchain, p
 ## When to Use This Skill
 
 Use when:
+
 - Creating a new npm library package from scratch
 - Setting up build/test/lint tooling for an existing package
 - Fixing CJS/ESM interop, exports map, or TypeScript declaration issues
@@ -17,23 +18,24 @@ Use when:
 - Reviewing or improving package configuration
 
 Do NOT use when:
+
 - Building an npx-executable CLI tool (use the `npx-cli` skill)
 - Building an application (not a published package)
 - Working in a monorepo (this skill targets single-package repos)
 
 ## Toolchain
 
-| Concern | Tool | Why |
-|---------|------|-----|
-| Runtime / package manager | Bun | Fast install, run, transpile |
-| Bundler | Bunup | Bun-native, dual output, .d.ts generation |
-| Type declarations | Bunup (via tsc) | Integrated with build |
-| TypeScript | `module: "nodenext"`, `strict: true` + extras | Maximum correctness for published code |
-| Formatting + basic linting | Biome v2 | 10-25x faster than ESLint, single tool |
-| Type-aware linting | ESLint + typescript-eslint | 40+ type-aware rules Biome can't do |
-| Testing | Vitest | Test isolation, mature mocking, coverage |
-| Versioning | Changesets | File-based, explicit, monorepo-ready |
-| Publishing | `npm publish --provenance` | Trusted Publishing / OIDC |
+| Concern                    | Tool                                          | Why                                       |
+| -------------------------- | --------------------------------------------- | ----------------------------------------- |
+| Runtime / package manager  | Bun                                           | Fast install, run, transpile              |
+| Bundler                    | Bunup                                         | Bun-native, dual output, .d.ts generation |
+| Type declarations          | Bunup (via tsc)                               | Integrated with build                     |
+| TypeScript                 | `module: "nodenext"`, `strict: true` + extras | Maximum correctness for published code    |
+| Formatting + basic linting | Biome v2                                      | 10-25x faster than ESLint, single tool    |
+| Type-aware linting         | ESLint + typescript-eslint                    | 40+ type-aware rules Biome can't do       |
+| Testing                    | Vitest                                        | Test isolation, mature mocking, coverage  |
+| Versioning                 | Changesets                                    | File-based, explicit, monorepo-ready      |
+| Publishing                 | `npm publish --provenance`                    | Trusted Publishing / OIDC                 |
 
 ## Scaffolding a New Package
 
@@ -48,6 +50,7 @@ bun run <skill-path>/scripts/scaffold.ts ./my-package \
 ```
 
 Options:
+
 - `--dual` — Generate dual CJS/ESM output (default: ESM-only)
 - `--no-eslint` — Skip ESLint, use Biome only
 

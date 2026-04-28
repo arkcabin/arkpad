@@ -7,20 +7,24 @@ Arkpad is organized as modular layers so teams can extend behavior without modif
 ## Layers
 
 1. Core Engine
+
 - Editor state lifecycle.
 - Transaction dispatch and command execution.
 - Extension orchestration.
 
 2. Extension Layer
+
 - Node/mark definitions.
 - Commands, input rules, keymaps.
 - Event hooks and plugins.
 
 3. Integration Layer
+
 - Framework adapters (React first).
 - UI bindings and state synchronization.
 
 4. Optional Service Layer
+
 - Collaboration service adapter.
 - AI assistant adapter.
 - Import/export adapters.

@@ -1,9 +1,4 @@
-import {
-  DOMParser as PMDOMParser,
-  DOMSerializer,
-  Node as PMNode,
-  type Schema,
-} from "prosemirror-model";
+import { DOMSerializer } from "prosemirror-model";
 import { EditorState } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
 
@@ -18,7 +13,6 @@ import {
   getMarkAttributes,
   getNodeAttributes,
 } from "./extensions";
-import { markdownToHtml } from "./extensions/markdown/parser";
 import { defaultMarkdownSerializer } from "./extensions/markdown/serializer";
 import type {
   ArkpadCommandRegistry,
@@ -27,42 +21,12 @@ import type {
   ArkpadEditorAPI,
   ArkpadEditorOptions,
 } from "./types";
+import { parseContent, resolveEditorOptions } from "./utils";
 
-function parseHtmlContent(content: string, schema: Schema) {
-  const parser = PMDOMParser.fromSchema(schema);
-  const element = document.createElement("div");
-  element.innerHTML = content.trim().length > 0 ? content : "<p></p>";
-  return parser.parse(element);
-}
-
-function parseContent(
-  content: ArkpadContent,
-  schema: Schema,
-  format?: "html" | "markdown" | "json"
-) {
-  if (typeof content === "string") {
-    if (format === "markdown" || /^[#*_\-+>=\s]|^\d+\. /m.test(content)) {
-      return parseHtmlContent(markdownToHtml(content), schema);
-    }
-    return parseHtmlContent(content, schema);
-  }
-  return PMNode.fromJSON(schema, content);
-}
-
-function resolveEditorOptions(options: ArkpadEditorOptions) {
-  return {
-    element: options.element,
-    content: options.content ?? "<p></p>",
-    editable: options.editable ?? true,
-    extensions: options.extensions ?? [],
-    nodeViews: options.nodeViews ?? {},
-    autofocus: options.autofocus ?? false,
-    onCreate: options.onCreate,
-    onUpdate: options.onUpdate,
-    onDestroy: options.onDestroy,
-  };
-}
-
+/**
+ * The core editor class for Arkpad.
+ * Handles the ProseMirror view, state, and command execution.
+ */
 export class ArkpadEditor implements ArkpadEditorAPI {
   public readonly element: HTMLElement;
   public commands: ArkpadCommandRegistry;
@@ -72,6 +36,7 @@ export class ArkpadEditor implements ArkpadEditorAPI {
   private readonly onUpdate?: ArkpadEditorOptions["onUpdate"];
   private readonly onDestroy?: ArkpadEditorOptions["onDestroy"];
   private readonly nodeViews: Record<string, any>;
+  private readonly serializer: DOMSerializer;
 
   private editable: boolean;
   private view: EditorView;
@@ -86,6 +51,7 @@ export class ArkpadEditor implements ArkpadEditorAPI {
     this.onUpdate = resolved.onUpdate;
     this.onDestroy = resolved.onDestroy;
     this.nodeViews = resolved.nodeViews;
+    this.serializer = DOMSerializer.fromSchema(arkpadSchema);
 
     const extensionManager = new ExtensionManager(arkpadSchema, [
       ...createDefaultExtensions(),
@@ -146,30 +112,47 @@ export class ArkpadEditor implements ArkpadEditorAPI {
     });
   }
 
+  /**
+   * Returns the current editor state.
+   */
   getState() {
     return this.view.state;
   }
 
+  /**
+   * Returns the document as an HTML string.
+   */
   getHTML(): string {
-    const serializer = DOMSerializer.fromSchema(arkpadSchema);
-    const fragment = serializer.serializeFragment(this.view.state.doc.content);
+    const fragment = this.serializer.serializeFragment(this.view.state.doc.content);
     const container = document.createElement("div");
     container.appendChild(fragment);
     return container.innerHTML;
   }
 
+  /**
+   * Returns the document as a JSON object.
+   */
   getJSON(): ArkpadDocJSON {
     return this.view.state.doc.toJSON();
   }
 
+  /**
+   * Returns the document as plain text.
+   */
   getText(): string {
     return this.view.state.doc.textBetween(0, this.view.state.doc.content.size, "\n\n");
   }
 
+  /**
+   * Returns the document as a Markdown string.
+   */
   getMarkdown(): string {
     return defaultMarkdownSerializer.serialize(this.view.state.doc);
   }
 
+  /**
+   * Runs a specific command by name.
+   */
   runCommand(name: string, ...args: any[]): boolean {
     if (this.destroyed) return false;
 
@@ -185,6 +168,9 @@ export class ArkpadEditor implements ArkpadEditorAPI {
     return result;
   }
 
+  /**
+   * Checks if a command can be executed.
+   */
   canRunCommand(name: string): boolean {
     const command = this.commands[name];
     if (!command) return false;
@@ -195,6 +181,9 @@ export class ArkpadEditor implements ArkpadEditorAPI {
     );
   }
 
+  /**
+   * Checks if a specific mark or node is active at the current selection.
+   */
   isActive(name: string, attrs: Record<string, any> = {}): boolean {
     const { state } = this.view;
 
@@ -213,6 +202,9 @@ export class ArkpadEditor implements ArkpadEditorAPI {
     return false;
   }
 
+  /**
+   * Gets the attributes of an active mark or node at the current selection.
+   */
   getAttributes(name: string): Record<string, any> | null {
     const { state } = this.view;
 
@@ -229,6 +221,9 @@ export class ArkpadEditor implements ArkpadEditorAPI {
     return null;
   }
 
+  /**
+   * Sets the editor content.
+   */
   setContent(content: ArkpadContent, format?: "html" | "markdown" | "json", emitUpdate = true) {
     const parsedDoc = parseContent(content, arkpadSchema, format);
     const state = this.view.state;
@@ -243,39 +238,63 @@ export class ArkpadEditor implements ArkpadEditorAPI {
     }
   }
 
+  /**
+   * Clears the editor content.
+   */
   clearContent(emitUpdate = true) {
     this.setContent("<p></p>", undefined, emitUpdate);
   }
 
+  /**
+   * Focuses the editor.
+   */
   focus() {
     this.view.focus();
   }
 
+  /**
+   * Blurs the editor.
+   */
   blur() {
     this.view.dom.blur();
   }
 
+  /**
+   * Sets the editable state of the editor.
+   */
   setEditable(editable: boolean) {
     this.editable = editable;
     this.view.setProps({ editable: () => this.editable });
   }
 
+  /**
+   * Returns whether the editor is editable.
+   */
   isEditable() {
     return this.editable;
   }
 
+  /**
+   * Registers a new extension.
+   */
   registerExtension(extension: Extension) {
     this.extensionManager.registerExtension(extension);
     this.commands = this.extensionManager.commands as unknown as ArkpadCommandRegistry;
     this.refreshState(this.view.state.doc.toJSON());
   }
 
+  /**
+   * Registers multiple extensions.
+   */
   registerExtensions(extensions: Extension[]) {
     this.extensionManager.registerExtensions(extensions);
     this.commands = this.extensionManager.commands as unknown as ArkpadCommandRegistry;
     this.refreshState(this.view.state.doc.toJSON());
   }
 
+  /**
+   * Destroys the editor instance.
+   */
   destroy() {
     if (this.destroyed) return;
 
@@ -285,6 +304,9 @@ export class ArkpadEditor implements ArkpadEditorAPI {
   }
 }
 
+/**
+ * Helper function to create an Arkpad editor instance.
+ */
 export function createArkpadEditor(options: ArkpadEditorOptions) {
   return new ArkpadEditor(options);
 }

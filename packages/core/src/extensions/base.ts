@@ -33,14 +33,14 @@ export function createHardBreak(): Extension {
     }),
     addKeyboardShortcuts: () => ({
       "Mod-Enter": (state, dispatch) => {
-         const node = arkpadSchema.nodes.hardBreak!.create();
-         if (dispatch) dispatch(state.tr.replaceSelectionWith(node));
-         return true;
+        const node = arkpadSchema.nodes.hardBreak!.create();
+        if (dispatch) dispatch(state.tr.replaceSelectionWith(node));
+        return true;
       },
       "Shift-Enter": (state, dispatch) => {
-         const node = arkpadSchema.nodes.hardBreak!.create();
-         if (dispatch) dispatch(state.tr.replaceSelectionWith(node));
-         return true;
+        const node = arkpadSchema.nodes.hardBreak!.create();
+        if (dispatch) dispatch(state.tr.replaceSelectionWith(node));
+        return true;
       },
     }),
   };
