@@ -1,3 +1,10 @@
+## [1.5.2](https://github.com/arkcabin/arkpad/compare/v1.5.1...v1.5.2) (2026-04-28)
+
+
+### Bug Fixes
+
+* finalize release pipeline and remove debug diagnostics ([f850231](https://github.com/arkcabin/arkpad/commit/f850231853f1c7d7e214548baa4ce78f742655b8))
+
 ## [1.5.1](https://github.com/arkcabin/arkpad/compare/v1.5.0...v1.5.1) (2026-04-28)
 
 
