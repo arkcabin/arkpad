@@ -13,7 +13,7 @@
   "author": "ArkCabin",
   "repository": {
     "type": "git",
-    "url": "https://github.com/arkcabin/arkpad",
+    "url": "git+https://github.com/arkcabin/arkpad.git",
     "directory": "packages/react"
   },
   "bugs": {
