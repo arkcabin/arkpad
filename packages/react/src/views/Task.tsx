@@ -34,7 +34,7 @@ export class TaskView implements NodeView {
     container.appendChild(this.checkboxContainer);
 
     const contentDOM = document.createElement("div");
-    contentDOM.className = "flex-1 min-w-0 text-[16px]";
+    contentDOM.className = "flex-1 min-w-0 text-[15px]";
     this.updateContentStyles(contentDOM, isChecked, node);
     this.contentDOM = contentDOM;
     container.appendChild(contentDOM);
