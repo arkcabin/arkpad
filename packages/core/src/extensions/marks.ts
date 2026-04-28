@@ -117,15 +117,16 @@ export function createClearFormatting(): Extension {
     name: "clearFormatting",
     addCommands: () => ({
       unsetAllMarks: () => (state: any, dispatch: any) => {
-        const { selection } = state;
+        const { tr, selection } = state;
         const { from, to, empty } = selection;
 
         if (empty) return false;
-        if (dispatch) {
-          const tr = state.tr;
-          tr.removeMark(from, to);
-          dispatch(tr);
-        }
+
+        // In some ProseMirror versions, tr.removeMark(from, to) only works 
+        // if the third argument is explicitly null to remove ALL marks.
+        tr.removeMark(from, to, null);
+        
+        if (dispatch) dispatch(tr);
         return true;
       },
     }),
