@@ -53,12 +53,27 @@ body {
   background: var(--toolbar-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  overflow-x: auto;
+  scrollbar-width: none; /* Firefox */
+}
+
+.toolbar-wrapper::-webkit-scrollbar {
+  display: none; /* Safari/Chrome */
 }
 
 .toolbar-group {
   display: flex;
   align-items: center;
   gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+/* Demo Specific Styles */
+.my-custom-h4-styling {
+  color: var(--brand);
+  border-left: 4px solid var(--brand);
+  padding-left: 1rem;
+  font-style: italic;
 }
 
 .toolbar-btn {

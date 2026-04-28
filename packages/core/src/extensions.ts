@@ -3,8 +3,7 @@ import { Plugin } from "prosemirror-state";
 import { keymap } from "prosemirror-keymap";
 import { baseKeymap } from "prosemirror-commands";
 import { inputRules } from "prosemirror-inputrules";
-import { Extension, Dispatch } from "./extensions-types";
-import { ArkpadCommandRegistry } from "./types";
+import { ArkpadExtension as Extension, type ArkpadCommandRegistry, type Dispatch } from "./types";
 
 export type { Extension, Dispatch };
 
@@ -16,11 +15,11 @@ export class ExtensionManager {
   public schema: Schema;
   public extensions: Extension[] = [];
   public commands: ArkpadCommandRegistry = {};
+  public storage: Record<string, any> = {};
   public keyboardShortcuts: Record<string, any> = {};
   public inputRules: any[] = [];
   public pasteRules: Plugin[] = [];
   public proseMirrorPlugins: Plugin[] = [];
-  public storage: Record<string, any> = {};
 
   constructor(schema: Schema, extensions: Extension[] = []) {
     this.schema = schema;
@@ -39,27 +38,19 @@ export class ExtensionManager {
     this.inputRules = this.collectInputRules(this.schema);
     this.pasteRules = this.collectPasteRules(this.schema);
     this.proseMirrorPlugins = this.collectProseMirrorPlugins(this.schema);
-    this.storage = this.collectStorage();
   }
 
   /**
-   * Aggregates storage from all registered extensions.
-   */
-  private collectStorage(): Record<string, any> {
-    const storage: Record<string, any> = {};
-    for (const ext of this.extensions) {
-      if (ext.addStorage) {
-        storage[ext.name] = ext.addStorage();
-      }
-    }
-    return storage;
-  }
-
-  /**
-   * Registers a single extension.
+   * Registers a single extension and initializes its storage.
    */
   registerExtension(extension: Extension): void {
     this.extensions.push(extension);
+
+    if (extension.addStorage) {
+      this.storage[extension.name] = extension.addStorage();
+      // Bind storage to extension for easy access
+      (extension as any).storage = this.storage[extension.name];
+    }
   }
 
   /**
@@ -99,10 +90,16 @@ export class ExtensionManager {
           commands[key] =
             (...args: any[]) =>
             (state: any, dispatch: any, view: any) => {
-              return (
-                newCommand(...args)(state, dispatch, view) ||
-                prevCommand(...args)(state, dispatch, view)
-              );
+              const run = (cmd: any) => {
+                if (typeof cmd !== "function") return false;
+                const result = cmd(...args);
+                if (typeof result === "function") return result(state, dispatch, view);
+                return result;
+              };
+
+              const newResult = run(newCommand);
+              const prevResult = run(prevCommand);
+              return newResult || prevResult;
             };
         } else {
           commands[key] = extCommands[key];

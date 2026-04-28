@@ -5,7 +5,8 @@ import type { EditorView, NodeView } from "prosemirror-view";
 export type ArkpadDocJSON = Record<string, unknown>;
 export type ArkpadContent = string | ArkpadDocJSON;
 
-export type ArkpadCommand = Command;
+export type Dispatch = (tr: Transaction) => void;
+export type ArkpadCommand = Command | ((...args: any[]) => Command) | ((...args: any[]) => (state: any, dispatch?: any, view?: any) => boolean);
 export type ArkpadCommandRegistry = Record<string, ArkpadCommand>;
 
 export interface ChainedCommands {
@@ -56,12 +57,23 @@ export interface ArkpadExtension {
   name: string;
   plugins?: Plugin[];
   commands?: Partial<ArkpadCommandRegistry>;
+  addStorage?: () => Record<string, any>;
+  addGlobalAttributes?: () => {
+    types: string[];
+    attributes: Record<string, { default: any; parseHTML?: (element: HTMLElement) => any; renderHTML?: (attributes: Record<string, any>) => any }>;
+  }[];
   addCommands?: () => Partial<ArkpadCommandRegistry>;
   addKeyboardShortcuts?: (schema: any) => Record<string, any>;
   addInputRules?: (schema: any) => any[];
   addPasteRules?: (schema: any) => Plugin[];
   addProseMirrorPlugins?: (schema: any) => Plugin[];
+  onUpdate?: (props: { editor: ArkpadEditorAPI }) => void;
+  storage?: any;
 }
+
+export const Extension = {
+  create: (config: ArkpadExtension): ArkpadExtension => config,
+};
 
 export type NodeViewConstructor =
   | (new (
@@ -143,9 +155,12 @@ export interface SearchResult {
   text: string;
 }
 
+export type ArkpadCommandProxy = Record<string, (...args: any[]) => boolean>;
+
 export interface ArkpadEditorAPI {
   readonly element: HTMLElement;
-  readonly commands: ArkpadCommandRegistry;
+  readonly commands: ArkpadCommandProxy;
+  readonly storage: Record<string, any>;
   getState(): EditorState;
   getView(): EditorView;
   getHTML(): string;

@@ -1,4 +1,4 @@
-import { Extension } from "../extensions-types";
+import { ArkpadExtension as Extension } from "../types";
 import { setTextAlign } from "./utils";
 
 export const TEXT_ALIGN = {

@@ -1,6 +1,6 @@
 import { toggleMark } from "prosemirror-commands";
 import { arkpadSchema } from "../schema";
-import { Extension } from "../extensions-types";
+import { ArkpadExtension as Extension } from "../types";
 import { markInputRule } from "./utils";
 
 export function createBold(): Extension {

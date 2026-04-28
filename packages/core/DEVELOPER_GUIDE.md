@@ -81,3 +81,55 @@ function MyComponent() {
 ### Command Proxy
 You can call commands directly on `editor.commands` with full TypeScript support.
 `editor.commands.toggleBold()` is equivalent to `editor.runCommand('toggleBold')`.
+
+---
+
+## 5. Dynamic Schema Generation
+
+Arkpad no longer uses a static schema. Instead, it uses the `SchemaBuilder` to compile a schema at runtime based on the extensions provided during initialization.
+
+### Benefits:
+- **Modular Nodes/Marks**: Extensions can inject their own schema specifications.
+- **Global Injection**: Global attributes are added during the build process, ensuring perfect integration with ProseMirror's internal models.
+
+---
+
+## 7. Cookbook: Common Patterns
+
+### Adding a Custom Class to Header 4
+Instead of modifying the core Heading extension, use a Global Attribute to inject styles based on node state.
+
+```typescript
+addGlobalAttributes() {
+  return [{
+    types: ['heading'],
+    attributes: {
+      class: {
+        default: null,
+        renderHTML: (attributes) => {
+          if (attributes.level === 4) {
+            return { class: 'my-custom-h4-styling' }
+          }
+          return null
+        }
+      }
+    }
+  }]
+}
+```
+
+### Implementing a Word Counter
+Use the Storage API and the `onUpdate` hook to keep track of document stats.
+
+```typescript
+const WordCounter = Extension.create({
+  name: 'wordCounter',
+  addStorage() {
+    return { count: 0 }
+  },
+  onUpdate({ editor }) {
+    const text = editor.getText()
+    this.storage.count = text.split(/\s+/).filter(s => s.length > 0).length
+  }
+})
+```

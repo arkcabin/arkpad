@@ -3,7 +3,7 @@ import { placeholder as createPlaceholderPlugin } from "prosemirror-placeholder"
 import { setBlockType } from "prosemirror-commands";
 import { TextSelection } from "prosemirror-state";
 import { arkpadSchema } from "../schema";
-import { Extension } from "../extensions-types";
+import { ArkpadExtension as Extension } from "../types";
 
 export function createDocument(): Extension {
   return {

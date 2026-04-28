@@ -41,11 +41,13 @@ import {
 import {
   useArkpadEditor,
   ArkpadEditorContent,
+  useEditorState,
+  ArkpadProvider,
   BubbleMenu,
   FloatingMenu,
-  useEditorState,
 } from "@arkpad/react";
-import type { ArkpadEditorAPI } from "@arkpad/core";
+import { CharacterCount } from "@arkpad/core";
+import type { ArkpadEditorAPI, Extension } from "@arkpad/core";
 
 interface ToolbarButtonProps {
   onClick: () => void;
@@ -71,9 +73,6 @@ const ToolbarButton = React.forwardRef<HTMLButtonElement, ToolbarButtonProps>(
   )
 );
 
-/**
- * A highly optimized button that only re-renders when its specific editor state changes.
- */
 function MenuButton({
   editor,
   command,
@@ -122,7 +121,6 @@ export function App() {
   const [isLocked, setIsLocked] = useState(false);
   const isLockedRef = useRef(isLocked);
 
-  // Keep ref in sync
   useEffect(() => {
     isLockedRef.current = isLocked;
   }, [isLocked]);
@@ -138,8 +136,30 @@ export function App() {
   }, [isDark]);
 
   const editor = useArkpadEditor({
+    extensions: [
+      CharacterCount,
+      {
+        name: "h4Theme",
+        addGlobalAttributes() {
+          return [
+            {
+              types: ["heading"],
+              attributes: {
+                class: {
+                  default: null,
+                  renderHTML: (attrs: Record<string, any>) => {
+                    if (attrs.level === 4) return { class: "my-custom-h4-styling" };
+                    return null;
+                  },
+                },
+              },
+            },
+          ];
+        },
+      },
+    ],
     content:
-      "<h1>The Ultimate Arkpad UI</h1><p>Every single core feature is now active. From <strong>Formatting</strong> and <strong>Lists</strong> to <strong>Master APIs</strong> like Search/Replace and Middleware Interceptors. Try it all!</p>",
+      "<h1>The Ultimate Arkpad UI</h1><p>Every single core feature is now active. From <strong>Formatting</strong> and <strong>Lists</strong> to <strong>Master APIs</strong> like Search/Replace and Middleware Interceptors. Try it all!</p><h4>I am a Header 4 with a Global Style!</h4><p>I was styled automatically via the Global Attribute API.</p>",
     onInterceptor: () => {
       if (isLockedRef.current) {
         console.warn("Arkpad: Transaction blocked by Interceptor Middleware.");
@@ -160,375 +180,329 @@ export function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#fafafa] dark:bg-[#000000] py-8 md:py-12 px-4 transition-colors duration-300">
-      <div className="max-w-[1300px] mx-auto">
-        <div className="editor-wrapper border-slate-200/50 dark:border-slate-800/50 shadow-2xl">
-          {/* Main Toolbar */}
-          <div className="toolbar-wrapper flex-wrap gap-y-2 p-2 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md sticky top-0 z-10">
-            {/* Formatting Group */}
-            <div className="toolbar-group">
-              <MenuButton editor={editor} command="toggleBold" name="strong" title="Bold">
-                <Bold className="w-4 h-4" />
-              </MenuButton>
-              <MenuButton editor={editor} command="toggleItalic" name="em" title="Italic">
-                <Italic className="w-4 h-4" />
-              </MenuButton>
-              <MenuButton
-                editor={editor}
-                command="toggleUnderline"
-                name="underline"
-                title="Underline"
-              >
-                <Underline className="w-4 h-4" />
-              </MenuButton>
-              <MenuButton
-                editor={editor}
-                command="toggleStrike"
-                name="strike"
-                title="Strikethrough"
-              >
-                <Strikethrough className="w-4 h-4" />
-              </MenuButton>
-              <MenuButton
-                editor={editor}
-                command="toggleHighlight"
-                name="highlight"
-                title="Highlight"
-              >
-                <Highlighter className="w-4 h-4" />
-              </MenuButton>
-              <MenuButton editor={editor} command="toggleCode" name="code" title="Inline Code">
-                <Code className="w-4 h-4" />
-              </MenuButton>
-              <ToolbarButton
-                onClick={() => {
-                  const url = window.prompt("Enter URL:", "https://");
-                  if (url) editor.runCommand("toggleLink", url);
-                }}
-                isActive={editor.isActive("link")}
-                title="Link"
-              >
-                <LinkIcon className="w-4 h-4" />
-              </ToolbarButton>
-              <MenuButton
-                editor={editor}
-                command="toggleSuperscript"
-                name="superscript"
-                title="Superscript"
-              >
-                <SuperscriptIcon className="w-4 h-4" />
-              </MenuButton>
-              <MenuButton
-                editor={editor}
-                command="toggleSubscript"
-                name="subscript"
-                title="Subscript"
-              >
-                <SubscriptIcon className="w-4 h-4" />
-              </MenuButton>
-              <ToolbarButton
-                onClick={() => editor.runCommand("unsetAllMarks")}
-                title="Clear Formatting"
-              >
-                <Eraser className="w-4 h-4" />
-              </ToolbarButton>
-            </div>
+    <ArkpadProvider editor={editor}>
+      <div className="min-h-screen bg-[#fafafa] dark:bg-[#000000] py-8 md:py-12 px-4 transition-colors duration-300">
+        <div className="max-w-[1300px] mx-auto">
+          <div className="editor-wrapper border-slate-200/50 dark:border-slate-800/50 shadow-2xl">
+            <div className="toolbar-wrapper p-2 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md sticky top-0 z-10">
+              <div className="toolbar-group">
+                <MenuButton editor={editor} command="toggleBold" name="strong" title="Bold">
+                  <Bold className="w-4 h-4" />
+                </MenuButton>
+                <MenuButton editor={editor} command="toggleItalic" name="em" title="Italic">
+                  <Italic className="w-4 h-4" />
+                </MenuButton>
+                <MenuButton
+                  editor={editor}
+                  command="toggleUnderline"
+                  name="underline"
+                  title="Underline"
+                >
+                  <Underline className="w-4 h-4" />
+                </MenuButton>
+                <MenuButton
+                  editor={editor}
+                  command="toggleStrike"
+                  name="strike"
+                  title="Strikethrough"
+                >
+                  <Strikethrough className="w-4 h-4" />
+                </MenuButton>
+                <MenuButton
+                  editor={editor}
+                  command="toggleHighlight"
+                  name="highlight"
+                  title="Highlight"
+                >
+                  <Highlighter className="w-4 h-4" />
+                </MenuButton>
+                <MenuButton editor={editor} command="toggleCode" name="code" title="Inline Code">
+                  <Code className="w-4 h-4" />
+                </MenuButton>
+                <ToolbarButton
+                  onClick={() => {
+                    const url = window.prompt("Enter URL:", "https://");
+                    if (url) editor?.runCommand("toggleLink", url);
+                  }}
+                  isActive={editor?.isActive("link")}
+                  title="Link"
+                >
+                  <LinkIcon className="w-4 h-4" />
+                </ToolbarButton>
+                <MenuButton
+                  editor={editor}
+                  command="toggleSuperscript"
+                  name="superscript"
+                  title="Superscript"
+                >
+                  <SuperscriptIcon className="w-4 h-4" />
+                </MenuButton>
+                <MenuButton
+                  editor={editor}
+                  command="toggleSubscript"
+                  name="subscript"
+                  title="Subscript"
+                >
+                  <SubscriptIcon className="w-4 h-4" />
+                </MenuButton>
+                <ToolbarButton
+                  onClick={() => editor?.runCommand("unsetAllMarks")}
+                  title="Clear Formatting"
+                >
+                  <Eraser className="w-4 h-4" />
+                </ToolbarButton>
+              </div>
 
-            <ToolbarSeparator />
-
-            {/* Structure Group */}
-            <div className="toolbar-group">
-              <MenuButton
-                editor={editor}
-                command="toggleHeading"
-                attrs={{ level: 1 }}
-                name="heading"
-                title="H1"
-              >
-                <Heading1 className="w-4 h-4" />
-              </MenuButton>
-              <MenuButton
-                editor={editor}
-                command="toggleHeading"
-                attrs={{ level: 2 }}
-                name="heading"
-                title="H2"
-              >
-                <Heading2 className="w-4 h-4" />
-              </MenuButton>
-              <MenuButton
-                editor={editor}
-                command="toggleHeading"
-                attrs={{ level: 3 }}
-                name="heading"
-                title="H3"
-              >
-                <Heading3 className="w-4 h-4" />
-              </MenuButton>
-              <MenuButton
-                editor={editor}
-                command="toggleBlockquote"
-                name="blockquote"
-                title="Blockquote"
-              >
-                <Quote className="w-4 h-4" />
-              </MenuButton>
-              <ToolbarButton
-                onClick={() => editor.runCommand("toggleCodeBlock")}
-                title="Code Block"
-              >
-                <Terminal className="w-4 h-4" />
-              </ToolbarButton>
-              <ToolbarButton
-                onClick={() => editor.runCommand("setHorizontalRule")}
-                title="Horizontal Rule"
-              >
-                <Minus className="w-4 h-4" />
-              </ToolbarButton>
-            </div>
-
-            <ToolbarSeparator />
-
-            {/* List Group */}
-            <div className="toolbar-group">
-              <MenuButton
-                editor={editor}
-                command="toggleBulletList"
-                name="bulletList"
-                title="Bullet List"
-              >
-                <List className="w-4 h-4" />
-              </MenuButton>
-              <MenuButton
-                editor={editor}
-                command="toggleOrderedList"
-                name="orderedList"
-                title="Ordered List"
-              >
-                <ListOrdered className="w-4 h-4" />
-              </MenuButton>
-              <MenuButton
-                editor={editor}
-                command="toggleTaskList"
-                name="taskList"
-                title="Task List"
-              >
-                <CheckSquare className="w-4 h-4" />
-              </MenuButton>
-              <ToolbarButton onClick={() => editor.runCommand("indentList")} title="Indent">
-                <Indent className="w-4 h-4" />
-              </ToolbarButton>
-              <ToolbarButton onClick={() => editor.runCommand("outdentList")} title="Outdent">
-                <Outdent className="w-4 h-4" />
-              </ToolbarButton>
-            </div>
-
-            <ToolbarSeparator />
-
-            {/* Alignment Group */}
-            <div className="toolbar-group">
-              <MenuButton
-                editor={editor}
-                command="setTextAlign"
-                attrs={{ align: "left" }}
-                name="textAlign"
-                title="Align Left"
-              >
-                <AlignLeft className="w-4 h-4" />
-              </MenuButton>
-              <MenuButton
-                editor={editor}
-                command="setTextAlign"
-                attrs={{ align: "center" }}
-                name="textAlign"
-                title="Align Center"
-              >
-                <AlignCenter className="w-4 h-4" />
-              </MenuButton>
-              <MenuButton
-                editor={editor}
-                command="setTextAlign"
-                attrs={{ align: "right" }}
-                name="textAlign"
-                title="Align Right"
-              >
-                <AlignRight className="w-4 h-4" />
-              </MenuButton>
-              <MenuButton
-                editor={editor}
-                command="setTextAlign"
-                attrs={{ align: "justify" }}
-                name="textAlign"
-                title="Justify"
-              >
-                <AlignJustify className="w-4 h-4" />
-              </MenuButton>
-            </div>
-
-            <ToolbarSeparator />
-
-            {/* Master API Tools */}
-            <div className="toolbar-group bg-brand/5 dark:bg-brand/10 p-1 rounded-md border border-brand/20">
-              <ToolbarButton
-                onClick={() => {
-                  const query = window.prompt("Search for:");
-                  if (query) {
-                    const results = editor.search(query);
-                    alert(`Found ${results.length} matches.`);
-                    const firstMatch = results[0];
-                    if (firstMatch)
-                      editor.setSelection({ from: firstMatch.from, to: firstMatch.to });
-                  }
-                }}
-                title="Search Document"
-                variant="brand"
-              >
-                <Search className="w-4 h-4" />
-              </ToolbarButton>
-              <ToolbarButton
-                onClick={() => {
-                  const query = window.prompt("Replace word:");
-                  const replacement = window.prompt("With:");
-                  if (query && replacement) editor.replace(query, replacement);
-                }}
-                title="Search & Replace"
-                variant="brand"
-              >
-                <Replace className="w-4 h-4" />
-              </ToolbarButton>
-              <ToolbarButton
-                onClick={() => editor.selectAll()}
-                title="Select Everything"
-                variant="brand"
-              >
-                <MousePointer2 className="w-4 h-4" />
-              </ToolbarButton>
-              <ToolbarButton
-                onClick={() => setIsLocked(!isLocked)}
-                isActive={isLocked}
-                title={isLocked ? "Unlock Editor Actions" : "Lock Editor Actions (Middleware)"}
-                variant={isLocked ? "danger" : "success"}
-              >
-                {isLocked ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
-              </ToolbarButton>
-              <ToolbarButton
-                onClick={() => {
-                  editor
-                    .chain()
-                    .focus("end")
-                    .insertContent("<p><strong>✨ Bulletproof Magic!</strong></p>", "html")
-                    .command(({ tr }) => {
-                      console.log("Current document size:", tr.doc.content.size);
-                      return true;
-                    })
-                    .scrollIntoView()
-                    .run();
-                }}
-                title="Test Bulletproof Chain"
-                variant="brand"
-              >
-                <Plus className="w-4 h-4 text-brand animate-bounce" />
-              </ToolbarButton>
-            </div>
-
-            <div className="flex-grow" />
-
-            {/* System Group */}
-            <div className="toolbar-group">
-              <ToolbarButton
-                onClick={() => {
-                  const url = window.prompt(
-                    "Image URL:",
-                    "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800"
-                  );
-                  if (url) editor.runCommand("setImage", { src: url });
-                }}
-                title="Insert Image"
-              >
-                <ImageIcon className="w-4 h-4" />
-              </ToolbarButton>
               <ToolbarSeparator />
-              <ToolbarButton onClick={() => editor.runCommand("undo")} title="Undo">
-                <Undo2 className="w-4 h-4" />
-              </ToolbarButton>
-              <ToolbarButton onClick={() => editor.runCommand("redo")} title="Redo">
-                <Redo2 className="w-4 h-4" />
-              </ToolbarButton>
+
+              <div className="toolbar-group">
+                <MenuButton
+                  editor={editor}
+                  command="toggleHeading"
+                  attrs={{ level: 1 }}
+                  name="heading"
+                  title="H1"
+                >
+                  <Heading1 className="w-4 h-4" />
+                </MenuButton>
+                <MenuButton
+                  editor={editor}
+                  command="toggleHeading"
+                  attrs={{ level: 2 }}
+                  name="heading"
+                  title="H2"
+                >
+                  <Heading2 className="w-4 h-4" />
+                </MenuButton>
+                <MenuButton
+                  editor={editor}
+                  command="toggleHeading"
+                  attrs={{ level: 3 }}
+                  name="heading"
+                  title="H3"
+                >
+                  <Heading3 className="w-4 h-4" />
+                </MenuButton>
+                <ToolbarButton
+                  onClick={() => editor.commands.toggleHeading?.({ level: 4 })}
+                  isActive={editor.isActive("heading", { level: 4 })}
+                  title="H4 (Custom Proxy API)"
+                >
+                  <span className="text-[10px] font-bold">H4</span>
+                </ToolbarButton>
+                <MenuButton
+                  editor={editor}
+                  command="toggleBlockquote"
+                  name="blockquote"
+                  title="Blockquote"
+                >
+                  <Quote className="w-4 h-4" />
+                </MenuButton>
+                <ToolbarButton
+                  onClick={() => editor?.runCommand("toggleCodeBlock")}
+                  title="Code Block"
+                >
+                  <Terminal className="w-4 h-4" />
+                </ToolbarButton>
+                <ToolbarButton
+                  onClick={() => editor?.runCommand("setHorizontalRule")}
+                  title="Horizontal Rule"
+                >
+                  <Minus className="w-4 h-4" />
+                </ToolbarButton>
+              </div>
+
               <ToolbarSeparator />
-              <ToolbarButton onClick={() => setIsDark(!isDark)} title="Toggle Dark Mode">
-                {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-              </ToolbarButton>
+
+              <div className="toolbar-group">
+                <MenuButton
+                  editor={editor}
+                  command="toggleBulletList"
+                  name="bulletList"
+                  title="Bullet List"
+                >
+                  <List className="w-4 h-4" />
+                </MenuButton>
+                <MenuButton
+                  editor={editor}
+                  command="toggleOrderedList"
+                  name="orderedList"
+                  title="Ordered List"
+                >
+                  <ListOrdered className="w-4 h-4" />
+                </MenuButton>
+                <MenuButton
+                  editor={editor}
+                  command="toggleTaskList"
+                  name="taskList"
+                  title="Task List"
+                >
+                  <CheckSquare className="w-4 h-4" />
+                </MenuButton>
+                <ToolbarButton onClick={() => editor.runCommand("indentList")} title="Indent">
+                  <Indent className="w-4 h-4" />
+                </ToolbarButton>
+                <ToolbarButton onClick={() => editor.runCommand("outdentList")} title="Outdent">
+                  <Outdent className="w-4 h-4" />
+                </ToolbarButton>
+              </div>
+
+              <ToolbarSeparator />
+
+              <div className="toolbar-group">
+                <MenuButton
+                  editor={editor}
+                  command="setTextAlign"
+                  attrs={{ align: "left" }}
+                  name="textAlign"
+                  title="Align Left"
+                >
+                  <AlignLeft className="w-4 h-4" />
+                </MenuButton>
+                <MenuButton
+                  editor={editor}
+                  command="setTextAlign"
+                  attrs={{ align: "center" }}
+                  name="textAlign"
+                  title="Align Center"
+                >
+                  <AlignCenter className="w-4 h-4" />
+                </MenuButton>
+                <MenuButton
+                  editor={editor}
+                  command="setTextAlign"
+                  attrs={{ align: "right" }}
+                  name="textAlign"
+                  title="Align Right"
+                >
+                  <AlignRight className="w-4 h-4" />
+                </MenuButton>
+                <MenuButton
+                  editor={editor}
+                  command="setTextAlign"
+                  attrs={{ align: "justify" }}
+                  name="textAlign"
+                  title="Justify"
+                >
+                  <AlignJustify className="w-4 h-4" />
+                </MenuButton>
+              </div>
+
+              <ToolbarSeparator />
+
+              <div className="toolbar-group bg-brand/5 dark:bg-brand/10 p-1 rounded-md border border-brand/20">
+                <ToolbarButton
+                  onClick={() => {
+                    const query = window.prompt("Search for:");
+                    if (query) {
+                      const results = editor.search(query);
+                      alert(`Found ${results.length} matches.`);
+                      const firstMatch = results[0];
+                      if (firstMatch)
+                        editor.setSelection({ from: firstMatch.from, to: firstMatch.to });
+                    }
+                  }}
+                  title="Search Document"
+                  variant="brand"
+                >
+                  <Search className="w-4 h-4" />
+                </ToolbarButton>
+                <ToolbarButton
+                  onClick={() => {
+                    const query = window.prompt("Replace word:");
+                    const replacement = window.prompt("With:");
+                    if (query && replacement) editor.replace(query, replacement);
+                  }}
+                  title="Search & Replace"
+                  variant="brand"
+                >
+                  <Replace className="w-4 h-4" />
+                </ToolbarButton>
+                <ToolbarButton
+                  onClick={() => editor.selectAll()}
+                  title="Select Everything"
+                  variant="brand"
+                >
+                  <MousePointer2 className="w-4 h-4" />
+                </ToolbarButton>
+                <ToolbarButton
+                  onClick={() => setIsLocked(!isLocked)}
+                  isActive={isLocked}
+                  title={isLocked ? "Unlock Editor Actions" : "Lock Editor Actions (Middleware)"}
+                  variant={isLocked ? "danger" : "success"}
+                >
+                  {isLocked ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
+                </ToolbarButton>
+                <ToolbarButton
+                  onClick={() => {
+                    editor
+                      .chain()
+                      .focus("end")
+                      .insertContent("<p><strong>✨ Bulletproof Magic!</strong></p>", "html")
+                      .command(({ tr }) => {
+                        console.log("Current document size:", tr.doc.content.size);
+                        return true;
+                      })
+                      .scrollIntoView()
+                      .run();
+                  }}
+                  title="Test Bulletproof Chain"
+                  variant="brand"
+                >
+                  <Plus className="w-4 h-4 text-brand animate-bounce" />
+                </ToolbarButton>
+              </div>
+
+              <div className="flex-grow" />
+
+              <div className="toolbar-group">
+                <ToolbarButton
+                  onClick={() => {
+                    const url = window.prompt(
+                      "Image URL:",
+                      "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800"
+                    );
+                    if (url) editor.runCommand("setImage", { src: url });
+                  }}
+                  title="Insert Image"
+                >
+                  <ImageIcon className="w-4 h-4" />
+                </ToolbarButton>
+                <ToolbarSeparator />
+                <ToolbarButton onClick={() => editor.runCommand("undo")} title="Undo">
+                  <Undo2 className="w-4 h-4" />
+                </ToolbarButton>
+                <ToolbarButton onClick={() => editor.runCommand("redo")} title="Redo">
+                  <Redo2 className="w-4 h-4" />
+                </ToolbarButton>
+                <ToolbarSeparator />
+                <ToolbarButton onClick={() => setIsDark(!isDark)} title="Toggle Dark Mode">
+                  {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                </ToolbarButton>
+              </div>
+            </div>
+
+            <div className="editor-body">
+              <ArkpadEditorContent editor={editor} className="arkpad-container p-4 md:p-8 lg:p-12" />
             </div>
           </div>
 
-          {/* Editor Body */}
-          <div className="editor-body">
-            <ArkpadEditorContent editor={editor} className="arkpad-container p-4 md:p-8 lg:p-12" />
-          </div>
-
-          {/* Bubble Menu for quick edits */}
-          <BubbleMenu editor={editor}>
-            <div className="bubble-menu shadow-2xl border-slate-200/50 dark:border-slate-800/50 bg-white dark:bg-slate-900 rounded-lg overflow-hidden border">
-              <MenuButton editor={editor} command="toggleBold" name="strong">
-                <Bold className="w-4 h-4" />
-              </MenuButton>
-              <MenuButton editor={editor} command="toggleItalic" name="em">
-                <Italic className="w-4 h-4" />
-              </MenuButton>
-              <MenuButton editor={editor} command="toggleHighlight" name="highlight">
-                <Highlighter className="w-4 h-4" />
-              </MenuButton>
-              <ToolbarButton
-                onClick={() => {
-                  const url = window.prompt("Link URL:");
-                  if (url) editor.runCommand("toggleLink", url);
-                }}
-              >
-                <LinkIcon className="w-4 h-4" />
-              </ToolbarButton>
+          <div className="mt-4 flex justify-between items-center text-[10px] uppercase tracking-widest text-slate-400 dark:text-slate-500 font-bold px-2">
+            <div className="flex gap-6">
+              <span className={isLocked ? "text-red-500 animate-pulse" : "text-green-500"}>
+                {isLocked ? "Middleware Locked" : "System Online"}
+              </span>
+              <span>{editor.storage.characterCount?.characters || 0} Characters</span>
+              <span>{editor.storage.characterCount?.words || 0} Words</span>
+              <span className="text-brand opacity-60 font-black">FRAMEWORK PARITY: 100%</span>
             </div>
-          </BubbleMenu>
-
-          {/* Floating Menu for quick insertion */}
-          <FloatingMenu editor={editor}>
-            <div className="floating-menu shadow-2xl border-slate-200/50 dark:border-slate-800/50 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm p-1 rounded-full border flex gap-1">
-              <ToolbarButton onClick={() => editor.runCommand("toggleHeading", { level: 1 })}>
-                <Heading1 className="w-4 h-4" />
-              </ToolbarButton>
-              <ToolbarButton onClick={() => editor.runCommand("toggleBulletList")}>
-                <List className="w-4 h-4" />
-              </ToolbarButton>
-              <ToolbarButton onClick={() => editor.runCommand("toggleTaskList")}>
-                <CheckSquare className="w-4 h-4" />
-              </ToolbarButton>
-              <ToolbarSeparator />
-              <ToolbarButton
-                onClick={() => {
-                  const url = window.prompt("Image URL:");
-                  if (url) editor.runCommand("setImage", { src: url });
-                }}
-              >
-                <Plus className="w-4 h-4" />
-              </ToolbarButton>
+            <div className="flex gap-4">
+              <span>Production Grade Headless Engine</span>
+              <span>Refreshed 2026</span>
             </div>
-          </FloatingMenu>
-        </div>
-
-        {/* Status Bar */}
-        <div className="mt-4 flex justify-between items-center text-[10px] uppercase tracking-widest text-slate-400 dark:text-slate-500 font-bold px-2">
-          <div className="flex gap-6">
-            <span className={isLocked ? "text-red-500 animate-pulse" : "text-green-500"}>
-              {isLocked ? "Middleware Locked" : "System Online"}
-            </span>
-            <span>{editor.getText().length} Characters</span>
-            <span className="text-brand opacity-60">Arkpad Master Core v1.7.0</span>
-          </div>
-          <div className="flex gap-4">
-            <span>Production Grade Headless Engine</span>
-            <span>Refreshed 2026</span>
           </div>
         </div>
       </div>
-    </div>
+    </ArkpadProvider>
   );
 }

@@ -1,7 +1,7 @@
 import { setBlockType } from "prosemirror-commands";
 import { textblockTypeInputRule, wrappingInputRule, InputRule } from "prosemirror-inputrules";
 import { Schema } from "prosemirror-model";
-import { Extension } from "../extensions-types";
+import { ArkpadExtension as Extension } from "../types";
 import { toggleBlock } from "./utils";
 
 function getAlignAttrs(state: any) {

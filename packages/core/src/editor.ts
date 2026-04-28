@@ -14,7 +14,9 @@ import {
 } from "./extensions";
 import { defaultMarkdownSerializer } from "./extensions/markdown/serializer";
 import { CommandManager } from "./commands";
+import { SchemaBuilder } from "./schema-builder";
 import type {
+  ArkpadCommandProxy,
   ArkpadCommandRegistry,
   ArkpadContent,
   ArkpadDocJSON,
@@ -32,7 +34,7 @@ import { parseContent, resolveEditorOptions } from "./utils";
  */
 export class ArkpadEditor implements ArkpadEditorAPI {
   public readonly element: HTMLElement;
-  public commands: ArkpadCommandRegistry;
+  public commands: ArkpadCommandProxy;
   public extensionManager: ExtensionManager;
   public readonly storage: Record<string, any>;
 
@@ -64,16 +66,26 @@ export class ArkpadEditor implements ArkpadEditorAPI {
     this.onInterceptor = resolved.onInterceptor;
     this.onDestroy = resolved.onDestroy;
     this.nodeViews = resolved.nodeViews;
-    this.serializer = DOMSerializer.fromSchema(arkpadSchema);
 
-    const extensionManager = new ExtensionManager(arkpadSchema, [
+    // 1. Collect Extensions and Build Dynamic Schema
+    const extensions = [
       ...createEssentials(),
-      ...resolved.extensions,
-    ]);
+      ...(resolved.extensions || []),
+    ];
+
+    const schemaBuilder = new SchemaBuilder(extensions);
+    const schema = schemaBuilder.build();
+    
+    this.serializer = DOMSerializer.fromSchema(schema);
+
+    // 2. Initialize Extension Manager with the new Schema
+    const extensionManager = new ExtensionManager(schema, extensions);
 
     this.extensionManager = extensionManager;
-    this.commands = extensionManager.commands as unknown as ArkpadCommandRegistry;
     this.storage = extensionManager.storage;
+
+    // 3. Setup Commands Proxy (The DX "Secret Sauce")
+    this.commands = this.createCommandsProxy();
 
     const state = this.createState(resolved.content);
 
@@ -113,6 +125,14 @@ export class ArkpadEditor implements ArkpadEditorAPI {
 
         const nextState = this.view.state.apply(tr);
         this.view.updateState(nextState);
+        
+        // Trigger onUpdate lifecycle for all extensions
+        this.extensionManager.extensions.forEach(ext => {
+          if (ext.onUpdate) {
+            ext.onUpdate({ editor: this });
+          }
+        });
+
         this.emitUpdate(nextState);
       },
     });
@@ -125,7 +145,8 @@ export class ArkpadEditor implements ArkpadEditorAPI {
   }
 
   private createState(content: ArkpadContent) {
-    const parsedDoc = parseContent(content, arkpadSchema);
+    const { schema } = this.extensionManager;
+    const parsedDoc = parseContent(content, schema);
     const plugins = [...this.extensionManager.getPlugins()];
 
     // Add Paste Interceptor Plugin
@@ -143,16 +164,17 @@ export class ArkpadEditor implements ArkpadEditorAPI {
     );
 
     return EditorState.create({
-      schema: arkpadSchema,
+      schema,
       doc: parsedDoc,
       plugins,
     });
   }
 
   private refreshState(content: ArkpadContent = this.view.state.doc.toJSON()) {
+    const { schema } = this.extensionManager;
     const nextState = EditorState.create({
-      schema: arkpadSchema,
-      doc: parseContent(content, arkpadSchema),
+      schema,
+      doc: parseContent(content, schema),
       plugins: this.extensionManager.getPlugins(),
     });
     this.view.updateState(nextState);
@@ -341,7 +363,7 @@ export class ArkpadEditor implements ArkpadEditorAPI {
     for (let i = matches.length - 1; i >= 0; i--) {
       const match = matches[i];
       if (match) {
-        tr.replaceWith(match.from, match.to, arkpadSchema.text(replacement));
+        tr.replaceWith(match.from, match.to, this.extensionManager.schema.text(replacement));
       }
     }
 
@@ -414,10 +436,11 @@ export class ArkpadEditor implements ArkpadEditorAPI {
    * Sets the editor content.
    */
   setContent(content: ArkpadContent, format?: "html" | "markdown" | "json", emitUpdate = true) {
-    const parsedDoc = parseContent(content, arkpadSchema, format);
+    const { schema } = this.extensionManager;
+    const parsedDoc = parseContent(content, schema, format);
     const state = this.view.state;
     const nextState = EditorState.create({
-      schema: arkpadSchema,
+      schema,
       doc: parsedDoc,
       plugins: state.plugins,
     });
@@ -478,7 +501,6 @@ export class ArkpadEditor implements ArkpadEditorAPI {
    */
   registerExtension(extension: Extension) {
     this.extensionManager.registerExtension(extension);
-    this.commands = this.extensionManager.commands as unknown as ArkpadCommandRegistry;
     this.refreshState(this.view.state.doc.toJSON());
   }
 
@@ -487,7 +509,6 @@ export class ArkpadEditor implements ArkpadEditorAPI {
    */
   registerExtensions(extensions: Extension[]) {
     this.extensionManager.registerExtensions(extensions);
-    this.commands = this.extensionManager.commands as unknown as ArkpadCommandRegistry;
     this.refreshState(this.view.state.doc.toJSON());
   }
 
@@ -501,6 +522,23 @@ export class ArkpadEditor implements ArkpadEditorAPI {
     return () => {
       this.listeners.delete(callback);
     };
+  }
+
+  /**
+   * Internal helper to create the commands proxy for superior DX.
+   */
+  private createCommandsProxy(): any {
+    return new Proxy(
+      {},
+      {
+        get: (_, prop: string) => {
+          if (this.extensionManager.commands[prop]) {
+            return (...args: any[]) => this.runCommand(prop, ...args);
+          }
+          return undefined;
+        },
+      }
+    );
   }
 
   /**

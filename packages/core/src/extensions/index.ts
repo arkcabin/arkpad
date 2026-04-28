@@ -87,3 +87,4 @@ export * from "./nodes";
 export * from "./lists";
 export * from "./alignment";
 export * from "./utils";
+export { CharacterCount } from "./character-count";

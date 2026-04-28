@@ -1,4 +1,4 @@
-import { Extension } from "../../extensions-types";
+import { ArkpadExtension as Extension } from "../../types";
 import { Plugin, PluginKey } from "prosemirror-state";
 import { DOMParser, Slice } from "prosemirror-model";
 import { markdownToHtml } from "./parser";
