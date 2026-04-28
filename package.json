@@ -2,6 +2,7 @@
   "name": "arkpad",
   "private": true,
   "version": "1.3.0",
+  "type": "module",
   "description": "A high-performance, modular rich text editor framework built on ProseMirror with a Tiptap-inspired API.",
   "license": "MIT",
   "packageManager": "npm@10.8.2",

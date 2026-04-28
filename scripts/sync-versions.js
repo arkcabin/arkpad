@@ -32,3 +32,9 @@ packages.forEach(pkgPath => {
     console.log(`Updated ${pkgPath} to ${version}`);
   }
 });
+
+// Fix ENEEDAUTH in CI by creating .npmrc if NPM_TOKEN is present
+if (process.env.NPM_TOKEN) {
+  fs.writeFileSync('.npmrc', `//registry.npmjs.org/:_authToken=${process.env.NPM_TOKEN}\n`);
+  console.log('Created .npmrc with auth token');
+}
