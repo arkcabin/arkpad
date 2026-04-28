@@ -1,5 +1,5 @@
 import { nanoid } from "nanoid";
-import { Plugin, PluginKey, Transaction } from "prosemirror-state";
+import { Plugin, PluginKey } from "prosemirror-state";
 import { ArkpadExtension as Extension } from "../types";
 
 export interface UniqueIdOptions {

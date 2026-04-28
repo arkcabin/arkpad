@@ -43,11 +43,9 @@ import {
   ArkpadEditorContent,
   useEditorState,
   ArkpadProvider,
-  BubbleMenu,
-  FloatingMenu,
 } from "@arkpad/react";
 import { CharacterCount } from "@arkpad/core";
-import type { ArkpadEditorAPI, Extension } from "@arkpad/core";
+import type { ArkpadEditorAPI } from "@arkpad/core";
 
 interface ToolbarButtonProps {
   onClick: () => void;

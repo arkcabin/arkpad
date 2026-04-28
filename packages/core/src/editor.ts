@@ -2,7 +2,8 @@ import { DOMSerializer } from "prosemirror-model";
 import { EditorState, TextSelection, Transaction, Plugin } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
 
-import { arkpadSchema } from "./schema";
+
+
 import {
   ExtensionManager,
   createEssentials,
@@ -17,7 +18,6 @@ import { CommandManager } from "./commands";
 import { SchemaBuilder } from "./schema-builder";
 import type {
   ArkpadCommandProxy,
-  ArkpadCommandRegistry,
   ArkpadContent,
   ArkpadDocJSON,
   ArkpadEditorAPI,
