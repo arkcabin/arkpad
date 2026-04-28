@@ -1,3 +1,10 @@
+## [1.6.1](https://github.com/arkcabin/arkpad/compare/v1.6.0...v1.6.1) (2026-04-28)
+
+
+### Bug Fixes
+
+* trigger initial OIDC release ([9b8b7d1](https://github.com/arkcabin/arkpad/commit/9b8b7d108b0638d7e1ca7ff3dcf874f89a0231ed))
+
 # [1.6.0](https://github.com/arkcabin/arkpad/compare/v1.5.2...v1.6.0) (2026-04-28)
 
 
