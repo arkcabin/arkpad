@@ -1,245 +1,225 @@
-@import "tailwindcss";
-@source "../../../packages/react/src";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@400;500;600;700&display=swap');
 
 :root {
-  --editor-bg: #ffffff;
-  --editor-text: #09090b;
-  --editor-text-muted: #71717a;
-  --editor-border: #f4f4f5;
-  --editor-toolbar-bg: #ffffff;
-  --editor-btn-hover: #f4f4f5;
-  --editor-btn-text: #3f3f46;
-  --editor-btn-active-bg: #f4f4f5;
-  --editor-btn-active-text: #09090b;
-  --editor-marker: #a1a1aa;
-  --editor-marker-bullet: #3b82f6;
-  --editor-code-bg: #f4f4f5;
-  --editor-code-text: #2563eb;
-  --editor-pre-bg: #09090b;
-  --editor-pre-text: #fafafa;
-  --font-sans: "Inter", system-ui, sans-serif;
-  --font-mono: "Geist Mono", "Fira Code", monospace;
+  --brand: #2563eb;
+  --brand-hover: #1d4ed8;
+  --bg-main: #ffffff;
+  --bg-editor: #ffffff;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --border: #e2e8f0;
+  --toolbar-bg: rgba(255, 255, 255, 0.8);
+  --selection: rgba(37, 99, 235, 0.1);
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-display: 'Outfit', sans-serif;
 }
 
 .dark {
-  --editor-bg: #09090b;
-  --editor-text: #fafafa;
-  --editor-text-muted: #a1a1aa;
-  --editor-border: #18181b;
-  --editor-toolbar-bg: #09090b;
-  --editor-btn-hover: #18181b;
-  --editor-btn-text: #a1a1aa;
-  --editor-btn-active-bg: #18181b;
-  --editor-btn-active-text: #fafafa;
-  --editor-marker: #3f3f46;
-  --editor-marker-bullet: #60a5fa;
-  --editor-code-bg: #27272a;
-  --editor-code-text: #60a5fa;
-  --editor-pre-bg: #000000;
-  --editor-pre-text: #fafafa;
+  --brand: #3b82f6;
+  --brand-hover: #60a5fa;
+  --bg-main: #000000;
+  --bg-editor: #000000;
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  --border: #1e293b;
+  --toolbar-bg: rgba(0, 0, 0, 0.8);
+  --selection: rgba(59, 130, 246, 0.2);
 }
 
-@theme {
-  --color-brand: var(--editor-marker-bullet);
-  --color-brand-dark: #2563eb;
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-mono);
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
 }
 
-@layer base {
-  body {
-    @apply antialiased transition-colors duration-300;
-    background-color: var(--editor-bg);
-    color: var(--editor-text);
-    background: radial-gradient(circle at top right, var(--editor-toolbar-bg), var(--editor-bg));
-  }
-
-  /* ProseMirror Base Styles */
-  .ProseMirror {
-    @apply outline-none min-h-[400px] text-lg leading-relaxed;
-    white-space: pre-wrap;
-  }
-
-  .ProseMirror p {
-    @apply mb-4;
-  }
-
-  .ProseMirror h1 {
-    @apply text-4xl font-extrabold mb-6 tracking-tight;
-    color: var(--editor-text);
-  }
-
-  .ProseMirror h2 {
-    @apply text-2xl font-bold mb-4 tracking-tight opacity-90;
-    color: var(--editor-text);
-  }
-
-  .ProseMirror h3 {
-    @apply text-xl font-bold mb-3 opacity-80;
-    color: var(--editor-text);
-  }
-
-  .ProseMirror mark {
-    background-color: #fef08a;
-    color: #854d0e;
-    @apply rounded-[4px] px-1;
-  }
-
-  .dark .ProseMirror mark {
-    background-color: #fde047;
-    color: #1a1a1a;
-  }
-
-  .ProseMirror blockquote {
-    @apply border-l-4 pl-4 mb-4 italic;
-    border-color: var(--editor-border);
-    color: var(--editor-text-muted);
-  }
-
-  .ProseMirror pre {
-    @apply p-4 rounded-xl mb-4 overflow-x-auto font-mono text-sm shadow-lg;
-    background-color: var(--editor-pre-bg);
-    color: var(--editor-pre-text);
-  }
-
-  .ProseMirror code {
-    @apply px-1.5 py-0.5 rounded-md font-mono text-[0.9em];
-    background-color: var(--editor-code-bg);
-    color: var(--editor-code-text);
-  }
-
-  .ProseMirror pre code {
-    @apply bg-transparent p-0 text-inherit;
-  }
-
-  /* Alignment Support */
-  .ProseMirror [data-align="left"] { text-align: left; }
-  .ProseMirror [data-align="center"] { text-align: center; }
-  .ProseMirror [data-align="right"] { text-align: right; }
-  .ProseMirror [data-align="justify"] { text-align: justify; }
-
-  /* Robust List Styles - Avoiding Flexbox-Caret Bugs */
-  .ProseMirror ul,
-  .ProseMirror ol {
-    @apply !pl-8 !mb-4 !list-none;
-  }
-
-  .ProseMirror li {
-    @apply relative mb-1 !list-none;
-  }
-
-  .ProseMirror li > p {
-    @apply !m-0;
-  }
-
-  .ProseMirror hr {
-    @apply border-t-2 my-8;
-    border-color: var(--editor-border);
-  }
-
-  .ProseMirror img {
-    @apply max-w-full h-auto rounded-xl shadow-md my-4;
-  }
-
-  .ProseMirror a {
-    @apply underline underline-offset-4 decoration-2 transition-colors;
-    color: var(--editor-marker-bullet);
-    text-decoration-color: var(--editor-marker-bullet);
-    opacity: 0.8;
-  }
-  .ProseMirror a:hover {
-    opacity: 1;
-  }
-
-  .ProseMirror p.is-editor-empty:first-child::before {
-    @apply float-left h-0 pointer-events-none;
-    color: var(--editor-text-muted);
-    content: attr(data-placeholder);
-  }
-
-  /* Bullet List Marker - Absolute Positioned */
-  .ProseMirror ul:not(.task-list) li::before {
-    content: "";
-    @apply absolute -left-5 top-[0.7em] w-1.5 h-1.5 rounded-full pointer-events-none;
-    background-color: var(--editor-marker-bullet);
-    box-shadow: 0 0 6px var(--editor-marker-bullet);
-  }
-
-  /* Ordered List Marker - Absolute Positioned */
-  .ProseMirror ol {
-    counter-reset: arkpad-counter;
-  }
-
-  .ProseMirror ol li {
-    counter-increment: arkpad-counter;
-  }
-
-  .ProseMirror ol > li::before {
-    content: counter(arkpad-counter) ".";
-    @apply absolute -left-8 top-[0.1em] w-6 flex items-center justify-end font-mono text-sm select-none pointer-events-none;
-    color: var(--editor-marker);
-  }
-
-  /* Task List Styles */
-  .ProseMirror .task-list {
-    @apply !list-none !pl-0;
-  }
-
-  .ProseMirror .task-item {
-    @apply !list-none flex items-start !gap-2 !mb-1 relative;
-  }
-
-  .ProseMirror .task-item p {
-    @apply !m-0 !leading-snug;
-  }
-
-  /* Nested Indentation */
-  .ProseMirror li > ul,
-  .ProseMirror li > ol,
-  .ProseMirror li > .task-list {
-    @apply !mt-2;
-  }
+/* Minimalist Wrapper */
+.editor-wrapper {
+  background: var(--bg-editor);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-@layer components {
-  .toolbar-btn {
-    @apply inline-flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed;
-    color: var(--editor-btn-text);
-  }
+/* Ultra-Clean Toolbar */
+.toolbar-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--toolbar-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
 
-  .toolbar-btn:hover:not(:disabled) {
-    background-color: var(--editor-btn-hover);
-    color: var(--editor-text);
-  }
+.toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
 
-  .toolbar-btn.active {
-    background-color: var(--editor-btn-active-bg);
-    color: var(--editor-btn-active-text);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  }
+.toolbar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
 
-  .toolbar-btn svg {
-    @apply w-[1.1rem] h-[1.1rem] stroke-[2.25];
-  }
+.toolbar-btn:hover {
+  background: var(--selection);
+  color: var(--brand);
+}
 
-  .toolbar-separator {
-    @apply w-px h-6 mx-1.5;
-    background-color: var(--editor-border);
-  }
+.toolbar-btn.active {
+  background: var(--selection);
+  color: var(--brand);
+}
 
-  .toolbar-wrapper {
-    background-color: var(--editor-toolbar-bg);
-    border-color: var(--editor-border);
-    @apply flex flex-wrap items-center gap-0.5 p-2 border-b sticky top-0 z-30 transition-all duration-300;
-  }
+.toolbar-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
 
-  .toolbar-group {
-    @apply flex items-center gap-0.5 px-2 transition-all duration-300;
-  }
+/* Variant Styles */
+.variant-brand {
+  color: var(--brand);
+}
 
-  .editor-wrapper {
-    background-color: var(--editor-bg);
-    border-color: var(--editor-border);
-    @apply rounded-xl overflow-hidden flex flex-col border transition-all duration-300;
+.variant-success {
+  color: #10b981;
+}
+
+.variant-danger {
+  color: #ef4444;
+}
+
+/* Editor Content */
+.arkpad-container {
+  outline: none;
+  min-height: 500px;
+}
+
+.ProseMirror {
+  outline: none;
+  padding: 0 !important;
+  font-family: var(--font-sans);
+  font-size: 1.125rem;
+  line-height: 1.75;
+  color: var(--text-main);
+}
+
+/* Typography Overrides */
+.ProseMirror h1 {
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-top: 2rem;
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.025em;
+}
+
+.ProseMirror h2 {
+  font-family: var(--font-display);
+  font-size: 1.875rem;
+  font-weight: 600;
+  margin-top: 1.75rem;
+  margin-bottom: 1rem;
+  letter-spacing: -0.02em;
+}
+
+.ProseMirror p {
+  margin-bottom: 1.25rem;
+}
+
+/* Dropdown Simulation */
+.dropdown-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  padding: 0 0.5rem;
+  cursor: pointer;
+}
+
+/* Task List & Items */
+.ProseMirror ul[data-type="taskList"] {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+}
+
+.task-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+  list-style-type: none !important;
+}
+
+.task-item>[data-react-container] {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 1.75em;
+  /* Match line height exactly */
+  width: 24px;
+  transform: translateY(-0.1rem);
+  /* Nudge up by 1px */
+}
+
+.task-item>[data-node-view-content] {
+  flex: 1;
+  min-width: 0;
+  min-height: 1.75em;
+}
+
+.task-item>[data-node-view-content] p {
+  margin: 0 !important;
+}
+
+.task-item.checked>[data-node-view-content] {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+/* Fallback for Checkbox UI if Tailwind fails */
+.task-item button[role="checkbox"] {
+  width: 20px !important;
+  height: 20px !important;
+  border-radius: 6px !important;
+  border: 1.5px solid var(--border) !important;
+  background-color: var(--bg-editor) !important;
+  transition: all 0.2s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.task-item button[role="checkbox"][data-state="checked"] {
+  background-color: var(--brand) !important;
+  border-color: var(--brand) !important;
+  color: white !important;
+}
+
+.task-item button[role="checkbox"] svg {
+  width: 14px !important;
+  height: 14px !important;
+  stroke-width: 3 !important;
+}
+
+/* Responsive Hide */
+@media (max-width: 768px) {
+  .hide-mobile {
+    display: none;
   }
 }

@@ -4,3 +4,5 @@ export * from "./useArkpadEditor";
 export * from "./useEditorState";
 export * from "./BubbleMenu";
 export * from "./FloatingMenu";
+export * from "./node-view";
+export * from "./useSelection";

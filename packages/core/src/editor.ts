@@ -1,5 +1,5 @@
 import { DOMSerializer } from "prosemirror-model";
-import { EditorState } from "prosemirror-state";
+import { EditorState, TextSelection, Transaction, Plugin } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
 
 import { arkpadSchema } from "./schema";
@@ -22,6 +22,7 @@ import type {
   ArkpadEditorOptions,
   ArkpadUpdatePayload,
   ChainedCommands,
+  SearchResult,
 } from "./types";
 import { parseContent, resolveEditorOptions } from "./utils";
 
@@ -37,6 +38,9 @@ export class ArkpadEditor implements ArkpadEditorAPI {
   private readonly onCreate?: ArkpadEditorOptions["onCreate"];
   private readonly onUpdate?: ArkpadEditorOptions["onUpdate"];
   private readonly onTransaction?: ArkpadEditorOptions["onTransaction"];
+  private readonly onSelectionUpdate?: ArkpadEditorOptions["onSelectionUpdate"];
+  private readonly onPaste?: ArkpadEditorOptions["onPaste"];
+  private readonly onInterceptor?: ArkpadEditorOptions["onInterceptor"];
   private readonly onDestroy?: ArkpadEditorOptions["onDestroy"];
   private readonly nodeViews: Record<string, any>;
   private readonly serializer: DOMSerializer;
@@ -54,6 +58,9 @@ export class ArkpadEditor implements ArkpadEditorAPI {
     this.onCreate = resolved.onCreate;
     this.onUpdate = resolved.onUpdate;
     this.onTransaction = resolved.onTransaction;
+    this.onSelectionUpdate = resolved.onSelectionUpdate;
+    this.onPaste = resolved.onPaste;
+    this.onInterceptor = resolved.onInterceptor;
     this.onDestroy = resolved.onDestroy;
     this.nodeViews = resolved.nodeViews;
     this.serializer = DOMSerializer.fromSchema(arkpadSchema);
@@ -73,10 +80,36 @@ export class ArkpadEditor implements ArkpadEditorAPI {
       editable: () => this.editable,
       nodeViews: this.nodeViews,
       dispatchTransaction: (transaction) => {
-        // Call onTransaction hook before applying the transaction
-        this.onTransaction?.({ editor: this, transaction });
+        if (this.destroyed) return;
 
-        const nextState = this.view.state.apply(transaction);
+        let tr = transaction;
+
+        // Run Interceptor (Middleware)
+        if (this.onInterceptor) {
+          const intercepted = this.onInterceptor({ editor: this, transaction: tr });
+
+          if (intercepted === false || intercepted === null) {
+            return; // Cancel transaction
+          }
+
+          if (intercepted instanceof Transaction) {
+            tr = intercepted;
+          }
+        }
+
+        // Call onTransaction hook
+        this.onTransaction?.({ editor: this, transaction: tr });
+
+        // Trigger onSelectionUpdate if selection changed
+        if (tr.selectionSet && this.onSelectionUpdate) {
+          this.onSelectionUpdate({
+            editor: this,
+            transaction: tr,
+            coords: this.getCoords(tr.selection.from),
+          });
+        }
+
+        const nextState = this.view.state.apply(tr);
         this.view.updateState(nextState);
         this.emitUpdate(nextState);
       },
@@ -91,7 +124,21 @@ export class ArkpadEditor implements ArkpadEditorAPI {
 
   private createState(content: ArkpadContent) {
     const parsedDoc = parseContent(content, arkpadSchema);
-    const plugins = this.extensionManager.getPlugins();
+    const plugins = [...this.extensionManager.getPlugins()];
+
+    // Add Paste Interceptor Plugin
+    plugins.push(
+      new Plugin({
+        props: {
+          handlePaste: (view, event, slice) => {
+            if (this.onPaste) {
+              return this.onPaste({ editor: this, event, slice }) === true;
+            }
+            return false;
+          },
+        },
+      })
+    );
 
     return EditorState.create({
       schema: arkpadSchema,
@@ -130,6 +177,13 @@ export class ArkpadEditor implements ArkpadEditorAPI {
    */
   getState() {
     return this.view.state;
+  }
+
+  /**
+   * Returns the ProseMirror EditorView.
+   */
+  getView() {
+    return this.view;
   }
 
   /**
@@ -220,6 +274,83 @@ export class ArkpadEditor implements ArkpadEditorAPI {
   }
 
   /**
+   * Selection API
+   */
+  getSelection() {
+    const { from, to, empty } = this.view.state.selection;
+    return { from, to, empty };
+  }
+
+  setSelection(range: { from: number; to: number } | number) {
+    const { tr } = this.view.state;
+    const from = typeof range === "number" ? range : range.from;
+    const to = typeof range === "number" ? range : range.to;
+
+    this.view.dispatch(tr.setSelection(TextSelection.create(tr.doc, from, to)));
+  }
+
+  selectAll() {
+    this.setSelection({ from: 0, to: this.view.state.doc.content.size });
+  }
+
+  /**
+   * Coordinate API
+   */
+  getCoords(pos?: number) {
+    const position = pos ?? this.view.state.selection.from;
+    return this.view.coordsAtPos(position);
+  }
+
+  /**
+   * Search & Replace API
+   */
+  search(query: string | RegExp): SearchResult[] {
+    const results: SearchResult[] = [];
+    const regex =
+      typeof query === "string"
+        ? new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi") // Escape string for literal matching
+        : query;
+
+    this.view.state.doc.descendants((node, pos) => {
+      if (node.isText && node.text) {
+        const matches = node.text.matchAll(regex);
+        for (const match of matches) {
+          if (match.index !== undefined) {
+            results.push({
+              from: pos + match.index,
+              to: pos + match.index + match[0].length,
+              text: match[0],
+            });
+          }
+        }
+      }
+      return true;
+    });
+
+    return results;
+  }
+
+  replace(query: string | RegExp, replacement: string): boolean {
+    const matches = this.search(query);
+    if (matches.length === 0) return false;
+
+    const { tr } = this.view.state;
+    // Apply in reverse order to keep positions valid
+    for (let i = matches.length - 1; i >= 0; i--) {
+      const match = matches[i];
+      if (match) {
+        tr.replaceWith(match.from, match.to, arkpadSchema.text(replacement));
+      }
+    }
+
+    // Apply transaction directly, bypassing interceptor for internal API calls
+    const nextState = this.view.state.apply(tr);
+    this.view.updateState(nextState);
+    this.emitUpdate(nextState);
+    return true;
+  }
+
+  /**
    * Checks if a specific mark or node is active at the current selection.
    */
   isActive(name: string, attrs: Record<string, any> = {}): boolean {
@@ -304,8 +435,18 @@ export class ArkpadEditor implements ArkpadEditorAPI {
   /**
    * Focuses the editor.
    */
-  focus() {
+  focus(pos?: "start" | "end" | number) {
+    if (this.view.hasFocus() && pos === undefined) return;
+
     this.view.focus();
+
+    if (pos === "start") {
+      this.setSelection(0);
+    } else if (pos === "end") {
+      this.setSelection(this.view.state.doc.content.size);
+    } else if (typeof pos === "number") {
+      this.setSelection(pos);
+    }
   }
 
   /**

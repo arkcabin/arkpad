@@ -1,5 +1,6 @@
 import type { Command, EditorState, Plugin, Transaction } from "prosemirror-state";
 import type { Node as PMNode } from "prosemirror-model";
+import type { EditorView, NodeView, ViewMutationRecord } from "prosemirror-view";
 
 export type ArkpadDocJSON = Record<string, unknown>;
 export type ArkpadContent = string | ArkpadDocJSON;
@@ -35,16 +36,22 @@ export interface ArkpadExtension {
 }
 
 export type NodeViewConstructor =
-  | (new (node: PMNode, view: any, getPos: () => number | undefined, decorations: any) => NodeView)
-  | ((node: PMNode, view: any, getPos: () => number | undefined, decorations: any) => NodeView);
+  | (new (node: PMNode, view: EditorView, getPos: () => number | undefined, decorations: any) => NodeView)
+  | ((node: PMNode, view: EditorView, getPos: () => number | undefined, decorations: any) => NodeView);
 
-export interface NodeView {
-  dom: globalThis.Node;
-  contentDOM?: globalThis.Node;
-  update?(node: PMNode, decorations: any): boolean;
-  destroy(): void;
-  ignoreMutation?(mutation: MutationRecord): boolean;
+export interface SelectionUpdatePayload {
+  editor: ArkpadEditorAPI;
+  transaction: Transaction;
+  coords: { top: number; left: number; bottom: number; right: number };
 }
+
+export interface PastePayload {
+  editor: ArkpadEditorAPI;
+  event: ClipboardEvent;
+  slice: any;
+}
+
+export type { NodeView };
 
 export interface ArkpadEditorOptions {
   element: HTMLElement;
@@ -56,6 +63,20 @@ export interface ArkpadEditorOptions {
   onCreate?: (editor: ArkpadEditorAPI) => void;
   onUpdate?: (payload: ArkpadUpdatePayload) => void;
   onTransaction?: (props: { editor: ArkpadEditorAPI; transaction: Transaction }) => void;
+  onSelectionUpdate?: (props: {
+    editor: ArkpadEditorAPI;
+    transaction: Transaction;
+    coords: { top: number; left: number; bottom: number; right: number };
+  }) => void;
+  onPaste?: (props: {
+    editor: ArkpadEditorAPI;
+    event: ClipboardEvent;
+    slice: any;
+  }) => boolean | void;
+  onInterceptor?: (props: {
+    editor: ArkpadEditorAPI;
+    transaction: Transaction;
+  }) => Transaction | boolean | null;
   onDestroy?: (editor: ArkpadEditorAPI) => void;
 }
 
@@ -78,10 +99,17 @@ export interface ArkpadUpdatePayload {
   text: string;
 }
 
+export interface SearchResult {
+  from: number;
+  to: number;
+  text: string;
+}
+
 export interface ArkpadEditorAPI {
   readonly element: HTMLElement;
   readonly commands: ArkpadCommandRegistry;
   getState(): EditorState;
+  getView(): EditorView;
   getHTML(): string;
   getJSON(): ArkpadDocJSON;
   getMarkdown(): string;
@@ -90,7 +118,7 @@ export interface ArkpadEditorAPI {
   getAttributes(name: string): Record<string, any> | null;
   runCommand(name: string, ...args: any[]): boolean;
   canRunCommand(name: string, ...args: any[]): boolean;
-  
+
   /**
    * Returns a command chain to execute multiple commands in a single transaction.
    */
@@ -101,18 +129,37 @@ export interface ArkpadEditorAPI {
    */
   can(): ChainedCommands;
 
+  // Content Management
   setContent(
     content: ArkpadContent,
     format?: "html" | "markdown" | "json",
     emitUpdate?: boolean
   ): void;
   clearContent(emitUpdate?: boolean): void;
-  focus(): void;
+
+  // Selection API
+  getSelection(): { from: number; to: number; empty: boolean };
+  setSelection(range: { from: number; to: number } | number): void;
+  selectAll(): void;
+
+  // Coordinate API
+  getCoords(pos?: number): { top: number; left: number; bottom: number; right: number };
+
+  // Search & Replace API
+  search(query: string | RegExp): SearchResult[];
+  replace(query: string | RegExp, replacement: string): boolean;
+
+  // Editor Control
+  focus(pos?: "start" | "end" | number): void;
   blur(): void;
   setEditable(editable: boolean): void;
   isEditable(): boolean;
+
+  // Extension Management
   registerExtension(extension: ArkpadExtension): void;
   registerExtensions(extensions: ArkpadExtension[]): void;
+
+  // Events
   subscribe(callback: (editor: ArkpadEditorAPI) => void): () => void;
   destroy(): void;
 }

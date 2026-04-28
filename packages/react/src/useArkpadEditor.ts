@@ -5,7 +5,6 @@ import {
   type ArkpadEditorAPI,
   type NodeViewConstructor,
 } from "@arkpad/core";
-import { type Node as PMNode } from "prosemirror-model";
 import { TaskView } from "./views/Task";
 
 export type UseArkpadEditorOptions = {
@@ -13,7 +12,17 @@ export type UseArkpadEditorOptions = {
    * Whether to use Shadcn-like task items. Defaults to true.
    */
   useShadcnTaskItems?: boolean;
-} & Omit<ArkpadEditorOptions, "nodeViews" | "element">;
+} & Omit<
+  ArkpadEditorOptions,
+  "element" | "onUpdate" | "onTransaction" | "onSelectionUpdate" | "onPaste" | "onInterceptor"
+> & {
+    nodeViews?: ArkpadEditorOptions["nodeViews"];
+    onUpdate?: ArkpadEditorOptions["onUpdate"];
+    onTransaction?: ArkpadEditorOptions["onTransaction"];
+    onSelectionUpdate?: ArkpadEditorOptions["onSelectionUpdate"];
+    onPaste?: ArkpadEditorOptions["onPaste"];
+    onInterceptor?: ArkpadEditorOptions["onInterceptor"];
+  };
 
 /**
  * A hook to create and manage an Arkpad editor instance in React.
@@ -32,12 +41,12 @@ export function useArkpadEditor(options: UseArkpadEditorOptions = {}) {
     // Prevent double initialization in strict mode
     if (editorRef.current) return;
 
-    const nodeViews: Record<string, NodeViewConstructor> = {};
+    const nodeViews: Record<string, NodeViewConstructor> = {
+      ...(options.nodeViews || {}),
+    };
 
     if (options.useShadcnTaskItems !== false) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      nodeViews.taskItem = (node: PMNode, view: any, getPos: () => number | undefined) =>
-        new TaskView(node, view, getPos);
+      nodeViews.taskItem = TaskView;
     }
 
     const instance = new ArkpadEditor({
@@ -60,6 +69,23 @@ export function useArkpadEditor(options: UseArkpadEditorOptions = {}) {
       editorRef.current = null;
     };
   }, []); // Only run once on mount
+
+  // Sync content when it changes from outside
+  useEffect(() => {
+    if (!editor || options.content === undefined) return;
+
+    const currentContent = editor.getHTML();
+    // Only update if the content is actually different to avoid cursor jumps
+    if (options.content !== currentContent && options.content !== editor.getJSON()) {
+      editor.setContent(options.content, undefined, false);
+    }
+  }, [editor, options.content]);
+
+  // Sync editable state
+  useEffect(() => {
+    if (!editor || options.editable === undefined) return;
+    editor.setEditable(options.editable);
+  }, [editor, options.editable]);
 
   return editor;
 }

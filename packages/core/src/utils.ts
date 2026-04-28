@@ -43,6 +43,10 @@ export function resolveEditorOptions(options: ArkpadEditorOptions): ResolvedArkp
     autofocus: options.autofocus ?? false,
     onCreate: options.onCreate,
     onUpdate: options.onUpdate,
+    onTransaction: options.onTransaction,
+    onSelectionUpdate: options.onSelectionUpdate,
+    onPaste: options.onPaste,
+    onInterceptor: options.onInterceptor,
     onDestroy: options.onDestroy,
   };
 }
