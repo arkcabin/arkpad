@@ -47,7 +47,6 @@ export function createUniqueId(options?: Partial<UniqueIdOptions>): Extension {
         new Plugin({
           key: pluginKey,
           appendTransaction(transactions, oldState, newState) {
-            // Only scan if the document actually changed to keep it "Super Ultra Fast"
             if (!transactions.some(tr => tr.docChanged)) {
               return null;
             }
@@ -56,52 +55,66 @@ export function createUniqueId(options?: Partial<UniqueIdOptions>): Extension {
             let modified = false;
             const seenIds = new Set<string>();
 
-            newState.doc.descendants((node, pos) => {
-              if (node.isBlock && types.includes(node.type.name)) {
-                const id = node.attrs[attributeName];
+            // Optimization: Only scan ranges that actually changed
+            transactions.forEach(transaction => {
+              transaction.steps.forEach(step => {
+                const map = step.getMap();
+                map.forEach((from, to, newFrom, newTo) => {
+                  newState.doc.nodesBetween(newFrom, newTo, (node, pos) => {
+                    if (node.isBlock && types.includes(node.type.name)) {
+                      const id = node.attrs[attributeName];
 
-                if (!id || seenIds.has(id)) {
-                  tr.setNodeMarkup(pos, undefined, {
-                    ...node.attrs,
-                    [attributeName]: generateId(),
+                      if (!id || seenIds.has(id)) {
+                        tr.setNodeMarkup(pos, undefined, {
+                          ...node.attrs,
+                          [attributeName]: generateId(),
+                        });
+                        modified = true;
+                      } else {
+                        seenIds.add(id);
+                      }
+                    }
+                    return true;
                   });
-                  modified = true;
-                } else {
-                  seenIds.add(id);
-                }
-              }
-              return true;
+                });
+              });
             });
-
+            
             return modified ? tr : null;
           },
 
           view(editorView) {
-            // On mount, check if we need to assign IDs to the initial content
-            const { state } = editorView;
-            const tr = state.tr;
-            let modified = false;
-            const seenIds = new Set<string>();
+            // On mount, check if we need to assign IDs to the initial content.
+            // We wrap this in requestAnimationFrame to ensure the ArkpadEditor instance 
+            // has finished initializing and this.view is assigned.
+            requestAnimationFrame(() => {
+              if (editorView.isDestroyed) return;
 
-            state.doc.descendants((node, pos) => {
-              if (node.isBlock && types.includes(node.type.name)) {
-                const id = node.attrs[attributeName];
-                if (!id || seenIds.has(id)) {
-                  tr.setNodeMarkup(pos, undefined, {
-                    ...node.attrs,
-                    [attributeName]: generateId(),
-                  });
-                  modified = true;
-                } else {
-                  seenIds.add(id);
+              const { state } = editorView;
+              const tr = state.tr;
+              let modified = false;
+              const seenIds = new Set<string>();
+
+              state.doc.descendants((node, pos) => {
+                if (node.isBlock && types.includes(node.type.name)) {
+                  const id = node.attrs[attributeName];
+                  if (!id || seenIds.has(id)) {
+                    tr.setNodeMarkup(pos, undefined, {
+                      ...node.attrs,
+                      [attributeName]: generateId(),
+                    });
+                    modified = true;
+                  } else {
+                    seenIds.add(id);
+                  }
                 }
-              }
-              return true;
-            });
+                return true;
+              });
 
-            if (modified) {
-              editorView.dispatch(tr);
-            }
+              if (modified) {
+                editorView.dispatch(tr);
+              }
+            });
 
             return {};
           },

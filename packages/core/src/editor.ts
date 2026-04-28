@@ -247,7 +247,7 @@ export class ArkpadEditor implements ArkpadEditorAPI {
   runCommand(name: string, ...args: any[]): boolean {
     if (this.destroyed) return false;
 
-    const command = this.commands[name];
+    const command = this.extensionManager.commands[name];
     if (!command) return false;
 
     const result = (command as any)(...args);
@@ -263,7 +263,7 @@ export class ArkpadEditor implements ArkpadEditorAPI {
    * Checks if a command can be executed without actually running it.
    */
   canRunCommand(name: string, ...args: any[]): boolean {
-    const command = this.commands[name];
+    const command = this.extensionManager.commands[name];
     if (!command) return false;
 
     try {

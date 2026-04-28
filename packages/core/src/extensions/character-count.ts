@@ -23,7 +23,15 @@ export const CharacterCount: Extension = {
     const text = editor.getText();
     if (this.storage) {
       this.storage.characters = text.length;
-      this.storage.words = text.split(/\s+/).filter((s) => s.length > 0).length;
+      
+      // Super fast word count using regex match without creating massive arrays
+      let wordCount = 0;
+      const matches = text.matchAll(/\S+/g);
+      for (const _ of matches) {
+        wordCount++;
+      }
+      
+      this.storage.words = wordCount;
     }
   },
 };
