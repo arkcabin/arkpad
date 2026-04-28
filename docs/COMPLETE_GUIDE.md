@@ -1,6 +1,6 @@
-# AgentEdit: The Complete Developer Guide
+# Arkpad: The Complete Developer Guide
 
-Welcome to the official documentation for **AgentEdit**, a high-performance, modular, and agent-ready rich text editor framework built on ProseMirror.
+Welcome to the official documentation for **Arkpad**, a high-performance, modular, and agent-ready rich text editor framework built on ProseMirror.
 
 ---
 
@@ -22,45 +22,61 @@ npm install @arkpad/core
 
 The React package is designed to be declarative and reactive. It handles the heavy lifting of synchronization between the editor state and the React render cycle.
 
-### Example 1: Basic Implementation
-This is the simplest way to get a professional editor running with the `Essentials` kit.
+### Example: Basic Setup
 
 ```tsx
-import { useAgentEditor, AgentEditorContent } from "@arkpad/react";
+import { useArkpadEditor, ArkpadEditorContent } from "@arkpad/react";
 import { Essentials } from "@arkpad/core";
 
 export function SimpleEditor() {
-  const editor = useAgentEditor({
+  const editor = useArkpadEditor({
     extensions: [Essentials],
-    content: "<p>Start your journey with AgentEdit.</p>",
+    content: "<p>Start your journey with Arkpad.</p>",
   });
 
-  return (
-    <div className="editor-shell">
-      <AgentEditorContent editor={editor} />
-    </div>
-  );
+  return <ArkpadEditorContent editor={editor} />;
 }
 ```
 
-### Example 2: Advanced Usage with Callbacks
-Monitor updates and interact with the editor instance directly.
+---
+
+## 🎨 Headless UI: Tailwind CSS & Shadcn Integration
+
+Arkpad is **100% headless**. It does not come with any pre-styled UI, giving you full creative freedom. You can build your own "Toolbox" using **Tailwind CSS** and **Shadcn UI** components.
+
+### Building a Shadcn-style Toolbar
+
+Because `useArkpadEditor` is a hook, you can pass the `editor` instance to any component, such as a custom Toolbar or Toolbox.
 
 ```tsx
-const editor = useAgentEditor({
-  extensions: [Essentials],
-  autofocus: true,
-  onCreate: (editor) => {
-    console.log("Editor is ready!");
-  },
-  onUpdate: ({ html, json, text }) => {
-    // Reactive updates
-    console.log("Characters:", text.length);
-  },
-});
+import { Toggle } from "@/components/ui/toggle";
+import { Bold, Italic, Heading2 } from "lucide-react";
 
-// Triggering commands from your own UI
-const toggleBold = () => editor?.runCommand("toggleBold");
+const Toolbar = ({ editor }) => {
+  if (!editor) return null;
+
+  return (
+    <div className="flex items-center gap-1 p-2 bg-background border rounded-md shadow-sm">
+      <Toggle
+        size="sm"
+        pressed={editor.isActive("strong")}
+        onPressedChange={() => editor.runCommand("toggleBold")}
+      >
+        <Bold className="w-4 h-4" />
+      </Toggle>
+
+      <Toggle
+        size="sm"
+        pressed={editor.isActive("heading", { level: 2 })}
+        onPressedChange={() => editor.runCommand("toggleHeading", { level: 2 })}
+      >
+        <Heading2 className="w-4 h-4" />
+      </Toggle>
+      
+      {/* Add more Shadcn components here! */}
+    </div>
+  );
+};
 ```
 
 ---
@@ -70,9 +86,9 @@ const toggleBold = () => editor?.runCommand("toggleBold");
 For those not using React, the core library provides a powerful class-based API.
 
 ```ts
-import { AgentEditor, Essentials } from "@arkpad/core";
+import { ArkpadEditor, Essentials } from "@arkpad/core";
 
-const editor = new AgentEditor({
+const editor = new ArkpadEditor({
   element: document.querySelector("#editor")!,
   extensions: [Essentials],
   content: "<h1>Pure Performance</h1>",
@@ -120,7 +136,7 @@ The `Essentials` kit bundles the following features by default:
 
 ## 🛠️ Extension System: Building Your Own
 
-AgentEdit is designed to be extended. You can build custom nodes or marks with ease.
+Arkpad is designed to be extended. You can build custom nodes or marks with ease.
 
 ```ts
 const MyCustomMark = {
@@ -154,5 +170,5 @@ We are moving towards a future where the editor is not just a tool, but a collab
 
 ## 📄 License
 
-AgentEdit is open-source under the **MIT License**.
+Arkpad is open-source under the **MIT License**.
 Built with ❤️ by **ArkCabin**.
