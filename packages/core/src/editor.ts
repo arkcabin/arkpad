@@ -5,7 +5,7 @@ import { EditorView } from "prosemirror-view";
 import { arkpadSchema } from "./schema";
 import {
   ExtensionManager,
-  createDefaultExtensions,
+  createEssentials,
   type Extension,
   type Dispatch,
   isMarkActive,
@@ -54,7 +54,7 @@ export class ArkpadEditor implements ArkpadEditorAPI {
     this.serializer = DOMSerializer.fromSchema(arkpadSchema);
 
     const extensionManager = new ExtensionManager(arkpadSchema, [
-      ...createDefaultExtensions(),
+      ...createEssentials(),
       ...resolved.extensions,
     ]);
 

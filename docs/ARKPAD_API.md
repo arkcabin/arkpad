@@ -188,7 +188,6 @@ The core package contains:
 - `ArkpadEditor` - Main editor class
 - `arkpadSchema` - ProseMirror schema
 - `ExtensionManager` - Manages extensions
-- `createDefaultExtensions()` - Built-in extensions
 - Type definitions
 
 ---

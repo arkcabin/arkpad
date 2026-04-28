@@ -33,10 +33,13 @@ import {
 } from "./lists";
 import { createMarkdownPaste } from "./markdown";
 import { createTextAlign } from "./alignment";
-import { Extension } from "../extensions-types";
+import { ArkpadExtension as Extension } from "../types";
 
-// STARTER KIT - bundles all common extensions
-export const StarterKit: Extension[] = [
+/**
+ * Essentials - A bundled collection of the most common and essential editor extensions.
+ * Use this as a base for a fully-featured rich text experience.
+ */
+export const Essentials: Extension[] = [
   createDocument(),
   createParagraph(),
   createText(),
@@ -66,9 +69,15 @@ export const StarterKit: Extension[] = [
   createTextAlign(),
 ];
 
-export function createDefaultExtensions(): Extension[] {
-  return StarterKit;
+/**
+ * Returns the default set of essential extensions.
+ */
+export function createEssentials(): Extension[] {
+  return Essentials;
 }
+
+// Backward compatibility or legacy naming (Optional, but let's stick to Essentials)
+export const StarterKit = Essentials;
 
 export * from "./base";
 export * from "./marks";

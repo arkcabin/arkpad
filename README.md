@@ -47,11 +47,11 @@ Arkpad provides a seamless React integration via the `useArkpadEditor` hook, ens
 
 ```tsx
 import { useArkpadEditor, ArkpadEditorContent } from "@arkpad/react";
-import { StarterKit } from "@arkpad/core";
+import { Essentials } from "@arkpad/core";
 
 function App() {
   const editor = useArkpadEditor({
-    extensions: [StarterKit],
+    extensions: [Essentials],
     content: "<h1>Build something beautiful.</h1><p>Arkpad makes it easy.</p>",
     onUpdate: ({ editor }) => {
       console.log("Content changed:", editor.getHTML());
@@ -69,12 +69,11 @@ function App() {
 ### Vanilla JavaScript
 
 ```ts
-import { ArkpadEditor } from "@arkpad/core";
-import { StarterKit } from "@arkpad/core";
+import { ArkpadEditor, Essentials } from "@arkpad/core";
 
 const editor = new ArkpadEditor({
   element: document.querySelector("#editor")!,
-  extensions: [StarterKit],
+  extensions: [Essentials],
   content: "<p>The future of editing is here.</p>",
 });
 ```
