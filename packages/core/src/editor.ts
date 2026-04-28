@@ -3,9 +3,7 @@ import { EditorState, TextSelection, Transaction, Plugin } from "prosemirror-sta
 import { EditorView } from "prosemirror-view";
 import { ExtensionManager } from "./extensions/ExtensionManager";
 import { Extension } from "./extensions/Extension";
-import {
-  createEssentials,
-} from "./extensions/index";
+import { createEssentials } from "./extensions/index";
 import {
   isMarkActive,
   isNodeActive,
@@ -45,7 +43,7 @@ export class ArkpadEditor implements ArkpadEditorAPI {
   private readonly onInterceptor?: ArkpadEditorOptions["onInterceptor"];
   private readonly onDestroy?: ArkpadEditorOptions["onDestroy"];
   private readonly nodeViews: Record<string, any>;
-  private readonly serializer: DOMSerializer;
+  private serializer: DOMSerializer;
 
   private editable: boolean;
   private view: EditorView;
@@ -67,10 +65,7 @@ export class ArkpadEditor implements ArkpadEditorAPI {
     this.nodeViews = resolved.nodeViews;
 
     // 1. Collect Extensions and Build Dynamic Schema
-    const extensions = [
-      ...createEssentials(),
-      ...(resolved.extensions || []),
-    ];
+    const extensions = [...createEssentials(), ...(resolved.extensions || [])];
 
     const schemaBuilder = new SchemaBuilder(extensions);
     const schema = schemaBuilder.build();
@@ -84,7 +79,7 @@ export class ArkpadEditor implements ArkpadEditorAPI {
 
     // 3. Boot Extensions (Inject Editor and Setup Storage)
     this.storage = {};
-    extensionManager.extensions.forEach(ext => {
+    extensionManager.extensions.forEach((ext) => {
       if (ext.init) {
         ext.init(this);
       }
@@ -138,7 +133,7 @@ export class ArkpadEditor implements ArkpadEditorAPI {
         this.view.updateState(nextState);
 
         // Trigger onUpdate lifecycle for all extensions
-        this.extensionManager.extensions.forEach(ext => {
+        this.extensionManager.extensions.forEach((ext) => {
           if (ext.onUpdate) {
             ext.onUpdate({ editor: this });
           }
@@ -293,6 +288,7 @@ export class ArkpadEditor implements ArkpadEditorAPI {
       commands: this.commands,
       view: this.view,
       dispatch: (tr) => this.view.dispatch(tr),
+      schema: this.extensionManager.schema,
     }) as unknown as ChainedCommands;
   }
 
@@ -305,6 +301,7 @@ export class ArkpadEditor implements ArkpadEditorAPI {
       commands: this.commands,
       view: this.view,
       shouldDispatch: false,
+      schema: this.extensionManager.schema,
     }) as unknown as ChainedCommands;
   }
 
@@ -513,7 +510,17 @@ export class ArkpadEditor implements ArkpadEditorAPI {
   registerExtension(extension: Extension) {
     this.extensionManager.registerExtension(extension);
 
-    // Boot the new extension
+    if (typeof extension.addGlobalAttributes === "function") {
+      const attrs = extension.addGlobalAttributes();
+      if (attrs && attrs.length > 0) {
+        const schemaBuilder = new SchemaBuilder([...this.extensionManager.extensions]);
+        const newSchema = schemaBuilder.build();
+        this.extensionManager.schema = newSchema;
+        this.serializer = DOMSerializer.fromSchema(newSchema);
+        this.extensionManager.rebuild();
+      }
+    }
+
     if (extension.init) {
       extension.init(this);
     }
@@ -530,8 +537,7 @@ export class ArkpadEditor implements ArkpadEditorAPI {
   registerExtensions(extensions: Extension[]) {
     this.extensionManager.registerExtensions(extensions);
 
-    // Boot the new extensions
-    extensions.forEach(ext => {
+    extensions.forEach((ext) => {
       if (ext.init) {
         ext.init(this);
       }
@@ -559,17 +565,19 @@ export class ArkpadEditor implements ArkpadEditorAPI {
    * Internal helper to create the commands proxy for superior DX.
    */
   private createCommandsProxy(): ArkpadCommandProxy {
-    return new Proxy(
-      {} as ArkpadCommandProxy,
-      {
-        get: (_, prop: string) => {
-          if (this.extensionManager.commands[prop]) {
-            return (...args: any[]) => this.runCommand(prop, ...args);
-          }
-          return undefined;
-        },
-      }
-    );
+    return new Proxy({} as ArkpadCommandProxy, {
+      get: (_, prop: string) => {
+        const command =
+          this.extensionManager.commands[prop as keyof typeof this.extensionManager.commands];
+        if (command) {
+          return (...args: unknown[]) => this.runCommand(prop, ...args);
+        }
+        if (prop in this && typeof (this as any)[prop] === "function") {
+          return (this as any)[prop];
+        }
+        return undefined;
+      },
+    });
   }
 
   /**

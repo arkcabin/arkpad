@@ -1,8 +1,4 @@
-import { 
-  ArkpadExtension, 
-  ArkpadCommandRegistry,
-  ArkpadCommand,
-} from "../types";
+import { ArkpadExtension, ArkpadCommandRegistry, ArkpadCommand } from "../types";
 import { type Schema } from "prosemirror-model";
 import { Plugin, EditorState, Transaction } from "prosemirror-state";
 import { keymap } from "prosemirror-keymap";
@@ -36,6 +32,13 @@ export class ExtensionManager {
     for (const extension of extensions) {
       this.registerExtension(extension);
     }
+    this.rebuild();
+  }
+
+  /**
+   * Rebuilds all collected commands, keyboard shortcuts, input rules, and plugins.
+   */
+  rebuild(): void {
     this.commands = this.collectCommands() as unknown as ArkpadCommandRegistry;
     this.keyboardShortcuts = this.collectKeyboardShortcuts(this.schema);
     this.inputRules = this.collectInputRules(this.schema);
@@ -48,9 +51,6 @@ export class ExtensionManager {
    */
   registerExtension(extension: ArkpadExtension): void {
     this.extensions.push(extension);
-    
-    // The ArkpadEditor will call init() on each extension later
-    // to provide the editor instance and setup storage.
   }
 
   get(name: string): ArkpadExtension | undefined {
@@ -90,7 +90,7 @@ export class ExtensionManager {
             (state: EditorState, dispatch?: (tr: Transaction) => void, view?: EditorView) => {
               const run = (cmd: ArkpadCommand) => {
                 if (typeof cmd !== "function") return false;
-                
+
                 // We cast to any here because ArkpadCommand is a union of signatures,
                 // and we need to call it with dynamic arguments.
                 const result = (cmd as any)(...args);
@@ -126,7 +126,11 @@ export class ExtensionManager {
 
         if (shortcuts[key]) {
           const prevCommand = shortcuts[key];
-          shortcuts[key] = (state: EditorState, dispatch?: (tr: Transaction) => void, view?: EditorView) => {
+          shortcuts[key] = (
+            state: EditorState,
+            dispatch?: (tr: Transaction) => void,
+            view?: EditorView
+          ) => {
             return newCommand(state, dispatch, view) || prevCommand(state, dispatch, view);
           };
         } else {

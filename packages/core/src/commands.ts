@@ -1,8 +1,7 @@
 import { EditorState, Transaction, TextSelection } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
-import { Slice } from "prosemirror-model";
+import { Slice, Schema } from "prosemirror-model";
 import { ChainedCommands, ArkpadCommandRegistry, ArkpadContent } from "./types";
-import { arkpadSchema } from "./schema";
 import { parseContent } from "./utils";
 
 /**
@@ -15,6 +14,7 @@ export class CommandManager implements ChainedCommands {
   private commands: ArkpadCommandRegistry;
   private dispatch?: (tr: Transaction) => void;
   private shouldDispatch: boolean;
+  private schema: Schema;
   private callbacks: ((props: {
     state: EditorState;
     tr: Transaction;
@@ -27,6 +27,7 @@ export class CommandManager implements ChainedCommands {
     view?: EditorView;
     dispatch?: (tr: Transaction) => void;
     shouldDispatch?: boolean;
+    schema: Schema;
   }) {
     this.state = options.state;
     this.commands = options.commands;
@@ -34,6 +35,7 @@ export class CommandManager implements ChainedCommands {
     this.dispatch = options.dispatch;
     this.shouldDispatch = options.shouldDispatch ?? true;
     this.transaction = this.state.tr;
+    this.schema = options.schema;
 
     // Build the proxy to allow calling commands as methods
     return new Proxy(this, {
@@ -99,7 +101,7 @@ export class CommandManager implements ChainedCommands {
     format?: "html" | "markdown" | "json"
   ): ChainedCommands {
     this.callbacks.push(({ tr }) => {
-      const parsedDoc = parseContent(content, arkpadSchema, format);
+      const parsedDoc = parseContent(content, this.schema, format);
       const slice = new Slice(parsedDoc.content, 0, 0);
       tr.replaceSelection(slice);
       return true;

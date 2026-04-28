@@ -4,6 +4,7 @@ import {
   type ArkpadEditorOptions,
   type ArkpadEditorAPI,
   type NodeViewConstructor,
+  type ArkpadDocJSON,
 } from "@arkpad/core";
 import { TaskView } from "./views/Task";
 
@@ -74,10 +75,19 @@ export function useArkpadEditor(options: UseArkpadEditorOptions = {}) {
   useEffect(() => {
     if (!editor || options.content === undefined) return;
 
-    const currentContent = editor.getHTML();
-    // Only update if the content is actually different to avoid cursor jumps
-    if (options.content !== currentContent && options.content !== editor.getJSON()) {
-      editor.setContent(options.content, undefined, false);
+    const isHtmlContent = typeof options.content === "string";
+
+    if (isHtmlContent) {
+      const currentHtml = editor.getHTML();
+      if (options.content !== currentHtml) {
+        editor.setContent(options.content, "html", false);
+      }
+    } else {
+      const currentJson = editor.getJSON();
+      const newJson = options.content as ArkpadDocJSON;
+      if (JSON.stringify(newJson) !== JSON.stringify(currentJson)) {
+        editor.setContent(options.content, "json", false);
+      }
     }
   }, [editor, options.content]);
 

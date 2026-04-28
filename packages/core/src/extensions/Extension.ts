@@ -1,6 +1,6 @@
-import { 
-  ArkpadExtension, 
-  ExtensionConfig, 
+import {
+  ArkpadExtension,
+  ExtensionConfig,
   ExtensionContext,
   ArkpadCommandRegistry,
   ArkpadEditorAPI,
@@ -24,13 +24,6 @@ export class Extension<Options = any, Storage = any> implements ArkpadExtension 
     this.name = config.name;
     this.config = config;
     this.parent = parent;
-    
-    // Pre-initialize options with defaults, binding to a temporary context
-    if (config.addOptions) {
-      this.options = config.addOptions.call(this.createContext());
-    } else {
-      this.options = {} as Options;
-    }
   }
 
   /**
@@ -57,11 +50,15 @@ export class Extension<Options = any, Storage = any> implements ArkpadExtension 
    */
   init(editor: ArkpadEditorAPI): void {
     this.editor = editor;
-    
-    // Merge default options with editor-provided options
+
+    if (this.config.addOptions) {
+      this.options = this.config.addOptions.call(this.createContext());
+    } else {
+      this.options = {} as Options;
+    }
+
     this.options = { ...this.options, ...(editor as any).options?.[this.name] };
 
-    // Initialize storage
     if (this.config.addStorage) {
       this.storage = this.config.addStorage.call(this.createContext());
     }
@@ -72,7 +69,7 @@ export class Extension<Options = any, Storage = any> implements ArkpadExtension 
    */
   public createContext(): ExtensionContext<Options, Storage> {
     const context: ExtensionContext<Options, Storage> = {
-      editor: this.editor,
+      editor: this.editor ?? ({} as ArkpadEditorAPI),
       options: this.options,
       storage: this.storage,
       name: this.name,
@@ -81,7 +78,7 @@ export class Extension<Options = any, Storage = any> implements ArkpadExtension 
     if (this.parent) {
       context.parent = (methodName: string, ...args: any[]) => {
         const parentMethod = (this.parent!.config as any)[methodName];
-        if (typeof parentMethod === 'function') {
+        if (typeof parentMethod === "function") {
           return parentMethod.call(this.parent!.createContext(), ...args);
         }
         return undefined;
@@ -91,7 +88,6 @@ export class Extension<Options = any, Storage = any> implements ArkpadExtension 
     return context;
   }
 
-  // Implementation of ArkpadExtension interface
   addGlobalAttributes() {
     return this.config.addGlobalAttributes?.call(this.createContext()) || [];
   }
