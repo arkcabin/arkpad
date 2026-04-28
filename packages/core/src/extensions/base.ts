@@ -1,11 +1,45 @@
 import { history, undo, redo } from "prosemirror-history";
 import { placeholder as createPlaceholderPlugin } from "prosemirror-placeholder";
 import { setBlockType } from "prosemirror-commands";
+import { TextSelection } from "prosemirror-state";
 import { arkpadSchema } from "../schema";
 import { Extension } from "../extensions-types";
 
 export function createDocument(): Extension {
-  return { name: "doc", addCommands: () => ({}) };
+  return {
+    name: "doc",
+    addCommands: () => ({
+      /**
+       * Focuses the editor.
+       */
+      focus: (position?: "start" | "end" | number | boolean | null) => (state: any, dispatch: any, view: any) => {
+        if (view) {
+          view.focus();
+
+          if (position === false || position === null) {
+            return true;
+          }
+
+          const { tr } = state;
+          const { doc } = tr;
+          let selection = state.selection;
+
+          if (position === "start") {
+            selection = TextSelection.create(doc, 0);
+          } else if (position === "end") {
+            selection = TextSelection.create(doc, doc.content.size);
+          } else if (typeof position === "number") {
+            selection = TextSelection.create(doc, position);
+          }
+
+          if (!selection.eq(state.selection)) {
+            if (dispatch) dispatch(tr.setSelection(selection));
+          }
+        }
+        return true;
+      },
+    }),
+  };
 }
 
 export function createParagraph(): Extension {

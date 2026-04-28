@@ -1,4 +1,4 @@
-import type { Command, EditorState, Plugin } from "prosemirror-state";
+import type { Command, EditorState, Plugin, Transaction } from "prosemirror-state";
 import type { Node as PMNode } from "prosemirror-model";
 
 export type ArkpadDocJSON = Record<string, unknown>;
@@ -6,6 +6,22 @@ export type ArkpadContent = string | ArkpadDocJSON;
 
 export type ArkpadCommand = Command;
 export type ArkpadCommandRegistry = Record<string, ArkpadCommand>;
+
+/**
+ * Interface for chained commands.
+ * Allows calling multiple commands in a single transaction.
+ */
+export interface ChainedCommands {
+  /**
+   * Executes the collected commands.
+   */
+  run(): boolean;
+
+  /**
+   * Any command registered in the editor can be called here.
+   */
+  [key: string]: any;
+}
 
 export interface ArkpadExtension {
   name: string;
@@ -73,6 +89,17 @@ export interface ArkpadEditorAPI {
   getAttributes(name: string): Record<string, any> | null;
   runCommand(name: string, ...args: any[]): boolean;
   canRunCommand(name: string): boolean;
+  
+  /**
+   * Returns a command chain to execute multiple commands in a single transaction.
+   */
+  chain(): ChainedCommands;
+
+  /**
+   * Returns a command chain to check if multiple commands can be executed.
+   */
+  can(): ChainedCommands;
+
   setContent(
     content: ArkpadContent,
     format?: "html" | "markdown" | "json",

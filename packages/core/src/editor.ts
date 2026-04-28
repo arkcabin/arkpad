@@ -14,6 +14,7 @@ import {
   getNodeAttributes,
 } from "./extensions";
 import { defaultMarkdownSerializer } from "./extensions/markdown/serializer";
+import { CommandManager } from "./commands";
 import type {
   ArkpadCommandRegistry,
   ArkpadContent,
@@ -21,6 +22,7 @@ import type {
   ArkpadEditorAPI,
   ArkpadEditorOptions,
   ArkpadUpdatePayload,
+  ChainedCommands,
 } from "./types";
 import { parseContent, resolveEditorOptions } from "./utils";
 
@@ -186,6 +188,30 @@ export class ArkpadEditor implements ArkpadEditorAPI {
       undefined,
       this.view
     );
+  }
+
+  /**
+   * Returns a command chain.
+   */
+  chain(): ChainedCommands {
+    return new CommandManager({
+      state: this.view.state,
+      commands: this.commands,
+      view: this.view,
+      dispatch: (tr) => this.view.dispatch(tr),
+    }) as unknown as ChainedCommands;
+  }
+
+  /**
+   * Returns a command chain to check if multiple commands can be executed.
+   */
+  can(): ChainedCommands {
+    return new CommandManager({
+      state: this.view.state,
+      commands: this.commands,
+      view: this.view,
+      shouldDispatch: false,
+    }) as unknown as ChainedCommands;
   }
 
   /**
