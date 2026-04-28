@@ -20,7 +20,8 @@
   },
   "homepage": "https://github.com/arkcabin/arkpad/tree/main/packages/core#readme",
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "type": "module",
   "exports": {

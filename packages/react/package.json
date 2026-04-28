@@ -21,7 +21,8 @@
   },
   "homepage": "https://github.com/arkcabin/arkpad/tree/main/packages/react#readme",
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "type": "module",
   "exports": {
