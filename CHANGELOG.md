@@ -1,3 +1,11 @@
+## [1.6.3](https://github.com/arkcabin/arkpad/compare/v1.6.2...v1.6.3) (2026-04-28)
+
+
+### Bug Fixes
+
+* finalize automated deployment ([25661aa](https://github.com/arkcabin/arkpad/commit/25661aadd7e14d2af171d78eda680c8992492d05))
+* verify full automated OIDC trusted publishing flow ([8501022](https://github.com/arkcabin/arkpad/commit/85010229b8cfa93deac35b64cd22d02cf662600d))
+
 ## [1.6.2](https://github.com/arkcabin/arkpad/compare/v1.6.1...v1.6.2) (2026-04-28)
 
 
