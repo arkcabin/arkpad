@@ -59,7 +59,7 @@ function App() {
   });
 
   return (
-    <div className="editor-container">
+    <div className="editor-shell">
       <ArkpadEditorContent editor={editor} />
     </div>
   );
