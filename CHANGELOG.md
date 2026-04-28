@@ -1,3 +1,15 @@
+# [1.4.0](https://github.com/arkcabin/arkpad/compare/v1.3.0...v1.4.0) (2026-04-28)
+
+
+### Bug Fixes
+
+* remove --include-workspace-root from npm version command in semantic-release config ([580bb72](https://github.com/arkcabin/arkpad/commit/580bb72c7193b2ad4aea2608873aed810ff8ef14))
+
+
+### Features
+
+* initialize core and react workspace packages and configure semantic-release for monorepo publishing ([cc7549d](https://github.com/arkcabin/arkpad/commit/cc7549dd79b4dcb1a80bb5a0527052aad4c0bd1a))
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
