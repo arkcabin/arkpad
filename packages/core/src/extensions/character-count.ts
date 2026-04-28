@@ -24,10 +24,10 @@ export const CharacterCount: Extension = {
     if (this.storage) {
       this.storage.characters = text.length;
       
-      // Super fast word count using regex match without creating massive arrays
+      // Super fast word count using regex matchAll without creating massive arrays
       let wordCount = 0;
       const matches = text.matchAll(/\S+/g);
-      for (const _ of matches) {
+      while (!matches.next().done) {
         wordCount++;
       }
       
