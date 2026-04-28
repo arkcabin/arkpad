@@ -2,6 +2,9 @@
   "name": "@arkpad/core",
   "version": "0.1.0",
   "description": "Core engine for the Arkpad rich text editor.",
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "exports": {
     ".": {
