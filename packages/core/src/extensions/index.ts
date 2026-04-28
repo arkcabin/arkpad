@@ -34,6 +34,7 @@ import {
 } from "./lists";
 import { createMarkdownPaste } from "./markdown";
 import { createTextAlign } from "./alignment";
+import { createUniqueId } from "./unique-id";
 import { ArkpadExtension as Extension } from "../types";
 
 /**
@@ -69,6 +70,7 @@ export const Essentials: Extension[] = [
   createHistory(),
   createMarkdownPaste(),
   createTextAlign(),
+  createUniqueId(),
 ];
 
 /**
@@ -86,5 +88,6 @@ export * from "./marks";
 export * from "./nodes";
 export * from "./lists";
 export * from "./alignment";
+export * from "./unique-id";
 export * from "./utils";
 export { CharacterCount } from "./character-count";

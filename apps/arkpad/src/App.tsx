@@ -107,6 +107,28 @@ const ToolbarSeparator = () => (
   <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1 opacity-50" />
 );
 
+function EditorFooter({ editor, isLocked }: { editor: ArkpadEditorAPI; isLocked: boolean }) {
+  const characters = useEditorState(editor, (s) => s.storage.characterCount?.characters ?? 0);
+  const words = useEditorState(editor, (s) => s.storage.characterCount?.words ?? 0);
+
+  return (
+    <div className="editor-footer">
+      <div className="footer-left">
+        <span className={isLocked ? "text-red-500 animate-pulse" : "text-green-500"}>
+          {isLocked ? "Middleware Locked" : "System Online"}
+        </span>
+        <span>{characters} Characters</span>
+        <span>{words} Words</span>
+        <span className="text-brand opacity-60 font-black">FRAMEWORK PARITY: 100%</span>
+      </div>
+      <div className="footer-right">
+        <span>Production Grade Headless Engine</span>
+        <span>Refreshed 2026</span>
+      </div>
+    </div>
+  );
+}
+
 export function App() {
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== "undefined") {
@@ -174,6 +196,13 @@ export function App() {
       console.log("Content pasted:", event.clipboardData?.getData("text/plain"));
     },
   });
+
+  // Expose editor to window for console debugging
+  useEffect(() => {
+    if (editor && typeof window !== "undefined") {
+      (window as any).editor = editor;
+    }
+  }, [editor]);
 
   if (!editor) {
     return null;
@@ -487,20 +516,7 @@ export function App() {
             </div>
           </div>
 
-          <div className="mt-4 flex justify-between items-center text-[10px] uppercase tracking-widest text-slate-400 dark:text-slate-500 font-bold px-2">
-            <div className="flex gap-6">
-              <span className={isLocked ? "text-red-500 animate-pulse" : "text-green-500"}>
-                {isLocked ? "Middleware Locked" : "System Online"}
-              </span>
-              <span>{editor.storage.characterCount?.characters || 0} Characters</span>
-              <span>{editor.storage.characterCount?.words || 0} Words</span>
-              <span className="text-brand opacity-60 font-black">FRAMEWORK PARITY: 100%</span>
-            </div>
-            <div className="flex gap-4">
-              <span>Production Grade Headless Engine</span>
-              <span>Refreshed 2026</span>
-            </div>
-          </div>
+          <EditorFooter editor={editor} isLocked={isLocked} />
         </div>
       </div>
     </ArkpadProvider>
