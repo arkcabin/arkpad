@@ -48,4 +48,3 @@ This document outlines the multi-phase plan to transform Arkpad into a world-cla
 
 - **Notion-style Drag Handles**: Visual handles on the left side of blocks for easy reordering.
 - **Slash Command (/)**: A searchable menu to quickly insert blocks without using the toolbar.
-- **Multi-Block Selection**: Dragging over multiple blocks to select, delete, or move them as a group.
