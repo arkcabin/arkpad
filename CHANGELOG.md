@@ -1,3 +1,16 @@
+# [1.5.0](https://github.com/arkcabin/arkpad/compare/v1.4.0...v1.5.0) (2026-04-28)
+
+
+### Bug Fixes
+
+* resolve ESM warnings and NPM authentication issues in CI ([4c70fb2](https://github.com/arkcabin/arkpad/commit/4c70fb221334203cced8030170a648772ea70d1a))
+* synchronize workspace versions and update package-lock.json to fix CI 404 ([f079a1a](https://github.com/arkcabin/arkpad/commit/f079a1aa774454dd516009541412d46506083abd))
+
+
+### Features
+
+* initialize core and react package structures with documentation, license files, and updated repository configuration ([a9ba06c](https://github.com/arkcabin/arkpad/commit/a9ba06c8153ec7af9b1599278a0b616fddd73276))
+
 # [1.4.0](https://github.com/arkcabin/arkpad/compare/v1.3.0...v1.4.0) (2026-04-28)
 
 
