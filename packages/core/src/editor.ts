@@ -37,6 +37,7 @@ export class ArkpadEditor implements ArkpadEditorAPI {
 
   private readonly onCreate?: ArkpadEditorOptions["onCreate"];
   private readonly onUpdate?: ArkpadEditorOptions["onUpdate"];
+  private readonly onTransaction?: ArkpadEditorOptions["onTransaction"];
   private readonly onDestroy?: ArkpadEditorOptions["onDestroy"];
   private readonly nodeViews: Record<string, any>;
   private readonly serializer: DOMSerializer;
@@ -53,6 +54,7 @@ export class ArkpadEditor implements ArkpadEditorAPI {
     this.editable = resolved.editable;
     this.onCreate = resolved.onCreate;
     this.onUpdate = resolved.onUpdate;
+    this.onTransaction = resolved.onTransaction;
     this.onDestroy = resolved.onDestroy;
     this.nodeViews = resolved.nodeViews;
     this.serializer = DOMSerializer.fromSchema(arkpadSchema);
@@ -72,6 +74,9 @@ export class ArkpadEditor implements ArkpadEditorAPI {
       editable: () => this.editable,
       nodeViews: this.nodeViews,
       dispatchTransaction: (transaction) => {
+        // Call onTransaction hook before applying the transaction
+        this.onTransaction?.({ editor: this, transaction });
+
         const nextState = this.view.state.apply(transaction);
         this.view.updateState(nextState);
         this.emitUpdate(nextState);
@@ -220,6 +225,12 @@ export class ArkpadEditor implements ArkpadEditorAPI {
   isActive(name: string, attrs: Record<string, any> = {}): boolean {
     const { state } = this.view;
 
+    // Special Case: Text Alignment
+    if (name === "textAlign") {
+      const { $from } = state.selection;
+      return $from.parent.attrs.align === attrs.align;
+    }
+
     // Check for Marks (bold, italic, etc.)
     const markType = state.schema.marks[name];
     if (markType) {
@@ -230,6 +241,18 @@ export class ArkpadEditor implements ArkpadEditorAPI {
     const nodeType = state.schema.nodes[name];
     if (nodeType) {
       return isNodeActive(state, nodeType, attrs);
+    }
+
+    // Fallback: Check if ANY parent node matches the attributes
+    const { $from } = state.selection;
+    for (let depth = $from.depth; depth >= 0; depth--) {
+      const node = $from.node(depth);
+      if (node.type.name === name) {
+        const hasMatchingAttrs = Object.entries(attrs).every(
+          ([key, value]) => node.attrs[key] === value
+        );
+        if (hasMatchingAttrs) return true;
+      }
     }
 
     return false;

@@ -55,6 +55,7 @@ export interface ArkpadEditorOptions {
   autofocus?: boolean;
   onCreate?: (editor: ArkpadEditorAPI) => void;
   onUpdate?: (payload: ArkpadUpdatePayload) => void;
+  onTransaction?: (props: { editor: ArkpadEditorAPI; transaction: Transaction }) => void;
   onDestroy?: (editor: ArkpadEditorAPI) => void;
 }
 

@@ -152,7 +152,7 @@
   }
 
   /* Bullet List Marker - Absolute Positioned */
-  .ProseMirror ul li::before {
+  .ProseMirror ul:not(.task-list) li::before {
     content: "";
     @apply absolute -left-5 top-[0.7em] w-1.5 h-1.5 rounded-full pointer-events-none;
     background-color: var(--editor-marker-bullet);
@@ -175,15 +175,15 @@
   }
 
   /* Task List Styles */
-  .task-list {
+  .ProseMirror .task-list {
     @apply !list-none !pl-0;
   }
 
-  .task-item {
-    @apply !list-none flex items-start !gap-2 !mb-1;
+  .ProseMirror .task-item {
+    @apply !list-none flex items-start !gap-2 !mb-1 relative;
   }
 
-  .task-item p {
+  .ProseMirror .task-item p {
     @apply !m-0 !leading-snug;
   }
 

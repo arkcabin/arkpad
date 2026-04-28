@@ -44,10 +44,14 @@ export class CommandManager implements ChainedCommands {
           this.callbacks.push((state, tr, view) => {
             const result = (command as any)(...args);
             if (typeof result === "function") {
-              return result(state, (tr2: Transaction) => {
-                // Merge the transaction into our main one
-                tr2.steps.forEach((step) => tr.step(step));
-              }, view);
+              return result(
+                state,
+                (tr2: Transaction) => {
+                  // Merge the transaction into our main one
+                  tr2.steps.forEach((step) => tr.step(step));
+                },
+                view
+              );
             }
             return !!result;
           });
@@ -58,7 +62,7 @@ export class CommandManager implements ChainedCommands {
   }
 
   public run(): boolean {
-    let currentState = this.state;
+    const currentState = this.state;
     const tr = this.transaction;
     let allSuccessful = true;
 

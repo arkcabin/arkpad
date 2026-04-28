@@ -110,6 +110,8 @@ export function App() {
     }
   }, [isDark]);
 
+  console.log("💎 App Render (This should only happen once!)");
+
   // THE NEW CLEAN API: Simple, Declarative, and Auto-Reactive
   const editor = useArkpadEditor({
     content:
@@ -262,7 +264,7 @@ export function App() {
                 editor={editor}
                 command="setTextAlign"
                 attrs={{ align: "left" }}
-                name="paragraph"
+                name="textAlign"
                 title="Align Left"
               >
                 <AlignLeft className="w-4 h-4" />
@@ -271,7 +273,7 @@ export function App() {
                 editor={editor}
                 command="setTextAlign"
                 attrs={{ align: "center" }}
-                name="paragraph"
+                name="textAlign"
                 title="Align Center"
               >
                 <AlignCenter className="w-4 h-4" />
@@ -280,7 +282,7 @@ export function App() {
                 editor={editor}
                 command="setTextAlign"
                 attrs={{ align: "right" }}
-                name="paragraph"
+                name="textAlign"
                 title="Align Right"
               >
                 <AlignRight className="w-4 h-4" />
