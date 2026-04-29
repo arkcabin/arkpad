@@ -41,6 +41,8 @@ Access these via `editor.commands` or `editor.runCommand(name, args)`.
 | `toggleHeaderRow` | - | Toggles the current row between Header and Body type. |
 | `toggleHeaderColumn`| - | Toggles the current column between Header and Body type. |
 | `toggleHeaderCell` | - | Toggles the specific cell type. |
+| `setCellAttribute` | `{ name, value }` | Sets an attribute for the selected cell(s). |
+| `clearCellContents` | - | Wipes all content inside the selected cell(s). |
 | `deleteTable` | - | Deletes the entire table. |
 | `fixTables` | - | Emergency utility to fix corrupted table structures. |
 

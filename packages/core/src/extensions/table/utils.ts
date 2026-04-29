@@ -1,5 +1,6 @@
 import { type ResolvedPos, type Node } from "prosemirror-model";
 import { type Schema } from "prosemirror-model";
+import { TableMap } from "prosemirror-tables";
 
 /**
  * Creates a table node grid.
@@ -43,4 +44,39 @@ export function findTableCell($pos: ResolvedPos) {
     }
   }
   return null;
+}
+
+/**
+ * Gets the TableMap and starting position of the table containing the given position.
+ */
+export function getTableMapContext($pos: ResolvedPos) {
+  for (let d = $pos.depth; d > 0; d--) {
+    const node = $pos.node(d);
+    if (node.type.spec.tableRole === "table") {
+      return {
+        map: TableMap.get(node),
+        tablePos: $pos.before(d), // Outer position
+        tableStart: $pos.start(d), // Content start (O-indexed for TableMap)
+        tableNode: node,
+      };
+    }
+  }
+  return null;
+}
+
+/**
+ * Gets the rectangle (row, col coordinates) for a cell at the given position.
+ */
+export function getCellRect($pos: ResolvedPos) {
+  const context = getTableMapContext($pos);
+  if (!context) return null;
+
+  const cell = findTableCell($pos);
+  if (!cell) return null;
+
+  const relativePos = cell.pos - context.tableStart;
+  return {
+    ...context.map.findCell(relativePos),
+    ...context,
+  };
 }
