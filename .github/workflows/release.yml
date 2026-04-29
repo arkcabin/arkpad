@@ -43,6 +43,7 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
           # AUTO-CHANGESET: Create if missing
+          mkdir -p .changeset
           if [ -z "$(ls .changeset/*.md 2>/dev/null)" ]; then
             echo "Auto-generating changeset..."
             COMMIT_MSG=$(git log -1 --pretty=%B)
