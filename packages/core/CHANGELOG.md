@@ -1,5 +1,11 @@
 # @arkpad/core
 
+## 1.6.6
+
+### Patch Changes
+
+- fix(workflow): add NPM authentication to release process
+
 ## 1.6.5
 
 ### Patch Changes

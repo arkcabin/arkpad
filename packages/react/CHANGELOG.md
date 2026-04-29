@@ -1,5 +1,13 @@
 # @arkpad/react
 
+## 1.6.6
+
+### Patch Changes
+
+- fix(workflow): add NPM authentication to release process
+- Updated dependencies
+  - @arkpad/core@1.6.6
+
 ## 1.6.5
 
 ### Patch Changes

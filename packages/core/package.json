@@ -1,6 +1,6 @@
 {
   "name": "@arkpad/core",
-  "version": "1.6.5",
+  "version": "1.6.6",
   "description": "Core engine for the Arkpad rich text editor.",
   "keywords": [
     "prosemirror",
