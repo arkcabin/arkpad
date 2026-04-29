@@ -34,7 +34,6 @@ import {
   MousePointer2,
   Lock,
   Unlock,
-  Plus,
   PenLine,
 } from "lucide-react";
 
