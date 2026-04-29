@@ -37,7 +37,8 @@ import { createTextAlign } from "./alignment";
 import { createUniqueId } from "./unique-id";
 import { HighlighterTool } from "./highlighter-tool";
 import { EraserTool } from "./eraser-tool";
-import { Table } from "./table";
+// @ts-expect-error - external extension package
+import { Table } from "@arkpad/extension-table";
 import { ArkpadExtension as Extension } from "../types";
 
 /**
@@ -98,5 +99,6 @@ export * from "./unique-id";
 export * from "./highlighter-tool";
 export * from "./eraser-tool";
 export * from "./utils";
-export * from "./table";
+// @ts-expect-error - external extension package
+export { Table } from "@arkpad/extension-table";
 export { CharacterCount } from "./character-count";

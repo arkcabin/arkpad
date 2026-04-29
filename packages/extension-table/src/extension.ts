@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   handlePaste,
   tableNodes,
@@ -31,7 +32,8 @@ import {
   getCellsInRow,
   isAtTableBoundary,
 } from "./utils";
-import { Extension } from "../Extension";
+import { Extension, type Dispatch } from "@arkpad/core";
+import { type EditorState } from "prosemirror-state";
 import { InputRule } from "prosemirror-inputrules";
 import { Plugin, NodeSelection, TextSelection } from "prosemirror-state";
 
@@ -56,11 +58,11 @@ export const Table = Extension.create({
       cellAttributes: {
         background: {
           default: null,
-          getFromDOM(dom: any) {
+          getFromDOM(dom: HTMLElement) {
             return dom.style.backgroundColor || null;
           },
-          setDOMAttr(value: any, attrs: any) {
-            if (value) {
+          setDOMAttr(value: unknown, attrs: Record<string, any>) {
+            if (typeof value === "string") {
               attrs.style = (attrs.style || "") + `background-color: ${value};`;
             }
           },
@@ -79,7 +81,7 @@ export const Table = Extension.create({
       nodes.table.parseDOM = [
         {
           tag: "table[data-align]",
-          getAttrs: (dom: any) => ({
+          getAttrs: (dom: HTMLElement) => ({
             alignment: dom.getAttribute("data-align") || "left",
           }),
         },
@@ -87,13 +89,16 @@ export const Table = Extension.create({
       ];
 
       const originalTableRender = nodes.table.renderHTML;
-      nodes.table.renderHTML = (props: any) => {
+      nodes.table.renderHTML = (props: {
+        node: { attrs: Record<string, any> };
+        HTMLAttributes: Record<string, any>;
+      }) => {
         const render = originalTableRender(props);
         if (Array.isArray(render)) {
-          const map = TableMap.get(props.node);
+          const map = TableMap.get(props.node as any);
           render[1] = {
             ...render[1],
-            "data-align": props.node.attrs.alignment,
+            "data-align": props.node.attrs["alignment"],
             role: "grid",
             "aria-rowcount": map.height,
             "aria-colcount": map.width,
@@ -106,7 +111,10 @@ export const Table = Extension.create({
     // Inject A11y to Row
     if (nodes.table_row) {
       const originalRowRender = nodes.table_row.renderHTML;
-      nodes.table_row.renderHTML = (props: any) => {
+      nodes.table_row.renderHTML = (props: {
+        node: { attrs: Record<string, any> };
+        HTMLAttributes: Record<string, any>;
+      }) => {
         const render = originalRowRender(props);
         if (Array.isArray(render)) {
           render[1] = { ...render[1], role: "row" };
@@ -118,7 +126,10 @@ export const Table = Extension.create({
     // Inject A11y to Cell
     if (nodes.table_cell) {
       const originalCellRender = nodes.table_cell.renderHTML;
-      nodes.table_cell.renderHTML = (props: any) => {
+      nodes.table_cell.renderHTML = (props: {
+        node: { attrs: Record<string, any> };
+        HTMLAttributes: Record<string, any>;
+      }) => {
         const render = originalCellRender(props);
         if (Array.isArray(render)) {
           render[1] = { ...render[1], role: "gridcell" };
@@ -134,26 +145,33 @@ export const Table = Extension.create({
     return {
       insertTable:
         ({ rows = 3, cols = 3 } = {}) =>
-        (state, dispatch) => {
+        (state: EditorState, dispatch?: Dispatch) => {
           const node = createTable(state.schema, rows, cols);
           if (dispatch) {
             dispatch(state.tr.replaceSelectionWith(node).scrollIntoView());
           }
           return true;
         },
-      addColumnBefore: () => (state, dispatch) => addColumnBefore(state, dispatch),
-      addColumnAfter: () => (state, dispatch) => addColumnAfter(state, dispatch),
-      deleteColumn: () => (state, dispatch) => deleteColumn(state, dispatch),
-      addRowBefore: () => (state, dispatch) => addRowBefore(state, dispatch),
-      addRowAfter: () => (state, dispatch) => addRowAfter(state, dispatch),
-      deleteRow: () => (state, dispatch) => deleteRow(state, dispatch),
-      deleteTable: () => (state, dispatch) => deleteTable(state, dispatch),
-      mergeCells: () => (state, dispatch) => mergeCells(state, dispatch),
-      splitCell: () => (state, dispatch) => splitCell(state, dispatch),
-      toggleHeaderRow: () => (state, dispatch) => toggleHeaderRow(state, dispatch),
-      toggleHeaderColumn: () => (state, dispatch) => toggleHeaderColumn(state, dispatch),
-      toggleHeaderCell: () => (state, dispatch) => toggleHeaderCell(state, dispatch),
-      selectColumn: (index?: number) => (state, dispatch) => {
+      addColumnBefore: () => (state: EditorState, dispatch?: Dispatch) =>
+        addColumnBefore(state, dispatch),
+      addColumnAfter: () => (state: EditorState, dispatch?: Dispatch) =>
+        addColumnAfter(state, dispatch),
+      deleteColumn: () => (state: EditorState, dispatch?: Dispatch) =>
+        deleteColumn(state, dispatch),
+      addRowBefore: () => (state: EditorState, dispatch?: Dispatch) =>
+        addRowBefore(state, dispatch),
+      addRowAfter: () => (state: EditorState, dispatch?: Dispatch) => addRowAfter(state, dispatch),
+      deleteRow: () => (state: EditorState, dispatch?: Dispatch) => deleteRow(state, dispatch),
+      deleteTable: () => (state: EditorState, dispatch?: Dispatch) => deleteTable(state, dispatch),
+      mergeCells: () => (state: EditorState, dispatch?: Dispatch) => mergeCells(state, dispatch),
+      splitCell: () => (state: EditorState, dispatch?: Dispatch) => splitCell(state, dispatch),
+      toggleHeaderRow: () => (state: EditorState, dispatch?: Dispatch) =>
+        toggleHeaderRow(state, dispatch),
+      toggleHeaderColumn: () => (state: EditorState, dispatch?: Dispatch) =>
+        toggleHeaderColumn(state, dispatch),
+      toggleHeaderCell: () => (state: EditorState, dispatch?: Dispatch) =>
+        toggleHeaderCell(state, dispatch),
+      selectColumn: (index?: number) => (state: EditorState, dispatch?: Dispatch) => {
         const rect = getCellRect(state.selection.$from);
         if (!rect) return false;
 
@@ -164,7 +182,7 @@ export const Table = Extension.create({
         if (dispatch) dispatch(tr.setSelection(selection));
         return true;
       },
-      selectRow: (index?: number) => (state, dispatch) => {
+      selectRow: (index?: number) => (state: EditorState, dispatch?: Dispatch) => {
         const rect = getCellRect(state.selection.$from);
         if (!rect) return false;
 
@@ -175,20 +193,21 @@ export const Table = Extension.create({
         if (dispatch) dispatch(tr.setSelection(selection));
         return true;
       },
-      setCellAttribute: (name: string, value: any) => (state, dispatch) => {
-        const { selection, tr } = state;
-        if (selection instanceof CellSelection) {
-          selection.forEachCell((node, pos) => {
-            if (node.attrs[name] !== value) {
-              tr.setNodeMarkup(pos, undefined, { ...node.attrs, [name]: value });
-            }
-          });
-          if (dispatch) dispatch(tr);
-          return true;
-        }
-        return setCellAttr(name, value)(state, dispatch);
-      },
-      clearCellContents: () => (state, dispatch) => {
+      setCellAttribute:
+        (name: string, value: unknown) => (state: EditorState, dispatch?: Dispatch) => {
+          const { selection, tr } = state;
+          if (selection instanceof CellSelection) {
+            selection.forEachCell((node, pos) => {
+              if (node.attrs[name] !== value) {
+                tr.setNodeMarkup(pos, undefined, { ...node.attrs, [name]: value });
+              }
+            });
+            if (dispatch) dispatch(tr);
+            return true;
+          }
+          return setCellAttr(name, value)(state, dispatch);
+        },
+      clearCellContents: () => (state: EditorState, dispatch?: Dispatch) => {
         const { selection, tr, schema } = state;
 
         if (selection instanceof CellSelection) {
@@ -199,28 +218,31 @@ export const Table = Extension.create({
         const cell = findTableCell($from);
         if (cell) {
           if (dispatch) {
-            // Replace with a paragraph to satisfy "block+" schema requirement
-            dispatch(
-              tr.replaceWith(
-                cell.pos + 1,
-                cell.pos + cell.node.nodeSize - 1,
-                schema.nodes.paragraph.createAndFill()!
-              )
-            );
+            const paragraph = schema.nodes.paragraph;
+            if (paragraph) {
+              // Replace with a paragraph to satisfy "block+" schema requirement
+              dispatch(
+                tr.replaceWith(
+                  cell.pos + 1,
+                  cell.pos + cell.node.nodeSize - 1,
+                  paragraph.createAndFill()!
+                )
+              );
+            }
           }
           return true;
         }
 
         return false;
       },
-      fixTables: () => (state, dispatch) => {
+      fixTables: () => (state: EditorState, dispatch?: Dispatch) => {
         const tr = fixTables(state);
         if (tr && dispatch) {
           dispatch(tr);
         }
         return !!tr;
       },
-      smartDelete: () => (state, dispatch) => {
+      smartDelete: () => (state: EditorState, dispatch?: Dispatch) => {
         const { selection } = state;
 
         if (selection instanceof CellSelection) {
@@ -247,23 +269,24 @@ export const Table = Extension.create({
 
         return false;
       },
-      setTableAlignment: (alignment: "left" | "center" | "right") => (state, dispatch) => {
-        const context = getTableMapContext(state.selection.$from);
-        if (!context) return false;
+      setTableAlignment:
+        (alignment: "left" | "center" | "right") => (state: EditorState, dispatch?: Dispatch) => {
+          const context = getTableMapContext(state.selection.$from);
+          if (!context) return false;
 
-        if (dispatch) {
-          dispatch(
-            state.tr.setNodeMarkup(context.tablePos, undefined, {
-              ...context.tableNode.attrs,
-              alignment,
-            })
-          );
-        }
-        return true;
-      },
+          if (dispatch) {
+            dispatch(
+              state.tr.setNodeMarkup(context.tablePos, undefined, {
+                ...context.tableNode.attrs,
+                alignment,
+              })
+            );
+          }
+          return true;
+        },
       setZebraStriping:
         (evenColor: string = "#f8fafc", oddColor: string | null = null) =>
-        (state, dispatch) => {
+        (state: EditorState, dispatch?: Dispatch) => {
           const context = getTableMapContext(state.selection.$from);
           if (!context) return false;
 
@@ -290,7 +313,7 @@ export const Table = Extension.create({
           if (dispatch) dispatch(tr);
           return true;
         },
-      toggleHeader: (type: "row" | "column") => (state, dispatch) => {
+      toggleHeader: (type: "row" | "column") => (state: EditorState, dispatch?: Dispatch) => {
         const context = getTableMapContext(state.selection.$from);
         if (!context) return false;
 

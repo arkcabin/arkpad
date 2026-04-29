@@ -1,0 +1,35 @@
+{
+  "name": "@arkpad/extension-table",
+  "version": "1.6.0",
+  "description": "Table extension for Arkpad.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "peerDependencies": {
+    "@arkpad/core": "*"
+  },
+  "dependencies": {
+    "prosemirror-model": "^1.25.4",
+    "prosemirror-state": "^1.4.4",
+    "prosemirror-tables": "^1.8.5",
+    "prosemirror-view": "^1.41.8"
+  },
+  "devDependencies": {
+    "@types/prosemirror-tables": "^0.8.0"
+  }
+}
