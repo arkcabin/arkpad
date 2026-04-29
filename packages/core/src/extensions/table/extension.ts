@@ -36,7 +36,7 @@ export const Table = Extension.create({
   },
 
   addNodes() {
-    return tableNodes({
+    const nodes = tableNodes({
       tableGroup: "block",
       cellContent: "block+",
       cellAttributes: {
@@ -53,32 +53,57 @@ export const Table = Extension.create({
         },
       },
     });
+
+    // Add custom row height attribute
+    nodes.table_row.attrs = {
+      ...nodes.table_row.attrs,
+      height: {
+        default: null,
+      },
+    };
+
+    nodes.table_row.parseHTML = [
+      {
+        tag: "tr",
+        getAttrs: (dom: any) => ({
+          height: dom.style.height || null,
+        }),
+      },
+    ];
+
+    nodes.table_row.toDOM = (node: any) => {
+      const styles = node.attrs.height ? { style: `height: ${node.attrs.height}` } : {};
+      return ["tr", styles, 0];
+    };
+
+    return nodes;
   },
 
   addCommands() {
     return {
       insertTable:
         ({ rows = 3, cols = 3 } = {}) =>
-          (state, dispatch) => {
-            const node = createTable(state.schema, rows, cols);
-            if (dispatch) {
-              dispatch(state.tr.replaceSelectionWith(node).scrollIntoView());
-            }
-            return true;
-          },
-      addColumnBefore: () => addColumnBefore,
-      addColumnAfter: () => addColumnAfter,
-      deleteColumn: () => deleteColumn,
-      addRowBefore: () => addRowBefore,
-      addRowAfter: () => addRowAfter,
-      deleteRow: () => deleteRow,
-      deleteTable: () => deleteTable,
-      mergeCells: () => mergeCells,
-      splitCell: () => splitCell,
-      toggleHeaderRow: () => toggleHeaderRow,
-      toggleHeaderColumn: () => toggleHeaderColumn,
-      toggleHeaderCell: () => toggleHeaderCell,
-      setCellAttribute: (name: string, value: any) => setCellAttr(name, value),
+        (state, dispatch) => {
+          const node = createTable(state.schema, rows, cols);
+          if (dispatch) {
+            dispatch(state.tr.replaceSelectionWith(node).scrollIntoView());
+          }
+          return true;
+        },
+      addColumnBefore: () => (state, dispatch) => addColumnBefore(state, dispatch),
+      addColumnAfter: () => (state, dispatch) => addColumnAfter(state, dispatch),
+      deleteColumn: () => (state, dispatch) => deleteColumn(state, dispatch),
+      addRowBefore: () => (state, dispatch) => addRowBefore(state, dispatch),
+      addRowAfter: () => (state, dispatch) => addRowAfter(state, dispatch),
+      deleteRow: () => (state, dispatch) => deleteRow(state, dispatch),
+      deleteTable: () => (state, dispatch) => deleteTable(state, dispatch),
+      mergeCells: () => (state, dispatch) => mergeCells(state, dispatch),
+      splitCell: () => (state, dispatch) => splitCell(state, dispatch),
+      toggleHeaderRow: () => (state, dispatch) => toggleHeaderRow(state, dispatch),
+      toggleHeaderColumn: () => (state, dispatch) => toggleHeaderColumn(state, dispatch),
+      toggleHeaderCell: () => (state, dispatch) => toggleHeaderCell(state, dispatch),
+      setCellAttribute: (name: string, value: any) => (state, dispatch) =>
+        setCellAttr(name, value)(state, dispatch),
       fixTables: () => (state, dispatch) => {
         const tr = fixTables(state);
         if (tr && dispatch) {

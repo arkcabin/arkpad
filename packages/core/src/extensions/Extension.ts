@@ -34,6 +34,18 @@ export class Extension<Options = any, Storage = any> implements ArkpadExtension 
   }
 
   /**
+   * Configures the extension with custom options.
+   */
+  configure(options: Partial<Options>): Extension<Options, Storage> {
+    return this.extend({
+      addOptions: () => ({
+        ...(this.config.addOptions?.call(this.createContext()) || {}),
+        ...options,
+      }),
+    }) as any;
+  }
+
+  /**
    * Creates a new extension by extending an existing one.
    */
   extend<O = Options, S = Storage>(config: Partial<ExtensionConfig<O, S>>): Extension<O, S> {
@@ -63,7 +75,7 @@ export class Extension<Options = any, Storage = any> implements ArkpadExtension 
       const storage = this.config.addStorage.call(this.createContext());
       if (storage && typeof storage === "object" && !Array.isArray(storage)) {
         // Update existing storage object to preserve references
-        Object.keys(this.storage as any).forEach(key => delete (this.storage as any)[key]);
+        Object.keys(this.storage as any).forEach((key) => delete (this.storage as any)[key]);
         Object.assign(this.storage as any, storage);
       } else {
         this.storage = storage;

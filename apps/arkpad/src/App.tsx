@@ -35,6 +35,13 @@ import {
   Lock,
   Unlock,
   PenLine,
+  Table as TableIcon,
+  Columns as ColumnsIcon,
+  Rows as RowsIcon,
+  Trash2,
+  Combine,
+  Split,
+  Layout,
 } from "lucide-react";
 
 import {
@@ -43,7 +50,8 @@ import {
   useEditorState,
   ArkpadProvider,
 } from "@arkpad/react";
-import { CharacterCount } from "@arkpad/core";
+import { CharacterCount, TableExtensions } from "@arkpad/core";
+
 import type { ArkpadEditorAPI } from "@arkpad/core";
 
 interface ToolbarButtonProps {
@@ -162,6 +170,7 @@ export function App() {
   const editor = useArkpadEditor({
     extensions: [
       CharacterCount,
+      ...TableExtensions,
       {
         name: "h4Theme",
         addGlobalAttributes() {
@@ -199,7 +208,10 @@ export function App() {
     },
   });
 
-  const isHighlighterActive = useEditorState(editor, (s) => s.storage.highlighterTool?.active || s.isActive("highlight"));
+  const isHighlighterActive = useEditorState(
+    editor,
+    (s) => s.storage.highlighterTool?.active || s.isActive("highlight")
+  );
   const isEraserActive = useEditorState(editor, (s) => s.storage.eraserTool?.active);
 
   const canUndo = useEditorState(editor, (s) => s.canRunCommand("undo"));
@@ -410,6 +422,60 @@ export function App() {
               <ToolbarSeparator />
 
               <div className="toolbar-group">
+                <ToolbarButton
+                  onClick={() => editor.runCommand("insertTable")}
+                  title="Insert Table"
+                >
+                  <TableIcon className="w-4 h-4" />
+                </ToolbarButton>
+                <ToolbarButton
+                  onClick={() => editor.runCommand("addColumnAfter")}
+                  disabled={!editor.isActive("table")}
+                  title="Add Column After"
+                >
+                  <ColumnsIcon className="w-4 h-4" />
+                </ToolbarButton>
+                <ToolbarButton
+                  onClick={() => editor.runCommand("addRowAfter")}
+                  disabled={!editor.isActive("table")}
+                  title="Add Row After"
+                >
+                  <RowsIcon className="w-4 h-4" />
+                </ToolbarButton>
+                <ToolbarButton
+                  onClick={() => editor.runCommand("mergeCells")}
+                  disabled={!editor.isActive("table")}
+                  title="Merge Cells"
+                >
+                  <Combine className="w-4 h-4" />
+                </ToolbarButton>
+                <ToolbarButton
+                  onClick={() => editor.runCommand("splitCell")}
+                  disabled={!editor.isActive("table")}
+                  title="Split Cell"
+                >
+                  <Split className="w-4 h-4" />
+                </ToolbarButton>
+                <ToolbarButton
+                  onClick={() => editor.runCommand("toggleHeaderRow")}
+                  disabled={!editor.isActive("table")}
+                  title="Toggle Header Row"
+                >
+                  <Layout className="w-4 h-4" />
+                </ToolbarButton>
+                <ToolbarButton
+                  onClick={() => editor.runCommand("deleteTable")}
+                  disabled={!editor.isActive("table")}
+                  title="Delete Table"
+                  variant="danger"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </ToolbarButton>
+              </div>
+
+              <ToolbarSeparator />
+
+              <div className="toolbar-group">
                 <MenuButton
                   editor={editor}
                   command="setTextAlign"
@@ -537,11 +603,13 @@ export function App() {
                   {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
                 </ToolbarButton>
               </div>
-
             </div>
 
             <div className="editor-body">
-              <ArkpadEditorContent editor={editor} className="arkpad-container p-4 md:p-8 lg:p-12" />
+              <ArkpadEditorContent
+                editor={editor}
+                className="arkpad-container p-4 md:p-8 lg:p-12"
+              />
             </div>
           </div>
 
