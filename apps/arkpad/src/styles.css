@@ -12,6 +12,9 @@
   --selection: rgba(37, 99, 235, 0.1);
   --font-sans: 'Inter', system-ui, sans-serif;
   --font-display: 'Outfit', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --code-bg: rgba(248, 250, 252, 0.7);
+  --code-text: #1e293b;
 }
 
 .dark {
@@ -24,6 +27,8 @@
   --border: #1e293b;
   --toolbar-bg: rgba(0, 0, 0, 0.8);
   --selection: rgba(59, 130, 246, 0.2);
+  --code-bg: rgba(30, 30, 46, 0.6);
+  --code-text: #cbd5e1;
 }
 
 body {
@@ -150,6 +155,122 @@ body {
 .ProseMirror p {
   margin-bottom: 1.25rem;
 }
+
+/* Inline Code - Refined and Minimalist */
+.ProseMirror code {
+  background: rgba(148, 163, 184, 0.05);
+  color: inherit;
+  padding: 0.1rem 0.3rem;
+  border-radius: 4px;
+  font-size: 0.9em;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  border: none;
+}
+
+.dark .ProseMirror code {
+  background: rgba(255, 255, 255, 0.05);
+  color: inherit;
+}
+
+/* Polished Code Blocks */
+.ProseMirror pre {
+  background: var(--code-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid transparent;
+  color: var(--code-text);
+  font-family: var(--font-mono);
+  padding: 1.25rem 1.5rem;
+  border-radius: 12px;
+  margin: 1.5rem 0;
+  line-height: 1.6;
+  overflow-x: auto;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.ProseMirror pre:hover {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark .ProseMirror pre:hover {
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.ProseMirror pre code {
+  color: inherit;
+  padding: 0;
+  background: none !important;
+  border: none !important;
+  font-size: 0.95rem;
+}
+
+
+.ProseMirror h2 {
+  font-family: var(--font-display);
+  font-size: 1.875rem;
+  font-weight: 600;
+  margin-top: 1.75rem;
+  margin-bottom: 1rem;
+  letter-spacing: -0.02em;
+}
+
+.ProseMirror p {
+  margin-bottom: 1.25rem;
+}
+
+/* Polished Code Blocks */
+.ProseMirror pre {
+  background: var(--code-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid transparent;
+  color: var(--code-text);
+  font-family: var(--font-mono);
+  padding: 1.25rem 1.5rem;
+  border-radius: 12px;
+  margin: 1.5rem 0;
+  line-height: 1.6;
+  overflow-x: auto;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.ProseMirror pre:hover {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark .ProseMirror pre:hover {
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.ProseMirror pre code {
+  color: inherit;
+  padding: 0;
+  background: none;
+  border: none;
+  font-size: 0.95rem;
+}
+
+/* Inline Code - Refined and Minimalist */
+.ProseMirror code {
+  background: rgba(148, 163, 184, 0.05);
+  color: inherit;
+  padding: 0.1rem 0.3rem;
+  border-radius: 4px;
+  font-size: 0.9em;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  border: none;
+}
+
+.dark .ProseMirror code {
+  background: transparent !important;
+  border: none !important;
+  color: inherit;
+}
+
 
 /* Dropdown Simulation */
 .dropdown-label {
