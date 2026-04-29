@@ -20,7 +20,6 @@ import {
   fixTables,
   TableView,
   CellSelection,
-  TableMap,
 } from "prosemirror-tables";
 import { createTable, findTableCell, getCellRect } from "./utils";
 import { Extension } from "../Extension";
@@ -65,13 +64,13 @@ export const Table = Extension.create({
     return {
       insertTable:
         ({ rows = 3, cols = 3 } = {}) =>
-        (state, dispatch) => {
-          const node = createTable(state.schema, rows, cols);
-          if (dispatch) {
-            dispatch(state.tr.replaceSelectionWith(node).scrollIntoView());
-          }
-          return true;
-        },
+          (state, dispatch) => {
+            const node = createTable(state.schema, rows, cols);
+            if (dispatch) {
+              dispatch(state.tr.replaceSelectionWith(node).scrollIntoView());
+            }
+            return true;
+          },
       addColumnBefore: () => (state, dispatch) => addColumnBefore(state, dispatch),
       addColumnAfter: () => (state, dispatch) => addColumnAfter(state, dispatch),
       deleteColumn: () => (state, dispatch) => deleteColumn(state, dispatch),
