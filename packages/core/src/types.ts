@@ -139,7 +139,7 @@ export interface ArkpadEditorOptions {
   onSelectionUpdate?: (props: {
     editor: ArkpadEditorAPI;
     transaction: Transaction;
-    coords: { top: number; left: number; bottom: number; right: number };
+    coords: { top: number; left: number; bottom: number; right: number } | null;
   }) => void;
   onPaste?: (props: {
     editor: ArkpadEditorAPI;
@@ -219,7 +219,7 @@ export interface ArkpadEditorAPI {
   selectAll(): void;
 
   // Coordinate API
-  getCoords(pos?: number): { top: number; left: number; bottom: number; right: number };
+  getCoords(pos?: number): { top: number; left: number; bottom: number; right: number } | null;
 
   // Search & Replace API
   search(query: string | RegExp): SearchResult[];

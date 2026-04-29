@@ -6,7 +6,7 @@ export interface SelectionState {
   to: number;
   empty: boolean;
   text: string;
-  coords: { top: number; left: number; bottom: number; right: number };
+  coords: { top: number; left: number; bottom: number; right: number } | null;
   isBold: boolean;
   isItalic: boolean;
   isUnderline: boolean;
@@ -26,7 +26,7 @@ export function useSelection(editor: ArkpadEditorAPI | null): SelectionState {
     to: 0,
     empty: true,
     text: "",
-    coords: { top: 0, left: 0, bottom: 0, right: 0 },
+    coords: null,
     isBold: false,
     isItalic: false,
     isUnderline: false,

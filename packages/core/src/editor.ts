@@ -362,8 +362,19 @@ export class ArkpadEditor implements ArkpadEditorAPI {
    * Coordinate API
    */
   getCoords(pos?: number) {
-    const position = pos ?? this.view.state.selection.from;
-    return this.view.coordsAtPos(position);
+    const { state } = this.view;
+    const docSize = state.doc.content.size;
+    const position = pos ?? state.selection.from;
+
+    // Safety guard: Clamp position to document bounds
+    const safePos = Math.max(0, Math.min(position, docSize));
+
+    try {
+      return this.view.coordsAtPos(safePos);
+    } catch (error) {
+      console.warn("Arkpad: Failed to get coordinates at pos", safePos, error);
+      return null;
+    }
   }
 
   /**

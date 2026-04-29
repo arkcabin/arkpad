@@ -494,24 +494,6 @@ export function App() {
                 >
                   {isLocked ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
                 </ToolbarButton>
-                <ToolbarButton
-                  onClick={() => {
-                    editor
-                      .chain()
-                      .focus("end")
-                      .insertContent("<p><strong>✨ Bulletproof Magic!</strong></p>", "html")
-                      .command(({ tr }) => {
-                        console.log("Current document size:", tr.doc.content.size);
-                        return true;
-                      })
-                      .scrollIntoView()
-                      .run();
-                  }}
-                  title="Test Bulletproof Chain"
-                  variant="brand"
-                >
-                  <Plus className="w-4 h-4 text-brand animate-bounce" />
-                </ToolbarButton>
               </div>
 
               <div className="flex-grow" />
