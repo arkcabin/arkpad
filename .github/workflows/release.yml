@@ -74,6 +74,12 @@ jobs:
           # Create and push git tags to keep GitHub in sync with NPM
           npx changeset tag
           git push --tags
+          
+          # Convert the new tags into official GitHub Releases
+          for tag in $(git tag --points-at HEAD); do
+            gh release create "$tag" --title "$tag" --generate-notes || echo "Release for $tag already exists"
+          done
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
