@@ -50,7 +50,7 @@ import {
   useEditorState,
   ArkpadProvider,
 } from "@arkpad/react";
-import { CharacterCount, TableExtensions } from "@arkpad/core";
+import { CharacterCount } from "@arkpad/core";
 
 import type { ArkpadEditorAPI } from "@arkpad/core";
 
@@ -139,6 +139,33 @@ function EditorFooter({ editor, isLocked }: { editor: ArkpadEditorAPI; isLocked:
   );
 }
 
+function TableActionButton({
+  editor,
+  command,
+  title,
+  children,
+  variant = "default",
+}: {
+  editor: ArkpadEditorAPI;
+  command: string;
+  title: string;
+  children: React.ReactNode;
+  variant?: "default" | "danger" | "success" | "brand";
+}) {
+  const disabled = useEditorState(editor, (s) => !s.canRunCommand(command));
+
+  return (
+    <ToolbarButton
+      onClick={() => editor.runCommand(command)}
+      disabled={disabled ?? false}
+      title={title}
+      variant={variant}
+    >
+      {children}
+    </ToolbarButton>
+  );
+}
+
 export function App() {
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== "undefined") {
@@ -170,7 +197,6 @@ export function App() {
   const editor = useArkpadEditor({
     extensions: [
       CharacterCount,
-      ...TableExtensions,
       {
         name: "h4Theme",
         addGlobalAttributes() {
@@ -428,49 +454,37 @@ export function App() {
                 >
                   <TableIcon className="w-4 h-4" />
                 </ToolbarButton>
-                <ToolbarButton
-                  onClick={() => editor.runCommand("addColumnAfter")}
-                  disabled={!editor.isActive("table")}
+                <TableActionButton
+                  editor={editor}
+                  command="addColumnAfter"
                   title="Add Column After"
                 >
                   <ColumnsIcon className="w-4 h-4" />
-                </ToolbarButton>
-                <ToolbarButton
-                  onClick={() => editor.runCommand("addRowAfter")}
-                  disabled={!editor.isActive("table")}
-                  title="Add Row After"
-                >
+                </TableActionButton>
+                <TableActionButton editor={editor} command="addRowAfter" title="Add Row After">
                   <RowsIcon className="w-4 h-4" />
-                </ToolbarButton>
-                <ToolbarButton
-                  onClick={() => editor.runCommand("mergeCells")}
-                  disabled={!editor.isActive("table")}
-                  title="Merge Cells"
-                >
+                </TableActionButton>
+                <TableActionButton editor={editor} command="mergeCells" title="Merge Cells">
                   <Combine className="w-4 h-4" />
-                </ToolbarButton>
-                <ToolbarButton
-                  onClick={() => editor.runCommand("splitCell")}
-                  disabled={!editor.isActive("table")}
-                  title="Split Cell"
-                >
+                </TableActionButton>
+                <TableActionButton editor={editor} command="splitCell" title="Split Cell">
                   <Split className="w-4 h-4" />
-                </ToolbarButton>
-                <ToolbarButton
-                  onClick={() => editor.runCommand("toggleHeaderRow")}
-                  disabled={!editor.isActive("table")}
+                </TableActionButton>
+                <TableActionButton
+                  editor={editor}
+                  command="toggleHeaderRow"
                   title="Toggle Header Row"
                 >
                   <Layout className="w-4 h-4" />
-                </ToolbarButton>
-                <ToolbarButton
-                  onClick={() => editor.runCommand("deleteTable")}
-                  disabled={!editor.isActive("table")}
+                </TableActionButton>
+                <TableActionButton
+                  editor={editor}
+                  command="deleteTable"
                   title="Delete Table"
                   variant="danger"
                 >
                   <Trash2 className="w-4 h-4" />
-                </ToolbarButton>
+                </TableActionButton>
               </div>
 
               <ToolbarSeparator />

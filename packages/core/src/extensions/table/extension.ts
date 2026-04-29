@@ -17,9 +17,12 @@ import {
   toggleHeaderCell,
   setCellAttr,
   fixTables,
+  TableView,
+  CellSelection,
 } from "prosemirror-tables";
-import { createTable } from "./utils";
+import { createTable, findTableCell } from "./utils";
 import { Extension } from "../Extension";
+import { InputRule } from "prosemirror-inputrules";
 
 export const Table = Extension.create({
   name: "table",
@@ -30,7 +33,7 @@ export const Table = Extension.create({
       handleWidth: 5,
       cellMinWidth: 25,
       lastColumnResizable: true,
-      View: null,
+      View: TableView,
       allowTableNodeSelection: false,
     };
   },
@@ -78,6 +81,28 @@ export const Table = Extension.create({
       toggleHeaderRow: () => (state, dispatch) => toggleHeaderRow(state, dispatch),
       toggleHeaderColumn: () => (state, dispatch) => toggleHeaderColumn(state, dispatch),
       toggleHeaderCell: () => (state, dispatch) => toggleHeaderCell(state, dispatch),
+      selectColumn: (index: number) => (state, dispatch) => {
+        const { $from } = state.selection;
+        const table = findTableCell($from);
+        if (!table) return false;
+
+        const tr = state.tr;
+        // @ts-expect-error - CellSelection is not in the type definition but exists in JS
+        const selection = CellSelection.colSelection(tr.doc.resolve(table.pos), index);
+        if (dispatch) dispatch(tr.setSelection(selection));
+        return true;
+      },
+      selectRow: (index: number) => (state, dispatch) => {
+        const { $from } = state.selection;
+        const table = findTableCell($from);
+        if (!table) return false;
+
+        const tr = state.tr;
+        // @ts-expect-error - CellSelection is not in the type definition but exists in JS
+        const selection = CellSelection.rowSelection(tr.doc.resolve(table.pos), index);
+        if (dispatch) dispatch(tr.setSelection(selection));
+        return true;
+      },
       setCellAttribute: (name: string, value: any) => (state, dispatch) =>
         setCellAttr(name, value)(state, dispatch),
       fixTables: () => (state, dispatch) => {
@@ -109,5 +134,22 @@ export const Table = Extension.create({
       Tab: () => goToNextCell(1),
       "Shift-Tab": () => goToNextCell(-1),
     };
+  },
+
+  addInputRules() {
+    return [
+      new InputRule(/^\|{2,}\s$/, (state, match, start, end) => {
+        if (!state.schema.nodes.table) {
+          return null;
+        }
+
+        const rows = 3;
+        const cols = match[0].trim().length - 1;
+        const { tr } = state;
+        const table = createTable(state.schema, rows, cols);
+
+        return tr.replaceWith(start, end, table);
+      }),
+    ];
   },
 });
