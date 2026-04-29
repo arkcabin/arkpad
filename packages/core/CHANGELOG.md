@@ -1,5 +1,11 @@
 # @arkpad/core
 
+## 1.6.12
+
+### Patch Changes
+
+- Merge branch 'main' of https://github.com/arkcabin/arkpad
+
 ## 1.6.11
 
 ### Patch Changes
