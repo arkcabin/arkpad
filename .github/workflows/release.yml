@@ -30,51 +30,57 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Lint
-        run: npm run lint
+      - name: Verify
+        run: |
+          npm run lint
+          npm run typecheck
 
-      - name: Typecheck
-        run: npm run typecheck
-
-      - name: Build packages
-        run: npm run build
-
-      - name: Create Release and Publish
-        id: changesets
+      - name: Version and Build
+        id: versioning
         run: |
           # Configure Git
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
-          # AUTO-CHANGESET: If no changeset exists, create one from commit message
+          # AUTO-CHANGESET: Create if missing
           if [ -z "$(ls .changeset/*.md 2>/dev/null)" ]; then
-            echo "No manual changeset found. Auto-generating one..."
+            echo "Auto-generating changeset..."
             COMMIT_MSG=$(git log -1 --pretty=%B)
             BUMP_TYPE="patch"
             if [[ "$COMMIT_MSG" == feat:* ]]; then BUMP_TYPE="minor"; fi
-            
-            # Create a temporary changeset for all packages
             printf "---\n\"@arkpad/core\": $BUMP_TYPE\n\"@arkpad/react\": $BUMP_TYPE\n---\n\n$COMMIT_MSG" > .changeset/auto-generated.md
           fi
           
-          # Version the packages (consumes changesets)
+          # 1. Version the packages
           npm run version-packages
           
-          # Check if there were changes to commit
+          # 2. Check for changes
           if [ -n "$(git status --porcelain)" ]; then
-            echo "Changes detected, committing and publishing..."
+            echo "HAS_CHANGES=true" >> $GITHUB_OUTPUT
             git add .
-            git commit -m "chore: automated release [skip ci]"
+            git commit -m "chore: automated versioning [skip ci]"
             git push origin main
-            
-            # Publish to NPM and create tags
-            npm run release
-            
-            # Push the created tags to GitHub
-            git push --tags
           else
-            echo "No changes needed, skipping release."
+            echo "HAS_CHANGES=false" >> $GITHUB_OUTPUT
           fi
+          
+          # 3. Build (Always build to ensure demo is updated)
+          npm run build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish to NPM
+        if: steps.versioning.outputs.HAS_CHANGES == 'true'
+        run: |
+          # Publish and Tag
+          npm run release
+          git push --tags
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
+
+      - name: Deploy Demo
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./apps/arkpad/dist
