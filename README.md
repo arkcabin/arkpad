@@ -2,6 +2,8 @@
 
 **The Ultimate Modular Rich Text Framework.**
 
+[**Live Demo**](https://arkcabin.github.io/arkpad/) | [**NPM Packages**](https://www.npmjs.com/org/arkpad)
+
 Arkpad is an enterprise-grade rich text editor built on ProseMirror. It provides a sophisticated, developer-first API designed for building powerful, reliable, and highly customizable editing experiences.
 
 ![Arkpad Toolbar Preview](https://raw.githubusercontent.com/arkcabin/arkpad/main/assets/toolbar-preview.png)
