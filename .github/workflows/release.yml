@@ -6,10 +6,14 @@ on:
       - main
   workflow_dispatch:
 
-
+# Prevent multiple release jobs from running at once
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   release:
+    name: Release & Publish
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -37,14 +41,11 @@ jobs:
           npm run lint
           npm run typecheck
 
-      - name: Version and Build
-        id: versioning
+      - name: Build
+        run: npm run build
+
+      - name: Create Changeset if missing
         run: |
-          # Configure Git
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          
-          # AUTO-CHANGESET: Create if missing
           mkdir -p .changeset
           if [ -z "$(ls .changeset/*.md 2>/dev/null)" ]; then
             echo "Auto-generating changeset..."
@@ -60,31 +61,16 @@ jobs:
               echo "$COMMIT_MSG"
             } > .changeset/auto-generated.md
           fi
-          
-          # 1. Version the packages
-          npm run version-packages
-          
-          # 2. Check for changes
-          if [ -n "$(git status --porcelain)" ]; then
-            echo "HAS_CHANGES=true" >> $GITHUB_OUTPUT
-            git add .
-            git commit -m "chore: automated versioning [skip ci]"
-            git push origin main
-          else
-            echo "HAS_CHANGES=false" >> $GITHUB_OUTPUT
-          fi
-          
-          # 3. Build (Always build to ensure demo is updated)
-          npm run build
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Publish to NPM
-        if: steps.versioning.outputs.HAS_CHANGES == 'true'
-        run: |
-          # Use npx to ensure we use the local version of changeset
-          npx changeset publish
-          git push --tags
+      - name: Create Release Pull Request or Publish to NPM
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          # This will publish if versions are bumped, or create a PR if there are changesets
+          publish: npx changeset publish
+          version: npm run version-packages
+          commit: "chore: automated versioning [skip ci]"
+          title: "chore: automated versioning"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
@@ -92,6 +78,7 @@ jobs:
           NPM_CONFIG_REGISTRY: https://registry.npmjs.org
 
       - name: Deploy Demo
+        if: steps.changesets.outputs.published == 'true' || github.event_name == 'workflow_dispatch'
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
