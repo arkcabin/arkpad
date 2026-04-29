@@ -46,6 +46,17 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
+          # AUTO-CHANGESET: If no changeset exists, create one from commit message
+          if [ -z "$(ls .changeset/*.md 2>/dev/null)" ]; then
+            echo "No manual changeset found. Auto-generating one..."
+            COMMIT_MSG=$(git log -1 --pretty=%B)
+            BUMP_TYPE="patch"
+            if [[ "$COMMIT_MSG" == feat:* ]]; then BUMP_TYPE="minor"; fi
+            
+            # Create a temporary changeset for all packages
+            printf "---\n\"@arkpad/core\": $BUMP_TYPE\n\"@arkpad/react\": $BUMP_TYPE\n---\n\n$COMMIT_MSG" > .changeset/auto-generated.md
+          fi
+          
           # Version the packages (consumes changesets)
           npm run version-packages
           
@@ -53,13 +64,16 @@ jobs:
           if [ -n "$(git status --porcelain)" ]; then
             echo "Changes detected, committing and publishing..."
             git add .
-            git commit -m "chore: version packages"
+            git commit -m "chore: automated release [skip ci]"
             git push origin main
             
             # Publish to NPM and create tags
             npm run release
+            
+            # Push the created tags to GitHub
+            git push --tags
           else
-            echo "No changesets found, skipping release."
+            echo "No changes needed, skipping release."
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
