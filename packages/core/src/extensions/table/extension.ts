@@ -24,7 +24,7 @@ import {
 import { createTable, findTableCell, getCellRect } from "./utils";
 import { Extension } from "../Extension";
 import { InputRule } from "prosemirror-inputrules";
-import { NodeSelection } from "prosemirror-state";
+import { Plugin, NodeSelection } from "prosemirror-state";
 
 export const Table = Extension.create({
   name: "table",
@@ -64,13 +64,13 @@ export const Table = Extension.create({
     return {
       insertTable:
         ({ rows = 3, cols = 3 } = {}) =>
-          (state, dispatch) => {
-            const node = createTable(state.schema, rows, cols);
-            if (dispatch) {
-              dispatch(state.tr.replaceSelectionWith(node).scrollIntoView());
-            }
-            return true;
-          },
+        (state, dispatch) => {
+          const node = createTable(state.schema, rows, cols);
+          if (dispatch) {
+            dispatch(state.tr.replaceSelectionWith(node).scrollIntoView());
+          }
+          return true;
+        },
       addColumnBefore: () => (state, dispatch) => addColumnBefore(state, dispatch),
       addColumnAfter: () => (state, dispatch) => addColumnAfter(state, dispatch),
       deleteColumn: () => (state, dispatch) => deleteColumn(state, dispatch),
@@ -105,8 +105,19 @@ export const Table = Extension.create({
         if (dispatch) dispatch(tr.setSelection(selection));
         return true;
       },
-      setCellAttribute: (name: string, value: any) => (state, dispatch) =>
-        setCellAttr(name, value)(state, dispatch),
+      setCellAttribute: (name: string, value: any) => (state, dispatch) => {
+        const { selection, tr } = state;
+        if (selection instanceof CellSelection) {
+          selection.forEachCell((node, pos) => {
+            if (node.attrs[name] !== value) {
+              tr.setNodeMarkup(pos, undefined, { ...node.attrs, [name]: value });
+            }
+          });
+          if (dispatch) dispatch(tr);
+          return true;
+        }
+        return setCellAttr(name, value)(state, dispatch);
+      },
       clearCellContents: () => (state, dispatch) => {
         const { selection, tr, schema } = state;
 
@@ -179,6 +190,12 @@ export const Table = Extension.create({
       }),
       tableEditing({
         allowTableNodeSelection: this.options.allowTableNodeSelection,
+      }),
+      new Plugin({
+        appendTransaction: (transactions, oldState, newState) => {
+          if (!transactions.some((tr) => tr.docChanged)) return null;
+          return fixTables(newState);
+        },
       }),
     ];
   },

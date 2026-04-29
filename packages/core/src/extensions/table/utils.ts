@@ -80,3 +80,37 @@ export function getCellRect($pos: ResolvedPos) {
     ...context,
   };
 }
+
+/**
+ * Gets all cell positions in a specific column.
+ */
+export function getCellsInColumn(tableStart: number, tableNode: Node, colIndex: number) {
+  const map = TableMap.get(tableNode);
+  if (colIndex < 0 || colIndex >= (map.width || 0)) return [];
+
+  const cells: number[] = [];
+  for (let row = 0; row < (map.height || 0); row++) {
+    const pos = map.map[row * map.width + colIndex];
+    if (pos !== undefined) {
+      cells.push(pos + tableStart);
+    }
+  }
+  return [...new Set(cells)]; // Remove duplicates from rowspans
+}
+
+/**
+ * Gets all cell positions in a specific row.
+ */
+export function getCellsInRow(tableStart: number, tableNode: Node, rowIndex: number) {
+  const map = TableMap.get(tableNode);
+  if (rowIndex < 0 || rowIndex >= (map.height || 0)) return [];
+
+  const cells: number[] = [];
+  for (let col = 0; col < (map.width || 0); col++) {
+    const pos = map.map[rowIndex * map.width + col];
+    if (pos !== undefined) {
+      cells.push(pos + tableStart);
+    }
+  }
+  return [...new Set(cells)]; // Remove duplicates from colspans
+}
