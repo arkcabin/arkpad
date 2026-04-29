@@ -1,5 +1,13 @@
 # @arkpad/react
 
+## 1.6.11
+
+### Patch Changes
+
+- Merge branch 'main' of https://github.com/arkcabin/arkpad
+- Updated dependencies
+  - @arkpad/core@1.6.11
+
 ## 1.6.10
 
 ### Patch Changes
