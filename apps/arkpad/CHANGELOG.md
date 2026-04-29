@@ -1,5 +1,13 @@
 # @arkpad/app
 
+## 1.6.7
+
+### Patch Changes
+
+- Updated dependencies
+  - @arkpad/core@1.6.7
+  - @arkpad/react@1.6.7
+
 ## 1.6.6
 
 ### Patch Changes

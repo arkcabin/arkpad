@@ -1,5 +1,13 @@
 # @arkpad/react
 
+## 1.6.7
+
+### Patch Changes
+
+- fix(workflow): explicitly set up .npmrc for release
+- Updated dependencies
+  - @arkpad/core@1.6.7
+
 ## 1.6.6
 
 ### Patch Changes

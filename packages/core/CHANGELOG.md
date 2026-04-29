@@ -1,5 +1,11 @@
 # @arkpad/core
 
+## 1.6.7
+
+### Patch Changes
+
+- fix(workflow): explicitly set up .npmrc for release
+
 ## 1.6.6
 
 ### Patch Changes
