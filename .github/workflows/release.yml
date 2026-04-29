@@ -60,6 +60,10 @@ jobs:
           # Use native NPM workspaces publishing with explicit registry and provenance
           # This ensures OIDC is used for authentication
           npm publish --workspaces --if-present --provenance --access public --registry https://registry.npmjs.org
+          
+          # Create and push git tags to keep GitHub in sync with NPM
+          npx changeset tag
+          git push --tags
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
