@@ -42,14 +42,45 @@ jobs:
 
       - name: Version Packages
         run: |
-          # 1. If no changesets exist, create an automated patch changeset
+          # 1. If no manual changesets exist, create a smart automated patch changeset
           if [ ! -f .changeset/*.md ] || [ "$(ls -A .changeset/*.md 2>/dev/null | grep -v 'README.md')" = "" ]; then
+            echo "No manual changesets found. Running Pro-Max auto-detection..."
+            
+            # Determine the base SHA for comparison (entire push history)
+            BASE_SHA="${{ github.event.before }}"
+            if [ "$BASE_SHA" = "0000000000000000000000000000000000000000" ] || [ -z "$BASE_SHA" ]; then
+              BASE_SHA="HEAD^"
+            fi
+            
             echo "---" > .changeset/automated-release.md
-            echo '"@arkpad/core": patch' >> .changeset/automated-release.md
-            echo '"@arkpad/react": patch' >> .changeset/automated-release.md
+            
+            # Dynamically detect all packages and check for meaningful code changes
+            ANY_CHANGED=false
+            for pkg_dir in packages/*; do
+              if [ -d "$pkg_dir" ] && [ -f "$pkg_dir/package.json" ]; then
+                PKG_NAME=$(node -p "require('./$pkg_dir/package.json').name")
+                
+                # Check for changes in this package, ignoring docs and tests
+                # This ensures we don't release new versions for just README fixes
+                PKG_CHANGES=$(git diff --name-only $BASE_SHA HEAD -- "$pkg_dir" | grep -vE "\.(md|txt|test\.ts|test\.js)$" || true)
+                
+                if [ -n "$PKG_CHANGES" ]; then
+                   echo "\"$PKG_NAME\": patch" >> .changeset/automated-release.md
+                   ANY_CHANGED=true
+                   echo "Detected code changes in $PKG_NAME"
+                fi
+              fi
+            done
+            
             echo "---" >> .changeset/automated-release.md
             echo "" >> .changeset/automated-release.md
-            echo "automated release" >> .changeset/automated-release.md
+            echo "automated release: code changes detected via CI" >> .changeset/automated-release.md
+            
+            # Only keep the file if at least one package actually had code changes
+            if [ "$ANY_CHANGED" = false ]; then
+              rm .changeset/automated-release.md
+              echo "No meaningful code changes detected in any package. Skipping auto-versioning."
+            fi
           fi
 
           # 2. Bump versions locally based on changesets
