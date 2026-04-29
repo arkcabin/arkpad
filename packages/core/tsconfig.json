@@ -5,7 +5,6 @@
     "rootDir": "src",
     "noImplicitAny": false,
     "composite": true,
-    "baseUrl": ".",
     "paths": {
       "@arkpad/shared": ["../shared/src/index"]
     }

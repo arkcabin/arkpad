@@ -59,12 +59,12 @@
     "prosemirror-schema-basic": "^1.2.4",
     "prosemirror-schema-list": "^1.5.1",
     "prosemirror-state": "^1.4.4",
-    "prosemirror-view": "^1.41.8"
+    "prosemirror-view": "^1.41.8",
+    "@arkpad/shared": "workspace:*"
   },
   "peerDependencies": {
     "@arkpad/extension-table": "*",
-    "@arkpad/extension-marks": "*",
-    "@arkpad/shared": "*"
+    "@arkpad/extension-marks": "*"
   },
   "devDependencies": {
     "@types/prosemirror-tables": "^0.8.0"
