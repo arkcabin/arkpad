@@ -42,6 +42,7 @@ import {
   Combine,
   Split,
   Layout,
+  Paintbrush,
 } from "lucide-react";
 
 import {
@@ -49,6 +50,8 @@ import {
   ArkpadEditorContent,
   useEditorState,
   ArkpadProvider,
+  SmartBar,
+  EditorButton,
 } from "@arkpad/react";
 import { CharacterCount } from "@arkpad/core";
 
@@ -79,43 +82,95 @@ const ToolbarButton = React.forwardRef<HTMLButtonElement, ToolbarButtonProps>(
   )
 );
 
+function ToolbarSeparator() {
+  return <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1 opacity-50" />;
+}
+
 function MenuButton({
-  editor,
   command,
   name,
   attrs,
   children,
   title,
 }: {
-  editor: ArkpadEditorAPI;
   command: string;
-  name: string;
+  name?: string;
   attrs?: any;
   children: React.ReactNode;
   title?: string;
 }) {
-  const active = useEditorState(editor, (s) => s.isActive(name, attrs));
-  const disabled = useEditorState(editor, (s) => !s.canRunCommand(command, attrs));
-
-  const handleClick = () => {
-    editor.runCommand(command, attrs);
-  };
-
   return (
-    <ToolbarButton
-      onClick={handleClick}
-      isActive={!!active}
-      disabled={disabled ?? false}
+    <EditorButton
+      command={command}
+      name={name}
+      attrs={attrs}
       title={title}
+      className="toolbar-btn"
+      activeClassName="active"
     >
       {children}
-    </ToolbarButton>
+    </EditorButton>
   );
 }
 
-const ToolbarSeparator = () => (
-  <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1 opacity-50" />
-);
+function TableActionButton({
+  command,
+  args,
+  title,
+  children,
+  variant = "default",
+}: {
+  command: string;
+  args?: any[];
+  title: string;
+  children: React.ReactNode;
+  variant?: "default" | "danger" | "success" | "brand";
+}) {
+  return (
+    <EditorButton
+      command={command}
+      args={args}
+      title={title}
+      className={`toolbar-btn variant-${variant}`}
+    >
+      {children}
+    </EditorButton>
+  );
+}
+
+function TableSmartBar() {
+  return (
+    <SmartBar>
+      <SmartBar.Group showIf={(e) => !e.getSelection().empty}>
+        <MenuButton command="toggleBold" name="strong" title="Bold">
+          <Bold className="w-4 h-4" />
+        </MenuButton>
+        <MenuButton command="toggleItalic" name="em" title="Italic">
+          <Italic className="w-4 h-4" />
+        </MenuButton>
+        <div className="w-px h-4 bg-slate-200 dark:bg-slate-700 mx-1" />
+      </SmartBar.Group>
+
+      <SmartBar.Group showIf={(e) => e.isActive("table")}>
+        <TableActionButton command="addColumnAfter" title="Add Column After">
+          <ColumnsIcon className="w-4 h-4" />
+        </TableActionButton>
+        <TableActionButton command="addRowAfter" title="Add Row After">
+          <RowsIcon className="w-4 h-4" />
+        </TableActionButton>
+        <TableActionButton command="toggleHeader" args={["row"]} title="Toggle Header Row">
+          <Layout className="w-4 h-4" />
+        </TableActionButton>
+        <TableActionButton command="setZebraStriping" title="Zebra Striping">
+          <Paintbrush className="w-4 h-4" />
+        </TableActionButton>
+        <TableActionButton command="smartDelete" title="Delete" variant="danger">
+          <Trash2 className="w-4 h-4" />
+        </TableActionButton>
+      </SmartBar.Group>
+    </SmartBar>
+  );
+}
 
 function EditorFooter({ editor, isLocked }: { editor: ArkpadEditorAPI; isLocked: boolean }) {
   const characters = useEditorState(editor, (s) => s.storage.characterCount?.characters ?? 0);
@@ -136,33 +191,6 @@ function EditorFooter({ editor, isLocked }: { editor: ArkpadEditorAPI; isLocked:
         <span>Refreshed 2026</span>
       </div>
     </div>
-  );
-}
-
-function TableActionButton({
-  editor,
-  command,
-  title,
-  children,
-  variant = "default",
-}: {
-  editor: ArkpadEditorAPI;
-  command: string;
-  title: string;
-  children: React.ReactNode;
-  variant?: "default" | "danger" | "success" | "brand";
-}) {
-  const disabled = useEditorState(editor, (s) => !s.canRunCommand(command));
-
-  return (
-    <ToolbarButton
-      onClick={() => editor.runCommand(command)}
-      disabled={disabled ?? false}
-      title={title}
-      variant={variant}
-    >
-      {children}
-    </ToolbarButton>
   );
 }
 
@@ -259,28 +287,19 @@ export function App() {
       <div className="min-h-screen bg-[#fafafa] dark:bg-[#000000] py-8 md:py-12 px-4 transition-colors duration-300">
         <div className="max-w-[1300px] mx-auto">
           <div className="editor-wrapper border-slate-200/50 dark:border-slate-800/50 shadow-2xl">
+            <TableSmartBar />
             <div className="toolbar-wrapper p-2 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md sticky top-0 z-10">
               <div className="toolbar-group">
-                <MenuButton editor={editor} command="toggleBold" name="strong" title="Bold">
+                <MenuButton command="toggleBold" name="strong" title="Bold">
                   <Bold className="w-4 h-4" />
                 </MenuButton>
-                <MenuButton editor={editor} command="toggleItalic" name="em" title="Italic">
+                <MenuButton command="toggleItalic" name="em" title="Italic">
                   <Italic className="w-4 h-4" />
                 </MenuButton>
-                <MenuButton
-                  editor={editor}
-                  command="toggleUnderline"
-                  name="underline"
-                  title="Underline"
-                >
+                <MenuButton command="toggleUnderline" name="underline" title="Underline">
                   <Underline className="w-4 h-4" />
                 </MenuButton>
-                <MenuButton
-                  editor={editor}
-                  command="toggleStrike"
-                  name="strike"
-                  title="Strikethrough"
-                >
+                <MenuButton command="toggleStrike" name="strike" title="Strikethrough">
                   <Strikethrough className="w-4 h-4" />
                 </MenuButton>
                 <ToolbarButton
@@ -291,13 +310,11 @@ export function App() {
                 >
                   <Highlighter className="w-4 h-4" />
                 </ToolbarButton>
-                <MenuButton editor={editor} command="toggleCode" name="code" title="Inline Code">
+                <MenuButton command="toggleCode" name="code" title="Inline Code">
                   <Code className="w-4 h-4" />
                 </MenuButton>
                 <ToolbarButton
                   onClick={() => {
-                    // Clear painting modes
-
                     const url = window.prompt("Enter URL:", "https://");
                     if (url) editor?.runCommand("toggleLink", url);
                   }}
@@ -306,20 +323,10 @@ export function App() {
                 >
                   <LinkIcon className="w-4 h-4" />
                 </ToolbarButton>
-                <MenuButton
-                  editor={editor}
-                  command="toggleSuperscript"
-                  name="superscript"
-                  title="Superscript"
-                >
+                <MenuButton command="toggleSuperscript" name="superscript" title="Superscript">
                   <SuperscriptIcon className="w-4 h-4" />
                 </MenuButton>
-                <MenuButton
-                  editor={editor}
-                  command="toggleSubscript"
-                  name="subscript"
-                  title="Subscript"
-                >
+                <MenuButton command="toggleSubscript" name="subscript" title="Subscript">
                   <SubscriptIcon className="w-4 h-4" />
                 </MenuButton>
                 <ToolbarButton
@@ -335,36 +342,17 @@ export function App() {
               <ToolbarSeparator />
 
               <div className="toolbar-group">
-                <MenuButton
-                  editor={editor}
-                  command="toggleHeading"
-                  attrs={{ level: 1 }}
-                  name="heading"
-                  title="H1"
-                >
+                <MenuButton command="toggleHeading" attrs={{ level: 1 }} name="heading" title="H1">
                   <Heading1 className="w-4 h-4" />
                 </MenuButton>
-                <MenuButton
-                  editor={editor}
-                  command="toggleHeading"
-                  attrs={{ level: 2 }}
-                  name="heading"
-                  title="H2"
-                >
+                <MenuButton command="toggleHeading" attrs={{ level: 2 }} name="heading" title="H2">
                   <Heading2 className="w-4 h-4" />
                 </MenuButton>
-                <MenuButton
-                  editor={editor}
-                  command="toggleHeading"
-                  attrs={{ level: 3 }}
-                  name="heading"
-                  title="H3"
-                >
+                <MenuButton command="toggleHeading" attrs={{ level: 3 }} name="heading" title="H3">
                   <Heading3 className="w-4 h-4" />
                 </MenuButton>
                 <ToolbarButton
                   onClick={() => {
-                    // Clear painting modes
                     editor.runCommand("toggleHeading", { level: 4 });
                   }}
                   isActive={editor.isActive("heading", { level: 4 })}
@@ -372,17 +360,11 @@ export function App() {
                 >
                   <span className="text-[10px] font-bold">H4</span>
                 </ToolbarButton>
-                <MenuButton
-                  editor={editor}
-                  command="toggleBlockquote"
-                  name="blockquote"
-                  title="Blockquote (Style like Highlighter)"
-                >
+                <MenuButton command="toggleBlockquote" name="blockquote" title="Blockquote">
                   <PenLine className="w-4 h-4" />
                 </MenuButton>
                 <ToolbarButton
                   onClick={() => {
-                    // Clear painting modes
                     editor?.runCommand("toggleCodeBlock");
                   }}
                   title="Code Block"
@@ -391,7 +373,6 @@ export function App() {
                 </ToolbarButton>
                 <ToolbarButton
                   onClick={() => {
-                    // Clear painting modes
                     editor?.runCommand("setHorizontalRule");
                   }}
                   title="Horizontal Rule"
@@ -403,28 +384,13 @@ export function App() {
               <ToolbarSeparator />
 
               <div className="toolbar-group">
-                <MenuButton
-                  editor={editor}
-                  command="toggleBulletList"
-                  name="bulletList"
-                  title="Bullet List"
-                >
+                <MenuButton command="toggleBulletList" name="bulletList" title="Bullet List">
                   <List className="w-4 h-4" />
                 </MenuButton>
-                <MenuButton
-                  editor={editor}
-                  command="toggleOrderedList"
-                  name="orderedList"
-                  title="Ordered List"
-                >
+                <MenuButton command="toggleOrderedList" name="orderedList" title="Ordered List">
                   <ListOrdered className="w-4 h-4" />
                 </MenuButton>
-                <MenuButton
-                  editor={editor}
-                  command="toggleTaskList"
-                  name="taskList"
-                  title="Task List"
-                >
+                <MenuButton command="toggleTaskList" name="taskList" title="Task List">
                   <CheckSquare className="w-4 h-4" />
                 </MenuButton>
                 <ToolbarButton
@@ -454,41 +420,28 @@ export function App() {
                 >
                   <TableIcon className="w-4 h-4" />
                 </ToolbarButton>
-                <TableActionButton
-                  editor={editor}
-                  command="addColumnAfter"
-                  title="Add Column After"
-                >
+                <TableActionButton command="addColumnAfter" title="Add Column After">
                   <ColumnsIcon className="w-4 h-4" />
                 </TableActionButton>
-                <TableActionButton editor={editor} command="addRowAfter" title="Add Row After">
+                <TableActionButton command="addRowAfter" title="Add Row After">
                   <RowsIcon className="w-4 h-4" />
                 </TableActionButton>
-                <TableActionButton editor={editor} command="mergeCells" title="Merge Cells">
+                <TableActionButton command="mergeCells" title="Merge Cells">
                   <Combine className="w-4 h-4" />
                 </TableActionButton>
-                <TableActionButton editor={editor} command="splitCell" title="Split Cell">
+                <TableActionButton command="splitCell" title="Split Cell">
                   <Split className="w-4 h-4" />
                 </TableActionButton>
-                <TableActionButton
-                  editor={editor}
-                  command="toggleHeaderRow"
-                  title="Toggle Header Row"
-                >
+                <TableActionButton command="toggleHeader" args={["row"]} title="Toggle Header Row">
                   <Layout className="w-4 h-4" />
                 </TableActionButton>
-                <TableActionButton editor={editor} command="selectColumn" title="Select Column">
+                <TableActionButton command="selectColumn" title="Select Column">
                   <ColumnsIcon className="w-4 h-4 opacity-50" />
                 </TableActionButton>
-                <TableActionButton editor={editor} command="selectRow" title="Select Row">
+                <TableActionButton command="selectRow" title="Select Row">
                   <RowsIcon className="w-4 h-4 opacity-50" />
                 </TableActionButton>
-                <TableActionButton
-                  editor={editor}
-                  command="smartDelete"
-                  title="Smart Delete (Row/Col/Table)"
-                  variant="danger"
-                >
+                <TableActionButton command="smartDelete" title="Smart Delete" variant="danger">
                   <Trash2 className="w-4 h-4" />
                 </TableActionButton>
               </div>
@@ -497,7 +450,6 @@ export function App() {
 
               <div className="toolbar-group">
                 <MenuButton
-                  editor={editor}
                   command="setTextAlign"
                   attrs={{ align: "left" }}
                   name="textAlign"
@@ -506,7 +458,6 @@ export function App() {
                   <AlignLeft className="w-4 h-4" />
                 </MenuButton>
                 <MenuButton
-                  editor={editor}
                   command="setTextAlign"
                   attrs={{ align: "center" }}
                   name="textAlign"
@@ -515,7 +466,6 @@ export function App() {
                   <AlignCenter className="w-4 h-4" />
                 </MenuButton>
                 <MenuButton
-                  editor={editor}
                   command="setTextAlign"
                   attrs={{ align: "right" }}
                   name="textAlign"
@@ -524,7 +474,6 @@ export function App() {
                   <AlignRight className="w-4 h-4" />
                 </MenuButton>
                 <MenuButton
-                  editor={editor}
                   command="setTextAlign"
                   attrs={{ align: "justify" }}
                   name="textAlign"

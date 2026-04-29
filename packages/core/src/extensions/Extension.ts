@@ -14,6 +14,7 @@ import { Plugin } from "prosemirror-state";
  */
 export class Extension<Options = any, Storage = any> implements ArkpadExtension {
   public name: string;
+  public id?: string;
   public config: ExtensionConfig<Options, Storage>;
   public parent?: Extension;
   public options: Options = {} as Options;

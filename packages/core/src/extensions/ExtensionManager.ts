@@ -47,10 +47,19 @@ export class ExtensionManager {
   }
 
   /**
-   * Registers a single extension.
+   * Registers a single extension and rebuilds the configuration.
    */
   registerExtension(extension: ArkpadExtension): void {
     this.extensions.push(extension);
+    this.rebuild();
+  }
+
+  /**
+   * Unregisters an extension by name or ID and rebuilds the configuration.
+   */
+  unregisterExtension(nameOrId: string): void {
+    this.extensions = this.extensions.filter((ext) => ext.id !== nameOrId && ext.name !== nameOrId);
+    this.rebuild();
   }
 
   get(name: string): ArkpadExtension | undefined {

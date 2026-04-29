@@ -178,14 +178,18 @@ export class ArkpadEditor implements ArkpadEditorAPI {
         appendTransaction: (transactions, oldState, newState) => {
           // If any transaction changed the doc structure (not just marks)
           // we might want to deactivate painting tools.
-          
-          const hasStructuralChange = transactions.some(tr => {
+
+          const hasStructuralChange = transactions.some((tr) => {
             // Check if any step in the transaction is NOT a Mapping/Mark step
             // or if the transaction is explicitly marked for deactivation.
             // tr.docChanged is true if nodes were added/removed/replaced.
-            
-            return (tr.docChanged && !tr.getMeta("highlighter-tool-apply") && !tr.getMeta("eraser-tool-apply")) ||
-                   tr.getMeta("deactivate-painting-tools") === true;
+
+            return (
+              (tr.docChanged &&
+                !tr.getMeta("highlighter-tool-apply") &&
+                !tr.getMeta("eraser-tool-apply")) ||
+              tr.getMeta("deactivate-painting-tools") === true
+            );
           });
 
           if (hasStructuralChange) {
@@ -198,7 +202,7 @@ export class ArkpadEditor implements ArkpadEditorAPI {
           }
 
           return null;
-        }
+        },
       })
     );
 
@@ -590,6 +594,14 @@ export class ArkpadEditor implements ArkpadEditorAPI {
       }
     });
 
+    this.refreshState(this.view.state.doc.toJSON());
+  }
+
+  /**
+   * Unregisters an extension by name or unique ID.
+   */
+  unregisterExtension(nameOrId: string) {
+    this.extensionManager.unregisterExtension(nameOrId);
     this.refreshState(this.view.state.doc.toJSON());
   }
 

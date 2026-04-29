@@ -6,7 +6,10 @@ export type ArkpadDocJSON = Record<string, unknown>;
 export type ArkpadContent = string | ArkpadDocJSON;
 
 export type Dispatch = (tr: Transaction) => void;
-export type ArkpadCommand = Command | ((...args: any[]) => Command) | ((...args: any[]) => (state: any, dispatch?: any, view?: any) => boolean);
+export type ArkpadCommand =
+  | Command
+  | ((...args: any[]) => Command)
+  | ((...args: any[]) => (state: any, dispatch?: any, view?: any) => boolean);
 export type ArkpadCommandRegistry = Record<string, ArkpadCommand>;
 
 export interface ChainedCommands {
@@ -68,12 +71,22 @@ export interface ExtensionConfig<Options = any, Storage = any> {
   addStorage?: (this: ExtensionContext<Options, Storage>) => Storage;
   addGlobalAttributes?: (this: ExtensionContext<Options, Storage>) => {
     types: string[];
-    attributes: Record<string, { default: any; parseHTML?: (element: HTMLElement) => any; renderHTML?: (attributes: Record<string, any>) => any }>;
+    attributes: Record<
+      string,
+      {
+        default: any;
+        parseHTML?: (element: HTMLElement) => any;
+        renderHTML?: (attributes: Record<string, any>) => any;
+      }
+    >;
   }[];
   addNodes?: (this: ExtensionContext<Options, Storage>) => Record<string, any>;
   addMarks?: (this: ExtensionContext<Options, Storage>) => Record<string, any>;
   addCommands?: (this: ExtensionContext<Options, Storage>) => Partial<ArkpadCommandRegistry>;
-  addKeyboardShortcuts?: (this: ExtensionContext<Options, Storage>, schema: any) => Record<string, any>;
+  addKeyboardShortcuts?: (
+    this: ExtensionContext<Options, Storage>,
+    schema: any
+  ) => Record<string, any>;
   addInputRules?: (this: ExtensionContext<Options, Storage>, schema: any) => any[];
   addPasteRules?: (this: ExtensionContext<Options, Storage>, schema: any) => Plugin[];
   addProseMirrorPlugins?: (this: ExtensionContext<Options, Storage>, schema: any) => Plugin[];
@@ -83,6 +96,7 @@ export interface ExtensionConfig<Options = any, Storage = any> {
 
 export interface ArkpadExtension {
   name: string;
+  id?: string;
   init?: (editor: ArkpadEditorAPI) => void;
   addNodes?: () => Record<string, any>;
   addMarks?: () => Record<string, any>;
@@ -234,6 +248,7 @@ export interface ArkpadEditorAPI {
   // Extension Management
   registerExtension(extension: ArkpadExtension): void;
   registerExtensions(extensions: ArkpadExtension[]): void;
+  unregisterExtension(name: string): void;
 
   // Events
   subscribe(callback: (editor: ArkpadEditorAPI) => void): () => void;

@@ -7,3 +7,5 @@ export * from "./ArkpadEditorContent";
 export * from "./BubbleMenu";
 export * from "./FloatingMenu";
 export * from "./EditorButton";
+export * from "./BubbleMenu";
+export * from "./SmartBar";
