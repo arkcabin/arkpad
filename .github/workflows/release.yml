@@ -51,7 +51,7 @@ jobs:
           
           if [[ -n "$(git status --porcelain)" ]]; then
             git add .
-            git commit -m "chore: version packages [skip ci]"
+            git commit -m "release: version packages [skip ci]"
             git push
           fi
           
