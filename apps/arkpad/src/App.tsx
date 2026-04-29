@@ -531,34 +531,29 @@ export function App() {
                   onClick={() => {
                     editor.runCommand("undo");
                   }}
-                  title="Undo"
+                  disabled={!editor.canRunCommand("undo")}
+                  title="Undo (Mod-Z)"
                 >
                   <Undo2 className="w-4 h-4" />
                 </ToolbarButton>
-        <ToolbarButton
-          onClick={() => {
-            editor.runCommand("undo");
-          }}
-          disabled={!editor.canRunCommand("undo")}
-          title="Undo (Mod-Z)"
-        >
-          <Undo2 className="w-4 h-4" />
-        </ToolbarButton>
-        <ToolbarButton
-          onClick={() => {
-            editor.runCommand("redo");
-          }}
-          disabled={!editor.canRunCommand("redo")}
-          title="Redo (Mod-Y)"
-        >
-          <Redo2 className="w-4 h-4" />
-        </ToolbarButton>
-
+                <ToolbarButton
+                  onClick={() => {
+                    editor.runCommand("redo");
+                  }}
+                  disabled={!editor.canRunCommand("redo")}
+                  title="Redo (Mod-Y)"
+                >
+                  <Redo2 className="w-4 h-4" />
+                </ToolbarButton>
                 <ToolbarSeparator />
-                <ToolbarButton onClick={() => setIsDark(!isDark)} title="Toggle Dark Mode">
+                <ToolbarButton
+                  onClick={() => setIsDark(!isDark)}
+                  title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+                >
                   {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
                 </ToolbarButton>
               </div>
+
             </div>
 
             <div className="editor-body">

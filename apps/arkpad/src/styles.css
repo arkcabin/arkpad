@@ -47,18 +47,13 @@ body {
 .toolbar-wrapper {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 0.5rem;
   padding: 0.75rem 1rem;
   border-bottom: 1px solid var(--border);
   background: var(--toolbar-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  overflow-x: auto;
-  scrollbar-width: none; /* Firefox */
-}
-
-.toolbar-wrapper::-webkit-scrollbar {
-  display: none; /* Safari/Chrome */
 }
 
 .toolbar-group {
