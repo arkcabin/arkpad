@@ -80,8 +80,12 @@ jobs:
       - name: Publish to NPM
         if: steps.versioning.outputs.HAS_CHANGES == 'true'
         run: |
+          # Verify npm version and environment
+          npm -v
+          
           # Publish using OIDC (Trusted Publishing)
-          npm run release
+          # We use --provenance to trigger the OIDC handshake
+          npm run release -- --provenance
           git push --tags
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
