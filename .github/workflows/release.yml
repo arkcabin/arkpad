@@ -48,7 +48,14 @@ jobs:
             COMMIT_MSG=$(git log -1 --pretty=%B)
             BUMP_TYPE="patch"
             if [[ "$COMMIT_MSG" == feat:* ]]; then BUMP_TYPE="minor"; fi
-            printf "---\n\"@arkpad/core\": $BUMP_TYPE\n\"@arkpad/react\": $BUMP_TYPE\n---\n\n$COMMIT_MSG" > .changeset/auto-generated.md
+            cat <<EOF > .changeset/auto-generated.md
+---
+"@arkpad/core": $BUMP_TYPE
+"@arkpad/react": $BUMP_TYPE
+---
+
+$COMMIT_MSG
+EOF
           fi
           
           # 1. Version the packages
