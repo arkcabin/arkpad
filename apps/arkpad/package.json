@@ -1,7 +1,7 @@
 {
   "name": "@arkpad/app",
   "private": true,
-  "version": "1.6.11",
+  "version": "1.6.12",
   "author": "ArkCabin",
   "type": "module",
   "scripts": {
@@ -10,8 +10,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@arkpad/core": "1.6.11",
-    "@arkpad/react": "1.6.11",
+    "@arkpad/core": "1.6.12",
+    "@arkpad/react": "1.6.12",
     "@tailwindcss/vite": "^4.1.13",
     "class-variance-authority": "^0.7.1",
     "lucide-react": "^0.542.0",
