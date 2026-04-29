@@ -40,18 +40,18 @@ const Checkbox = React.forwardRef<React.ElementRef<typeof CheckboxPrimitive.Root
       )}
       {...props}
     >
-      <CheckboxPrimitive.Indicator className={cn("flex items-center justify-center text-current")}>
+      <CheckboxPrimitive.Indicator className={cn("flex items-center justify-center text-current w-full h-full")}>
         <svg
           width={iconSizes[size]}
           height={iconSizes[size]}
-          viewBox="0 0 16 16"
+          viewBox="0 0 24 24"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
-            d="M13.5 4.5L6.5 11.5L2.5 7.5"
+            d="M19 8L10 17L5 12"
             stroke="currentColor"
-            strokeWidth="2.5"
+            strokeWidth="3"
             strokeLinecap="round"
             strokeLinejoin="round"
           />

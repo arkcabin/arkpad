@@ -228,9 +228,7 @@ body {
 }
 
 .task-item button[role="checkbox"] svg {
-  width: 14px !important;
-  height: 14px !important;
-  stroke-width: 3 !important;
+  display: block;
 }
 
 /* Highlighter Mark Styling */
