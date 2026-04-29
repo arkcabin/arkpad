@@ -19,7 +19,11 @@ export function createTable(schema: Schema, rows: number, cols: number) {
   for (let i = 0; i < rows; i += 1) {
     const cells: Node[] = [];
     for (let j = 0; j < cols; j += 1) {
-      const cell = cellType.createAndFill();
+      // Start with null colwidth to allow the CSS width: 100% to distribute columns evenly
+      // prosemirror-tables will update these to fixed pixels once the user resizes
+      const cell = cellType.createAndFill({
+        colwidth: null,
+      });
       if (cell) cells.push(cell);
     }
     rowNodes.push(rowType.create(null, cells));

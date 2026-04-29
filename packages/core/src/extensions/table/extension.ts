@@ -36,7 +36,7 @@ export const Table = Extension.create({
   },
 
   addNodes() {
-    const nodes = tableNodes({
+    return tableNodes({
       tableGroup: "block",
       cellContent: "block+",
       cellAttributes: {
@@ -53,30 +53,6 @@ export const Table = Extension.create({
         },
       },
     });
-
-    // Add custom row height attribute
-    nodes.table_row.attrs = {
-      ...nodes.table_row.attrs,
-      height: {
-        default: null,
-      },
-    };
-
-    nodes.table_row.parseHTML = [
-      {
-        tag: "tr",
-        getAttrs: (dom: any) => ({
-          height: dom.style.height || null,
-        }),
-      },
-    ];
-
-    nodes.table_row.toDOM = (node: any) => {
-      const styles = node.attrs.height ? { style: `height: ${node.attrs.height}` } : {};
-      return ["tr", styles, 0];
-    };
-
-    return nodes;
   },
 
   addCommands() {
