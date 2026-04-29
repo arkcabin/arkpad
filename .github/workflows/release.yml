@@ -6,15 +6,16 @@ on:
       - main
   workflow_dispatch:
 
-permissions:
-  contents: write
-  issues: write
-  pull-requests: write
-  id-token: write
+
 
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      pull-requests: write
+      issues: write
 
     steps:
       - name: Checkout
@@ -81,13 +82,14 @@ jobs:
       - name: Publish to NPM
         if: steps.versioning.outputs.HAS_CHANGES == 'true'
         run: |
-          # Publish using OIDC (Trusted Publishing)
-          npm run release
+          # Use npx to ensure we use the local version of changeset
+          npx changeset publish
           git push --tags
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
-          NODE_AUTH_TOKEN: ""
+          NPM_CONFIG_ACCESS: public
+          NPM_CONFIG_REGISTRY: https://registry.npmjs.org
 
       - name: Deploy Demo
         uses: peaceiris/actions-gh-pages@v4
