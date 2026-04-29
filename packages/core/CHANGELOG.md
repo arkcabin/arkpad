@@ -1,5 +1,11 @@
 # @arkpad/core
 
+## 1.6.10
+
+### Patch Changes
+
+- fix(workflow): remove invalid flag and set registry-url for OIDC
+
 ## 1.6.9
 
 ### Patch Changes
