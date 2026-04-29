@@ -477,10 +477,16 @@ export function App() {
                 >
                   <Layout className="w-4 h-4" />
                 </TableActionButton>
+                <TableActionButton editor={editor} command="selectColumn" title="Select Column">
+                  <ColumnsIcon className="w-4 h-4 opacity-50" />
+                </TableActionButton>
+                <TableActionButton editor={editor} command="selectRow" title="Select Row">
+                  <RowsIcon className="w-4 h-4 opacity-50" />
+                </TableActionButton>
                 <TableActionButton
                   editor={editor}
-                  command="deleteTable"
-                  title="Delete Table"
+                  command="smartDelete"
+                  title="Smart Delete (Row/Col/Table)"
                   variant="danger"
                 >
                   <Trash2 className="w-4 h-4" />

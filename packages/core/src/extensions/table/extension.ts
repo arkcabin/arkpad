@@ -10,6 +10,7 @@ import {
   addRowAfter,
   deleteRow,
   deleteTable,
+  deleteCellSelection,
   mergeCells,
   splitCell,
   toggleHeaderRow,
@@ -19,10 +20,12 @@ import {
   fixTables,
   TableView,
   CellSelection,
+  TableMap,
 } from "prosemirror-tables";
 import { createTable, findTableCell } from "./utils";
 import { Extension } from "../Extension";
 import { InputRule } from "prosemirror-inputrules";
+import { NodeSelection } from "prosemirror-state";
 
 export const Table = Extension.create({
   name: "table",
@@ -81,25 +84,31 @@ export const Table = Extension.create({
       toggleHeaderRow: () => (state, dispatch) => toggleHeaderRow(state, dispatch),
       toggleHeaderColumn: () => (state, dispatch) => toggleHeaderColumn(state, dispatch),
       toggleHeaderCell: () => (state, dispatch) => toggleHeaderCell(state, dispatch),
-      selectColumn: (index: number) => (state, dispatch) => {
+      selectColumn: (index?: number) => (state, dispatch) => {
         const { $from } = state.selection;
         const table = findTableCell($from);
         if (!table) return false;
 
+        const map = TableMap.get(table.node);
+        const colIndex = index !== undefined ? index : map.findCell($from.pos - table.pos).left;
+
         const tr = state.tr;
         // @ts-expect-error - CellSelection is not in the type definition but exists in JS
-        const selection = CellSelection.colSelection(tr.doc.resolve(table.pos), index);
+        const selection = CellSelection.colSelection(tr.doc.resolve(table.pos), colIndex);
         if (dispatch) dispatch(tr.setSelection(selection));
         return true;
       },
-      selectRow: (index: number) => (state, dispatch) => {
+      selectRow: (index?: number) => (state, dispatch) => {
         const { $from } = state.selection;
         const table = findTableCell($from);
         if (!table) return false;
 
+        const map = TableMap.get(table.node);
+        const rowIndex = index !== undefined ? index : map.findCell($from.pos - table.pos).top;
+
         const tr = state.tr;
         // @ts-expect-error - CellSelection is not in the type definition but exists in JS
-        const selection = CellSelection.rowSelection(tr.doc.resolve(table.pos), index);
+        const selection = CellSelection.rowSelection(tr.doc.resolve(table.pos), rowIndex);
         if (dispatch) dispatch(tr.setSelection(selection));
         return true;
       },
@@ -111,6 +120,33 @@ export const Table = Extension.create({
           dispatch(tr);
         }
         return !!tr;
+      },
+      smartDelete: () => (state, dispatch) => {
+        const { selection } = state;
+
+        if (selection instanceof CellSelection) {
+          if (selection.isRowSelection() && selection.isColSelection()) {
+            return deleteTable(state, dispatch);
+          }
+          if (selection.isRowSelection()) {
+            return deleteRow(state, dispatch);
+          }
+          if (selection.isColSelection()) {
+            return deleteColumn(state, dispatch);
+          }
+
+          if (dispatch) {
+            return deleteCellSelection(state, dispatch);
+          }
+          return true;
+        }
+
+        // Only delete the table if the table node itself is selected
+        if (selection instanceof NodeSelection && selection.node.type.name === "table") {
+          return deleteTable(state, dispatch);
+        }
+
+        return false;
       },
     };
   },
@@ -133,6 +169,8 @@ export const Table = Extension.create({
     return {
       Tab: () => goToNextCell(1),
       "Shift-Tab": () => goToNextCell(-1),
+      Backspace: () => this.editor.runCommand("smartDelete"),
+      Delete: () => this.editor.runCommand("smartDelete"),
     };
   },
 
