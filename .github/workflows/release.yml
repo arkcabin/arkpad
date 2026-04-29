@@ -53,10 +53,10 @@ jobs:
           fi
           
       - name: Publish to NPM
-        uses: changesets/action@v1
-        with:
-          publish: npx changeset publish
+        run: |
+          # Use native NPM workspaces publishing which is 100% OIDC compatible
+          # This will publish @arkpad/core and @arkpad/react while skipping private apps
+          npm publish --workspaces --if-present --provenance --access public
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
-          NPM_CONFIG_ACCESS: public
