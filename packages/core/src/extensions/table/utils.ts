@@ -114,3 +114,22 @@ export function getCellsInRow(tableStart: number, tableNode: Node, rowIndex: num
   }
   return [...new Set(cells)]; // Remove duplicates from colspans
 }
+
+/**
+ * Checks if the current selection is at the top or bottom boundary of a table.
+ */
+export function isAtTableBoundary($pos: ResolvedPos, direction: "up" | "down") {
+  const rect = getCellRect($pos);
+  if (!rect) return false;
+
+  if (direction === "up") {
+    return rect.top === 0;
+  }
+
+  if (direction === "down") {
+    // bottom is the index of the row after the cell
+    return rect.bottom === rect.map.height;
+  }
+
+  return false;
+}

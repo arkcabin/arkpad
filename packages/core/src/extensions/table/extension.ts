@@ -1,4 +1,5 @@
 import {
+  handlePaste,
   tableNodes,
   columnResizing,
   tableEditing,
@@ -20,11 +21,19 @@ import {
   fixTables,
   TableView,
   CellSelection,
+  TableMap,
 } from "prosemirror-tables";
-import { createTable, findTableCell, getCellRect } from "./utils";
+import {
+  createTable,
+  findTableCell,
+  getCellRect,
+  getTableMapContext,
+  getCellsInRow,
+  isAtTableBoundary,
+} from "./utils";
 import { Extension } from "../Extension";
 import { InputRule } from "prosemirror-inputrules";
-import { Plugin, NodeSelection } from "prosemirror-state";
+import { Plugin, NodeSelection, TextSelection } from "prosemirror-state";
 
 export const Table = Extension.create({
   name: "table",
@@ -41,7 +50,7 @@ export const Table = Extension.create({
   },
 
   addNodes() {
-    return tableNodes({
+    const nodes = tableNodes({
       tableGroup: "block",
       cellContent: "block+",
       cellAttributes: {
@@ -58,6 +67,67 @@ export const Table = Extension.create({
         },
       },
     });
+
+    // Inject A11y & Alignment to Table
+    if (nodes.table) {
+      nodes.table.attrs = {
+        ...(nodes.table.attrs || {}),
+        alignment: { default: "left" },
+      };
+
+      const originalParseDOM = nodes.table.parseDOM || [];
+      nodes.table.parseDOM = [
+        {
+          tag: "table[data-align]",
+          getAttrs: (dom: any) => ({
+            alignment: dom.getAttribute("data-align") || "left",
+          }),
+        },
+        ...originalParseDOM,
+      ];
+
+      const originalTableRender = nodes.table.renderHTML;
+      nodes.table.renderHTML = (props: any) => {
+        const render = originalTableRender(props);
+        if (Array.isArray(render)) {
+          const map = TableMap.get(props.node);
+          render[1] = {
+            ...render[1],
+            "data-align": props.node.attrs.alignment,
+            role: "grid",
+            "aria-rowcount": map.height,
+            "aria-colcount": map.width,
+          };
+        }
+        return render;
+      };
+    }
+
+    // Inject A11y to Row
+    if (nodes.table_row) {
+      const originalRowRender = nodes.table_row.renderHTML;
+      nodes.table_row.renderHTML = (props: any) => {
+        const render = originalRowRender(props);
+        if (Array.isArray(render)) {
+          render[1] = { ...render[1], role: "row" };
+        }
+        return render;
+      };
+    }
+
+    // Inject A11y to Cell
+    if (nodes.table_cell) {
+      const originalCellRender = nodes.table_cell.renderHTML;
+      nodes.table_cell.renderHTML = (props: any) => {
+        const render = originalCellRender(props);
+        if (Array.isArray(render)) {
+          render[1] = { ...render[1], role: "gridcell" };
+        }
+        return render;
+      };
+    }
+
+    return nodes;
   },
 
   addCommands() {
@@ -177,6 +247,58 @@ export const Table = Extension.create({
 
         return false;
       },
+      setTableAlignment: (alignment: "left" | "center" | "right") => (state, dispatch) => {
+        const context = getTableMapContext(state.selection.$from);
+        if (!context) return false;
+
+        if (dispatch) {
+          dispatch(
+            state.tr.setNodeMarkup(context.tablePos, undefined, {
+              ...context.tableNode.attrs,
+              alignment,
+            })
+          );
+        }
+        return true;
+      },
+      setZebraStriping:
+        (evenColor: string = "#f8fafc", oddColor: string | null = null) =>
+        (state, dispatch) => {
+          const context = getTableMapContext(state.selection.$from);
+          if (!context) return false;
+
+          const { tr } = state;
+          const map = context.map;
+
+          for (let i = 0; i < map.height; i++) {
+            // Logic fixed: Row 0 is the 1st row (Odd), Row 1 is the 2nd row (Even)
+            const isEven = (i + 1) % 2 === 0;
+            const color = isEven ? evenColor : oddColor;
+            const cellPositions = getCellsInRow(context.tableStart, context.tableNode, i);
+
+            cellPositions.forEach((pos) => {
+              const node = tr.doc.nodeAt(pos);
+              if (node && node.attrs.background !== color) {
+                tr.setNodeMarkup(pos, undefined, {
+                  ...node.attrs,
+                  background: color,
+                });
+              }
+            });
+          }
+
+          if (dispatch) dispatch(tr);
+          return true;
+        },
+      toggleHeader: (type: "row" | "column") => (state, dispatch) => {
+        const context = getTableMapContext(state.selection.$from);
+        if (!context) return false;
+
+        if (type === "row") {
+          return toggleHeaderRow(state, dispatch);
+        }
+        return toggleHeaderColumn(state, dispatch);
+      },
     };
   },
 
@@ -195,6 +317,86 @@ export const Table = Extension.create({
         appendTransaction: (transactions, oldState, newState) => {
           if (!transactions.some((tr) => tr.docChanged)) return null;
           return fixTables(newState);
+        },
+      }),
+      new Plugin({
+        props: {
+          handlePaste: (view, event, slice) => {
+            // Excel-style "Flood Fill" for CellSelection
+            if (view.state.selection instanceof CellSelection && slice.content.childCount === 1) {
+              const firstChild = slice.content.firstChild;
+              if (
+                firstChild &&
+                (firstChild.type.name === "table_cell" ||
+                  firstChild.type.name === "table_header_cell")
+              ) {
+                const tr = view.state.tr;
+                (view.state.selection as CellSelection).forEachCell((node, pos) => {
+                  tr.replaceWith(pos + 1, pos + node.nodeSize - 1, firstChild.content);
+                });
+                view.dispatch(tr);
+                return true;
+              }
+            }
+            return handlePaste(view, event, slice);
+          },
+        },
+      }),
+      new Plugin({
+        props: {
+          handleKeyDown: (view, event) => {
+            const { state, dispatch } = view;
+            const { selection, tr, schema } = state;
+
+            // Handle Table Escape via Arrows
+            if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+              const dir = event.key === "ArrowUp" ? "up" : "down";
+              if (isAtTableBoundary(selection.$from, dir)) {
+                const context = getTableMapContext(selection.$from);
+                if (!context) return false;
+
+                const pos =
+                  dir === "up" ? context.tablePos : context.tablePos + context.tableNode.nodeSize;
+                const nextNode = tr.doc.nodeAt(pos);
+
+                // If no node exists after/before, or if it's another table, insert a paragraph
+                if (!nextNode || nextNode.type.name === "table") {
+                  const paragraph = schema.nodes.paragraph;
+                  if (!paragraph) return false;
+
+                  tr.insert(pos, paragraph.createAndFill()!);
+                  const newSelection = TextSelection.create(tr.doc, pos + 1);
+                  tr.setSelection(newSelection);
+                  dispatch(tr.scrollIntoView());
+                  return true;
+                }
+              }
+            }
+
+            // Handle Table Escape via Enter in empty cell or at end of last cell
+            if (event.key === "Enter" && !event.shiftKey) {
+              const { $from } = selection;
+              const cell = findTableCell($from);
+              if (cell) {
+                const isAtEnd = $from.parentOffset === $from.parent.content.size;
+                const isEmpty = cell.node.textContent.length === 0;
+
+                if ((isEmpty || isAtEnd) && isAtTableBoundary($from, "down")) {
+                  const context = getTableMapContext($from);
+                  const paragraph = schema.nodes.paragraph;
+                  if (context && paragraph) {
+                    const pos = context.tablePos + context.tableNode.nodeSize;
+                    tr.insert(pos, paragraph.createAndFill()!);
+                    tr.setSelection(TextSelection.create(tr.doc, pos + 1));
+                    dispatch(tr.scrollIntoView());
+                    return true;
+                  }
+                }
+              }
+            }
+
+            return false;
+          },
         },
       }),
     ];
