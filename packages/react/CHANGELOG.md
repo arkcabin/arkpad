@@ -1,5 +1,13 @@
 # @arkpad/react
 
+## 1.6.12
+
+### Patch Changes
+
+- automated release
+- Updated dependencies
+  - @arkpad/core@1.6.12
+
 ## 1.6.11
 
 ### Patch Changes

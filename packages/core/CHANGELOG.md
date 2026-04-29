@@ -1,5 +1,11 @@
 # @arkpad/core
 
+## 1.6.12
+
+### Patch Changes
+
+- automated release
+
 ## 1.6.11
 
 ### Patch Changes
