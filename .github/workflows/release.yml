@@ -99,12 +99,27 @@ jobs:
       - name: Publish to NPM
         run: |
           # Use native NPM workspaces publishing with explicit registry and provenance
-          # This ensures OIDC is used for authentication
-          npm publish --workspaces --if-present --provenance --access public --registry https://registry.npmjs.org
+          # We use --if-present and we'll let npm handle the version check
+          # To avoid errors on existing versions, we can wrap it in a check
           
-          # Create and push git tags to keep GitHub in sync with NPM
-          npx changeset tag
-          git push --tags
+          # Only attempt to publish if the version is NOT on npm yet
+          for pkg_dir in packages/*; do
+            if [ -d "$pkg_dir" ] && [ -f "$pkg_dir/package.json" ]; then
+              PKG_NAME=$(node -p "require('./$pkg_dir/package.json').name")
+              PKG_VERSION=$(node -p "require('./$pkg_dir/package.json').version")
+              
+              if ! npm info "$PKG_NAME@$PKG_VERSION" >/dev/null 2>&1; then
+                echo "Publishing $PKG_NAME@$PKG_VERSION..."
+                npm publish "$pkg_dir" --provenance --access public --registry https://registry.npmjs.org
+              else
+                echo "$PKG_NAME@$PKG_VERSION is already published. Skipping."
+              fi
+            fi
+          done
+          
+          # Create and push git tags (only if they don't exist)
+          npx changeset tag || echo "Tags already exist"
+          git push --tags || echo "Tags already synced"
           
           # Convert the new tags into official GitHub Releases
           for tag in $(git tag --points-at HEAD); do
