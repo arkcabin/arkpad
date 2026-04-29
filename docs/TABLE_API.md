@@ -77,5 +77,15 @@ Target these in your `styles.css` for custom themes:
 ---
 
 ## 🧠 Performance Architecture
+---
+
+## 🗺️ Future Roadmap (The "S-Tier" Plan)
+
+To evolve the Arkpad Table Engine into the industry leader, the following features are planned for future implementation:
+
+1. **Excel-Style Tiled Paste**: Moving beyond "Flood Fill" to support pattern-repeating when pasting multi-cell selections into larger grids.
+2. **Visual Selection Headers**: Interactive gutters and "dots" at the start of each row/column for one-click selection (Google Sheets style).
+3. **Resize Tooltips**: Real-time floating badges displaying width (px/%) during column resizing for engineering-grade precision.
+4. **Smart Keyboard Navigation**: Fine-tuned "Arrow Flow" for moving between nested tables and text blocks.
 
 The extension uses **`TableMap`** for O(1) grid calculations. This ensures that even with thousands of cells and complex merges, actions like "Add Row" remain instantaneous without blocking the UI thread.

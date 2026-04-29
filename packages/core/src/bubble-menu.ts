@@ -209,12 +209,8 @@ export const BubbleMenu = (options: BubbleMenuPluginProps): Extension => {
         ),
         view: (view) => new BubbleMenuView({ ...options, view }),
         update: (view) => {
-          const pluginState = extension.editor
-            .getState()
-            .plugins.find((p) => p.spec.key === BubbleMenuPluginKey);
-          // @ts-ignore
-          const pluginView = view.pluginViews?.find(
-            (pv) => pv instanceof BubbleMenuView && pv.id === options.id
+          const pluginView = (view as any).pluginViews?.find(
+            (pv: any) => pv instanceof BubbleMenuView && pv.id === options.id
           );
           if (pluginView) {
             pluginView.update(view);
