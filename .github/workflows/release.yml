@@ -54,6 +54,9 @@ jobs:
           
           # 3. Publish to NPM using OIDC (No token required)
           npx changeset publish
+          
+          # 4. Push the new tags back to GitHub to keep everything in sync
+          git push --tags
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
