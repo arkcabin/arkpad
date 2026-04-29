@@ -1,5 +1,11 @@
 # @arkpad/core
 
+## 1.6.5
+
+### Patch Changes
+
+- fix(workflow): avoid YAML document separator at column 1
+
 ## 1.6.4
 
 ### Patch Changes
