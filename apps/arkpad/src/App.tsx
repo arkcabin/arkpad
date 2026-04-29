@@ -203,6 +203,9 @@ export function App() {
   const isHighlighterActive = useEditorState(editor, (s) => s.storage.highlighterTool?.active || s.isActive("highlight"));
   const isEraserActive = useEditorState(editor, (s) => s.storage.eraserTool?.active);
 
+  const canUndo = useEditorState(editor, (s) => s.canRunCommand("undo"));
+  const canRedo = useEditorState(editor, (s) => s.canRunCommand("redo"));
+
   // Expose editor to window for console debugging
   useEffect(() => {
     if (editor && typeof window !== "undefined") {
@@ -531,7 +534,7 @@ export function App() {
                   onClick={() => {
                     editor.runCommand("undo");
                   }}
-                  disabled={!editor.canRunCommand("undo")}
+                  disabled={!canUndo}
                   title="Undo (Mod-Z)"
                 >
                   <Undo2 className="w-4 h-4" />
@@ -540,7 +543,7 @@ export function App() {
                   onClick={() => {
                     editor.runCommand("redo");
                   }}
-                  disabled={!editor.canRunCommand("redo")}
+                  disabled={!canRedo}
                   title="Redo (Mod-Y)"
                 >
                   <Redo2 className="w-4 h-4" />
