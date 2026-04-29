@@ -156,21 +156,23 @@ body {
   margin-bottom: 1.25rem;
 }
 
-/* Inline Code - Refined and Minimalist */
+/* Polished Inline Code */
 .ProseMirror code {
-  background: rgba(148, 163, 184, 0.05);
-  color: inherit;
-  padding: 0.1rem 0.3rem;
-  border-radius: 4px;
-  font-size: 0.9em;
+  background: rgba(148, 163, 184, 0.1); /* Subtle light mode gray */
+  color: var(--brand); /* Brand color for distinction */
+  padding: 0.15rem 0.4rem;
+  border-radius: 6px;
+  font-size: 0.85em;
   font-family: var(--font-mono);
   font-weight: 500;
-  border: none;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  transition: all 0.2s ease;
 }
 
 .dark .ProseMirror code {
-  background: rgba(255, 255, 255, 0.05);
-  color: inherit;
+  background: rgba(255, 255, 255, 0.05); /* Subtle dark mode gray */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #a5b4fc; /* Softer brand color for dark mode */
 }
 
 /* Polished Code Blocks */
@@ -179,7 +181,7 @@ body {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid transparent;
-  color: var(--code-text);
+  color: var(--brand); /* Unified brand color for code text */
   font-family: var(--font-mono);
   padding: 1.25rem 1.5rem;
   border-radius: 12px;
@@ -188,6 +190,10 @@ body {
   overflow-x: auto;
   position: relative;
   transition: all 0.2s ease;
+}
+
+.dark .ProseMirror pre {
+  color: #a5b4fc; /* Unified dark mode brand tint for code blocks */
 }
 
 .ProseMirror pre:hover {
@@ -199,43 +205,32 @@ body {
 }
 
 .ProseMirror pre code {
-  color: inherit;
-  padding: 0;
+  color: inherit !important;
+  padding: 0 !important;
   background: none !important;
   border: none !important;
   font-size: 0.95rem;
 }
 
-
-.ProseMirror h2 {
-  font-family: var(--font-display);
-  font-size: 1.875rem;
-  font-weight: 600;
-  margin-top: 1.75rem;
-  margin-bottom: 1rem;
-  letter-spacing: -0.02em;
-}
-
-.ProseMirror p {
-  margin-bottom: 1.25rem;
-}
-
-/* Polished Code Blocks */
-.ProseMirror pre {
-  background: var(--code-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid transparent;
-  color: var(--code-text);
+/* Polished Inline Code */
+.ProseMirror code {
+  background: rgba(37, 99, 235, 0.1); /* Subtle brand tint background */
+  color: var(--brand); /* Brand color text */
+  padding: 0.15rem 0.4rem;
+  border-radius: 6px;
+  font-size: 0.85em;
   font-family: var(--font-mono);
-  padding: 1.25rem 1.5rem;
-  border-radius: 12px;
-  margin: 1.5rem 0;
-  line-height: 1.6;
-  overflow-x: auto;
-  position: relative;
+  font-weight: 500;
+  border: 1px solid rgba(37, 99, 235, 0.2);
   transition: all 0.2s ease;
 }
+
+.dark .ProseMirror code {
+  background: rgba(165, 180, 252, 0.1); /* Subtle dark mode brand tint background */
+  border: 1px solid rgba(165, 180, 252, 0.2);
+  color: #a5b4fc; /* Unified dark mode brand tint for inline code */
+}
+
 
 .ProseMirror pre:hover {
   border-color: rgba(255, 255, 255, 0.1);
@@ -246,30 +241,13 @@ body {
 }
 
 .ProseMirror pre code {
-  color: inherit;
-  padding: 0;
-  background: none;
-  border: none;
+  color: inherit !important;
+  padding: 0 !important;
+  background: none !important;
+  border: none !important;
   font-size: 0.95rem;
 }
 
-/* Inline Code - Refined and Minimalist */
-.ProseMirror code {
-  background: rgba(148, 163, 184, 0.05);
-  color: inherit;
-  padding: 0.1rem 0.3rem;
-  border-radius: 4px;
-  font-size: 0.9em;
-  font-family: var(--font-mono);
-  font-weight: 500;
-  border: none;
-}
-
-.dark .ProseMirror code {
-  background: transparent !important;
-  border: none !important;
-  color: inherit;
-}
 
 
 /* Dropdown Simulation */
