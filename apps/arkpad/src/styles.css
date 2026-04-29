@@ -174,7 +174,7 @@ body {
 
 .task-item {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 0.75rem;
   margin-bottom: 0.5rem;
   list-style-type: none !important;
@@ -188,14 +188,14 @@ body {
   height: 1.75em;
   /* Match line height exactly */
   width: 24px;
-  transform: translateY(-0.1rem);
-  /* Nudge up by 1px */
 }
 
 .task-item>[data-node-view-content] {
   flex: 1;
   min-width: 0;
   min-height: 1.75em;
+  display: flex;
+  align-items: center;
 }
 
 .task-item>[data-node-view-content] p {

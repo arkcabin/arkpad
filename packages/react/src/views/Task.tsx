@@ -31,6 +31,6 @@ export const TaskView: NodeViewConstructor = createReactNodeView({
   name: "taskItem",
   component: TaskItemComponent,
   tagName: "li",
-  className: "task-item flex items-start gap-2 list-none py-0 leading-none",
+  className: "task-item flex items-center gap-2 list-none py-0 leading-none",
   contentDOM: true,
 });
