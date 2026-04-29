@@ -1,5 +1,11 @@
 # @arkpad/core
 
+## 1.6.8
+
+### Patch Changes
+
+- feat(workflow): switch to OIDC (Trusted Publishing) for NPM
+
 ## 1.6.7
 
 ### Patch Changes
