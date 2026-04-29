@@ -1,8 +1,8 @@
 import { EditorState, Plugin, PluginKey } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
 import { CellSelection } from "prosemirror-tables";
-import { Extension } from "./extensions/Extension";
-import { ArkpadEditorAPI } from "./types";
+import { Extension } from "@arkpad/shared";
+import { ArkpadEditorAPI } from "@arkpad/shared";
 
 export interface BubbleMenuPluginProps {
   id?: string;

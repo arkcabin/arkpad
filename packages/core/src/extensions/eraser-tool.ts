@@ -1,4 +1,4 @@
-import { Extension } from "./Extension";
+import { Extension } from "@arkpad/shared";
 import { Plugin, PluginKey } from "prosemirror-state";
 
 export interface EraserToolOptions {

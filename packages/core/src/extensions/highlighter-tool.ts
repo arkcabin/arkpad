@@ -1,5 +1,5 @@
 import { Plugin, PluginKey } from "prosemirror-state";
-import { Extension } from "./Extension";
+import { Extension } from "@arkpad/shared";
 
 export interface HighlighterToolOptions {
   /**

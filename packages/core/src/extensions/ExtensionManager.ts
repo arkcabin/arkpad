@@ -1,4 +1,4 @@
-import { ArkpadExtension, ArkpadCommandRegistry, ArkpadCommand } from "../types";
+import { ArkpadExtension, ArkpadCommandRegistry, ArkpadCommand } from "@arkpad/shared";
 import { type Schema } from "prosemirror-model";
 import { Plugin, EditorState, Transaction } from "prosemirror-state";
 import { keymap } from "prosemirror-keymap";

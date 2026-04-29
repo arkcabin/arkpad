@@ -1,4 +1,4 @@
-import { Extension } from "./Extension";
+import { Extension } from "@arkpad/shared";
 
 export interface CharacterCountOptions {
   limit?: number;

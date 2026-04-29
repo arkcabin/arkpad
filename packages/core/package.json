@@ -62,7 +62,9 @@
     "prosemirror-view": "^1.41.8"
   },
   "peerDependencies": {
-    "@arkpad/extension-table": "*"
+    "@arkpad/extension-table": "*",
+    "@arkpad/extension-marks": "*",
+    "@arkpad/shared": "*"
   },
   "devDependencies": {
     "@types/prosemirror-tables": "^0.8.0"

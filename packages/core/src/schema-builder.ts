@@ -1,6 +1,6 @@
 import { Schema } from "prosemirror-model";
 import { arkpadSchema } from "./schema";
-import { ArkpadExtension } from "./types";
+import { ArkpadExtension } from "@arkpad/shared";
 
 /**
  * SchemaBuilder dynamically constructs a ProseMirror schema from Arkpad extensions.
@@ -18,20 +18,20 @@ export class SchemaBuilder {
    */
   build(): Schema {
     // Start with the base specs from arkpadSchema
-    let nodes = (arkpadSchema.spec.nodes as any);
-    let marks = (arkpadSchema.spec.marks as any);
+    let nodes = arkpadSchema.spec.nodes as any;
+    let marks = arkpadSchema.spec.marks as any;
 
     // Merge nodes and marks from extensions
-    this.extensions.forEach(ext => {
+    this.extensions.forEach((ext) => {
       if (ext.addNodes) {
         const extNodes = ext.addNodes();
-        Object.keys(extNodes).forEach(name => {
+        Object.keys(extNodes).forEach((name) => {
           nodes = nodes.update(name, extNodes[name]);
         });
       }
       if (ext.addMarks) {
         const extMarks = ext.addMarks();
-        Object.keys(extMarks).forEach(name => {
+        Object.keys(extMarks).forEach((name) => {
           marks = marks.update(name, extMarks[name]);
         });
       }
@@ -73,10 +73,10 @@ export class SchemaBuilder {
             },
             toDOM: (node: any) => {
               const dom = nodeSpec.toDOM(node);
-              
+
               // Apply global attributes to the DOM
               if (dom && dom[1]) {
-                Object.keys(global.attributes || {}).forEach(key => {
+                Object.keys(global.attributes || {}).forEach((key) => {
                   const attr = global.attributes[key];
                   if (attr && attr.renderHTML) {
                     const rendered = attr.renderHTML(node.attrs);
@@ -84,14 +84,14 @@ export class SchemaBuilder {
                       Object.assign(dom[1], rendered);
                     }
                   } else if (node.attrs[key] !== undefined && node.attrs[key] !== null) {
-                     // Default: add as attribute if not null
-                     dom[1][key] = node.attrs[key];
+                    // Default: add as attribute if not null
+                    dom[1][key] = node.attrs[key];
                   }
                 });
               }
 
               return dom;
-            }
+            },
           });
         }
       });
@@ -122,7 +122,7 @@ export class SchemaBuilder {
             },
             renderHTML: (mark: any) => {
               const dom = markSpec.renderHTML(mark);
-              
+
               if (dom && dom[1]) {
                 Object.entries(global.attributes || {}).forEach(([key, attr]: [string, any]) => {
                   if (attr && attr.renderHTML) {
@@ -137,7 +137,7 @@ export class SchemaBuilder {
               }
 
               return dom;
-            }
+            },
           });
         }
       });

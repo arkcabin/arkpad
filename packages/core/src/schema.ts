@@ -1,6 +1,7 @@
 import { Schema } from "prosemirror-model";
 import { schema as basicSchema } from "prosemirror-schema-basic";
 import { addListNodes } from "prosemirror-schema-list";
+import { getAlignmentAttr } from "./utils";
 
 const nodes = addListNodes(
   basicSchema.spec.nodes
@@ -12,14 +13,16 @@ const nodes = addListNodes(
       parseDOM: [
         {
           tag: "p",
-          getAttrs: (dom: HTMLElement) => ({
-            align: dom.style.textAlign || dom.getAttribute("data-align") || "left",
-          }),
+          getAttrs: (dom: HTMLElement) => getAlignmentAttr(dom),
         },
       ],
       toDOM(node) {
         const { align } = node.attrs;
-        return ["p", { "data-align": align, style: align !== "left" ? `text-align: ${align}` : null }, 0];
+        return [
+          "p",
+          { "data-align": align, style: align !== "left" ? `text-align: ${align}` : null },
+          0,
+        ];
       },
     })
     .append({
@@ -29,12 +32,12 @@ const nodes = addListNodes(
         group: "block",
         defining: true,
         parseDOM: [
-          { tag: "h1", getAttrs: (dom: HTMLElement) => ({ level: 1, align: dom.style.textAlign || dom.getAttribute("data-align") || "left" }) },
-          { tag: "h2", getAttrs: (dom: HTMLElement) => ({ level: 2, align: dom.style.textAlign || dom.getAttribute("data-align") || "left" }) },
-          { tag: "h3", getAttrs: (dom: HTMLElement) => ({ level: 3, align: dom.style.textAlign || dom.getAttribute("data-align") || "left" }) },
-          { tag: "h4", getAttrs: (dom: HTMLElement) => ({ level: 4, align: dom.style.textAlign || dom.getAttribute("data-align") || "left" }) },
-          { tag: "h5", getAttrs: (dom: HTMLElement) => ({ level: 5, align: dom.style.textAlign || dom.getAttribute("data-align") || "left" }) },
-          { tag: "h6", getAttrs: (dom: HTMLElement) => ({ level: 6, align: dom.style.textAlign || dom.getAttribute("data-align") || "left" }) },
+          { tag: "h1", getAttrs: (dom: HTMLElement) => ({ level: 1, ...getAlignmentAttr(dom) }) },
+          { tag: "h2", getAttrs: (dom: HTMLElement) => ({ level: 2, ...getAlignmentAttr(dom) }) },
+          { tag: "h3", getAttrs: (dom: HTMLElement) => ({ level: 3, ...getAlignmentAttr(dom) }) },
+          { tag: "h4", getAttrs: (dom: HTMLElement) => ({ level: 4, ...getAlignmentAttr(dom) }) },
+          { tag: "h5", getAttrs: (dom: HTMLElement) => ({ level: 5, ...getAlignmentAttr(dom) }) },
+          { tag: "h6", getAttrs: (dom: HTMLElement) => ({ level: 6, ...getAlignmentAttr(dom) }) },
         ],
         toDOM(node) {
           const { level, align } = node.attrs;
@@ -61,13 +64,13 @@ const nodes = addListNodes(
         code: true,
         defining: true,
         attrs: { language: { default: "" }, align: { default: "left" } },
-        parseDOM: [{ 
-          tag: "pre", 
-          preserveWhitespace: "full",
-          getAttrs: (dom: HTMLElement) => ({
-            align: dom.style.textAlign || dom.getAttribute("data-align") || "left",
-          }),
-        }],
+        parseDOM: [
+          {
+            tag: "pre",
+            preserveWhitespace: "full",
+            getAttrs: (dom: HTMLElement) => getAlignmentAttr(dom),
+          },
+        ],
         toDOM(node) {
           const { align } = node.attrs;
           return [
@@ -182,85 +185,6 @@ const nodes = addListNodes(
   "block"
 );
 
-const marks = basicSchema.spec.marks.append({
-  strong: {
-    parseDOM: [
-      { tag: "strong" },
-      { tag: "b", getAttrs: (node: HTMLElement) => node.style.fontWeight !== "normal" && null },
-      {
-        style: "font-weight",
-        getAttrs: (value: string) => /^(bold(er)?|[5-9]\d{2,})$/.test(value) && null,
-      },
-    ],
-    toDOM() {
-      return ["strong", 0];
-    },
-  },
-  em: {
-    parseDOM: [{ tag: "i" }, { tag: "em" }, { style: "font-style=italic" }],
-    toDOM() {
-      return ["em", 0];
-    },
-  },
-  code: {
-    parseDOM: [{ tag: "code" }],
-    toDOM() {
-      return ["code", 0];
-    },
-  },
-  strike: {
-    parseDOM: [{ tag: "s" }, { tag: "strike" }, { style: "text-decoration=line-through" }],
-    toDOM() {
-      return ["s", 0];
-    },
-  },
-  underline: {
-    parseDOM: [{ tag: "u" }, { style: "text-decoration=underline" }],
-    toDOM() {
-      return ["u", 0];
-    },
-  },
-  link: {
-    attrs: {
-      href: {},
-      target: { default: null },
-      title: { default: null },
-    },
-    inclusive: false,
-    parseDOM: [
-      {
-        tag: "a[href]",
-        getAttrs(dom: HTMLElement) {
-          return {
-            href: dom.getAttribute("href"),
-            target: dom.getAttribute("target"),
-            title: dom.getAttribute("title"),
-          };
-        },
-      },
-    ],
-    toDOM(node) {
-      return ["a", node.attrs, 0];
-    },
-  },
-  superscript: {
-    parseDOM: [{ tag: "sup" }],
-    toDOM() {
-      return ["sup", 0];
-    },
-  },
-  subscript: {
-    parseDOM: [{ tag: "sub" }],
-    toDOM() {
-      return ["sub", 0];
-    },
-  },
-  highlight: {
-    parseDOM: [{ tag: "mark" }],
-    toDOM() {
-      return ["mark", { "data-type": "highlight" }, 0];
-    },
-  },
-});
+const marks = basicSchema.spec.marks;
 
 export const arkpadSchema = new Schema({ nodes, marks });

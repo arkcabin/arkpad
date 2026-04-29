@@ -17,7 +17,8 @@ import {
   createSubscript,
   createHighlight,
   createClearFormatting,
-} from "./marks";
+  // @ts-expect-error - external extension package
+} from "@arkpad/extension-marks";
 import {
   createHeading,
   createBlockquote,
@@ -39,7 +40,7 @@ import { HighlighterTool } from "./highlighter-tool";
 import { EraserTool } from "./eraser-tool";
 // @ts-expect-error - external extension package
 import { Table } from "@arkpad/extension-table";
-import { ArkpadExtension as Extension } from "../types";
+import { ArkpadExtension as Extension } from "@arkpad/shared";
 
 /**
  * Essentials - A bundled collection of the most common and essential editor extensions.
@@ -91,7 +92,8 @@ export function createEssentials(): Extension[] {
 export const StarterKit = Essentials;
 
 export * from "./base";
-export * from "./marks";
+// @ts-expect-error - external extension package
+export * from "@arkpad/extension-marks";
 export * from "./nodes";
 export * from "./lists";
 export * from "./alignment";

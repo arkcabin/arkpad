@@ -1,6 +1,6 @@
 import { EditorState, Plugin, PluginKey } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
-import { Extension } from "./extensions/Extension";
+import { Extension } from "@arkpad/shared";
 
 export interface FloatingMenuPluginProps {
   editor: any;

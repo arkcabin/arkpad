@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   ArkpadExtension,
   ExtensionConfig,
   ExtensionContext,
   ArkpadCommandRegistry,
   ArkpadEditorAPI,
-} from "../types";
+} from "./types";
 import { type Schema } from "prosemirror-model";
 import { Plugin } from "prosemirror-state";
 

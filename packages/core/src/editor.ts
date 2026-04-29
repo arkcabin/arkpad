@@ -2,7 +2,6 @@ import { DOMSerializer } from "prosemirror-model";
 import { EditorState, TextSelection, Transaction, Plugin } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
 import { ExtensionManager } from "./extensions/ExtensionManager";
-import { Extension } from "./extensions/Extension";
 import { createEssentials } from "./extensions/index";
 import {
   isMarkActive,
@@ -13,7 +12,7 @@ import {
 import { defaultMarkdownSerializer } from "./extensions/markdown/serializer";
 import { CommandManager } from "./commands";
 import { SchemaBuilder } from "./schema-builder";
-import type {
+import {
   ArkpadCommandProxy,
   ArkpadContent,
   ArkpadDocJSON,
@@ -22,7 +21,8 @@ import type {
   ArkpadUpdatePayload,
   ChainedCommands,
   SearchResult,
-} from "./types";
+  ArkpadExtension as Extension,
+} from "@arkpad/shared";
 import { parseContent, resolveEditorOptions } from "./utils";
 
 import { highlighterToolPluginKey } from "./extensions/highlighter-tool";

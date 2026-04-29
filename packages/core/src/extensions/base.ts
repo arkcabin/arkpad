@@ -3,7 +3,7 @@ import { placeholder as createPlaceholderPlugin } from "prosemirror-placeholder"
 import { setBlockType } from "prosemirror-commands";
 import { TextSelection, Plugin } from "prosemirror-state";
 import { arkpadSchema } from "../schema";
-import { Extension } from "./Extension";
+import { Extension } from "@arkpad/shared";
 
 /**
  * Ensures there is always a trailing paragraph at the end of the document.

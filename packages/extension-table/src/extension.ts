@@ -32,7 +32,7 @@ import {
   getCellsInRow,
   isAtTableBoundary,
 } from "./utils";
-import { Extension, type Dispatch } from "@arkpad/core";
+import { Extension, type Dispatch } from "@arkpad/shared";
 import { type EditorState } from "prosemirror-state";
 import { InputRule } from "prosemirror-inputrules";
 import { Plugin, NodeSelection, TextSelection } from "prosemirror-state";

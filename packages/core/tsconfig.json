@@ -4,8 +4,12 @@
     "outDir": "dist",
     "rootDir": "src",
     "noImplicitAny": false,
-    "composite": true
+    "composite": true,
+    "baseUrl": ".",
+    "paths": {
+      "@arkpad/shared": ["../shared/src/index"]
+    }
   },
   "include": ["src"],
-  "references": [{ "path": "../extension-table" }]
+  "references": [{ "path": "../shared" }, { "path": "../extension-table" }]
 }

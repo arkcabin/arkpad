@@ -1,6 +1,6 @@
 import { sinkListItem, liftListItem, splitListItem } from "prosemirror-schema-list";
 import { wrappingInputRule } from "prosemirror-inputrules";
-import { Extension } from "./Extension";
+import { Extension } from "@arkpad/shared";
 import { type Node as PMNode } from "prosemirror-model";
 import { toggleList } from "./utils";
 

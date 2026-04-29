@@ -1,7 +1,7 @@
 {
-  "name": "@arkpad/extension-table",
+  "name": "@arkpad/extension-marks",
   "version": "1.6.0",
-  "description": "Table extension for Arkpad.",
+  "description": "Standard marks for Arkpad.",
   "type": "module",
   "exports": {
     ".": {
@@ -12,10 +12,6 @@
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "sideEffects": false,
-  "files": [
-    "dist"
-  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit"
@@ -26,12 +22,9 @@
   },
   "dependencies": {
     "@arkpad/shared": "^1.6.0",
+    "prosemirror-commands": "^1.7.1",
     "prosemirror-model": "^1.25.4",
     "prosemirror-state": "^1.4.4",
-    "prosemirror-tables": "^1.8.5",
-    "prosemirror-view": "^1.41.8"
-  },
-  "devDependencies": {
-    "@types/prosemirror-tables": "^0.8.0"
+    "prosemirror-inputrules": "^1.5.1"
   }
 }

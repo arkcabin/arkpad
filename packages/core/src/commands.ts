@@ -1,7 +1,7 @@
 import { EditorState, Transaction, TextSelection } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
 import { Slice, Schema } from "prosemirror-model";
-import { ChainedCommands, ArkpadCommandRegistry, ArkpadContent } from "./types";
+import { ChainedCommands, ArkpadCommandRegistry, ArkpadContent } from "@arkpad/shared";
 import { parseContent } from "./utils";
 
 /**

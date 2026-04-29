@@ -59,7 +59,32 @@ To prevent issues when multiple packages (like a `starter-kit` and a standalone 
 
 ---
 
+### 🎁 The "Gift Box" Analogy
+To simplify how packages and kits interact:
+- **The Starter Kit** is a **Gift Box**.
+- **The Bold Extension** is a **Chocolate** inside that box.
+- If a user buys the Gift Box, they **implicitly** have the Chocolate. They don't need to install it again.
+- If a user *only* wants a Chocolate, they can install the standalone Extension package.
+
+### 🎨 Pro Export Convention
+To ensure the best Developer Experience (DX), all extension packages should follow this export pattern:
+
+```typescript
+// Internal factory function
+function createBold() { ... }
+
+// Named export for direct use
+export const Bold = createBold();
+
+// Factory export for custom configuration (if needed)
+export { createBold };
+```
+This allows users to simply `import { Bold } from '@arkpad/extension-bold'` without needing to call functions in their config array.
+
+---
+
 ## 🧩 Extension Strategy
+
 
 Each extension package is responsible for its own:
 - **Node/Mark Definitions**: Schema, `parseHTML`, and `renderHTML`.

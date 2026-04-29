@@ -1,5 +1,9 @@
 import { DOMParser as PMDOMParser, Node as PMNode, type Schema } from "prosemirror-model";
-import type { ArkpadContent, ArkpadEditorOptions, ResolvedArkpadEditorOptions } from "./types";
+import type {
+  ArkpadContent,
+  ArkpadEditorOptions,
+  ResolvedArkpadEditorOptions,
+} from "@arkpad/shared";
 import { markdownToHtml } from "./extensions/markdown/parser";
 
 /**
@@ -48,5 +52,14 @@ export function resolveEditorOptions(options: ArkpadEditorOptions): ResolvedArkp
     onPaste: options.onPaste,
     onInterceptor: options.onInterceptor,
     onDestroy: options.onDestroy,
+  };
+}
+
+/**
+ * Shared helper for parsing common DOM attributes like alignment.
+ */
+export function getAlignmentAttr(dom: HTMLElement): { align: string } {
+  return {
+    align: dom.style.textAlign || dom.getAttribute("data-align") || "left",
   };
 }

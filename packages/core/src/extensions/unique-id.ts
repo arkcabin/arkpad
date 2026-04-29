@@ -2,7 +2,7 @@ import { nanoid } from "nanoid";
 import { Plugin, PluginKey, Transaction } from "prosemirror-state";
 import { Node as PMNode } from "prosemirror-model";
 import { EditorView } from "prosemirror-view";
-import { Extension } from "./Extension";
+import { Extension } from "@arkpad/shared";
 
 export interface UniqueIdOptions {
   attributeName: string;
