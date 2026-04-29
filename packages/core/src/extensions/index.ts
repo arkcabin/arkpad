@@ -37,6 +37,7 @@ import { createTextAlign } from "./alignment";
 import { createUniqueId } from "./unique-id";
 import { HighlighterTool } from "./highlighter-tool";
 import { EraserTool } from "./eraser-tool";
+import { Table } from "./table";
 import { ArkpadExtension as Extension } from "../types";
 
 /**
@@ -75,6 +76,7 @@ export const Essentials: Extension[] = [
   createUniqueId(),
   HighlighterTool,
   EraserTool,
+  Table.configure({ resizable: true }),
 ];
 
 /**

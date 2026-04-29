@@ -441,8 +441,8 @@ mark,
 
 .ProseMirror table {
   border-collapse: collapse;
-  table-layout: fixed !important;
-  width: 100% !important;
+  table-layout: fixed;
+  width: 100%;
   margin: 2rem 0;
   border: 1px solid var(--border);
   background-color: var(--bg-editor);
@@ -456,8 +456,8 @@ mark,
   vertical-align: top;
   box-sizing: border-box;
   position: relative;
-  word-break: break-word; /* Prevents cell expansion bug */
-  overflow: hidden; /* Required for ProseMirror column sizing */
+  word-break: break-word;
+  overflow: visible !important;
 }
 
 .ProseMirror th {
@@ -475,13 +475,14 @@ mark,
   position: absolute;
   right: -2px;
   top: 0;
-  bottom: -1px;
+  bottom: 0;
   width: 4px;
   z-index: 20;
   background-color: #3b82f6;
-  pointer-events: none;
+  pointer-events: auto !important; /* Ensure it can be dragged */
   opacity: 0;
   transition: opacity 0.2s;
+  cursor: col-resize;
 }
 
 .ProseMirror table:hover .column-resize-handle {
@@ -512,68 +513,6 @@ mark,
 
 .ProseMirror col {
   display: table-column;
-}
-
-.ProseMirror td,
-.ProseMirror th {
-  min-width: 1em;
-  border: 0.5px solid var(--border);
-  padding: 10px 14px;
-  vertical-align: middle;
-  box-sizing: border-box;
-  position: relative;
-  transition: background-color 0.1s ease;
-  color: var(--text-main);
-  font-size: 0.95rem;
-}
-
-.ProseMirror th {
-  font-weight: 600;
-  text-transform: none;
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  background-color: rgba(var(--brand-rgb, 37, 99, 235), 0.03);
-  border-bottom: 1px solid var(--border);
-  padding-top: 8px;
-  padding-bottom: 8px;
-}
-
-.dark .ProseMirror th {
-  background-color: rgba(255, 255, 255, 0.03);
-}
-
-.ProseMirror td:hover {
-  background-color: rgba(var(--brand-rgb, 37, 99, 235), 0.02);
-}
-
-/* Cell Selection Style */
-.ProseMirror .selectedCell:after {
-  z-index: 2;
-  position: absolute;
-  content: "";
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  background: rgba(37, 99, 235, 0.12);
-  border: 1px solid #3b82f6;
-  pointer-events: none;
-}
-
-/* Column Resizer Handle */
-.ProseMirror .column-resize-handle {
-  position: absolute;
-  right: -2px;
-  top: 0;
-  bottom: 0;
-  width: 4px;
-  background-color: #3b82f6;
-  z-index: 20;
-  pointer-events: none;
-}
-
-.resize-cursor {
-  cursor: col-resize;
 }
 
 /* Internal Paragraph Spacing */
