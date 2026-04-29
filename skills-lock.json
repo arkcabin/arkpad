@@ -16,6 +16,12 @@
       "sourceType": "github",
       "computedHash": "de138e83b74a1d16fd1c40f0261e9963b823e6ee70b453541e098bbb5f86bfb9"
     },
+    "npm-publish": {
+      "source": "b-open-io/prompts",
+      "sourceType": "github",
+      "skillPath": "skills/npm-publish/SKILL.md",
+      "computedHash": "74074689edec9c204e5c702bcdb856bccc1fabb12efbb6337d8b0c83615d840c"
+    },
     "tiptap": {
       "source": "ueberdosis/tiptap",
       "sourceType": "github",
