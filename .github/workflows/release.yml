@@ -26,6 +26,7 @@ jobs:
         with:
           node-version: 20
           cache: npm
+          registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
         run: npm ci
@@ -80,12 +81,8 @@ jobs:
       - name: Publish to NPM
         if: steps.versioning.outputs.HAS_CHANGES == 'true'
         run: |
-          # Verify npm version and environment
-          npm -v
-          
           # Publish using OIDC (Trusted Publishing)
-          # We use --provenance to trigger the OIDC handshake
-          npm run release -- --provenance
+          npm run release
           git push --tags
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
