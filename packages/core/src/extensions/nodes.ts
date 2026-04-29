@@ -75,6 +75,39 @@ export function createCodeBlock(): Extension {
         return toggleBlock(state.schema.nodes.codeBlock!)(state, dispatch);
       },
     }),
+    addKeyboardShortcuts: (schema: Schema) => ({
+      Enter: (state, dispatch) => {
+        const { selection, tr } = state;
+        const { $from, empty } = selection;
+
+        if (!empty || $from.parent.type !== schema.nodes.codeBlock) {
+          return false;
+        }
+
+        const isAtEnd = $from.parentOffset === $from.parent.content.size;
+        const textBefore = $from.parent.textContent.slice(0, $from.parentOffset);
+        
+        // If the line is empty (it ends with a newline and we are at the end)
+        // or if it's the second Enter on an empty line.
+        if (isAtEnd && textBefore.endsWith("\n")) {
+          if (dispatch) {
+            // Remove the newline that triggered this breakout
+            tr.delete($from.pos - 1, $from.pos);
+            
+            const paragraph = schema.nodes.paragraph!;
+            const posAfter = $from.after();
+            
+            tr.insert(posAfter, paragraph.create());
+            tr.setSelection(state.selection.constructor.near(tr.doc.resolve(posAfter + 1)));
+            dispatch(tr.scrollIntoView());
+          }
+          return true;
+        }
+
+        return false;
+      },
+    }),
+
     addInputRules: (schema: Schema) => [textblockTypeInputRule(/^```$/, schema.nodes.codeBlock!)],
   });
 }

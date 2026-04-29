@@ -1,9 +1,45 @@
 import { history, undo, redo } from "prosemirror-history";
 import { placeholder as createPlaceholderPlugin } from "prosemirror-placeholder";
 import { setBlockType } from "prosemirror-commands";
-import { TextSelection } from "prosemirror-state";
+import { TextSelection, Plugin } from "prosemirror-state";
 import { arkpadSchema } from "../schema";
 import { Extension } from "./Extension";
+
+/**
+ * Ensures there is always a trailing paragraph at the end of the document.
+ */
+function trailingNodePlugin() {
+  return new Plugin({
+    appendTransaction: (transactions, oldState, newState) => {
+      const { doc, schema } = newState;
+      const lastNode = doc.lastChild;
+      const paragraph = schema.nodes.paragraph!;
+
+      // Don't act if the last node is already a paragraph or if doc is empty
+      if (!lastNode || lastNode.type === paragraph) {
+        return null;
+      }
+
+      // We only want to append a paragraph if the last node is a structural block 
+      // that users might get "stuck" in (like codeBlock, heading, list).
+      const structuralTypes = [
+        schema.nodes.codeBlock,
+        schema.nodes.heading,
+        schema.nodes.bulletList,
+        schema.nodes.orderedList,
+        schema.nodes.taskList,
+        schema.nodes.blockquote,
+      ].filter(Boolean);
+
+      if (structuralTypes.includes(lastNode.type)) {
+        const tr = newState.tr;
+        return tr.insert(doc.content.size, paragraph.create());
+      }
+
+      return null;
+    },
+  });
+}
 
 export function createDocument(): Extension {
   return Extension.create({
@@ -39,6 +75,7 @@ export function createDocument(): Extension {
         return true;
       },
     }),
+    addProseMirrorPlugins: () => [trailingNodePlugin()],
   });
 }
 
