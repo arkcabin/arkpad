@@ -1,5 +1,13 @@
 # @arkpad/react
 
+## 1.6.9
+
+### Patch Changes
+
+- fix(workflow): explicitly pass --provenance to changeset publish
+- Updated dependencies
+  - @arkpad/core@1.6.9
+
 ## 1.6.8
 
 ### Patch Changes

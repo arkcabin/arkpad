@@ -1,5 +1,11 @@
 # @arkpad/core
 
+## 1.6.9
+
+### Patch Changes
+
+- fix(workflow): explicitly pass --provenance to changeset publish
+
 ## 1.6.8
 
 ### Patch Changes
