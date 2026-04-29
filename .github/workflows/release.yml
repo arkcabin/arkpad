@@ -42,7 +42,17 @@ jobs:
 
       - name: Version Packages
         run: |
-          # 1. Bump versions locally based on changesets
+          # 1. If no changesets exist, create an automated patch changeset
+          if [ ! -f .changeset/*.md ] || [ "$(ls -A .changeset/*.md 2>/dev/null | grep -v 'README.md')" = "" ]; then
+            echo "---" > .changeset/automated-release.md
+            echo '"@arkpad/core": patch' >> .changeset/automated-release.md
+            echo '"@arkpad/react": patch' >> .changeset/automated-release.md
+            echo "---" >> .changeset/automated-release.md
+            echo "" >> .changeset/automated-release.md
+            echo "automated release" >> .changeset/automated-release.md
+          fi
+
+          # 2. Bump versions locally based on changesets
           npx changeset version
           
           # 2. Commit and push version bumps back to main (if any)
