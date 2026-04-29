@@ -38,13 +38,25 @@ jobs:
       - name: Preflight Build
         run: npm run build
 
-      - name: Create Release PR or Publish to NPM
-        uses: changesets/action@v1
-        with:
-          publish: npm run release
-          version: npm run version-packages
-          commit: "chore: automated versioning"
-          title: "chore: automated versioning"
+      - name: Version and Publish
+        run: |
+          # 1. Bump versions locally based on changesets
+          npx changeset version
+          
+          # 2. Commit and push version bumps back to main (if any)
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          if [[ -n "$(git status --porcelain)" ]]; then
+            git add .
+            git commit -m "chore: version packages [skip ci]"
+            git push
+          fi
+          
+          # 3. Publish to NPM using OIDC (No token required)
+          npx changeset publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
+          NPM_CONFIG_ACCESS: public
+          NPM_CONFIG_REGISTRY: https://registry.npmjs.org
