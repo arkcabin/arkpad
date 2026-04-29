@@ -49,6 +49,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "nanoid": "^5.0.0",
     "prosemirror-commands": "^1.7.1",
     "prosemirror-history": "^1.5.0",
     "prosemirror-inputrules": "^1.5.1",
@@ -58,7 +59,10 @@
     "prosemirror-schema-basic": "^1.2.4",
     "prosemirror-schema-list": "^1.5.1",
     "prosemirror-state": "^1.4.4",
-    "prosemirror-view": "^1.41.8",
-    "nanoid": "^5.0.0"
+    "prosemirror-tables": "^1.8.5",
+    "prosemirror-view": "^1.41.8"
+  },
+  "devDependencies": {
+    "@types/prosemirror-tables": "^0.8.0"
   }
 }

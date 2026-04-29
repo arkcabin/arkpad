@@ -96,4 +96,5 @@ export * from "./unique-id";
 export * from "./highlighter-tool";
 export * from "./eraser-tool";
 export * from "./utils";
+export * from "./table";
 export { CharacterCount } from "./character-count";
