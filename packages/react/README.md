@@ -1,19 +1,6 @@
 # @arkpad/react
 
-**Premium React Components & Hooks for Arkpad.**
-
-`@arkpad/react` provides the official React integration for the Arkpad ecosystem. It features optimized hooks and components designed to bring the power of ProseMirror into your React application with zero friction.
-
----
-
-## ✨ Features
-
-- 🪝 **`useArkpadEditor`** — A powerful hook that manages the editor lifecycle and reactive state.
-- 🖼️ **`ArkpadEditorContent`** — A high-performance component for rendering your editor instance.
-- 🫧 **Contextual Menus** — Built-in support for Bubble and Floating menus out of the box.
-- ⚡ **Optimized Rendering** — Minimizes re-renders for a silky-smooth editing experience.
-
----
+React components and hooks for the Arkpad rich text editor.
 
 ## 📦 Installation
 
@@ -21,32 +8,81 @@
 npm install @arkpad/react @arkpad/core
 ```
 
----
-
 ## 🚀 Quick Start
 
-Build a professional editor in just a few lines of code:
-
 ```tsx
-import { useArkpadEditor, ArkpadEditorContent } from "@arkpad/react";
-import { Essentials } from "@arkpad/core";
+import { useArkpadEditor, ArkpadEditorContent } from '@arkpad/react';
+import { Essentials } from '@arkpad/core';
 
-function App() {
+const MyEditor = () => {
   const editor = useArkpadEditor({
     extensions: [Essentials],
-    content: "<h1>Build with Arkpad + React</h1><p>Start your journey here.</p>",
+    content: '<p>Built with Arkpad React</p>',
   });
 
+  return <ArkpadEditorContent editor={editor} />;
+};
+```
+
+## 🛠 Hooks & Components
+
+### `useArkpadEditor(options)`
+A hook that creates and manages an `ArkpadEditor` instance. It automatically handles cleanup on unmount.
+
+### `ArkpadEditorContent`
+The component that renders the editor surface.
+- `editor`: The editor instance from `useArkpadEditor`.
+- `className`: Optional CSS class for the container.
+
+## 🎨 Building a Toolbar
+
+Arkpad is headless, meaning you provide the UI. Here is how to build a toolbar matching the **Ultimate Arkpad UI**:
+
+```tsx
+import { useArkpadEditor } from '@arkpad/react';
+
+const Toolbar = ({ editor }) => {
+  if (!editor) return null;
+
+  const Button = ({ command, icon, activeName, activeAttrs }) => (
+    <button
+      onClick={() => editor.commands[command]()}
+      className={editor.isActive(activeName || command, activeAttrs) ? 'is-active' : ''}
+    >
+      {icon}
+    </button>
+  );
+
   return (
-    <div className="editor-shell">
-      <ArkpadEditorContent editor={editor} />
+    <div className="toolbar">
+      <Button command="toggleBold" activeName="strong" icon="B" />
+      <Button command="toggleItalic" activeName="em" icon="I" />
+      <Button command="toggleUnderline" activeName="underline" icon="U" />
+      
+      <div className="divider" />
+      
+      <Button 
+        command="toggleHeading" 
+        activeAttrs={{ level: 1 }} 
+        icon="H1" 
+      />
+      
+      <Button 
+        command="toggleHighlighter" 
+        activeName="highlighter" 
+        icon="🖍" 
+      />
+      
+      <button onClick={() => editor.commands.undo()}>Undo</button>
+      <button onClick={() => editor.commands.redo()}>Redo</button>
     </div>
   );
-}
+};
 ```
+
+## 💡 Pro Tip: Reactive State
+`useArkpadEditor` returns a reactive editor instance. Your UI will automatically re-render whenever the selection or content changes, making it trivial to keep toolbar states in sync.
 
 ---
 
-## 📄 License
-
-MIT © [ArkCabin](https://github.com/arkcabin)
+Built by **ArkCabin**

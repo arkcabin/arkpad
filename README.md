@@ -1,76 +1,76 @@
-# Arkpad (by AgentEdit)
+# Arkpad
 
-**The High-Performance, Modular Foundation for Modern Rich Text Creation.**
+**The Ultimate Modular Rich Text Framework.**
 
-Arkpad is an enterprise-grade rich text editor framework built on top of ProseMirror. It provides a sophisticated, developer-first API designed for building powerful, reliable, and highly customizable editing experiences.
+Arkpad is an enterprise-grade rich text editor built on ProseMirror. It provides a sophisticated, developer-first API designed for building powerful, reliable, and highly customizable editing experiences.
 
----
+![Arkpad Toolbar Preview](https://raw.githubusercontent.com/arkcabin/arkpad/main/assets/toolbar-preview.png)
+
+## ✨ Features
+
+- 🚀 **Extreme Performance** — Optimized for large, complex documents.
+- 🎨 **Painting Tools** — Built-in Highlighter and Eraser "drawing" modes.
+- 🧩 **100% Modular** — Tiny core, infinite extensions.
+- 🛡️ **Type-Safe** — First-class TypeScript support.
+- 🎨 **Headless** — Complete CSS/UI freedom.
+- 🔍 **Native Search** — High-performance search and replace API.
+
+## 📦 Packages
+
+| Package | Version | Description |
+| :--- | :--- | :--- |
+| [`@arkpad/core`](./packages/core) | `1.6.4` | The core editor engine. |
+| [`@arkpad/react`](./packages/react) | `1.6.4` | React hooks and components. |
 
 ## 🚀 Quick Start
-
-### 1. Installation
 
 ```bash
 npm install @arkpad/react @arkpad/core
 ```
 
-### 2. Full React Implementation (with Toolbar)
-
-Building a full UI is easy. Use the `ArkpadEditor` instance via the `useArkpadEditor` hook to check state and run commands.
-
 ```tsx
-import { useArkpadEditor, ArkpadEditorContent } from "@arkpad/react";
-import { Essentials } from "@arkpad/core";
+import { useArkpadEditor, ArkpadEditorContent } from '@arkpad/react';
+import { Essentials } from '@arkpad/core';
 
-function MyEditor() {
+export default function App() {
   const editor = useArkpadEditor({
     extensions: [Essentials],
-    content: "<h1>Hello Arkpad</h1><p>Start building your custom UI.</p>",
+    content: '<h1>The Ultimate Arkpad UI</h1>',
   });
 
   if (!editor) return null;
 
   return (
-    <div className="editor-container">
-      {/* Toolbar */}
+    <div className="ark-editor">
       <div className="toolbar">
         <button 
-          onClick={() => editor.runCommand("toggleBold")}
-          className={editor.isActive("strong") ? "is-active" : ""}
+          onClick={() => editor.commands.toggleBold()}
+          className={editor.isActive('strong') ? 'is-active' : ''}
         >
           Bold
         </button>
-        <button 
-          onClick={() => editor.runCommand("toggleHeading", { level: 2 })}
-          className={editor.isActive("heading", { level: 2 }) ? "is-active" : ""}
-        >
-          H2
-        </button>
-        <button onClick={() => editor.runCommand("undo")}>Undo</button>
       </div>
-
-      {/* Editor Surface */}
       <ArkpadEditorContent editor={editor} />
     </div>
   );
 }
 ```
 
----
+## 📖 Documentation
 
-## ✨ Features
+- **[NPM Package Guide](./packages/core/README.md)** — Core API and Configuration.
+- **[React Implementation](./packages/react/README.md)** — Hooks and UI components.
+- **[Full Command Reference](./docs/COMMAND_REFERENCE.md)** — List of all 30+ available commands.
 
-- 🚀 **Extreme Performance** — Optimized for large documents.
-- 🧩 **Purely Modular** — Only include what you use.
-- 🛡️ **Type-Safe** — First-class TypeScript support.
-- 🎨 **Headless** — You have 100% control over the CSS/UI.
+## 🛠 Features in Core
 
----
+The following features are available in the `@arkpad/core` Essentials bundle:
 
-## 📖 Learn More
-
-*   **[Complete Developer Guide](./docs/COMPLETE_GUIDE.md)** — Deep dive into the API and advanced features.
-*   **[Roadmap](./docs/ROADMAP.md)** — See where we are headed with Agentic AI.
+- **Typography**: Bold, Italic, Underline, Strike, Code, Sub/Superscript.
+- **Structure**: Headings 1-4, Blockquotes, Dividers, Images.
+- **Lists**: Bullet, Ordered, and Task lists.
+- **Tools**: Highlighter, Eraser, Search/Replace, Undo/Redo.
+- **Alignment**: Left, Center, Right, Justify.
 
 ---
 
