@@ -25,6 +25,9 @@ import type {
 } from "./types";
 import { parseContent, resolveEditorOptions } from "./utils";
 
+import { highlighterToolPluginKey } from "./extensions/highlighter-tool";
+import { eraserToolPluginKey } from "./extensions/eraser-tool";
+
 /**
  * The core editor class for Arkpad.
  * Handles the ProseMirror view, state, and command execution.
@@ -166,6 +169,36 @@ export class ArkpadEditor implements ArkpadEditorAPI {
             return false;
           },
         },
+      })
+    );
+
+    // Add Painting Tool Deactivation Plugin
+    plugins.push(
+      new Plugin({
+        appendTransaction: (transactions, oldState, newState) => {
+          // If any transaction changed the doc structure (not just marks)
+          // we might want to deactivate painting tools.
+          
+          const hasStructuralChange = transactions.some(tr => {
+            // Check if any step in the transaction is NOT a Mapping/Mark step
+            // or if the transaction is explicitly marked for deactivation.
+            // tr.docChanged is true if nodes were added/removed/replaced.
+            
+            return (tr.docChanged && !tr.getMeta("highlighter-tool-apply") && !tr.getMeta("eraser-tool-apply")) ||
+                   tr.getMeta("deactivate-painting-tools") === true;
+          });
+
+          if (hasStructuralChange) {
+            const tr = newState.tr;
+            tr.setMeta("deactivate-painting-tools", true);
+            // Also explicitly unset the plugin states just in case
+            tr.setMeta(highlighterToolPluginKey, false);
+            tr.setMeta(eraserToolPluginKey, false);
+            return tr;
+          }
+
+          return null;
+        }
       })
     );
 

@@ -35,6 +35,8 @@ import {
 import { createMarkdownPaste } from "./markdown";
 import { createTextAlign } from "./alignment";
 import { createUniqueId } from "./unique-id";
+import { HighlighterTool } from "./highlighter-tool";
+import { EraserTool } from "./eraser-tool";
 import { ArkpadExtension as Extension } from "../types";
 
 /**
@@ -71,6 +73,8 @@ export const Essentials: Extension[] = [
   createMarkdownPaste(),
   createTextAlign(),
   createUniqueId(),
+  HighlighterTool,
+  EraserTool,
 ];
 
 /**
@@ -89,5 +93,7 @@ export * from "./nodes";
 export * from "./lists";
 export * from "./alignment";
 export * from "./unique-id";
+export * from "./highlighter-tool";
+export * from "./eraser-tool";
 export * from "./utils";
 export { CharacterCount } from "./character-count";

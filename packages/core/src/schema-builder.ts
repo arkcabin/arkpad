@@ -1,6 +1,5 @@
 import { Schema } from "prosemirror-model";
-import { schema as basicSchema } from "prosemirror-schema-basic";
-import { addListNodes } from "prosemirror-schema-list";
+import { arkpadSchema } from "./schema";
 import { ArkpadExtension } from "./types";
 
 /**
@@ -18,19 +17,28 @@ export class SchemaBuilder {
    * Builds and returns the ProseMirror schema.
    */
   build(): Schema {
-    let nodes = addListNodes(
-      basicSchema.spec.nodes.update("doc", { content: "block+" }),
-      "paragraph block*",
-      "block"
-    );
+    // Start with the base specs from arkpadSchema
+    let nodes = (arkpadSchema.spec.nodes as any);
+    let marks = (arkpadSchema.spec.marks as any);
 
-    let marks = basicSchema.spec.marks;
+    // Merge nodes and marks from extensions
+    this.extensions.forEach(ext => {
+      if (ext.addNodes) {
+        const extNodes = ext.addNodes();
+        Object.keys(extNodes).forEach(name => {
+          nodes = nodes.update(name, extNodes[name]);
+        });
+      }
+      if (ext.addMarks) {
+        const extMarks = ext.addMarks();
+        Object.keys(extMarks).forEach(name => {
+          marks = marks.update(name, extMarks[name]);
+        });
+      }
+    });
 
     // Apply Global Attributes
     const globalAttributes = this.collectGlobalAttributes();
-
-    // In a real-world scenario, we would iterate through extensions and collect their specific node/mark specs.
-    // For now, we will enhance the existing nodes/marks with global attributes.
 
     nodes = this.enhanceNodes(nodes, globalAttributes);
     marks = this.enhanceMarks(marks, globalAttributes);

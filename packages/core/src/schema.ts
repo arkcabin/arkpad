@@ -258,7 +258,7 @@ const marks = basicSchema.spec.marks.append({
   highlight: {
     parseDOM: [{ tag: "mark" }],
     toDOM() {
-      return ["mark", 0];
+      return ["mark", { "data-type": "highlight" }, 0];
     },
   },
 });

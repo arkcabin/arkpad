@@ -60,7 +60,14 @@ export class Extension<Options = any, Storage = any> implements ArkpadExtension 
     this.options = { ...this.options, ...(editor as any).options?.[this.name] };
 
     if (this.config.addStorage) {
-      this.storage = this.config.addStorage.call(this.createContext());
+      const storage = this.config.addStorage.call(this.createContext());
+      if (storage && typeof storage === "object" && !Array.isArray(storage)) {
+        // Update existing storage object to preserve references
+        Object.keys(this.storage as any).forEach(key => delete (this.storage as any)[key]);
+        Object.assign(this.storage as any, storage);
+      } else {
+        this.storage = storage;
+      }
     }
   }
 
@@ -90,6 +97,14 @@ export class Extension<Options = any, Storage = any> implements ArkpadExtension 
 
   addGlobalAttributes() {
     return this.config.addGlobalAttributes?.call(this.createContext()) || [];
+  }
+
+  addNodes() {
+    return this.config.addNodes?.call(this.createContext()) || {};
+  }
+
+  addMarks() {
+    return this.config.addMarks?.call(this.createContext()) || {};
   }
 
   addCommands(): Partial<ArkpadCommandRegistry> {

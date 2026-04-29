@@ -12,7 +12,6 @@ import {
   ListOrdered,
   Code,
   Terminal,
-  Quote,
   Minus,
   Image as ImageIcon,
   Undo2,
@@ -36,6 +35,7 @@ import {
   Lock,
   Unlock,
   Plus,
+  PenLine,
 } from "lucide-react";
 
 import {
@@ -54,17 +54,18 @@ interface ToolbarButtonProps {
   children: React.ReactNode;
   title?: string;
   variant?: "default" | "danger" | "success" | "brand";
+  className?: string;
 }
 
 const ToolbarButton = React.forwardRef<HTMLButtonElement, ToolbarButtonProps>(
-  ({ onClick, isActive, disabled, children, title, variant = "default" }, ref) => (
+  ({ onClick, isActive, disabled, children, title, variant = "default", className = "" }, ref) => (
     <button
       ref={ref}
       onMouseDown={(e) => e.preventDefault()}
       onClick={onClick}
       disabled={disabled}
       title={title}
-      className={`toolbar-btn ${isActive ? "active" : ""} variant-${variant}`}
+      className={`toolbar-btn ${isActive ? "active" : ""} variant-${variant} ${className}`}
     >
       {children}
     </button>
@@ -89,9 +90,13 @@ function MenuButton({
   const active = useEditorState(editor, (s) => s.isActive(name, attrs));
   const disabled = useEditorState(editor, (s) => !s.canRunCommand(command, attrs));
 
+  const handleClick = () => {
+    editor.runCommand(command, attrs);
+  };
+
   return (
     <ToolbarButton
-      onClick={() => editor.runCommand(command, attrs)}
+      onClick={handleClick}
       isActive={!!active}
       disabled={disabled ?? false}
       title={title}
@@ -195,6 +200,9 @@ export function App() {
     },
   });
 
+  const isHighlighterActive = useEditorState(editor, (s) => s.storage.highlighterTool?.active || s.isActive("highlight"));
+  const isEraserActive = useEditorState(editor, (s) => s.storage.eraserTool?.active);
+
   // Expose editor to window for console debugging
   useEffect(() => {
     if (editor && typeof window !== "undefined") {
@@ -235,19 +243,21 @@ export function App() {
                 >
                   <Strikethrough className="w-4 h-4" />
                 </MenuButton>
-                <MenuButton
-                  editor={editor}
-                  command="toggleHighlight"
-                  name="highlight"
-                  title="Highlight"
+                <ToolbarButton
+                  onClick={() => editor.runCommand("toggleHighlighterTool")}
+                  isActive={isHighlighterActive}
+                  title="Highlighter Tool"
+                  className="highlighter-btn"
                 >
                   <Highlighter className="w-4 h-4" />
-                </MenuButton>
+                </ToolbarButton>
                 <MenuButton editor={editor} command="toggleCode" name="code" title="Inline Code">
                   <Code className="w-4 h-4" />
                 </MenuButton>
                 <ToolbarButton
                   onClick={() => {
+                    // Clear painting modes
+
                     const url = window.prompt("Enter URL:", "https://");
                     if (url) editor?.runCommand("toggleLink", url);
                   }}
@@ -273,8 +283,10 @@ export function App() {
                   <SubscriptIcon className="w-4 h-4" />
                 </MenuButton>
                 <ToolbarButton
-                  onClick={() => editor?.runCommand("unsetAllMarks")}
-                  title="Clear Formatting"
+                  onClick={() => editor.runCommand("toggleEraserTool")}
+                  isActive={isEraserActive}
+                  title="Eraser Tool (Paint to Clear)"
+                  className="eraser-btn"
                 >
                   <Eraser className="w-4 h-4" />
                 </ToolbarButton>
@@ -311,7 +323,10 @@ export function App() {
                   <Heading3 className="w-4 h-4" />
                 </MenuButton>
                 <ToolbarButton
-                  onClick={() => editor.commands.toggleHeading?.({ level: 4 })}
+                  onClick={() => {
+                    // Clear painting modes
+                    editor.runCommand("toggleHeading", { level: 4 });
+                  }}
                   isActive={editor.isActive("heading", { level: 4 })}
                   title="H4 (Custom Proxy API)"
                 >
@@ -321,18 +336,24 @@ export function App() {
                   editor={editor}
                   command="toggleBlockquote"
                   name="blockquote"
-                  title="Blockquote"
+                  title="Blockquote (Style like Highlighter)"
                 >
-                  <Quote className="w-4 h-4" />
+                  <PenLine className="w-4 h-4" />
                 </MenuButton>
                 <ToolbarButton
-                  onClick={() => editor?.runCommand("toggleCodeBlock")}
+                  onClick={() => {
+                    // Clear painting modes
+                    editor?.runCommand("toggleCodeBlock");
+                  }}
                   title="Code Block"
                 >
                   <Terminal className="w-4 h-4" />
                 </ToolbarButton>
                 <ToolbarButton
-                  onClick={() => editor?.runCommand("setHorizontalRule")}
+                  onClick={() => {
+                    // Clear painting modes
+                    editor?.runCommand("setHorizontalRule");
+                  }}
                   title="Horizontal Rule"
                 >
                   <Minus className="w-4 h-4" />
@@ -366,10 +387,20 @@ export function App() {
                 >
                   <CheckSquare className="w-4 h-4" />
                 </MenuButton>
-                <ToolbarButton onClick={() => editor.runCommand("indentList")} title="Indent">
+                <ToolbarButton
+                  onClick={() => {
+                    editor.runCommand("indentList");
+                  }}
+                  title="Indent"
+                >
                   <Indent className="w-4 h-4" />
                 </ToolbarButton>
-                <ToolbarButton onClick={() => editor.runCommand("outdentList")} title="Outdent">
+                <ToolbarButton
+                  onClick={() => {
+                    editor.runCommand("outdentList");
+                  }}
+                  title="Outdent"
+                >
                   <Outdent className="w-4 h-4" />
                 </ToolbarButton>
               </div>
@@ -496,12 +527,33 @@ export function App() {
                   <ImageIcon className="w-4 h-4" />
                 </ToolbarButton>
                 <ToolbarSeparator />
-                <ToolbarButton onClick={() => editor.runCommand("undo")} title="Undo">
+                <ToolbarButton
+                  onClick={() => {
+                    editor.runCommand("undo");
+                  }}
+                  title="Undo"
+                >
                   <Undo2 className="w-4 h-4" />
                 </ToolbarButton>
-                <ToolbarButton onClick={() => editor.runCommand("redo")} title="Redo">
-                  <Redo2 className="w-4 h-4" />
-                </ToolbarButton>
+        <ToolbarButton
+          onClick={() => {
+            editor.runCommand("undo");
+          }}
+          disabled={!editor.canRunCommand("undo")}
+          title="Undo (Mod-Z)"
+        >
+          <Undo2 className="w-4 h-4" />
+        </ToolbarButton>
+        <ToolbarButton
+          onClick={() => {
+            editor.runCommand("redo");
+          }}
+          disabled={!editor.canRunCommand("redo")}
+          title="Redo (Mod-Y)"
+        >
+          <Redo2 className="w-4 h-4" />
+        </ToolbarButton>
+
                 <ToolbarSeparator />
                 <ToolbarButton onClick={() => setIsDark(!isDark)} title="Toggle Dark Mode">
                   {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}

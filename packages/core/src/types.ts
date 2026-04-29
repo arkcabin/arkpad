@@ -70,6 +70,8 @@ export interface ExtensionConfig<Options = any, Storage = any> {
     types: string[];
     attributes: Record<string, { default: any; parseHTML?: (element: HTMLElement) => any; renderHTML?: (attributes: Record<string, any>) => any }>;
   }[];
+  addNodes?: (this: ExtensionContext<Options, Storage>) => Record<string, any>;
+  addMarks?: (this: ExtensionContext<Options, Storage>) => Record<string, any>;
   addCommands?: (this: ExtensionContext<Options, Storage>) => Partial<ArkpadCommandRegistry>;
   addKeyboardShortcuts?: (this: ExtensionContext<Options, Storage>, schema: any) => Record<string, any>;
   addInputRules?: (this: ExtensionContext<Options, Storage>, schema: any) => any[];
@@ -82,6 +84,8 @@ export interface ExtensionConfig<Options = any, Storage = any> {
 export interface ArkpadExtension {
   name: string;
   init?: (editor: ArkpadEditorAPI) => void;
+  addNodes?: () => Record<string, any>;
+  addMarks?: () => Record<string, any>;
   addGlobalAttributes?: () => any[];
   addCommands?: () => Partial<ArkpadCommandRegistry>;
   addKeyboardShortcuts?: (schema: any) => Record<string, any>;
