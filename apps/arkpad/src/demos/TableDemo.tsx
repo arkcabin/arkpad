@@ -1,5 +1,6 @@
 import React from "react";
 import { Table } from "@arkpad/extension-table";
+import { Heading } from "@arkpad/extension-heading";
 import { 
   createDocument, 
   createParagraph, 
@@ -20,6 +21,7 @@ export function TableDemo() {
       createDocument(),
       createParagraph(),
       createText(),
+      Heading,
       Table,
     ],
     content: "<h1>Table Extension</h1><p>Insert and manage tables with rows and columns.</p>",

@@ -1,5 +1,6 @@
 import React from "react";
 import { Italic as ItalicExtension } from "@arkpad/extension-italic";
+import { Heading } from "@arkpad/extension-heading";
 import { 
   createDocument, 
   createParagraph, 
@@ -20,6 +21,7 @@ export function ItalicDemo() {
       createDocument(),
       createParagraph(),
       createText(),
+      Heading,
       ItalicExtension,
     ],
     content: "<h1>Italic Extension</h1><p>This editor <em>only</em> handles emphasis. <i>Italic text</i> helps highlight key points without changing the weight of the font.</p>",

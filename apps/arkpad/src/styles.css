@@ -54,6 +54,14 @@
   @apply font-bold mt-6 mb-4 text-[var(--text-main)];
 }
 
+.prose strong, .prose b {
+  @apply font-bold;
+}
+
+.prose em, .prose i {
+  @apply italic;
+}
+
 .prose p {
   @apply mb-4 leading-relaxed;
 }

@@ -1,5 +1,6 @@
 import React from "react";
 import { Bold as BoldExtension } from "@arkpad/extension-bold";
+import { Heading } from "@arkpad/extension-heading";
 import { 
   createDocument, 
   createParagraph, 
@@ -20,6 +21,7 @@ export function BoldDemo() {
       createDocument(),
       createParagraph(),
       createText(),
+      Heading,
       BoldExtension,
     ],
     content: "<h1>Bold Extension</h1><p>This editor <strong>only</strong> handles bold text. Try selecting this text and pressing Mod+B.</p>",
