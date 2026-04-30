@@ -1,7 +1,7 @@
 import { setBlockType, lift, wrapIn, toggleMark as pmToggleMark } from "prosemirror-commands";
 import { wrapInList, liftListItem } from "prosemirror-schema-list";
 import { type MarkType, type NodeType } from "prosemirror-model";
-import { type EditorState } from "prosemirror-state";
+import { type EditorState, Transaction } from "prosemirror-state";
 import { InputRule } from "prosemirror-inputrules";
 
 export function markInputRule(regexp: RegExp, markType: MarkType, getAttrs?: (match: any) => any) {
@@ -118,7 +118,18 @@ export function getNodeAttributes(state: EditorState, type: NodeType): Record<st
  * Smart toggle for marks.
  */
 export function toggleMark(type: MarkType, attrs: Record<string, any> = {}) {
-  return pmToggleMark(type, attrs);
+  return (state: EditorState, dispatch?: (tr: Transaction) => void) => {
+    const { $from } = state.selection;
+    
+    // If we are checking for "canRun" (dispatch is undefined)
+    if (!dispatch) {
+      // Best Practice: If the node at selection allows this mark, return true.
+      // This ensures toolbar buttons are enabled even if the selection is empty.
+      return $from.parent.type.allowsMarkType(type);
+    }
+
+    return pmToggleMark(type, attrs)(state, dispatch);
+  };
 }
 
 /**
@@ -127,6 +138,12 @@ export function toggleMark(type: MarkType, attrs: Record<string, any> = {}) {
 export function toggleBlock(type: any, attrs: Record<string, any> = {}) {
   return (state: any, dispatch: any) => {
     const { $from } = state.selection;
+
+    // Dry-run check for UI enabled state
+    if (!dispatch) {
+      // Check if we can apply this block type to the current selection
+      return !!setBlockType(type, attrs)(state);
+    }
 
     let isActive = false;
     for (let depth = $from.depth; depth >= 0; depth--) {
@@ -165,6 +182,12 @@ export function toggleList(listType: NodeType, itemType: NodeType) {
     const { $from, $to } = state.selection;
     const range = $from.blockRange($to);
     if (!range) return false;
+
+    // Dry-run check for UI enabled state
+    if (!dispatch) {
+      // Check if we can wrap the current selection in this list type
+      return !!wrapInList(listType)(state);
+    }
 
     // Search for the list node at all depths
     let listDepth = -1;

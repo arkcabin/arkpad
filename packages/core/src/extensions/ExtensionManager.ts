@@ -5,6 +5,7 @@ import { keymap } from "prosemirror-keymap";
 import { baseKeymap } from "prosemirror-commands";
 import { inputRules } from "prosemirror-inputrules";
 import { EditorView } from "prosemirror-view";
+import { SchemaBuilder } from "../schema-builder";
 
 /**
  * ExtensionManager coordinates all editor extensions, collecting their commands,
@@ -29,8 +30,26 @@ export class ExtensionManager {
    * Registers multiple extensions at once and rebuilds the editor configuration.
    */
   registerExtensions(extensions: ArkpadExtension[]): void {
-    for (const extension of extensions) {
-      this.registerExtension(extension);
+    const allExtensions: ArkpadExtension[] = [];
+    const seenNames = new Set<string>(this.extensions.map(ext => ext.name));
+
+    const flattenExtensions = (exts: ArkpadExtension[]) => {
+      for (const extension of exts) {
+        if (!seenNames.has(extension.name)) {
+          allExtensions.push(extension);
+          seenNames.add(extension.name);
+        }
+
+        if (extension.addExtensions) {
+          flattenExtensions(extension.addExtensions());
+        }
+      }
+    };
+
+    flattenExtensions(extensions);
+
+    for (const extension of allExtensions) {
+      this.extensions.push(extension);
     }
     this.rebuild();
   }
@@ -39,6 +58,12 @@ export class ExtensionManager {
    * Rebuilds all collected commands, keyboard shortcuts, input rules, and plugins.
    */
   rebuild(): void {
+    if (typeof window !== "undefined") (window as any).arkpad = { status: () => ({ extensions: this.extensions.map(e => e.name), commands: Object.keys(this.commands), marks: Object.keys(this.schema.marks) }) };
+    const builder = new SchemaBuilder(this.extensions);
+    this.schema = builder.build();
+    
+    console.log('[Arkpad] Schema Rebuilt. Marks:', Object.keys(this.schema.marks));
+
     this.commands = this.collectCommands() as unknown as ArkpadCommandRegistry;
     this.keyboardShortcuts = this.collectKeyboardShortcuts(this.schema);
     this.inputRules = this.collectInputRules(this.schema);
@@ -50,15 +75,14 @@ export class ExtensionManager {
    * Registers a single extension and rebuilds the configuration.
    */
   registerExtension(extension: ArkpadExtension): void {
-    this.extensions.push(extension);
-    this.rebuild();
+    this.registerExtensions([extension]);
   }
 
   /**
    * Unregisters an extension by name or ID and rebuilds the configuration.
    */
   unregisterExtension(nameOrId: string): void {
-    this.extensions = this.extensions.filter((ext) => ext.id !== nameOrId && ext.name !== nameOrId);
+    this.extensions = this.extensions.filter((ext) => ext.name !== nameOrId);
     this.rebuild();
   }
 
@@ -85,7 +109,10 @@ export class ExtensionManager {
   private collectCommands(): Record<string, ArkpadCommand> {
     const commands: Record<string, ArkpadCommand> = {};
 
-    for (const ext of this.extensions) {
+    // Standard monorepo practice: specialized extensions override core ones.
+    const sortedExtensions = [...this.extensions].reverse();
+
+    for (const ext of sortedExtensions) {
       if (!ext.addCommands) continue;
       const extCommands = ext.addCommands();
       Object.keys(extCommands).forEach((key) => {
@@ -96,20 +123,18 @@ export class ExtensionManager {
           const prevCommand = commands[key]!;
           commands[key] =
             (...args: any[]) =>
-            (state: EditorState, dispatch?: (tr: Transaction) => void, view?: EditorView) => {
+            (props: { state: EditorState; dispatch?: (tr: Transaction) => void; view?: EditorView }) => {
               const run = (cmd: ArkpadCommand) => {
                 if (typeof cmd !== "function") return false;
-
-                // We cast to any here because ArkpadCommand is a union of signatures,
-                // and we need to call it with dynamic arguments.
                 const result = (cmd as any)(...args);
-                if (typeof result === "function") return result(state, dispatch, view);
+                if (typeof result === "function") {
+                  return result(props);
+                }
                 return result;
               };
 
-              const newResult = run(newCommand);
-              const prevResult = run(prevCommand);
-              return newResult || prevResult;
+              // Specialized (newest) command runs first
+              return run(newCommand) || run(prevCommand);
             };
         } else {
           commands[key] = newCommand;

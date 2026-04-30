@@ -2,8 +2,8 @@ import { DOMSerializer } from "prosemirror-model";
 import { EditorState, TextSelection, Transaction, Plugin } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
 import { ExtensionManager } from "./extensions/ExtensionManager";
-import { Extension } from "./extensions/Extension";
-import { createEssentials } from "./extensions/index";
+
+import { createCoreEssentials } from "./extensions/index";
 import {
   isMarkActive,
   isNodeActive,
@@ -15,6 +15,7 @@ import { CommandManager } from "./commands";
 import { SchemaBuilder } from "./schema-builder";
 import type {
   ArkpadCommandProxy,
+  ArkpadExtension,
   ArkpadContent,
   ArkpadDocJSON,
   ArkpadEditorAPI,
@@ -43,6 +44,7 @@ export class ArkpadEditor implements ArkpadEditorAPI {
   private readonly onTransaction?: ArkpadEditorOptions["onTransaction"];
   private readonly onSelectionUpdate?: ArkpadEditorOptions["onSelectionUpdate"];
   private readonly onPaste?: ArkpadEditorOptions["onPaste"];
+  private interceptors: Array<(props: { editor: ArkpadEditorAPI; transaction: Transaction }) => Transaction | boolean | null> = [];
   private readonly onInterceptor?: ArkpadEditorOptions["onInterceptor"];
   private readonly onDestroy?: ArkpadEditorOptions["onDestroy"];
   private readonly nodeViews: Record<string, any>;
@@ -64,11 +66,14 @@ export class ArkpadEditor implements ArkpadEditorAPI {
     this.onSelectionUpdate = resolved.onSelectionUpdate;
     this.onPaste = resolved.onPaste;
     this.onInterceptor = resolved.onInterceptor;
+    if (this.onInterceptor) {
+      this.interceptors.push(this.onInterceptor);
+    }
     this.onDestroy = resolved.onDestroy;
     this.nodeViews = resolved.nodeViews;
 
     // 1. Collect Extensions and Build Dynamic Schema
-    const extensions = [...createEssentials(), ...(resolved.extensions || [])];
+    const extensions = [...createCoreEssentials(), ...(resolved.extensions || [])];
 
     const schemaBuilder = new SchemaBuilder(extensions);
     const schema = schemaBuilder.build();
@@ -89,6 +94,9 @@ export class ArkpadEditor implements ArkpadEditorAPI {
       if (ext.storage) {
         this.storage[ext.name] = ext.storage;
       }
+      if (ext.onInterceptor) {
+        this.addInterceptor((props) => ext.onInterceptor!(props));
+      }
     });
 
     extensionManager.storage = this.storage;
@@ -107,9 +115,9 @@ export class ArkpadEditor implements ArkpadEditorAPI {
 
         let tr = transaction;
 
-        // Run Interceptor (Middleware)
-        if (this.onInterceptor) {
-          const intercepted = this.onInterceptor({ editor: this, transaction: tr });
+        // Run Interceptors (Middleware)
+        for (const interceptor of this.interceptors) {
+          const intercepted = interceptor({ editor: this, transaction: tr });
 
           if (intercepted === false || intercepted === null) {
             return; // Cancel transaction
@@ -122,6 +130,13 @@ export class ArkpadEditor implements ArkpadEditorAPI {
 
         // Call onTransaction hook
         this.onTransaction?.({ editor: this, transaction: tr });
+
+        // Trigger onTransaction lifecycle for all extensions
+        this.extensionManager.extensions.forEach((ext) => {
+          if (ext.onTransaction) {
+            ext.onTransaction({ editor: this, transaction: tr });
+          }
+        });
 
         // Trigger onSelectionUpdate if selection changed
         if (tr.selectionSet && this.onSelectionUpdate) {
@@ -221,6 +236,10 @@ export class ArkpadEditor implements ArkpadEditorAPI {
       plugins: this.extensionManager.getPlugins(),
     });
     this.view.updateState(nextState);
+
+    // CRITICAL: Immediately notify React subscribers that the schema/state has been hot-reloaded
+    this.emitUpdate(nextState);
+    
     return nextState;
   }
 
@@ -287,7 +306,7 @@ export class ArkpadEditor implements ArkpadEditorAPI {
   /**
    * Runs a specific command by name.
    */
-  runCommand(name: string, ...args: any[]): boolean {
+  runCommand(name: string, ...args: any[]): any {
     if (this.destroyed) return false;
 
     const command = this.extensionManager.commands[name];
@@ -296,7 +315,24 @@ export class ArkpadEditor implements ArkpadEditorAPI {
     const result = (command as any)(...args);
 
     if (typeof result === "function") {
-      return result(this.view.state, this.view.dispatch, this.view);
+      // If result is a function, we look for a dispatch in args or use view.dispatch
+      // But actually, we should check if the LAST argument is a props object with dispatch
+      const lastArg = args[args.length - 1];
+      const hasProps = lastArg && typeof lastArg === "object" && "state" in lastArg && "dispatch" in lastArg;
+      
+      if (hasProps) {
+        return result(lastArg);
+      }
+
+      return result({
+        state: this.view.state,
+        dispatch: this.view.dispatch,
+        view: this.view,
+        tr: this.view.state.tr,
+        editor: this,
+        chain: () => this.chain(),
+        can: () => this.can(),
+      });
     }
 
     return result;
@@ -306,11 +342,52 @@ export class ArkpadEditor implements ArkpadEditorAPI {
    * Checks if a command can be executed without actually running it.
    */
   canRunCommand(name: string, ...args: any[]): boolean {
+    if (this.destroyed) return false;
+
+    // Special Case: Mark Toggles (Bold, Italic, etc)
+    // We want these to be "Always Ready" if the schema allows them in the current node.
+    const markMap: Record<string, string> = {
+      'toggleBold': 'strong',
+      'toggleItalic': 'em',
+      'toggleUnderline': 'underline',
+      'toggleStrike': 'strike',
+      'toggleCode': 'code',
+      'toggleSuperscript': 'superscript',
+      'toggleSubscript': 'subscript',
+    };
+
+    if (name in markMap) {
+      const markName = markMap[name]!;
+      const markType = this.view.state.schema.marks[markName];
+      if (markType) {
+        return this.view.state.selection.$from.parent.type.allowsMarkType(markType);
+      }
+    }
+
+    // Special Case: Block Toggles
+    if (name === 'toggleHeading' || name === 'toggleBlockquote' || name === 'toggleBulletList' || name === 'toggleOrderedList') {
+      return true; // Simplified: usually always allowed if marks are allowed
+    }
+
     const command = this.extensionManager.commands[name];
     if (!command) return false;
 
     try {
-      return (command as any)(...args)(this.view.state, undefined, this.view);
+      const { state } = this.view;
+      const result = (command as any)(...args);
+      
+      if (typeof result === "function") {
+        return result({
+          state,
+          dispatch: undefined,
+          view: this.view,
+          tr: state.tr,
+          editor: this,
+          chain: () => this.chain().command(({ dispatch }) => dispatch === undefined),
+          can: () => this.can(),
+        });
+      }
+      return !!result;
     } catch {
       return false;
     }
@@ -555,19 +632,8 @@ export class ArkpadEditor implements ArkpadEditorAPI {
   /**
    * Registers a new extension.
    */
-  registerExtension(extension: Extension) {
+  registerExtension(extension: ArkpadExtension) {
     this.extensionManager.registerExtension(extension);
-
-    if (typeof extension.addGlobalAttributes === "function") {
-      const attrs = extension.addGlobalAttributes();
-      if (attrs && attrs.length > 0) {
-        const schemaBuilder = new SchemaBuilder([...this.extensionManager.extensions]);
-        const newSchema = schemaBuilder.build();
-        this.extensionManager.schema = newSchema;
-        this.serializer = DOMSerializer.fromSchema(newSchema);
-        this.extensionManager.rebuild();
-      }
-    }
 
     if (extension.init) {
       extension.init(this);
@@ -575,14 +641,19 @@ export class ArkpadEditor implements ArkpadEditorAPI {
     if (extension.storage) {
       this.storage[extension.name] = extension.storage;
     }
+    if (extension.onInterceptor) {
+      this.addInterceptor((props) => extension.onInterceptor!(props));
+    }
 
+    this.extensionManager.rebuild();
+    this.serializer = DOMSerializer.fromSchema(this.extensionManager.schema);
     this.refreshState(this.view.state.doc.toJSON());
   }
 
   /**
    * Registers multiple extensions.
    */
-  registerExtensions(extensions: Extension[]) {
+  registerExtensions(extensions: ArkpadExtension[]) {
     this.extensionManager.registerExtensions(extensions);
 
     extensions.forEach((ext) => {
@@ -592,8 +663,13 @@ export class ArkpadEditor implements ArkpadEditorAPI {
       if (ext.storage) {
         this.storage[ext.name] = ext.storage;
       }
+      if (ext.onInterceptor) {
+        this.addInterceptor((props) => ext.onInterceptor!(props));
+      }
     });
 
+    this.extensionManager.rebuild();
+    this.serializer = DOMSerializer.fromSchema(this.extensionManager.schema);
     this.refreshState(this.view.state.doc.toJSON());
   }
 
@@ -602,6 +678,8 @@ export class ArkpadEditor implements ArkpadEditorAPI {
    */
   unregisterExtension(nameOrId: string) {
     this.extensionManager.unregisterExtension(nameOrId);
+    this.extensionManager.rebuild();
+    this.serializer = DOMSerializer.fromSchema(this.extensionManager.schema);
     this.refreshState(this.view.state.doc.toJSON());
   }
 
@@ -634,6 +712,13 @@ export class ArkpadEditor implements ArkpadEditorAPI {
         return undefined;
       },
     });
+  }
+
+  /**
+   * Registers a new interceptor.
+   */
+  addInterceptor(interceptor: (props: { editor: ArkpadEditorAPI; transaction: Transaction }) => Transaction | boolean | null) {
+    this.interceptors.push(interceptor);
   }
 
   /**

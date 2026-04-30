@@ -1,8 +1,7 @@
 import { history, undo, redo } from "prosemirror-history";
 import { placeholder as createPlaceholderPlugin } from "prosemirror-placeholder";
 import { setBlockType } from "prosemirror-commands";
-import { TextSelection, Plugin } from "prosemirror-state";
-import { arkpadSchema } from "../schema";
+import { Selection, TextSelection, Plugin } from "prosemirror-state";
 import { Extension } from "./Extension";
 
 /**
@@ -33,7 +32,7 @@ function trailingNodePlugin() {
 
       if (structuralTypes.includes(lastNode.type)) {
         const tr = newState.tr;
-        return tr.insert(doc.content.size, paragraph.create());
+        return tr.insert(doc.content.size, paragraph.create()).scrollIntoView();
       }
 
       return null;
@@ -44,11 +43,20 @@ function trailingNodePlugin() {
 export function createDocument(): Extension {
   return Extension.create({
     name: "doc",
+    addNodes() {
+      return {
+        doc: {
+          content: "block+",
+          marks: "_",
+        },
+      };
+    },
     addCommands: () => ({
       /**
        * Focuses the editor.
        */
-      focus: (position?: "start" | "end" | number | boolean | null) => (state: any, dispatch: any, view: any) => {
+      focus: (position?: "start" | "end" | number | boolean | null) => (props: any) => {
+        const { state, dispatch, view } = props;
         if (view) {
           view.focus();
 
@@ -60,12 +68,12 @@ export function createDocument(): Extension {
           const { doc } = tr;
           let selection = state.selection;
 
-          if (position === "start") {
-            selection = TextSelection.create(doc, 0);
+          if (position === "start" || position === true || position === undefined) {
+            selection = Selection.atStart(doc);
           } else if (position === "end") {
-            selection = TextSelection.create(doc, doc.content.size);
+            selection = Selection.atEnd(doc);
           } else if (typeof position === "number") {
-            selection = TextSelection.create(doc, position);
+            selection = TextSelection.create(doc, Math.min(position, doc.content.size));
           }
 
           if (!selection.eq(state.selection)) {
@@ -82,34 +90,83 @@ export function createDocument(): Extension {
 export function createParagraph(): Extension {
   return Extension.create({
     name: "paragraph",
+    addNodes() {
+      return {
+        paragraph: {
+          content: "inline*",
+          marks: "_",
+          group: "block",
+          attrs: { align: { default: "left" } },
+          parseDOM: [
+            {
+              tag: "p",
+              getAttrs: (dom: HTMLElement) => ({
+                align: dom.style.textAlign || dom.getAttribute("data-align") || "left",
+              }),
+            },
+          ],
+          toDOM(node) {
+            const { align } = node.attrs;
+            return ["p", { "data-align": align, style: align !== "left" ? `text-align: ${align}` : null }, 0];
+          },
+        },
+      };
+    },
     addCommands: () => ({
-      setParagraph: () => setBlockType(arkpadSchema.nodes.paragraph!),
+      setParagraph: () => (props: any) => {
+        return setBlockType(props.state.schema.nodes.paragraph!, {
+          align: "left",
+        })(props.state, props.dispatch);
+      },
     }),
   });
 }
 
 export function createText(): Extension {
-  return Extension.create({ name: "text", addCommands: () => ({}) });
+  return Extension.create({
+    name: "text",
+    addNodes() {
+      return {
+        text: {
+          group: "inline",
+        },
+      };
+    },
+  });
 }
 
 export function createHardBreak(): Extension {
   return Extension.create({
     name: "hardBreak",
+    addNodes() {
+      return {
+        hard_break: {
+          inline: true,
+          group: "inline",
+          selectable: false,
+          parseDOM: [{ tag: "br" }],
+          toDOM() {
+            return ["br"];
+          },
+        },
+      };
+    },
     addCommands: () => ({
-      setHardBreak: () => (state: any, dispatch: any) => {
-        const node = arkpadSchema.nodes.hardBreak!.create();
+      setHardBreak: () => (props: any) => {
+        const { state, dispatch } = props;
+        const node = state.schema.nodes.hard_break!.create();
         if (dispatch) dispatch(state.tr.replaceSelectionWith(node));
         return true;
       },
     }),
     addKeyboardShortcuts: () => ({
-      "Mod-Enter": (state, dispatch) => {
-        const node = arkpadSchema.nodes.hardBreak!.create();
+      "Mod-Enter": (state: any, dispatch: any) => {
+        const node = state.schema.nodes.hard_break!.create();
         if (dispatch) dispatch(state.tr.replaceSelectionWith(node));
         return true;
       },
-      "Shift-Enter": (state, dispatch) => {
-        const node = arkpadSchema.nodes.hardBreak!.create();
+      "Shift-Enter": (state: any, dispatch: any) => {
+        const node = state.schema.nodes.hard_break!.create();
         if (dispatch) dispatch(state.tr.replaceSelectionWith(node));
         return true;
       },

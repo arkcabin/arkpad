@@ -53,14 +53,25 @@ export class CommandManager implements ChainedCommands {
           this.callbacks.push(({ state, tr, view }) => {
             const result = (command as any)(...args);
             if (typeof result === "function") {
-              return result(
-                state,
-                (tr2: Transaction) => {
-                  // If the command dispatches, we merge its steps into our master transaction
-                  tr2.steps.forEach((step) => tr.step(step));
-                },
-                view
-              );
+              // Arkpad commands usually take a single 'props' object.
+              // Prosemirror commands take (state, dispatch, view).
+              // We check the function length to decide, or just pass both if it's an Arkpad thunk.
+              
+              const dispatchFn = (tr2: Transaction) => {
+                // If the command dispatches, we merge its steps into our master transaction
+                tr2.steps.forEach((step) => tr.step(step));
+              };
+
+              if (result.length <= 1) {
+                return result({
+                  state,
+                  dispatch: dispatchFn,
+                  view,
+                  tr,
+                });
+              }
+
+              return result(state, dispatchFn, view);
             }
             return !!result;
           });

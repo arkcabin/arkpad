@@ -22,13 +22,14 @@ export default [
       },
       globals: {
         ...globals.node,
+        ...globals.browser,
         ...globals.es2021,
       },
     },
   },
-  // Disable strict any checking for core package (extensions use dynamic commands)
+  // Disable strict any checking for core and extensions (ProseMirror uses many dynamic types)
   {
-    files: ["packages/core/src/**/*.ts"],
+    files: ["packages/*/src/**/*.{ts,tsx,js}"],
     rules: {
       "@typescript-eslint/no-explicit-any": "off",
     },

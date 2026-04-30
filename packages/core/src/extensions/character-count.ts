@@ -25,17 +25,14 @@ export const CharacterCount = Extension.create<CharacterCountOptions, CharacterC
     };
   },
 
-  onUpdate({ editor }) {
+  onTransaction({ editor, transaction }) {
+    if (!transaction.docChanged) return;
+
     const text = editor.getText();
     this.storage.characters = text.length;
-    
-    // Super fast word count using regex matchAll without creating massive arrays
-    let wordCount = 0;
-    const matches = text.matchAll(/\S+/g);
-    while (!matches.next().done) {
-      wordCount++;
-    }
-    
+
+    const wordCount = [...text.matchAll(/\S+/g)].length;
+
     this.storage.words = wordCount;
   },
 });

@@ -3,100 +3,44 @@ import {
   createParagraph,
   createText,
   createHardBreak,
-  createHistory,
-  createPlaceholder,
 } from "./base";
-import {
-  createBold,
-  createItalic,
-  createUnderline,
-  createStrike,
-  createCode,
-  createLink,
-  createSuperscript,
-  createSubscript,
-  createHighlight,
-  createClearFormatting,
-} from "./marks";
-import {
-  createHeading,
-  createBlockquote,
-  createCodeBlock,
-  createHorizontalRule,
-  createImage,
-} from "./nodes";
-import {
-  createBulletList,
-  createOrderedList,
-  createTaskList,
-  createTaskItem,
-  createListItem,
-} from "./lists";
 import { createMarkdownPaste } from "./markdown";
 import { createTextAlign } from "./alignment";
 import { createUniqueId } from "./unique-id";
 import { HighlighterTool } from "./highlighter-tool";
 import { EraserTool } from "./eraser-tool";
-import { Table } from "./table";
+import { BaseCommands } from "./commands";
 import { ArkpadExtension as Extension } from "../types";
 
 /**
- * Essentials - A bundled collection of the most common and essential editor extensions.
- * Use this as a base for a fully-featured rich text experience.
+ * Core Essentials - Minimal set of extensions required for the editor to function.
+ * Users should typically use @arkpad/starter-kit instead.
  */
-export const Essentials: Extension[] = [
+export const CoreEssentials: Extension[] = [
   createDocument(),
   createParagraph(),
   createText(),
-  createHeading(),
-  createBlockquote(),
-  createBulletList(),
-  createOrderedList(),
-  createTaskList(),
-  createTaskItem(),
-  createListItem(),
-  createCodeBlock(),
   createHardBreak(),
-  createHorizontalRule(),
-  createImage(),
-  createBold(),
-  createItalic(),
-  createUnderline(),
-  createStrike(),
-  createCode(),
-  createLink(),
-  createSuperscript(),
-  createSubscript(),
-  createHighlight(),
-  createClearFormatting(),
-  createPlaceholder({ placeholder: "Start writing..." }),
-  createHistory(),
   createMarkdownPaste(),
   createTextAlign(),
   createUniqueId(),
   HighlighterTool,
   EraserTool,
-  Table.configure({ resizable: true }),
+  BaseCommands,
 ];
 
 /**
- * Returns the default set of essential extensions.
+ * Returns the core essential extensions.
  */
-export function createEssentials(): Extension[] {
-  return Essentials;
+export function createCoreEssentials(): Extension[] {
+  return CoreEssentials;
 }
 
-// Backward compatibility or legacy naming (Optional, but let's stick to Essentials)
-export const StarterKit = Essentials;
-
 export * from "./base";
-export * from "./marks";
-export * from "./nodes";
-export * from "./lists";
 export * from "./alignment";
 export * from "./unique-id";
 export * from "./highlighter-tool";
 export * from "./eraser-tool";
 export * from "./utils";
-export * from "./table";
 export { CharacterCount } from "./character-count";
+export { BaseCommands } from "./commands";

@@ -7,6 +7,7 @@ export { ExtensionManager } from "./extensions/ExtensionManager";
 export * from "./extensions/index";
 export type {
   ArkpadCommandRegistry,
+  ArkpadCommandProps,
   ArkpadCommandProxy,
   ArkpadExtension,
   ArkpadContent,

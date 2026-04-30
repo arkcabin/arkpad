@@ -4,9 +4,6 @@ import {
   Italic,
   Underline,
   Strikethrough,
-  Heading1,
-  Heading2,
-  Heading3,
   Link as LinkIcon,
   List,
   ListOrdered,
@@ -50,9 +47,10 @@ import {
   ArkpadEditorContent,
   useEditorState,
   ArkpadProvider,
-  SmartBar,
   EditorButton,
 } from "@arkpad/react";
+import { StarterKit } from "@arkpad/starter-kit";
+import { AI } from "@arkpad/extension-ai";
 import { CharacterCount } from "@arkpad/core";
 
 import type { ArkpadEditorAPI } from "@arkpad/core";
@@ -92,12 +90,14 @@ function MenuButton({
   attrs,
   children,
   title,
+  className = "toolbar-btn",
 }: {
   command: string;
   name?: string;
   attrs?: any;
   children: React.ReactNode;
   title?: string;
+  className?: string;
 }) {
   return (
     <EditorButton
@@ -105,7 +105,7 @@ function MenuButton({
       name={name}
       attrs={attrs}
       title={title}
-      className="toolbar-btn"
+      className={className}
       activeClassName="active"
     >
       {children}
@@ -119,56 +119,24 @@ function TableActionButton({
   title,
   children,
   variant = "default",
+  className = "",
 }: {
   command: string;
   args?: any[];
   title: string;
   children: React.ReactNode;
   variant?: "default" | "danger" | "success" | "brand";
+  className?: string;
 }) {
   return (
     <EditorButton
       command={command}
       args={args}
       title={title}
-      className={`toolbar-btn variant-${variant}`}
+      className={`toolbar-btn variant-${variant} ${className}`}
     >
       {children}
     </EditorButton>
-  );
-}
-
-function TableSmartBar() {
-  return (
-    <SmartBar>
-      <SmartBar.Group showIf={(e) => !e.getSelection().empty}>
-        <MenuButton command="toggleBold" name="strong" title="Bold">
-          <Bold className="w-4 h-4" />
-        </MenuButton>
-        <MenuButton command="toggleItalic" name="em" title="Italic">
-          <Italic className="w-4 h-4" />
-        </MenuButton>
-        <div className="w-px h-4 bg-slate-200 dark:bg-slate-700 mx-1" />
-      </SmartBar.Group>
-
-      <SmartBar.Group showIf={(e) => e.isActive("table")}>
-        <TableActionButton command="addColumnAfter" title="Add Column After">
-          <ColumnsIcon className="w-4 h-4" />
-        </TableActionButton>
-        <TableActionButton command="addRowAfter" title="Add Row After">
-          <RowsIcon className="w-4 h-4" />
-        </TableActionButton>
-        <TableActionButton command="toggleHeader" args={["row"]} title="Toggle Header Row">
-          <Layout className="w-4 h-4" />
-        </TableActionButton>
-        <TableActionButton command="setZebraStriping" title="Zebra Striping">
-          <Paintbrush className="w-4 h-4" />
-        </TableActionButton>
-        <TableActionButton command="smartDelete" title="Delete" variant="danger">
-          <Trash2 className="w-4 h-4" />
-        </TableActionButton>
-      </SmartBar.Group>
-    </SmartBar>
   );
 }
 
@@ -224,6 +192,17 @@ export function App() {
 
   const editor = useArkpadEditor({
     extensions: [
+      StarterKit,
+      AI.configure({
+        onAIRequest: async ({ command, text }) => {
+          console.log(`AI Command: ${command}`, text);
+          // Mock AI response
+          await new Promise(r => setTimeout(r, 1000));
+          if (command === 'summarize') return "This is an AI-generated summary of your selection.";
+          if (command === 'complete') return " ...and this is how the AI thinks your sentence should end.";
+          return "AI response";
+        }
+      }),
       CharacterCount,
       {
         name: "h4Theme",
@@ -287,7 +266,6 @@ export function App() {
       <div className="min-h-screen bg-[#fafafa] dark:bg-[#000000] py-8 md:py-12 px-4 transition-colors duration-300">
         <div className="max-w-[1300px] mx-auto">
           <div className="editor-wrapper border-slate-200/50 dark:border-slate-800/50 shadow-2xl">
-            <TableSmartBar />
             <div className="toolbar-wrapper p-2 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md sticky top-0 z-10">
               <div className="toolbar-group">
                 <MenuButton command="toggleBold" name="strong" title="Bold">
@@ -341,17 +319,24 @@ export function App() {
 
               <ToolbarSeparator />
 
-              <div className="toolbar-group">
-                <MenuButton command="toggleHeading" attrs={{ level: 1 }} name="heading" title="H1">
-                  <Heading1 className="w-4 h-4" />
-                </MenuButton>
-                <MenuButton command="toggleHeading" attrs={{ level: 2 }} name="heading" title="H2">
-                  <Heading2 className="w-4 h-4" />
-                </MenuButton>
-                <MenuButton command="toggleHeading" attrs={{ level: 3 }} name="heading" title="H3">
-                  <Heading3 className="w-4 h-4" />
-                </MenuButton>
+              <div className="toolbar-group bg-brand/5 dark:bg-brand/10 p-1 rounded-md border border-brand/20">
                 <ToolbarButton
+                  onClick={() => editor.runCommand("aiSummarize")}
+                  title="AI Summarize"
+                  variant="brand"
+                >
+                  <Paintbrush className="w-4 h-4" />
+                </ToolbarButton>
+                <ToolbarButton
+                  onClick={() => editor.runCommand("aiComplete")}
+                  title="AI Complete"
+                  variant="brand"
+                >
+                  <PenLine className="w-4 h-4" />
+                </ToolbarButton>
+                <ToolbarSeparator />
+                <ToolbarButton
+
                   onClick={() => {
                     editor.runCommand("toggleHeading", { level: 4 });
                   }}
@@ -420,30 +405,62 @@ export function App() {
                 >
                   <TableIcon className="w-4 h-4" />
                 </ToolbarButton>
-                <TableActionButton command="addColumnAfter" title="Add Column After">
-                  <ColumnsIcon className="w-4 h-4" />
-                </TableActionButton>
-                <TableActionButton command="addRowAfter" title="Add Row After">
-                  <RowsIcon className="w-4 h-4" />
-                </TableActionButton>
-                <TableActionButton command="mergeCells" title="Merge Cells">
-                  <Combine className="w-4 h-4" />
-                </TableActionButton>
-                <TableActionButton command="splitCell" title="Split Cell">
-                  <Split className="w-4 h-4" />
-                </TableActionButton>
-                <TableActionButton command="toggleHeader" args={["row"]} title="Toggle Header Row">
-                  <Layout className="w-4 h-4" />
-                </TableActionButton>
-                <TableActionButton command="selectColumn" title="Select Column">
-                  <ColumnsIcon className="w-4 h-4 opacity-50" />
-                </TableActionButton>
-                <TableActionButton command="selectRow" title="Select Row">
-                  <RowsIcon className="w-4 h-4 opacity-50" />
-                </TableActionButton>
-                <TableActionButton command="smartDelete" title="Smart Delete" variant="danger">
-                  <Trash2 className="w-4 h-4" />
-                </TableActionButton>
+
+                {editor.isActive("table") && (
+                  <div className="flex items-center gap-1 animate-in fade-in slide-in-from-left-2 duration-300">
+                    <ToolbarSeparator />
+                    <TableActionButton command="addColumnBefore" title="Add Column Before">
+                      <div className="relative">
+                        <ColumnsIcon className="w-4 h-4" />
+                        <span className="absolute -left-1 -top-1 text-[8px] font-bold">+</span>
+                      </div>
+                    </TableActionButton>
+                    <TableActionButton command="addColumnAfter" title="Add Column After">
+                      <div className="relative">
+                        <ColumnsIcon className="w-4 h-4" />
+                        <span className="absolute -right-1 -top-1 text-[8px] font-bold">+</span>
+                      </div>
+                    </TableActionButton>
+                    <TableActionButton command="deleteColumn" title="Delete Column" variant="danger">
+                      <div className="relative">
+                        <ColumnsIcon className="w-4 h-4 opacity-50" />
+                        <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] font-bold">×</span>
+                      </div>
+                    </TableActionButton>
+                    <ToolbarSeparator />
+                    <TableActionButton command="addRowBefore" title="Add Row Before">
+                      <div className="relative">
+                        <RowsIcon className="w-4 h-4" />
+                        <span className="absolute -left-1 -top-1 text-[8px] font-bold">+</span>
+                      </div>
+                    </TableActionButton>
+                    <TableActionButton command="addRowAfter" title="Add Row After">
+                      <div className="relative">
+                        <RowsIcon className="w-4 h-4" />
+                        <span className="absolute -right-1 -top-1 text-[8px] font-bold">+</span>
+                      </div>
+                    </TableActionButton>
+                    <TableActionButton command="deleteRow" title="Delete Row" variant="danger">
+                      <div className="relative">
+                        <RowsIcon className="w-4 h-4 opacity-50" />
+                        <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] font-bold">×</span>
+                      </div>
+                    </TableActionButton>
+                    <ToolbarSeparator />
+                    <TableActionButton command="mergeCells" title="Merge Cells">
+                      <Combine className="w-4 h-4" />
+                    </TableActionButton>
+                    <TableActionButton command="splitCell" title="Split Cell">
+                      <Split className="w-4 h-4" />
+                    </TableActionButton>
+                    <TableActionButton command="toggleHeaderRow" title="Toggle Header Row">
+                      <Layout className="w-4 h-4" />
+                    </TableActionButton>
+                    <TableActionButton command="deleteTable" title="Delete Table" variant="danger">
+                      <Trash2 className="w-4 h-4" />
+                    </TableActionButton>
+                  </div>
+                )}
               </div>
 
               <ToolbarSeparator />

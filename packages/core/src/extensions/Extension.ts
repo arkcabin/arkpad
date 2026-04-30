@@ -6,7 +6,7 @@ import {
   ArkpadEditorAPI,
 } from "../types";
 import { type Schema } from "prosemirror-model";
-import { Plugin } from "prosemirror-state";
+import { Plugin, Transaction } from "prosemirror-state";
 
 /**
  * The Extension class is the base for all Arkpad extensions.
@@ -19,12 +19,18 @@ export class Extension<Options = any, Storage = any> implements ArkpadExtension 
   public parent?: Extension;
   public options: Options = {} as Options;
   public storage: Storage = {} as Storage;
-  public editor!: ArkpadEditorAPI;
+  public editor: ArkpadEditorAPI | null = null;
+  public utils!: Record<string, any>;
 
   constructor(config: ExtensionConfig<Options, Storage>, parent?: Extension) {
     this.name = config.name;
     this.config = config;
     this.parent = parent;
+    
+    // Pre-initialize options from config so they are available before init()
+    if (this.config.addOptions) {
+      this.options = this.config.addOptions.call(this.createContext());
+    }
   }
 
   /**
@@ -63,11 +69,15 @@ export class Extension<Options = any, Storage = any> implements ArkpadExtension 
    */
   init(editor: ArkpadEditorAPI): void {
     this.editor = editor;
+    this.utils = {
+      isActive: (name: string, attrs?: Record<string, any>) => editor.isActive(name, attrs),
+      getAttributes: (name: string) => editor.getAttributes(name),
+      runCommand: (name: string, ...args: any[]) => editor.runCommand(name, ...args),
+      canRunCommand: (name: string, ...args: any[]) => editor.canRunCommand(name, ...args),
+    };
 
-    if (this.config.addOptions) {
+    if (this.config.addOptions && !this.options) {
       this.options = this.config.addOptions.call(this.createContext());
-    } else {
-      this.options = {} as Options;
     }
 
     this.options = { ...this.options, ...(editor as any).options?.[this.name] };
@@ -89,10 +99,11 @@ export class Extension<Options = any, Storage = any> implements ArkpadExtension 
    */
   public createContext(): ExtensionContext<Options, Storage> {
     const context: ExtensionContext<Options, Storage> = {
-      editor: this.editor ?? ({} as ArkpadEditorAPI),
+      editor: this.editor as any,
       options: this.options,
       storage: this.storage,
       name: this.name,
+      utils: this.utils ?? {},
     };
 
     if (this.parent) {
@@ -140,7 +151,22 @@ export class Extension<Options = any, Storage = any> implements ArkpadExtension 
     return this.config.addProseMirrorPlugins?.call(this.createContext(), schema) || [];
   }
 
+  addExtensions(): ArkpadExtension[] {
+    return this.config.addExtensions?.call(this.createContext()) || [];
+  }
+
   onUpdate(props: { editor: ArkpadEditorAPI }) {
     this.config.onUpdate?.call(this.createContext(), props);
+  }
+
+  onTransaction(props: { editor: ArkpadEditorAPI; transaction: Transaction }) {
+    this.config.onTransaction?.call(this.createContext(), props);
+  }
+
+  onInterceptor(props: {
+    editor: ArkpadEditorAPI;
+    transaction: Transaction;
+  }): Transaction | boolean | null {
+    return this.config.onInterceptor?.call(this.createContext(), props) ?? props.transaction;
   }
 }

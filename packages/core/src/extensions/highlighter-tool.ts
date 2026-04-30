@@ -33,7 +33,8 @@ export const HighlighterTool = Extension.create<HighlighterToolOptions, Highligh
 
   addCommands() {
     return {
-      setHighlighterTool: (options: { active: boolean }) => (state, dispatch) => {
+      setHighlighterTool: (options: { active: boolean }) => (props: any) => {
+        const { state, dispatch } = props;
         if (dispatch) {
           const tr = state.tr;
           tr.setMeta(highlighterToolPluginKey, options.active);
@@ -44,7 +45,8 @@ export const HighlighterTool = Extension.create<HighlighterToolOptions, Highligh
         }
         return true;
       },
-      toggleHighlighterTool: () => (state, dispatch) => {
+      toggleHighlighterTool: () => (props: any) => {
+        const { state, dispatch } = props;
         const pluginState = highlighterToolPluginKey.getState(state);
         const nextActive = !pluginState?.active;
 

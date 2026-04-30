@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 import { useArkpadContext } from "./context";
 import { useEditorState } from "./useEditorState";

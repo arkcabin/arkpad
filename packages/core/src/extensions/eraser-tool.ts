@@ -34,7 +34,8 @@ export const EraserTool = Extension.create<EraserToolOptions, EraserToolStorage>
 
   addCommands() {
     return {
-      setEraserTool: (options: { active: boolean }) => (state, dispatch) => {
+      setEraserTool: (options: { active: boolean }) => (props: any) => {
+        const { state, dispatch } = props;
         if (dispatch) {
           const tr = state.tr;
           tr.setMeta(eraserToolPluginKey, options.active);
@@ -45,7 +46,8 @@ export const EraserTool = Extension.create<EraserToolOptions, EraserToolStorage>
         }
         return true;
       },
-      toggleEraserTool: () => (state, dispatch) => {
+      toggleEraserTool: () => (props: any) => {
+        const { state, dispatch } = props;
         if (dispatch) {
           const pluginState = eraserToolPluginKey.getState(state);
           const tr = state.tr;

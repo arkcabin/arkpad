@@ -6,10 +6,20 @@ export type ArkpadDocJSON = Record<string, unknown>;
 export type ArkpadContent = string | ArkpadDocJSON;
 
 export type Dispatch = (tr: Transaction) => void;
+export type ArkpadCommandProps = {
+  state: EditorState;
+  dispatch?: (tr: Transaction) => void;
+  view?: EditorView;
+  tr: Transaction;
+  editor: ArkpadEditorAPI;
+  chain: () => ChainedCommands;
+  can: () => ChainedCommands;
+};
+
 export type ArkpadCommand =
   | Command
   | ((...args: any[]) => Command)
-  | ((...args: any[]) => (state: any, dispatch?: any, view?: any) => boolean);
+  | ((...args: any[]) => (props: ArkpadCommandProps) => boolean | Promise<boolean>);
 export type ArkpadCommandRegistry = Record<string, ArkpadCommand>;
 
 export interface ChainedCommands {
@@ -61,6 +71,7 @@ export interface ExtensionContext<Options = any, Storage = any> {
   options: Options;
   storage: Storage;
   name: string;
+  utils: Record<string, any>;
   parent?: (methodName: string, ...args: any[]) => any;
 }
 
@@ -90,7 +101,16 @@ export interface ExtensionConfig<Options = any, Storage = any> {
   addInputRules?: (this: ExtensionContext<Options, Storage>, schema: any) => any[];
   addPasteRules?: (this: ExtensionContext<Options, Storage>, schema: any) => Plugin[];
   addProseMirrorPlugins?: (this: ExtensionContext<Options, Storage>, schema: any) => Plugin[];
+  addExtensions?: (this: ExtensionContext<Options, Storage>) => ArkpadExtension[];
   onUpdate?: (this: ExtensionContext<Options, Storage>, props: { editor: ArkpadEditorAPI }) => void;
+  onTransaction?: (
+    this: ExtensionContext<Options, Storage>,
+    props: { editor: ArkpadEditorAPI; transaction: Transaction }
+  ) => void;
+  onInterceptor?: (
+    this: ExtensionContext<Options, Storage>,
+    props: { editor: ArkpadEditorAPI; transaction: Transaction }
+  ) => Transaction | boolean | null;
   [key: string]: any;
 }
 
@@ -106,7 +126,13 @@ export interface ArkpadExtension {
   addInputRules?: (schema: any) => any[];
   addPasteRules?: (schema: any) => Plugin[];
   addProseMirrorPlugins?: (schema: any) => Plugin[];
+  addExtensions?: () => ArkpadExtension[];
   onUpdate?: (props: { editor: ArkpadEditorAPI }) => void;
+  onTransaction?: (props: { editor: ArkpadEditorAPI; transaction: Transaction }) => void;
+  onInterceptor?: (props: {
+    editor: ArkpadEditorAPI;
+    transaction: Transaction;
+  }) => Transaction | boolean | null;
   storage?: any;
   options?: any;
   extend?: (config: Partial<ExtensionConfig>) => ArkpadExtension;
@@ -252,5 +278,6 @@ export interface ArkpadEditorAPI {
 
   // Events
   subscribe(callback: (editor: ArkpadEditorAPI) => void): () => void;
+  addInterceptor(interceptor: (props: { editor: ArkpadEditorAPI; transaction: Transaction }) => Transaction | boolean | null): void;
   destroy(): void;
 }

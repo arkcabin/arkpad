@@ -1,0 +1,44 @@
+{
+  "name": "@arkpad/starter-kit",
+  "version": "1.0.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@arkpad/extension-bold": "*",
+    "@arkpad/extension-italic": "*",
+    "@arkpad/extension-underline": "*",
+    "@arkpad/extension-strike": "*",
+    "@arkpad/extension-code": "*",
+    "@arkpad/extension-link": "*",
+    "@arkpad/extension-heading": "*",
+    "@arkpad/extension-blockquote": "*",
+    "@arkpad/extension-bullet-list": "*",
+    "@arkpad/extension-ordered-list": "*",
+    "@arkpad/extension-task-list": "*",
+    "@arkpad/extension-horizontal-rule": "*",
+    "@arkpad/extension-table": "*",
+    "@arkpad/extension-superscript": "*",
+    "@arkpad/extension-subscript": "*",
+    "@arkpad/extension-code-block": "*",
+    "@arkpad/extension-image": "*",
+    "prosemirror-history": "^1.4.1",
+    "prosemirror-placeholder": "^1.0.7"
+  },
+  "peerDependencies": {
+    "@arkpad/core": "*"
+  }
+}
