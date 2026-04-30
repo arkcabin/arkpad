@@ -102,6 +102,11 @@ export interface ExtensionConfig<Options = any, Storage = any> {
   addPasteRules?: (this: ExtensionContext<Options, Storage>, schema: any) => Plugin[];
   addProseMirrorPlugins?: (this: ExtensionContext<Options, Storage>, schema: any) => Plugin[];
   addExtensions?: (this: ExtensionContext<Options, Storage>) => ArkpadExtension[];
+  /**
+   * Maps commands to a specific node or mark name for active state checking.
+   * This allows `editor.isActive('toggleBold')` to automatically check the 'strong' mark.
+   */
+  activeMapping?: Record<string, string>;
   onUpdate?: (this: ExtensionContext<Options, Storage>, props: { editor: ArkpadEditorAPI }) => void;
   onTransaction?: (
     this: ExtensionContext<Options, Storage>,
@@ -127,6 +132,11 @@ export interface ArkpadExtension {
   addPasteRules?: (schema: any) => Plugin[];
   addProseMirrorPlugins?: (schema: any) => Plugin[];
   addExtensions?: () => ArkpadExtension[];
+  /**
+   * Maps commands to a specific node or mark name for active state checking.
+   * This allows `editor.isActive('toggleBold')` to automatically check the 'strong' mark.
+   */
+  activeMapping?: Record<string, string>;
   onUpdate?: (props: { editor: ArkpadEditorAPI }) => void;
   onTransaction?: (props: { editor: ArkpadEditorAPI; transaction: Transaction }) => void;
   onInterceptor?: (props: {
@@ -278,6 +288,11 @@ export interface ArkpadEditorAPI {
 
   // Events
   subscribe(callback: (editor: ArkpadEditorAPI) => void): () => void;
-  addInterceptor(interceptor: (props: { editor: ArkpadEditorAPI; transaction: Transaction }) => Transaction | boolean | null): void;
+  addInterceptor(
+    interceptor: (props: {
+      editor: ArkpadEditorAPI;
+      transaction: Transaction;
+    }) => Transaction | boolean | null
+  ): void;
   destroy(): void;
 }

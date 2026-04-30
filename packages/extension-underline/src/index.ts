@@ -3,13 +3,14 @@ import { Extension, ArkpadCommandProps } from "@arkpad/core";
 export const Underline = Extension.create({
   name: "underline",
 
+  activeMapping: {
+    toggleUnderline: "underline",
+  },
+
   addMarks() {
     return {
       underline: {
-        parseDOM: [
-          { tag: "u" },
-          { style: "text-decoration=underline" },
-        ],
+        parseDOM: [{ tag: "u" }, { style: "text-decoration=underline" }],
         toDOM() {
           return ["u", 0];
         },
@@ -19,9 +20,11 @@ export const Underline = Extension.create({
 
   addCommands() {
     return {
-      toggleUnderline: () => ({ chain }: ArkpadCommandProps) => {
-        return chain().toggleMark("underline").run();
-      },
+      toggleUnderline:
+        () =>
+        ({ chain }: ArkpadCommandProps) => {
+          return chain().toggleMark("underline").run();
+        },
     };
   },
 

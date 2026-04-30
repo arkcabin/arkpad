@@ -20,6 +20,7 @@ export class ExtensionManager {
   public inputRules: any[] = [];
   public pasteRules: Plugin[] = [];
   public proseMirrorPlugins: Plugin[] = [];
+  public activeMappings: Record<string, string> = {};
 
   constructor(schema: Schema, extensions: ArkpadExtension[] = []) {
     this.schema = schema;
@@ -31,7 +32,7 @@ export class ExtensionManager {
    */
   registerExtensions(extensions: ArkpadExtension[]): void {
     const allExtensions: ArkpadExtension[] = [];
-    const seenNames = new Set<string>(this.extensions.map(ext => ext.name));
+    const seenNames = new Set<string>(this.extensions.map((ext) => ext.name));
 
     const flattenExtensions = (exts: ArkpadExtension[]) => {
       for (const extension of exts) {
@@ -50,6 +51,12 @@ export class ExtensionManager {
 
     for (const extension of allExtensions) {
       this.extensions.push(extension);
+      // Register active mappings if they exist
+      if (extension.activeMapping) {
+        for (const [command, target] of Object.entries(extension.activeMapping)) {
+          this.activeMappings[command] = target;
+        }
+      }
     }
     this.rebuild();
   }
@@ -58,11 +65,18 @@ export class ExtensionManager {
    * Rebuilds all collected commands, keyboard shortcuts, input rules, and plugins.
    */
   rebuild(): void {
-    if (typeof window !== "undefined") (window as any).arkpad = { status: () => ({ extensions: this.extensions.map(e => e.name), commands: Object.keys(this.commands), marks: Object.keys(this.schema.marks) }) };
+    if (typeof window !== "undefined")
+      (window as any).arkpad = {
+        status: () => ({
+          extensions: this.extensions.map((e) => e.name),
+          commands: Object.keys(this.commands),
+          marks: Object.keys(this.schema.marks),
+        }),
+      };
     const builder = new SchemaBuilder(this.extensions);
     this.schema = builder.build();
-    
-    console.log('[Arkpad] Schema Rebuilt. Marks:', Object.keys(this.schema.marks));
+
+    console.log("[Arkpad] Schema Rebuilt. Marks:", Object.keys(this.schema.marks));
 
     this.commands = this.collectCommands() as unknown as ArkpadCommandRegistry;
     this.keyboardShortcuts = this.collectKeyboardShortcuts(this.schema);
@@ -123,7 +137,11 @@ export class ExtensionManager {
           const prevCommand = commands[key]!;
           commands[key] =
             (...args: any[]) =>
-            (props: { state: EditorState; dispatch?: (tr: Transaction) => void; view?: EditorView }) => {
+            (props: {
+              state: EditorState;
+              dispatch?: (tr: Transaction) => void;
+              view?: EditorView;
+            }) => {
               const run = (cmd: ArkpadCommand) => {
                 if (typeof cmd !== "function") return false;
                 const result = (cmd as any)(...args);

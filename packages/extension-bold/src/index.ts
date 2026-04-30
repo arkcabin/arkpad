@@ -3,6 +3,10 @@ import { Extension, ArkpadCommandProps } from "@arkpad/core";
 export const Bold = Extension.create({
   name: "bold",
 
+  activeMapping: {
+    toggleBold: "strong",
+  },
+
   addMarks() {
     return {
       strong: {
@@ -23,9 +27,11 @@ export const Bold = Extension.create({
 
   addCommands() {
     return {
-      toggleBold: () => ({ chain }: ArkpadCommandProps) => {
-        return chain().toggleMark("strong").run();
-      },
+      toggleBold:
+        () =>
+        ({ chain }: ArkpadCommandProps) => {
+          return chain().toggleMark("strong").run();
+        },
     };
   },
 

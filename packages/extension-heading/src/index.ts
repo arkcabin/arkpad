@@ -7,6 +7,10 @@ export interface HeadingOptions {
 export const Heading = Extension.create<HeadingOptions>({
   name: "heading",
 
+  activeMapping: {
+    toggleHeading: "heading",
+  },
+
   addOptions() {
     return {
       levels: [1, 2, 3, 4, 5, 6],
@@ -34,9 +38,11 @@ export const Heading = Extension.create<HeadingOptions>({
 
   addCommands() {
     return {
-      toggleHeading: (attrs: { level: number }) => ({ chain }: ArkpadCommandProps) => {
-        return chain().toggleBlock("heading", attrs).run();
-      },
+      toggleHeading:
+        (attrs: { level: number }) =>
+        ({ chain }: ArkpadCommandProps) => {
+          return chain().toggleBlock("heading", attrs).run();
+        },
     };
   },
 

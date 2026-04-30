@@ -4,6 +4,10 @@ import ListItem from "@arkpad/extension-list-item";
 export const OrderedList = Extension.create({
   name: "orderedList",
 
+  activeMapping: {
+    toggleOrderedList: "orderedList",
+  },
+
   addExtensions() {
     return [ListItem];
   },
@@ -14,12 +18,16 @@ export const OrderedList = Extension.create({
         content: "list_item+",
         group: "block",
         attrs: { order: { default: 1 } },
-        parseDOM: [{
-          tag: "ol",
-          getAttrs(dom: HTMLElement) {
-            return { order: dom.hasAttribute("start") ? parseInt(dom.getAttribute("start")!, 10) : 1 };
+        parseDOM: [
+          {
+            tag: "ol",
+            getAttrs(dom: HTMLElement) {
+              return {
+                order: dom.hasAttribute("start") ? parseInt(dom.getAttribute("start")!, 10) : 1,
+              };
+            },
           },
-        }],
+        ],
         toDOM(node: any) {
           return node.attrs.order === 1 ? ["ol", 0] : ["ol", { start: node.attrs.order }, 0];
         },
@@ -29,9 +37,11 @@ export const OrderedList = Extension.create({
 
   addCommands() {
     return {
-      toggleOrderedList: () => ({ chain }: ArkpadCommandProps) => {
-        return chain().toggleList("ordered_list", "list_item").run();
-      },
+      toggleOrderedList:
+        () =>
+        ({ chain }: ArkpadCommandProps) => {
+          return chain().toggleList("ordered_list", "list_item").run();
+        },
     };
   },
 

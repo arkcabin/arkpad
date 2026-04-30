@@ -3,6 +3,10 @@ import { Extension, ArkpadCommandProps } from "@arkpad/core";
 export const Strike = Extension.create({
   name: "strike",
 
+  activeMapping: {
+    toggleStrike: "strike",
+  },
+
   addMarks() {
     return {
       strike: {
@@ -21,9 +25,11 @@ export const Strike = Extension.create({
 
   addCommands() {
     return {
-      toggleStrike: () => ({ chain }: ArkpadCommandProps) => {
-        return chain().toggleMark("strike").run();
-      },
+      toggleStrike:
+        () =>
+        ({ chain }: ArkpadCommandProps) => {
+          return chain().toggleMark("strike").run();
+        },
     };
   },
 

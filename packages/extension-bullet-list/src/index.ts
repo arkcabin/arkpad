@@ -4,6 +4,10 @@ import ListItem from "@arkpad/extension-list-item";
 export const BulletList = Extension.create({
   name: "bulletList",
 
+  activeMapping: {
+    toggleBulletList: "bulletList",
+  },
+
   addExtensions() {
     return [ListItem];
   },
@@ -23,9 +27,11 @@ export const BulletList = Extension.create({
 
   addCommands() {
     return {
-      toggleBulletList: () => ({ chain }: ArkpadCommandProps) => {
-        return chain().toggleList("bullet_list", "list_item").run();
-      },
+      toggleBulletList:
+        () =>
+        ({ chain }: ArkpadCommandProps) => {
+          return chain().toggleList("bullet_list", "list_item").run();
+        },
     };
   },
 

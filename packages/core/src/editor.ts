@@ -527,14 +527,20 @@ export class ArkpadEditor implements ArkpadEditorAPI {
       return $from.parent.attrs.align === attrs.align;
     }
 
+    // Smart Mapping: Check if 'name' is a command and map it to a mark/node
+    let targetName = name;
+    if (this.extensionManager.activeMappings[name]) {
+      targetName = this.extensionManager.activeMappings[name];
+    }
+
     // Check for Marks (bold, italic, etc.)
-    const markType = state.schema.marks[name];
+    const markType = state.schema.marks[targetName];
     if (markType) {
       return isMarkActive(state, markType);
     }
 
     // Check for Nodes (heading, blockquote, etc.)
-    const nodeType = state.schema.nodes[name];
+    const nodeType = state.schema.nodes[targetName];
     if (nodeType) {
       return isNodeActive(state, nodeType, attrs);
     }
@@ -543,7 +549,7 @@ export class ArkpadEditor implements ArkpadEditorAPI {
     const { $from } = state.selection;
     for (let depth = $from.depth; depth >= 0; depth--) {
       const node = $from.node(depth);
-      if (node.type.name === name) {
+      if (node.type.name === targetName) {
         const hasMatchingAttrs = Object.entries(attrs).every(
           ([key, value]) => node.attrs[key] === value
         );
