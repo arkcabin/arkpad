@@ -1,5 +1,5 @@
 import React from "react";
-import { Bold as BoldExtension } from "@arkpad/extension-bold";
+import { Table } from "@arkpad/extension-table";
 import { 
   createDocument, 
   createParagraph, 
@@ -11,38 +11,36 @@ import {
   ArkpadProvider, 
   EditorButton 
 } from "@arkpad/react";
-import { Bold as BoldIcon } from "lucide-react";
+import { Table as TableIcon } from "lucide-react";
 import { ShowcaseLayout } from "../layouts/ShowcaseLayout";
 
-export function BoldDemo() {
+export function TableDemo() {
   const editor = useArkpadEditor({
     extensions: [
       createDocument(),
       createParagraph(),
       createText(),
-      BoldExtension,
+      Table,
     ],
-    content: "<h1>Bold Extension</h1><p>This editor <strong>only</strong> handles bold text. Try selecting this text and pressing Mod+B.</p>",
+    content: "<h1>Table Extension</h1><p>Insert and manage tables with rows and columns.</p>",
   });
 
   if (!editor) return null;
 
   return (
     <ShowcaseLayout
-      category="Mark Extension"
-      title="Bold"
-      description="Toggles strong formatting on selected text."
+      category="Node Extension"
+      title="Table"
+      description="Create complex data structures with tables."
     >
       <ArkpadProvider editor={editor}>
         <div className="flex flex-col">
           <div className="h-10 px-2 border-b border-[var(--border)] flex items-center">
             <EditorButton
-              command="toggleBold"
-              name="strong"
+              command="insertTable"
               className="toolbar-btn"
-              activeClassName="active"
             >
-              <BoldIcon className="w-4 h-4" />
+              <TableIcon className="w-4 h-4" />
             </EditorButton>
           </div>
           <div className="p-8">

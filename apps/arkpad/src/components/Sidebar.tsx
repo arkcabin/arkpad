@@ -1,93 +1,84 @@
 import React from "react";
-import { 
-  Bold, 
-  ChevronLeft, 
-  ChevronRight,
-  AppWindow,
-  FlaskConical
-} from "lucide-react";
-
-export type ViewType = "main" | "bold";
+import { NavLink } from "react-router-dom";
+import { cn } from "../lib/utils";
+import { Sun, Moon } from "lucide-react";
 
 interface SidebarProps {
-  currentView: ViewType;
-  setView: (view: ViewType) => void;
   isCollapsed: boolean;
-  setIsCollapsed: (collapsed: boolean) => void;
+  setIsCollapsed: (val: boolean) => void;
 }
 
-export function Sidebar({ currentView, setView, isCollapsed, setIsCollapsed }: SidebarProps) {
-  const items = [
-    { id: "main", label: "Full Editor", icon: AppWindow, description: "All features active" },
-    { id: "bold", label: "Bold Isolated", icon: Bold, description: "Only Bold extension" },
-  ] as const;
+export function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
+  const sections = [
+    {
+      title: "PLATFORM",
+      items: [
+        { name: "Full Editor", path: "/" },
+      ]
+    },
+    {
+      title: "MARKS",
+      items: [
+        { name: "Bold", path: "/extensions/bold" },
+        { name: "Italic", path: "/extensions/italic" },
+      ]
+    },
+    {
+      title: "NODES",
+      items: [
+        { name: "Table", path: "/extensions/table" },
+      ]
+    }
+  ];
+
+  const toggleTheme = () => {
+    const isDark = document.documentElement.classList.toggle("dark");
+    localStorage.setItem("arkpad-theme", isDark ? "dark" : "light");
+  };
 
   return (
-    <aside 
-      className={`relative h-screen bg-slate-50 dark:bg-[#050505] border-r border-slate-200 dark:border-slate-800 transition-all duration-300 flex flex-col z-50 ${
-        isCollapsed ? "w-16" : "w-64"
-      }`}
-    >
-      {/* Header */}
-      <div className="h-16 flex items-center justify-between px-4 border-b border-slate-200 dark:border-slate-800">
-        {!isCollapsed && (
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-brand rounded-lg flex items-center justify-center text-white font-black text-xl">A</div>
-            <span className="font-bold tracking-tight text-slate-900 dark:text-white uppercase text-sm">Arkpad Lab</span>
-          </div>
-        )}
-        <button 
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className={`p-1.5 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-md transition-colors text-slate-500 ${isCollapsed ? "mx-auto" : ""}`}
-        >
-          {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
-        </button>
+    <aside className={cn(
+      "h-screen bg-[var(--bg-main)] border-r border-[var(--border)] flex flex-col",
+      isCollapsed ? "w-12" : "w-56"
+    )}>
+      <div className="h-14 flex items-center px-4 border-b border-[var(--border)]">
+        <span className="font-bold text-sm tracking-tight">ARKPAD</span>
       </div>
 
-      {/* Nav */}
-      <nav className="flex-grow p-3 space-y-1.5 overflow-y-auto">
-        {!isCollapsed && (
-          <div className="px-3 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-            Environments
-          </div>
-        )}
-        
-        {items.map((item) => (
-          <button
-            key={item.id}
-            onClick={() => setView(item.id)}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all group ${
-              currentView === item.id 
-                ? "bg-brand text-white shadow-lg shadow-brand/20" 
-                : "text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800"
-            }`}
-          >
-            <item.icon className={`w-5 h-5 flex-shrink-0 ${currentView === item.id ? "text-white" : "group-hover:text-brand transition-colors"}`} />
+      <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-6 scrollbar-hide">
+        {sections.map(section => (
+          <div key={section.title} className="space-y-1">
             {!isCollapsed && (
-              <div className="text-left">
-                <div className="text-sm font-semibold leading-none">{item.label}</div>
-                <div className={`text-[10px] mt-1 ${currentView === item.id ? "text-white/70" : "text-slate-500"}`}>
-                  {item.description}
-                </div>
+              <div className="px-3 text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">
+                {section.title}
               </div>
             )}
-          </button>
+            {section.items.map(item => (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                className={({ isActive }) => cn(
+                  "flex items-center px-3 py-1.5 text-sm rounded-none transition-colors",
+                  isActive 
+                    ? "bg-[var(--selection)] text-[var(--text-main)] font-medium" 
+                    : "text-[var(--text-muted)] hover:text-[var(--text-main)]"
+                )}
+              >
+                {item.name}
+              </NavLink>
+            ))}
+          </div>
         ))}
       </nav>
 
-      {/* Footer */}
-      <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-black/20">
-        <div className={`flex items-center gap-3 ${isCollapsed ? "justify-center" : ""}`}>
-          <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center shadow-inner">
-            <FlaskConical className="w-4 h-4 text-brand" />
-          </div>
-          {!isCollapsed && (
-            <div className="text-xs">
-              <div className="font-bold text-slate-900 dark:text-slate-100 uppercase tracking-tighter">Lab Mode</div>
-              <div className="text-slate-500 text-[9px] font-mono">v1.6.13-STABLE</div>
-            </div>
-          )}
-        </div>
+      <div className="p-2 border-t border-[var(--border)]">
+        <button 
+          onClick={toggleTheme}
+          className="w-full flex items-center justify-center p-2 text-[var(--text-muted)] hover:text-[var(--text-main)]"
+        >
+          <Sun className="w-4 h-4 dark:hidden" />
+          <Moon className="w-4 h-4 hidden dark:block" />
+        </button>
       </div>
     </aside>
   );
