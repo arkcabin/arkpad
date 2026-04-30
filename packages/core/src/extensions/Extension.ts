@@ -21,12 +21,18 @@ export class Extension<Options = any, Storage = any> implements ArkpadExtension 
   public storage: Storage = {} as Storage;
   public editor: ArkpadEditorAPI | null = null;
   public utils!: Record<string, any>;
+  public activeMapping?: Record<string, string>;
 
   constructor(config: ExtensionConfig<Options, Storage>, parent?: Extension) {
     this.name = config.name;
     this.config = config;
     this.parent = parent;
-    
+
+    // Initialize activeMapping from config
+    if (config.activeMapping) {
+      this.activeMapping = config.activeMapping;
+    }
+
     // Pre-initialize options from config so they are available before init()
     if (this.config.addOptions) {
       this.options = this.config.addOptions.call(this.createContext());

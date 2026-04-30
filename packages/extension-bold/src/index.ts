@@ -1,4 +1,5 @@
 import { Extension, ArkpadCommandProps } from "@arkpad/core";
+import { toggleMark } from "@arkpad/core";
 
 export const Bold = Extension.create({
   name: "bold",
@@ -29,8 +30,10 @@ export const Bold = Extension.create({
     return {
       toggleBold:
         () =>
-        ({ chain }: ArkpadCommandProps) => {
-          return chain().toggleMark("strong").run();
+        ({ state, dispatch }: ArkpadCommandProps) => {
+          const markType = state.schema.marks["strong"];
+          if (!markType) return false;
+          return toggleMark(markType)(state, dispatch);
         },
     };
   },
@@ -41,5 +44,3 @@ export const Bold = Extension.create({
     };
   },
 });
-
-export default Bold;

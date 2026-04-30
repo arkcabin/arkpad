@@ -1,4 +1,4 @@
-import { Extension } from "@arkpad/core";
+import { Extension, ArkpadCommandProps } from "@arkpad/core";
 
 export const HorizontalRule = Extension.create({
   name: "horizontalRule",
@@ -17,17 +17,28 @@ export const HorizontalRule = Extension.create({
 
   addCommands() {
     return {
-      setHorizontalRule: () => (props: any) => {
-        const type = props.state.schema.nodes.horizontal_rule;
-        if (!type) return false;
-        return this.editor.runCommand('insertNode', type, {}, props);
-      },
+      setHorizontalRule:
+        () =>
+        ({ chain, state }: ArkpadCommandProps) => {
+          const type = state.schema.nodes.horizontal_rule;
+          if (!type) return false;
+          return chain()
+            .command(({ tr, state: currentState }) => {
+              const { $from } = currentState.selection;
+              if (!$from.parent.canReplaceWith($from.index(), $from.indexAfter(), type)) {
+                return false;
+              }
+              tr.replaceSelectionWith(type.create());
+              return true;
+            })
+            .run();
+        },
     };
   },
 
   addKeyboardShortcuts() {
     return {
-      "Mod-Shift-h": () => this.editor.runCommand("setHorizontalRule"),
+      "Mod-Shift-h": () => this.editor!.runCommand("setHorizontalRule"),
     };
   },
 });

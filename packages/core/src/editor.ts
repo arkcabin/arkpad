@@ -312,13 +312,14 @@ export class ArkpadEditor implements ArkpadEditorAPI {
     if (this.destroyed) return false;
 
     const command = this.extensionManager.commands[name];
-    if (!command) return false;
+    if (!command) {
+      console.warn(`[Arkpad] Command "${name}" not found.`);
+      return false;
+    }
 
     const result = (command as any)(...args);
 
     if (typeof result === "function") {
-      // If result is a function, we look for a dispatch in args or use view.dispatch
-      // But actually, we should check if the LAST argument is a props object with dispatch
       const lastArg = args[args.length - 1];
       const hasProps =
         lastArg && typeof lastArg === "object" && "state" in lastArg && "dispatch" in lastArg;
@@ -327,7 +328,7 @@ export class ArkpadEditor implements ArkpadEditorAPI {
         return result(lastArg);
       }
 
-      return result({
+      const props = {
         state: this.view.state,
         dispatch: this.view.dispatch,
         view: this.view,
@@ -335,7 +336,8 @@ export class ArkpadEditor implements ArkpadEditorAPI {
         editor: this,
         chain: () => this.chain(),
         can: () => this.can(),
-      });
+      };
+      return result(props);
     }
 
     return result;
@@ -347,34 +349,43 @@ export class ArkpadEditor implements ArkpadEditorAPI {
   canRunCommand(name: string, ...args: any[]): boolean {
     if (this.destroyed) return false;
 
-    // Special Case: Mark Toggles (Bold, Italic, etc)
-    // We want these to be "Always Ready" if the schema allows them in the current node.
-    const markMap: Record<string, string> = {
-      toggleBold: "strong",
-      toggleItalic: "em",
-      toggleUnderline: "underline",
-      toggleStrike: "strike",
-      toggleCode: "code",
-      toggleSuperscript: "superscript",
-      toggleSubscript: "subscript",
-    };
-
-    if (name in markMap) {
-      const markName = markMap[name]!;
-      const markType = this.view.state.schema.marks[markName];
-      if (markType) {
-        return this.view.state.selection.$from.parent.type.allowsMarkType(markType);
-      }
+    // Smart Mapping: Check if 'name' is a command and map it to a mark/node
+    let targetName = name;
+    if (this.extensionManager.activeMappings[name]) {
+      targetName = this.extensionManager.activeMappings[name];
     }
 
-    // Special Case: Block Toggles
+    // Check if it's a Mark toggle
+    const markType = this.view.state.schema.marks[targetName];
+    if (markType) {
+      return this.view.state.selection.$from.parent.type.allowsMarkType(markType);
+    }
+
+    // Check if it's a Node toggle
+    const nodeType = this.view.state.schema.nodes[targetName];
+    if (nodeType) {
+      // Check if the current selection can be wrapped in or converted to this node type
+      const { $from, $to } = this.view.state.selection;
+      const range = $from.blockRange($to);
+      if (!range) return false;
+
+      // For block nodes, check if they can be applied at this position
+      if (nodeType.isBlock) {
+        // Check if we can wrap or replace the current block
+        const index = $from.index(range.depth);
+        return $from.parent.canReplaceWith(index, index + 1, nodeType);
+      }
+      return true;
+    }
+
+    // Special Case: Block Toggles (fallback)
     if (
       name === "toggleHeading" ||
       name === "toggleBlockquote" ||
       name === "toggleBulletList" ||
       name === "toggleOrderedList"
     ) {
-      return true; // Simplified: usually always allowed if marks are allowed
+      return true;
     }
 
     const command = this.extensionManager.commands[name];
@@ -409,9 +420,18 @@ export class ArkpadEditor implements ArkpadEditorAPI {
       state: this.view.state,
       commands: this.commands,
       view: this.view,
-      dispatch: (tr) => this.view.dispatch(tr),
+      // Use the REAL dispatch. CommandManager should dispatch the master transaction directly.
+      dispatch: (tr: Transaction) => {
+        if (tr.steps.length > 0) {
+          try {
+            this.view.dispatch(tr);
+          } catch (e) {
+            console.warn("[Arkpad] Dispatch failed:", e);
+          }
+        }
+      },
       schema: this.extensionManager.schema,
-    }) as unknown as ChainedCommands;
+    });
   }
 
   /**

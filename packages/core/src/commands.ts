@@ -6,6 +6,7 @@ import { parseContent } from "./utils";
 
 /**
  * CommandManager handles the chaining of commands in a single transaction.
+ * Optimized for performance and reliability.
  */
 export class CommandManager implements ChainedCommands {
   private state: EditorState;
@@ -39,10 +40,12 @@ export class CommandManager implements ChainedCommands {
 
     // Build the proxy to allow calling commands as methods
     return new Proxy(this, {
-      get: (target, prop: string) => {
-        if (prop in target) {
+      get: (target, prop: PropertyKey) => {
+        if (typeof prop === "string" && prop in target) {
           return (target as any)[prop];
         }
+
+        if (typeof prop !== "string") return undefined;
 
         const command = this.commands[prop];
         if (!command) {
@@ -52,26 +55,56 @@ export class CommandManager implements ChainedCommands {
         return (...args: any[]) => {
           this.callbacks.push(({ state, tr, view }) => {
             const result = (command as any)(...args);
+
             if (typeof result === "function") {
-              // Arkpad commands usually take a single 'props' object.
-              // Prosemirror commands take (state, dispatch, view).
-              // We check the function length to decide, or just pass both if it's an Arkpad thunk.
-              
-              const dispatchFn = (tr2: Transaction) => {
-                // If the command dispatches, we merge its steps into our master transaction
-                tr2.steps.forEach((step) => tr.step(step));
+              // Create a sub-chain that uses the master transaction
+              const subChain = new CommandManager({
+                state,
+                commands: this.commands,
+                view,
+                dispatch: (tr2: Transaction) => {
+                  // Apply steps from the sub-transaction to our master transaction
+                  tr2.steps.forEach((step) => {
+                    try {
+                      tr.step(step);
+                    } catch (e) {
+                      console.warn("[Arkpad] Step apply failed:", e);
+                    }
+                  });
+                },
+                shouldDispatch: false, // Don't dispatch - we're building the master tr
+                schema: this.schema,
+              });
+
+              const props = {
+                state,
+                dispatch: (tr2: Transaction) => {
+                  tr2.steps.forEach((step) => {
+                    try {
+                      tr.step(step);
+                    } catch (e) {
+                      console.warn("[Arkpad] Step apply failed:", e);
+                    }
+                  });
+                },
+                view,
+                tr,
+                editor: undefined as any,
+                chain: () => subChain,
+                can: () => undefined as any,
               };
 
-              if (result.length <= 1) {
-                return result({
-                  state,
-                  dispatch: dispatchFn,
-                  view,
-                  tr,
-                });
+              try {
+                // Try passing as ProseMirror command first (state, dispatch, view)
+                if (result.length >= 2) {
+                  return result(state, props.dispatch, view);
+                }
+                // Otherwise, pass as Arkpad Thunk (props)
+                return result(props);
+              } catch (e) {
+                console.warn("[Arkpad] Cmd failed:", e);
+                return false;
               }
-
-              return result(state, dispatchFn, view);
             }
             return !!result;
           });
@@ -151,10 +184,9 @@ export class CommandManager implements ChainedCommands {
   }
 
   public run(): boolean {
-    let currentState = this.state;
     const tr = this.transaction;
+    let currentState = this.state;
     let allSuccessful = true;
-    let lastStepCount = 0;
 
     // Fast Path: If only one callback, skip state application loop
     if (this.callbacks.length === 1) {
@@ -164,17 +196,18 @@ export class CommandManager implements ChainedCommands {
           this.dispatch(tr);
         }
         return success;
-      } catch {
+      } catch (e) {
+        console.warn("[Arkpad] Fast path failed:", e);
         return false;
       }
     }
 
     for (const callback of this.callbacks) {
-      // Execute callback with the latest state
       let success: boolean;
       try {
         success = callback({ state: currentState, tr, view: this.view });
-      } catch {
+      } catch (e) {
+        console.warn("[Arkpad] Callback failed:", e);
         allSuccessful = false;
         break;
       }
@@ -184,20 +217,23 @@ export class CommandManager implements ChainedCommands {
         break;
       }
 
-      // Optimization: Only apply transaction if steps were actually added
-      if (tr.steps.length > lastStepCount) {
+      // Apply the transaction to state so next command sees updated document
+      if (tr.steps.length > 0) {
         try {
           currentState = currentState.apply(tr);
-          lastStepCount = tr.steps.length;
-        } catch {
-          allSuccessful = false;
-          break;
+        } catch (e) {
+          console.warn("[Arkpad] State apply failed:", e);
         }
       }
     }
 
     if (allSuccessful && this.shouldDispatch && this.dispatch) {
-      this.dispatch(tr);
+      try {
+        this.dispatch(tr);
+      } catch (e) {
+        console.warn("[Arkpad] Dispatch failed:", e);
+        allSuccessful = false;
+      }
     }
 
     return allSuccessful;

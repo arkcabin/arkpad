@@ -120,11 +120,9 @@ export function getNodeAttributes(state: EditorState, type: NodeType): Record<st
 export function toggleMark(type: MarkType, attrs: Record<string, any> = {}) {
   return (state: EditorState, dispatch?: (tr: Transaction) => void) => {
     const { $from } = state.selection;
-    
+
     // If we are checking for "canRun" (dispatch is undefined)
     if (!dispatch) {
-      // Best Practice: If the node at selection allows this mark, return true.
-      // This ensures toolbar buttons are enabled even if the selection is empty.
       return $from.parent.type.allowsMarkType(type);
     }
 
@@ -141,7 +139,6 @@ export function toggleBlock(type: any, attrs: Record<string, any> = {}) {
 
     // Dry-run check for UI enabled state
     if (!dispatch) {
-      // Check if we can apply this block type to the current selection
       return !!setBlockType(type, attrs)(state);
     }
 
@@ -185,7 +182,6 @@ export function toggleList(listType: NodeType, itemType: NodeType) {
 
     // Dry-run check for UI enabled state
     if (!dispatch) {
-      // Check if we can wrap the current selection in this list type
       return !!wrapInList(listType)(state);
     }
 

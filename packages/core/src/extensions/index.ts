@@ -1,4 +1,4 @@
-import { createDocument, createParagraph, createText, createHardBreak } from "./base";
+import { createHardBreak } from "./base";
 import { createUniqueId } from "./unique-id";
 import { BaseCommands } from "./commands";
 import { Extension } from "./Extension";
@@ -6,25 +6,24 @@ import { ArkpadExtension } from "../types";
 
 /**
  * Engine - The essential skeleton for the editor.
- * Includes only Document, Paragraph, and Text for maximum speed and flexibility.
- * Uses addExtensions() to bundle the core nodes into a single extension object.
+ * Note: The base `arkpadSchema` already provides Document, Paragraph, and Text.
+ * This Engine bundle is now a no-op container for utility extensions
+ * like History, UniqueId, etc., ensuring a clean separation of concerns.
  */
 export const Engine = Extension.create({
   name: "engine",
   addExtensions() {
-    return [createDocument(), createParagraph(), createText()];
+    return [createHardBreak(), createUniqueId(), BaseCommands];
   },
 });
 
 /**
  * Core Essentials - Minimal set of extensions required for the editor to function.
  * Users should typically use @arkpad/starter-kit instead.
+ * Note: Document, Paragraph, and Text are provided by the base arkpadSchema.
  */
 export const CoreEssentials: ArkpadExtension[] = [
-  Engine,
-  createHardBreak(),
-  createUniqueId(),
-  BaseCommands,
+  Engine, // Includes HardBreak, UniqueId, BaseCommands
 ];
 
 /**
