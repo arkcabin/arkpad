@@ -20,6 +20,7 @@ import { CharacterCount } from "@arkpad/core";
 import { HighlighterTool } from "@arkpad/extension-highlighter";
 import { EraserTool } from "@arkpad/extension-eraser";
 import { createTextAlign } from "@arkpad/extension-alignment";
+import { createMarkdownPaste } from "@arkpad/extension-markdown";
 import { history, undo, redo } from "prosemirror-history";
 import { placeholder as createPlaceholderPlugin } from "prosemirror-placeholder";
 
@@ -93,6 +94,7 @@ export const StarterKit = Extension.create({
     extensions.push(HighlighterTool);
     extensions.push(EraserTool);
     extensions.push(createTextAlign());
+    extensions.push(createMarkdownPaste());
     extensions.push(CharacterCount);
 
     if (this.options.table) extensions.push(Table);

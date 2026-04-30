@@ -38,6 +38,9 @@
     "@arkpad/extension-highlighter": "*",
     "@arkpad/extension-eraser": "*",
     "@arkpad/extension-alignment": "*",
+    "@arkpad/extension-markdown": "*",
+    "@arkpad/extension-bubble-menu": "*",
+    "@arkpad/extension-floating-menu": "*",
     "prosemirror-history": "^1.4.1",
     "prosemirror-placeholder": "^1.0.7"
   },

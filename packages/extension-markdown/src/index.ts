@@ -1,7 +1,9 @@
-import { Extension } from "../Extension";
+import { Extension } from "@arkpad/core";
 import { Plugin, PluginKey } from "prosemirror-state";
 import { DOMParser, Slice } from "prosemirror-model";
 import { markdownToHtml } from "./parser";
+export { MarkdownSerializer } from "./serializer";
+export { markdownToHtml as markdownToHtml };
 
 export function createMarkdownPaste(): Extension {
   return Extension.create({

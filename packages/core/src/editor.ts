@@ -10,7 +10,7 @@ import {
   getMarkAttributes,
   getNodeAttributes,
 } from "./extensions/utils";
-import { defaultMarkdownSerializer } from "./extensions/markdown/serializer";
+import { MarkdownSerializer } from "@arkpad/extension-markdown";
 import { CommandManager } from "./commands";
 import { SchemaBuilder } from "./schema-builder";
 import type {
@@ -302,7 +302,7 @@ export class ArkpadEditor implements ArkpadEditorAPI {
    * Returns the document as a Markdown string.
    */
   getMarkdown(): string {
-    return defaultMarkdownSerializer.serialize(this.view.state.doc);
+    return new MarkdownSerializer().serialize(this.view.state.doc);
   }
 
   /**

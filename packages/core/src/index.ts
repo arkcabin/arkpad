@@ -1,7 +1,5 @@
 export { ArkpadEditor, createArkpadEditor } from "./editor";
 export { arkpadSchema } from "./schema";
-export { BubbleMenu } from "./bubble-menu";
-export { FloatingMenu } from "./floating-menu";
 export { Extension } from "./extensions/Extension";
 export { ExtensionManager } from "./extensions/ExtensionManager";
 export * from "./extensions/index";
@@ -19,3 +17,5 @@ export type {
   NodeView,
   NodeViewConstructor,
 } from "./types";
+export { BubbleMenu, BubbleMenuPluginKey } from "@arkpad/extension-bubble-menu";
+export { FloatingMenu, FloatingMenuPluginKey } from "@arkpad/extension-floating-menu";

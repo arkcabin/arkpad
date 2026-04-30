@@ -1,8 +1,8 @@
 import { EditorState, Plugin, PluginKey } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
 import { CellSelection } from "prosemirror-tables";
-import { Extension } from "./extensions/Extension";
-import { ArkpadEditorAPI } from "./types";
+import { Extension } from "@arkpad/core";
+import { ArkpadEditorAPI } from "@arkpad/core";
 
 export interface BubbleMenuPluginProps {
   id?: string;
@@ -208,7 +208,7 @@ export const BubbleMenu = (options: BubbleMenuPluginProps): Extension => {
             : `bubbleMenu-${Math.random().toString(36).substr(2, 9)}`
         ),
         view: (view) => new BubbleMenuView({ ...options, view }),
-        update: (view) => {
+        update: (view: EditorView) => {
           const pluginView = (view as any).pluginViews?.find(
             (pv: any) => pv instanceof BubbleMenuView && pv.id === options.id
           );

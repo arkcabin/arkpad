@@ -1,5 +1,4 @@
 import { createDocument, createParagraph, createText, createHardBreak } from "./base";
-import { createMarkdownPaste } from "./markdown";
 import { createUniqueId } from "./unique-id";
 import { BaseCommands } from "./commands";
 import { ArkpadExtension as Extension } from "../types";
@@ -13,7 +12,6 @@ export const CoreEssentials: Extension[] = [
   createParagraph(),
   createText(),
   createHardBreak(),
-  createMarkdownPaste(),
   createUniqueId(),
   BaseCommands,
 ];
