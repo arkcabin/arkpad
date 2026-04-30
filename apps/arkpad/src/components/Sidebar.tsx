@@ -40,9 +40,6 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
       "h-screen bg-[var(--bg-main)] border-r border-[var(--border)] flex flex-col",
       isCollapsed ? "w-12" : "w-56"
     )}>
-      <div className="h-14 flex items-center px-4 border-b border-[var(--border)]">
-        <span className="font-bold text-sm tracking-tight">ARKPAD</span>
-      </div>
 
       <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-6 scrollbar-hide">
         {sections.map(section => (
@@ -58,8 +55,8 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
                 to={item.path}
                 className={({ isActive }) => cn(
                   "flex items-center px-3 py-1.5 text-sm rounded-none transition-colors",
-                  isActive 
-                    ? "bg-[var(--selection)] text-[var(--text-main)] font-medium" 
+                  isActive
+                    ? "bg-[var(--selection)] text-[var(--text-main)] font-medium"
                     : "text-[var(--text-muted)] hover:text-[var(--text-main)]"
                 )}
               >
@@ -71,7 +68,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
       </nav>
 
       <div className="p-2 border-t border-[var(--border)]">
-        <button 
+        <button
           onClick={toggleTheme}
           className="w-full flex items-center justify-center p-2 text-[var(--text-muted)] hover:text-[var(--text-main)]"
         >
