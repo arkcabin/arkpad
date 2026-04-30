@@ -5,10 +5,9 @@ import { Sun, Moon } from "lucide-react";
 
 interface SidebarProps {
   isCollapsed: boolean;
-  setIsCollapsed: (val: boolean) => void;
 }
 
-export function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
+export function Sidebar({ isCollapsed }: SidebarProps) {
   const sections = [
     {
       title: "PLATFORM",

@@ -46,7 +46,7 @@ export function TableDemo() {
           <div className="p-8">
             <ArkpadEditorContent 
               editor={editor} 
-              className="prose dark:prose-invert focus:outline-none"
+              className="prose dark:prose-invert focus:outline-none arkpad-container"
             />
           </div>
         </div>
