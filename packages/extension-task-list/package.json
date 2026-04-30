@@ -2,6 +2,7 @@
   "name": "@arkpad/extension-task-list",
   "version": "1.0.0",
   "type": "module",
+  "module": "./dist/index.js",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

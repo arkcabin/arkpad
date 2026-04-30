@@ -19,5 +19,6 @@
   },
   "peerDependencies": {
     "@arkpad/core": "*"
-  }
+  },
+  "module": "./dist/index.js"
 }
