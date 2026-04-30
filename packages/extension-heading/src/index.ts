@@ -1,5 +1,11 @@
 import { Extension, ArkpadCommandProps } from "@arkpad/core";
 
+declare module "@arkpad/core" {
+  interface ArkpadCommands {
+    toggleHeading: (attrs: { level: number }) => void;
+  }
+}
+
 export interface HeadingOptions {
   levels: number[];
 }

@@ -1,5 +1,11 @@
 import { Extension, ArkpadCommandProps } from "@arkpad/core";
 
+declare module "@arkpad/core" {
+  interface ArkpadCommands {
+    toggleItalic: () => void;
+  }
+}
+
 export const Italic = Extension.create({
   name: "italic",
 

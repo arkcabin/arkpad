@@ -79,26 +79,70 @@ const editor = new ArkpadEditor({
 });
 ```
 
-## 🎨 Custom Extensions
+## 🌟 Pro Features
 
-Creating extensions is straightforward:
+Arkpad Core includes advanced features for building enterprise-grade editor experiences.
+
+### 1. Typed Commands (Module Augmentation)
+Get full IDE autocompletion for your custom commands by augmenting the `ArkpadCommands` interface.
 
 ```typescript
-import { Extension } from '@arkpad/core';
+// In your extension file
+declare module "@arkpad/core" {
+  interface ArkpadCommands {
+    myCustomCommand: (arg: string) => void;
+  }
+}
 
-const MyExtension = new Extension({
-  name: 'myExtension',
-  addCommands() {
-    return {
-      insertCustom: () => ({ tr, dispatch }) => {
-        if (dispatch) tr.insertText('Custom Text');
-        return true;
+// Usage
+editor.commands.myCustomCommand('hello'); // Fully typed!
+```
+
+### 2. Declarative Interceptors (Performance)
+High-performance transaction middleware that only runs when needed.
+
+```typescript
+const MyExtension = Extension.create({
+  addInterceptors() {
+    return [
+      {
+        on: 'docChanged', // Only runs if document content changes
+        handler: ({ transaction }) => {
+          console.log('Document changed!');
+          return transaction;
+        }
       }
-    }
+    ];
   }
 });
 ```
 
+### 3. Priority & Schema Extensions
+Control the loading order of extensions and modify existing node/mark schemas safely.
+
+```typescript
+const HighPriorityExt = Extension.create({
+  priority: 200, // Default is 100. Higher runs first.
+  
+  extendNodeSchema(nodeName, spec) {
+    if (nodeName === 'paragraph') {
+      // Add custom attributes to all paragraphs
+      return {
+        ...spec,
+        attrs: { ...spec.attrs, myAttr: { default: null } }
+      };
+    }
+    return spec;
+  }
+});
+```
+
+### 4. Lifecycle Hooks
+- `onInit()`: Called when the editor is fully initialized.
+- `onUpdate()`: Called on every content change.
+- `onDestroy()`: Called during editor cleanup.
+
 ---
 
 Built by **ArkCabin**
+

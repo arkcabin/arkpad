@@ -23,6 +23,7 @@ import type {
   ArkpadUpdatePayload,
   ChainedCommands,
   SearchResult,
+  InterceptorConfig,
 } from "./types";
 import { parseContent, resolveEditorOptions } from "./utils";
 
@@ -44,9 +45,7 @@ export class ArkpadEditor implements ArkpadEditorAPI {
   private readonly onTransaction?: ArkpadEditorOptions["onTransaction"];
   private readonly onSelectionUpdate?: ArkpadEditorOptions["onSelectionUpdate"];
   private readonly onPaste?: ArkpadEditorOptions["onPaste"];
-  private interceptors: Array<
-    (props: { editor: ArkpadEditorAPI; transaction: Transaction }) => Transaction | boolean | null
-  > = [];
+  private interceptors: InterceptorConfig[] = [];
   private readonly onInterceptor?: ArkpadEditorOptions["onInterceptor"];
   private readonly onDestroy?: ArkpadEditorOptions["onDestroy"];
   private readonly nodeViews: Record<string, any>;
@@ -74,7 +73,7 @@ export class ArkpadEditor implements ArkpadEditorAPI {
     this.onPaste = resolved.onPaste;
     this.onInterceptor = resolved.onInterceptor;
     if (this.onInterceptor) {
-      this.interceptors.push(this.onInterceptor);
+      this.addInterceptor(this.onInterceptor);
     }
     this.onDestroy = resolved.onDestroy;
     this.nodeViews = resolved.nodeViews;
@@ -104,6 +103,9 @@ export class ArkpadEditor implements ArkpadEditorAPI {
       if (ext.onInterceptor) {
         this.addInterceptor((props) => ext.onInterceptor!(props));
       }
+      if (ext.addInterceptors) {
+        ext.addInterceptors().forEach((config) => this.interceptors.push(config));
+      }
       if (ext.onTransaction) {
         this.transactionHooks.push(ext);
       }
@@ -132,8 +134,12 @@ export class ArkpadEditor implements ArkpadEditorAPI {
         let tr = transaction;
 
         // Run Interceptors (Middleware)
-        for (const interceptor of this.interceptors) {
-          const intercepted = interceptor({ editor: this, transaction: tr });
+        for (const config of this.interceptors) {
+          // Performance Optimization: Skip interceptors that don't match the transaction type
+          if (config.on === "docChanged" && !tr.docChanged) continue;
+          if (config.on === "selectionChanged" && !tr.selectionSet) continue;
+
+          const intercepted = config.handler({ editor: this, transaction: tr });
 
           if (intercepted === false || intercepted === null) {
             return; // Cancel transaction
@@ -758,12 +764,18 @@ export class ArkpadEditor implements ArkpadEditorAPI {
    * Registers a new interceptor.
    */
   addInterceptor(
-    interceptor: (props: {
-      editor: ArkpadEditorAPI;
-      transaction: Transaction;
-    }) => Transaction | boolean | null
+    interceptor:
+      | ((props: {
+          editor: ArkpadEditorAPI;
+          transaction: Transaction;
+        }) => Transaction | boolean | null)
+      | InterceptorConfig
   ) {
-    this.interceptors.push(interceptor);
+    if (typeof interceptor === "function") {
+      this.interceptors.push({ on: "all", handler: interceptor });
+    } else {
+      this.interceptors.push(interceptor);
+    }
   }
 
   /**

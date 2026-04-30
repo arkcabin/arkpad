@@ -16,13 +16,48 @@ export type ArkpadCommandProps = {
   can: () => ChainedCommands;
 };
 
+/**
+ * The global registry for all Arkpad commands.
+ * Extensions should augment this interface to provide autocompletion.
+ */
+export interface ArkpadCommands {
+  /** @internal Internal placeholder to satisfy type safety. */
+  _arkpad_placeholder?: never;
+}
+
+
+
+/**
+ * A utility type that transforms the ArkpadCommands interface into a version
+ * suitable for the command proxy or chaining.
+ */
+export type TypedCommands<T> = {
+  [K in keyof ArkpadCommands]: ArkpadCommands[K] extends (...args: infer A) => any
+    ? (...args: A) => T
+    : never;
+};
+
+
 export type ArkpadCommand =
   | Command
   | ((...args: any[]) => Command)
   | ((...args: any[]) => (props: ArkpadCommandProps) => boolean | Promise<boolean>);
 export type ArkpadCommandRegistry = Record<string, ArkpadCommand>;
 
-export interface ChainedCommands {
+export type InterceptorType = "all" | "docChanged" | "selectionChanged";
+
+export interface InterceptorProps {
+  editor: ArkpadEditorAPI;
+  transaction: Transaction;
+}
+
+export interface InterceptorConfig {
+  on?: InterceptorType;
+  handler: (props: InterceptorProps) => Transaction | boolean | null;
+}
+
+
+export interface ChainedCommands extends TypedCommands<ChainedCommands> {
   /**
    * Focuses the editor at the specified position.
    */
@@ -59,12 +94,8 @@ export interface ChainedCommands {
    * Executes the collected commands.
    */
   run(): boolean;
-
-  /**
-   * Any command registered in the editor can be called here.
-   */
-  [key: string]: any;
 }
+
 
 export interface ExtensionContext<Options = any, Storage = any> {
   editor: ArkpadEditorAPI;
@@ -79,6 +110,7 @@ export interface ExtensionConfig<Options = any, Storage = any> {
   name: string;
   priority?: number;
   addOptions?: () => Options;
+
   addStorage?: (this: ExtensionContext<Options, Storage>) => Storage;
   addGlobalAttributes?: (this: ExtensionContext<Options, Storage>) => {
     types: string[];
@@ -92,7 +124,18 @@ export interface ExtensionConfig<Options = any, Storage = any> {
     >;
   }[];
   addNodes?: (this: ExtensionContext<Options, Storage>) => Record<string, any>;
+  extendNodeSchema?: (
+    this: ExtensionContext<Options, Storage>,
+    nodeName: string,
+    spec: any
+  ) => any;
   addMarks?: (this: ExtensionContext<Options, Storage>) => Record<string, any>;
+  extendMarkSchema?: (
+    this: ExtensionContext<Options, Storage>,
+    markName: string,
+    spec: any
+  ) => any;
+
   addCommands?: (this: ExtensionContext<Options, Storage>) => Partial<ArkpadCommandRegistry>;
   addKeyboardShortcuts?: (
     this: ExtensionContext<Options, Storage>,
@@ -112,10 +155,16 @@ export interface ExtensionConfig<Options = any, Storage = any> {
     this: ExtensionContext<Options, Storage>,
     props: { editor: ArkpadEditorAPI; transaction: Transaction }
   ) => void;
+  addInterceptors?: (this: ExtensionContext<Options, Storage>) => InterceptorConfig[];
   onInterceptor?: (
     this: ExtensionContext<Options, Storage>,
     props: { editor: ArkpadEditorAPI; transaction: Transaction }
   ) => Transaction | boolean | null;
+
+  /**
+   * Called when the editor is initialized.
+   */
+  onInit?: (this: ExtensionContext<Options, Storage>) => void;
   /**
    * Called when the editor is destroyed.
    * Use this to clear timers, remove event listeners, or close connections.
@@ -128,8 +177,12 @@ export interface ArkpadExtension {
   name: string;
   id?: string;
   init?: (editor: ArkpadEditorAPI) => void;
+  priority?: number;
   addNodes?: () => Record<string, any>;
+  extendNodeSchema?: (nodeName: string, spec: any) => any;
   addMarks?: () => Record<string, any>;
+  extendMarkSchema?: (markName: string, spec: any) => any;
+
   addGlobalAttributes?: () => any[];
   addCommands?: () => Partial<ArkpadCommandRegistry>;
   addKeyboardShortcuts?: (schema: any) => Record<string, any>;
@@ -144,10 +197,15 @@ export interface ArkpadExtension {
   activeMapping?: Record<string, string>;
   onUpdate?: (props: { editor: ArkpadEditorAPI }) => void;
   onTransaction?: (props: { editor: ArkpadEditorAPI; transaction: Transaction }) => void;
+  addInterceptors?: () => InterceptorConfig[];
   onInterceptor?: (props: {
     editor: ArkpadEditorAPI;
     transaction: Transaction;
   }) => Transaction | boolean | null;
+  /**
+   * Called when the editor is initialized.
+   */
+  onInit?: () => void;
   /**
    * Called when the editor is destroyed.
    */
@@ -246,7 +304,7 @@ export interface SearchResult {
   text: string;
 }
 
-export type ArkpadCommandProxy = Record<string, (...args: any[]) => boolean>;
+export type ArkpadCommandProxy = TypedCommands<boolean> & Record<string, (...args: any[]) => boolean>;
 
 export interface ArkpadEditorAPI {
   readonly element: HTMLElement;

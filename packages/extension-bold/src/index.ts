@@ -1,6 +1,12 @@
 import { Extension, ArkpadCommandProps } from "@arkpad/core";
 import { toggleMark } from "@arkpad/core";
 
+declare module "@arkpad/core" {
+  interface ArkpadCommands {
+    toggleBold: () => void;
+  }
+}
+
 export const Bold = Extension.create({
   name: "bold",
 

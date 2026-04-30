@@ -8,7 +8,8 @@ import { parseContent } from "./utils";
  * CommandManager handles the chaining of commands in a single transaction.
  * Stateless Singleton architecture for zero-latency execution.
  */
-export class CommandManager implements ChainedCommands {
+class CommandManagerInstance {
+
   private view?: EditorView;
   private commands: ArkpadCommandRegistry;
   private dispatch?: (tr: Transaction) => void;
@@ -112,8 +113,9 @@ export class CommandManager implements ChainedCommands {
       tr.setSelection(selection);
       return true;
     });
-    return this;
+    return this as unknown as ChainedCommands;
   }
+
 
   public insertContent(
     content: ArkpadContent,
@@ -125,24 +127,27 @@ export class CommandManager implements ChainedCommands {
       tr.replaceSelection(slice);
       return true;
     });
-    return this;
+    return this as unknown as ChainedCommands;
   }
+
 
   public scrollIntoView(): ChainedCommands {
     this.callbacks.push(({ tr }) => {
       tr.scrollIntoView();
       return true;
     });
-    return this;
+    return this as unknown as ChainedCommands;
   }
+
 
   public setMeta(key: any, value: any): ChainedCommands {
     this.callbacks.push(({ tr }) => {
       tr.setMeta(key, value);
       return true;
     });
-    return this;
+    return this as unknown as ChainedCommands;
   }
+
 
   public command(
     fn: (props: {
@@ -155,8 +160,9 @@ export class CommandManager implements ChainedCommands {
     this.callbacks.push(({ state, tr, view }) => {
       return fn({ state, tr, view });
     });
-    return this;
+    return this as unknown as ChainedCommands;
   }
+
 
   public run(): boolean {
     if (!this.view && !this.dispatch) {
@@ -209,3 +215,19 @@ export class CommandManager implements ChainedCommands {
     return allSuccessful;
   }
 }
+
+/**
+ * Type-safe export for CommandManager.
+ * Uses a casted constructor to satisfy both the Proxy runtime behavior
+ * and the augmented ChainedCommands interface.
+ */
+export const CommandManager = CommandManagerInstance as unknown as {
+  new (options: {
+    state: EditorState;
+    commands: ArkpadCommandRegistry;
+    view?: EditorView;
+    dispatch?: (tr: Transaction) => void;
+    shouldDispatch?: boolean;
+    schema: Schema;
+  }): CommandManagerInstance & ChainedCommands;
+};

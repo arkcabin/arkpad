@@ -53,6 +53,9 @@ export class ExtensionManager {
 
     flattenExtensions(extensions);
 
+    // Sort by priority (Higher first)
+    allExtensions.sort((a, b) => (b.priority ?? 100) - (a.priority ?? 100));
+
     // Performance: Reset and rebuild flat mapping cache
     this.activeMappings = {};
 

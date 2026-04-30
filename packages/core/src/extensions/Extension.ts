@@ -4,6 +4,7 @@ import {
   ExtensionContext,
   ArkpadCommandRegistry,
   ArkpadEditorAPI,
+  InterceptorConfig,
 } from "../types";
 import { type Schema } from "prosemirror-model";
 import { Plugin, Transaction } from "prosemirror-state";
@@ -19,6 +20,7 @@ export class Extension<Options = any, Storage = any> implements ArkpadExtension 
   public parent?: Extension;
   public options: Options = {} as Options;
   public storage: Storage = {} as Storage;
+  public priority: number = 100;
   public editor: ArkpadEditorAPI | null = null;
   public utils!: Record<string, any>;
   public activeMapping?: Record<string, string>;
@@ -31,6 +33,10 @@ export class Extension<Options = any, Storage = any> implements ArkpadExtension 
     // Initialize activeMapping from config
     if (config.activeMapping) {
       this.activeMapping = config.activeMapping;
+    }
+
+    if (config.priority !== undefined) {
+      this.priority = config.priority;
     }
 
     // Pre-initialize options from config so they are available before init()
@@ -98,6 +104,15 @@ export class Extension<Options = any, Storage = any> implements ArkpadExtension 
         this.storage = storage;
       }
     }
+
+    this.onInit();
+  }
+
+  /**
+   * Called when the editor is initialized.
+   */
+  onInit() {
+    this.config.onInit?.call(this.createContext());
   }
 
   /**
@@ -133,9 +148,18 @@ export class Extension<Options = any, Storage = any> implements ArkpadExtension 
     return this.config.addNodes?.call(this.createContext()) || {};
   }
 
+  extendNodeSchema(nodeName: string, spec: any) {
+    return this.config.extendNodeSchema?.call(this.createContext(), nodeName, spec) || spec;
+  }
+
   addMarks() {
     return this.config.addMarks?.call(this.createContext()) || {};
   }
+
+  extendMarkSchema(markName: string, spec: any) {
+    return this.config.extendMarkSchema?.call(this.createContext(), markName, spec) || spec;
+  }
+
 
   addCommands(): Partial<ArkpadCommandRegistry> {
     return this.config.addCommands?.call(this.createContext()) || {};
@@ -167,6 +191,10 @@ export class Extension<Options = any, Storage = any> implements ArkpadExtension 
 
   onTransaction(props: { editor: ArkpadEditorAPI; transaction: Transaction }) {
     this.config.onTransaction?.call(this.createContext(), props);
+  }
+
+  addInterceptors(): InterceptorConfig[] {
+    return this.config.addInterceptors?.call(this.createContext()) || [];
   }
 
   onInterceptor(props: {

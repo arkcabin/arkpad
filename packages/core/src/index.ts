@@ -8,6 +8,7 @@ export type {
   ArkpadCommandRegistry,
   ArkpadCommandProps,
   ArkpadCommandProxy,
+  ArkpadCommands,
   ArkpadExtension,
   ArkpadContent,
   ArkpadDocJSON,

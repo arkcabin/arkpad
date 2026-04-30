@@ -2,6 +2,16 @@ import { Extension, ArkpadCommandProps } from "@arkpad/core";
 import { toggleMark, toggleBlock, toggleList, setTextAlign } from "./utils";
 import { type MarkType, type NodeType } from "prosemirror-model";
 
+declare module "@arkpad/core" {
+  interface ArkpadCommands {
+    toggleMark: (type: string | MarkType, attrs?: Record<string, any>) => void;
+    toggleBlock: (type: string | NodeType, attrs?: Record<string, any>) => void;
+    toggleList: (listType: string | NodeType, itemType: string | NodeType) => void;
+    setTextAlign: (align: string) => void;
+    insertNode: (type: string | NodeType, attrs?: Record<string, any>) => void;
+  }
+}
+
 export const BaseCommands = Extension.create({
   name: "baseCommands",
 

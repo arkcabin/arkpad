@@ -73,6 +73,20 @@ export class SchemaBuilder {
       }
     });
 
+    // Apply Schema Extensions
+    allExtensions.forEach((ext) => {
+      if (ext.extendNodeSchema) {
+        nodes.forEach((spec: any, name: string) => {
+          nodes = nodes.update(name, ext.extendNodeSchema!(name, spec));
+        });
+      }
+      if (ext.extendMarkSchema) {
+        marks.forEach((spec: any, name: string) => {
+          marks = marks.update(name, ext.extendMarkSchema!(name, spec));
+        });
+      }
+    });
+
     // Apply Global Attributes
     const globalAttributes = this.collectGlobalAttributes(allExtensions);
 
