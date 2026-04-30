@@ -158,7 +158,11 @@ export function toggleBlock(type: any, attrs: Record<string, any> = {}) {
       if (type.name === "blockquote") {
         return lift(state, dispatch);
       }
-      return setBlockType(state.schema.nodes.paragraph!, {
+
+      const paragraph = state.schema.nodes.paragraph;
+      if (!paragraph) return false;
+
+      return setBlockType(paragraph, {
         align: $from.parent.attrs.align || "left",
       })(state, dispatch);
     }

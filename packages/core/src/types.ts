@@ -217,9 +217,18 @@ export interface ResolvedArkpadEditorOptions extends Omit<
 export interface ArkpadUpdatePayload {
   editor: ArkpadEditorAPI;
   state: EditorState;
-  html: string;
-  json: ArkpadDocJSON;
-  text: string;
+  /**
+   * @deprecated Use editor.getHTML() instead for better performance.
+   */
+  html?: string;
+  /**
+   * @deprecated Use editor.getJSON() instead for better performance.
+   */
+  json?: ArkpadDocJSON;
+  /**
+   * @deprecated Use editor.getText() instead for better performance.
+   */
+  text?: string;
 }
 
 export interface SearchResult {

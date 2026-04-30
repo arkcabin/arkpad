@@ -49,13 +49,14 @@ export class ExtensionManager {
 
     flattenExtensions(extensions);
 
+    // Performance: Reset and rebuild flat mapping cache
+    this.activeMappings = {};
+
     for (const extension of allExtensions) {
       this.extensions.push(extension);
       // Register active mappings if they exist
       if (extension.activeMapping) {
-        for (const [command, target] of Object.entries(extension.activeMapping)) {
-          this.activeMappings[command] = target;
-        }
+        Object.assign(this.activeMappings, extension.activeMapping);
       }
     }
     this.rebuild();
@@ -75,8 +76,6 @@ export class ExtensionManager {
       };
     const builder = new SchemaBuilder(this.extensions);
     this.schema = builder.build();
-
-    console.log("[Arkpad] Schema Rebuilt. Marks:", Object.keys(this.schema.marks));
 
     this.commands = this.collectCommands() as unknown as ArkpadCommandRegistry;
     this.keyboardShortcuts = this.collectKeyboardShortcuts(this.schema);

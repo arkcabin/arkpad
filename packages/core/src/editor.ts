@@ -57,6 +57,10 @@ export class ArkpadEditor implements ArkpadEditorAPI {
   private destroyed = false;
   private listeners = new Set<(editor: ArkpadEditorAPI) => void>();
 
+  // Performance: Pre-indexed hooks to avoid iterating all extensions on every transaction
+  private transactionHooks: ArkpadExtension[] = [];
+  private updateHooks: ArkpadExtension[] = [];
+
   constructor(options: ArkpadEditorOptions) {
     const resolved = resolveEditorOptions(options);
 
@@ -87,7 +91,7 @@ export class ArkpadEditor implements ArkpadEditorAPI {
 
     this.extensionManager = extensionManager;
 
-    // 3. Boot Extensions (Inject Editor and Setup Storage)
+    // 3. Boot Extensions & Index Hooks (Performance Optimization)
     this.storage = {};
     extensionManager.extensions.forEach((ext) => {
       if (ext.init) {
@@ -98,6 +102,12 @@ export class ArkpadEditor implements ArkpadEditorAPI {
       }
       if (ext.onInterceptor) {
         this.addInterceptor((props) => ext.onInterceptor!(props));
+      }
+      if (ext.onTransaction) {
+        this.transactionHooks.push(ext);
+      }
+      if (ext.onUpdate) {
+        this.updateHooks.push(ext);
       }
     });
 
@@ -133,12 +143,10 @@ export class ArkpadEditor implements ArkpadEditorAPI {
         // Call onTransaction hook
         this.onTransaction?.({ editor: this, transaction: tr });
 
-        // Trigger onTransaction lifecycle for all extensions
-        this.extensionManager.extensions.forEach((ext) => {
-          if (ext.onTransaction) {
-            ext.onTransaction({ editor: this, transaction: tr });
-          }
-        });
+        // Trigger onTransaction lifecycle for indexed extensions ONLY (Fast Path)
+        for (const ext of this.transactionHooks) {
+          ext.onTransaction!({ editor: this, transaction: tr });
+        }
 
         // Trigger onSelectionUpdate if selection changed
         if (tr.selectionSet && this.onSelectionUpdate) {
@@ -152,12 +160,10 @@ export class ArkpadEditor implements ArkpadEditorAPI {
         const nextState = this.view.state.apply(tr);
         this.view.updateState(nextState);
 
-        // Trigger onUpdate lifecycle for all extensions
-        this.extensionManager.extensions.forEach((ext) => {
-          if (ext.onUpdate) {
-            ext.onUpdate({ editor: this });
-          }
-        });
+        // Trigger onUpdate lifecycle for indexed extensions ONLY (Fast Path)
+        for (const ext of this.updateHooks) {
+          ext.onUpdate!({ editor: this });
+        }
 
         this.emitUpdate(nextState);
       },
@@ -193,26 +199,14 @@ export class ArkpadEditor implements ArkpadEditorAPI {
     plugins.push(
       new Plugin({
         appendTransaction: (transactions, oldState, newState) => {
-          // If any transaction changed the doc structure (not just marks)
-          // we might want to deactivate painting tools.
-
-          const hasStructuralChange = transactions.some((tr) => {
-            // Check if any step in the transaction is NOT a Mapping/Mark step
-            // or if the transaction is explicitly marked for deactivation.
-            // tr.docChanged is true if nodes were added/removed/replaced.
-
-            return (
-              (tr.docChanged &&
-                !tr.getMeta("highlighter-tool-apply") &&
-                !tr.getMeta("eraser-tool-apply")) ||
-              tr.getMeta("deactivate-painting-tools") === true
-            );
-          });
+          // Optimization: Skip if no structural changes
+          const hasStructuralChange = transactions.some(
+            (tr) => tr.docChanged || tr.getMeta("deactivate-painting-tools") === true
+          );
 
           if (hasStructuralChange) {
             const tr = newState.tr;
             tr.setMeta("deactivate-painting-tools", true);
-            // Also explicitly unset the plugin states just in case
             tr.setMeta(highlighterToolPluginKey, false);
             tr.setMeta(eraserToolPluginKey, false);
             return tr;
@@ -239,7 +233,14 @@ export class ArkpadEditor implements ArkpadEditorAPI {
     });
     this.view.updateState(nextState);
 
-    // CRITICAL: Immediately notify React subscribers that the schema/state has been hot-reloaded
+    // Performance: Re-index hooks on refresh
+    this.transactionHooks = [];
+    this.updateHooks = [];
+    this.extensionManager.extensions.forEach((ext) => {
+      if (ext.onTransaction) this.transactionHooks.push(ext);
+      if (ext.onUpdate) this.updateHooks.push(ext);
+    });
+
     this.emitUpdate(nextState);
 
     return nextState;
@@ -249,9 +250,8 @@ export class ArkpadEditor implements ArkpadEditorAPI {
     const payload: ArkpadUpdatePayload = {
       editor: this,
       state,
-      html: this.getHTML(),
-      json: this.getJSON(),
-      text: this.getText(),
+      // Performance: DO NOT call getHTML() or getJSON() here.
+      // They are expensive and cause the UI to hang.
     };
 
     this.onUpdate?.(payload);

@@ -45,6 +45,28 @@ The `EditorButton` now automatically detects active states using the Engine's sm
 <EditorButton command="toggleBold" />
 ```
 
+## Saving Content (The Performance-First Way)
+
+To maintain ultra-fast performance, Arkpad does not serialize the document to HTML/JSON on every keypress. Instead, we recommend saving content when the user stops typing (debounced) or when the editor loses focus.
+
+```typescript
+const editor = useArkpadEditor({
+  extensions: [StarterKit],
+  onUpdate: ({ editor }) => {
+    // DO NOT: console.log(editor.getHTML()) here!
+    // It will cause typing lag on large documents.
+  },
+});
+
+// THE RIGHT WAY: Debounce your save function
+const handleSave = debounce(() => {
+  const html = editor.getHTML();
+  saveToDatabase(html);
+}, 2000);
+```
+
+For more details on why this is necessary, see the [Performance Architecture Guide](../architecture/PERFORMANCE.md).
+
 ## How it works (Smart Mapping)
 
 Extensions now declare an `activeMapping`. For example, the Bold extension defines:

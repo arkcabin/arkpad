@@ -57,25 +57,8 @@ export class CommandManager implements ChainedCommands {
             const result = (command as any)(...args);
 
             if (typeof result === "function") {
-              // Create a sub-chain that uses the master transaction
-              const subChain = new CommandManager({
-                state,
-                commands: this.commands,
-                view,
-                dispatch: (tr2: Transaction) => {
-                  // Apply steps from the sub-transaction to our master transaction
-                  tr2.steps.forEach((step) => {
-                    try {
-                      tr.step(step);
-                    } catch (e) {
-                      console.warn("[Arkpad] Step apply failed:", e);
-                    }
-                  });
-                },
-                shouldDispatch: false, // Don't dispatch - we're building the master tr
-                schema: this.schema,
-              });
-
+              // DX Optimization: Provide the current manager instance as the 'chain'
+              // to avoid object allocation overhead in long chains.
               const props = {
                 state,
                 dispatch: (tr2: Transaction) => {
@@ -90,16 +73,14 @@ export class CommandManager implements ChainedCommands {
                 view,
                 tr,
                 editor: undefined as any,
-                chain: () => subChain,
+                chain: () => this,
                 can: () => undefined as any,
               };
 
               try {
-                // Try passing as ProseMirror command first (state, dispatch, view)
                 if (result.length >= 2) {
                   return result(state, props.dispatch, view);
                 }
-                // Otherwise, pass as Arkpad Thunk (props)
                 return result(props);
               } catch (e) {
                 console.warn("[Arkpad] Cmd failed:", e);
