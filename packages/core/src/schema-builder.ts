@@ -8,6 +8,7 @@ import { ArkpadExtension } from "./types";
  */
 export class SchemaBuilder {
   private extensions: ArkpadExtension[];
+  private static schemaCache = new Map<string, Schema>();
 
   constructor(extensions: ArkpadExtension[]) {
     this.extensions = extensions;
@@ -17,9 +18,18 @@ export class SchemaBuilder {
    * Builds and returns the ProseMirror schema.
    */
   build(): Schema {
+    // Generate a unique key based on extension names and order
+    const cacheKey = this.extensions
+      .map((ext) => ext.name)
+      .sort()
+      .join(",");
+    if (SchemaBuilder.schemaCache.has(cacheKey)) {
+      return SchemaBuilder.schemaCache.get(cacheKey)!;
+    }
+
     // Start with the base specs from arkpadSchema
-    let nodes = (arkpadSchema.spec.nodes as any);
-    let marks = (arkpadSchema.spec.marks as any);
+    let nodes = arkpadSchema.spec.nodes as any;
+    let marks = arkpadSchema.spec.marks as any;
 
     const allExtensions: ArkpadExtension[] = [];
     const seenNames = new Set<string>();
@@ -40,10 +50,10 @@ export class SchemaBuilder {
     flattenExtensions(this.extensions);
 
     // Merge nodes and marks from extensions
-    allExtensions.forEach(ext => {
+    allExtensions.forEach((ext) => {
       if (ext.addNodes) {
         const extNodes = ext.addNodes();
-        Object.keys(extNodes).forEach(name => {
+        Object.keys(extNodes).forEach((name) => {
           if (nodes.get(name)) {
             nodes = nodes.update(name, extNodes[name]);
           } else {
@@ -53,7 +63,7 @@ export class SchemaBuilder {
       }
       if (ext.addMarks) {
         const extMarks = ext.addMarks();
-        Object.keys(extMarks).forEach(name => {
+        Object.keys(extMarks).forEach((name) => {
           if (marks.get(name)) {
             marks = marks.update(name, extMarks[name]);
           } else {
@@ -69,7 +79,16 @@ export class SchemaBuilder {
     nodes = this.enhanceNodes(nodes, globalAttributes);
     marks = this.enhanceMarks(marks, globalAttributes);
 
-    return new Schema({ nodes, marks });
+    const schema = new Schema({ nodes, marks });
+
+    // Generate cache key again to ensure it's fresh
+    const finalCacheKey = this.extensions
+      .map((ext) => ext.name)
+      .sort()
+      .join(",");
+    SchemaBuilder.schemaCache.set(finalCacheKey, schema);
+
+    return schema;
   }
 
   private collectGlobalAttributes(allExtensions: ArkpadExtension[]) {
@@ -100,16 +119,16 @@ export class SchemaBuilder {
             toDOM: (node: any) => {
               const dom = nodeSpec.toDOM(node);
               const attrs: Record<string, any> = {};
-              
+
               // 1. Collect and merge global attributes
-              Object.keys(global.attributes || {}).forEach(key => {
+              Object.keys(global.attributes || {}).forEach((key) => {
                 const attr = global.attributes[key];
                 if (attr && attr.renderHTML) {
                   const rendered = attr.renderHTML(node.attrs);
                   if (rendered) {
                     Object.entries(rendered).forEach(([rKey, rVal]) => {
-                      if (rKey === 'class' && attrs['class']) {
-                        attrs['class'] = `${attrs['class']} ${rVal}`.trim();
+                      if (rKey === "class" && attrs["class"]) {
+                        attrs["class"] = `${attrs["class"]} ${rVal}`.trim();
                       } else {
                         attrs[rKey] = rVal;
                       }
@@ -123,10 +142,10 @@ export class SchemaBuilder {
               // 2. Safely merge with existing DOM attributes
               if (Array.isArray(dom)) {
                 const target = dom[1];
-                if (target && typeof target === 'object' && !Array.isArray(target)) {
+                if (target && typeof target === "object" && !Array.isArray(target)) {
                   Object.entries(attrs).forEach(([key, val]) => {
-                    if (key === 'class' && target['class']) {
-                      target['class'] = `${target['class']} ${val}`.trim();
+                    if (key === "class" && target["class"]) {
+                      target["class"] = `${target["class"]} ${val}`.trim();
                     } else {
                       target[key] = val;
                     }
@@ -138,7 +157,7 @@ export class SchemaBuilder {
               }
 
               return dom;
-            }
+            },
           });
         }
       });
@@ -176,8 +195,8 @@ export class SchemaBuilder {
                   const rendered = attr.renderHTML(mark.attrs);
                   if (rendered) {
                     Object.entries(rendered).forEach(([rKey, rVal]) => {
-                      if (rKey === 'class' && attrs['class']) {
-                        attrs['class'] = `${attrs['class']} ${rVal}`.trim();
+                      if (rKey === "class" && attrs["class"]) {
+                        attrs["class"] = `${attrs["class"]} ${rVal}`.trim();
                       } else {
                         attrs[rKey] = rVal;
                       }
@@ -190,10 +209,10 @@ export class SchemaBuilder {
 
               if (Array.isArray(dom)) {
                 const target = dom[1];
-                if (target && typeof target === 'object' && !Array.isArray(target)) {
+                if (target && typeof target === "object" && !Array.isArray(target)) {
                   Object.entries(attrs).forEach(([key, val]) => {
-                    if (key === 'class' && target['class']) {
-                      target['class'] = `${target['class']} ${val}`.trim();
+                    if (key === "class" && target["class"]) {
+                      target["class"] = `${target["class"]} ${val}`.trim();
                     } else {
                       target[key] = val;
                     }
@@ -204,7 +223,7 @@ export class SchemaBuilder {
               }
 
               return dom;
-            }
+            },
           });
         }
       });

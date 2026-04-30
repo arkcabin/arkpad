@@ -27,19 +27,19 @@ export type UseArkpadEditorOptions = {
 
 /**
  * A hook to create and manage an Arkpad editor instance in React.
- * It handles the lifecycle of the editor and provides a reactive API.
- *
- * NOTE: This hook only triggers a re-render when the editor is created or destroyed.
- * For reactive selection/state updates, use the `useEditorState` hook inside sub-components.
  */
 export function useArkpadEditor(options: UseArkpadEditorOptions = {}) {
   const [editor, setEditor] = useState<ArkpadEditorAPI | null>(null);
 
-  // Use a ref to store the editor instance to avoid closure issues in callbacks
+  // Use refs to avoid closure issues and infinite loops
   const editorRef = useRef<ArkpadEditorAPI | null>(null);
+  const isMounted = useRef(true);
+  const initialContentApplied = useRef(false);
 
   useEffect(() => {
-    // Prevent double initialization in strict mode
+    isMounted.current = true;
+
+    // Prevent double initialization in React Strict Mode
     if (editorRef.current) return;
 
     const nodeViews: Record<string, NodeViewConstructor> = {
@@ -50,31 +50,53 @@ export function useArkpadEditor(options: UseArkpadEditorOptions = {}) {
       nodeViews.taskItem = TaskView;
     }
 
-    const instance = new ArkpadEditor({
-      ...options,
-      nodeViews,
-      element: document.createElement("div"),
-      onUpdate: (payload) => {
-        // We no longer pulse the state here!
-        // This makes the editor "Super Light" and avoids parent re-renders.
-        options.onUpdate?.(payload);
-      },
-    });
+    // Initialize editor asynchronously to avoid blocking the initial paint
+    const timeout = setTimeout(() => {
+      if (!isMounted.current) return;
 
-    editorRef.current = instance;
-    setEditor(instance);
-    options.onCreate?.(instance);
+      const container = document.createElement("div");
+      container.className = "arkpad-editor-wrapper";
+
+      const instance = new ArkpadEditor({
+        ...options,
+        nodeViews,
+        element: container,
+        onUpdate: (payload) => {
+          options.onUpdate?.(payload);
+        },
+      });
+
+      editorRef.current = instance;
+      setEditor(instance);
+      options.onCreate?.(instance);
+
+      // We mark initial content as applied immediately on boot
+      initialContentApplied.current = true;
+    }, 0);
 
     return () => {
-      instance.destroy();
-      editorRef.current = null;
+      isMounted.current = false;
+      clearTimeout(timeout);
+      if (editorRef.current) {
+        editorRef.current.destroy();
+
+        // Clean up DOM element
+        if (editorRef.current.element) {
+          editorRef.current.element.remove();
+        }
+
+        editorRef.current = null;
+        setEditor(null);
+      }
     };
-  }, []); // Only run once on mount
+  }, []);
 
-  // Sync content when it changes from outside
+  // Sync content only if it changes from OUTSIDE and after initial boot
   useEffect(() => {
-    if (!editor || options.content === undefined) return;
+    if (!editor || !initialContentApplied.current || options.content === undefined) return;
 
+    // We only sync if the content is truly different.
+    // This prevents the "Infinite Loop" caused by lazy update payloads.
     const isHtmlContent = typeof options.content === "string";
 
     if (isHtmlContent) {

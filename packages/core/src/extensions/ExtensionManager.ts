@@ -21,10 +21,14 @@ export class ExtensionManager {
   public pasteRules: Plugin[] = [];
   public proseMirrorPlugins: Plugin[] = [];
   public activeMappings: Record<string, string> = {};
+  private isBatching = false;
 
   constructor(schema: Schema, extensions: ArkpadExtension[] = []) {
     this.schema = schema;
+    this.isBatching = true;
     this.registerExtensions(extensions);
+    this.isBatching = false;
+    this.rebuild();
   }
 
   /**
@@ -59,7 +63,10 @@ export class ExtensionManager {
         Object.assign(this.activeMappings, extension.activeMapping);
       }
     }
-    this.rebuild();
+
+    if (!this.isBatching) {
+      this.rebuild();
+    }
   }
 
   /**

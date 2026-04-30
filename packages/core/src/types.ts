@@ -116,6 +116,11 @@ export interface ExtensionConfig<Options = any, Storage = any> {
     this: ExtensionContext<Options, Storage>,
     props: { editor: ArkpadEditorAPI; transaction: Transaction }
   ) => Transaction | boolean | null;
+  /**
+   * Called when the editor is destroyed.
+   * Use this to clear timers, remove event listeners, or close connections.
+   */
+  onDestroy?: (this: ExtensionContext<Options, Storage>) => void;
   [key: string]: any;
 }
 
@@ -143,6 +148,10 @@ export interface ArkpadExtension {
     editor: ArkpadEditorAPI;
     transaction: Transaction;
   }) => Transaction | boolean | null;
+  /**
+   * Called when the editor is destroyed.
+   */
+  onDestroy?: () => void;
   storage?: any;
   options?: any;
   extend?: (config: Partial<ExtensionConfig>) => ArkpadExtension;

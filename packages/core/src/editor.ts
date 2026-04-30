@@ -60,6 +60,7 @@ export class ArkpadEditor implements ArkpadEditorAPI {
   // Performance: Pre-indexed hooks to avoid iterating all extensions on every transaction
   private transactionHooks: ArkpadExtension[] = [];
   private updateHooks: ArkpadExtension[] = [];
+  private destroyHooks: ArkpadExtension[] = [];
 
   constructor(options: ArkpadEditorOptions) {
     const resolved = resolveEditorOptions(options);
@@ -108,6 +109,9 @@ export class ArkpadEditor implements ArkpadEditorAPI {
       }
       if (ext.onUpdate) {
         this.updateHooks.push(ext);
+      }
+      if (ext.onDestroy) {
+        this.destroyHooks.push(ext);
       }
     });
 
@@ -328,11 +332,13 @@ export class ArkpadEditor implements ArkpadEditorAPI {
         return result(lastArg);
       }
 
+      // Performance: Always use fresh state from view
+      const state = this.view.state;
       const props = {
-        state: this.view.state,
+        state,
         dispatch: this.view.dispatch,
         view: this.view,
-        tr: this.view.state.tr,
+        tr: state.tr,
         editor: this,
         chain: () => this.chain(),
         can: () => this.can(),
@@ -768,6 +774,12 @@ export class ArkpadEditor implements ArkpadEditorAPI {
 
     this.destroyed = true;
     this.listeners.clear();
+
+    // Call onDestroy lifecycle for all indexed extensions
+    for (const ext of this.destroyHooks) {
+      ext.onDestroy!();
+    }
+
     this.view.destroy();
     this.onDestroy?.(this);
   }

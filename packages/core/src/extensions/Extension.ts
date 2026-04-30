@@ -175,4 +175,8 @@ export class Extension<Options = any, Storage = any> implements ArkpadExtension 
   }): Transaction | boolean | null {
     return this.config.onInterceptor?.call(this.createContext(), props) ?? props.transaction;
   }
+
+  onDestroy() {
+    this.config.onDestroy?.call(this.createContext());
+  }
 }

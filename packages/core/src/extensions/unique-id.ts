@@ -86,6 +86,13 @@ export const UniqueId = Extension.create({
     };
   },
 
+  addStorage() {
+    return {
+      idleScanTimer: null as any,
+      lastDocSize: 0,
+    };
+  },
+
   addGlobalAttributes() {
     const { attributeName, types } = this.options;
 
@@ -96,8 +103,7 @@ export const UniqueId = Extension.create({
           [attributeName]: {
             default: null,
             parseHTML: (element: HTMLElement) =>
-              element.getAttribute(attributeName) ||
-              element.getAttribute(`data-${attributeName}`),
+              element.getAttribute(attributeName) || element.getAttribute(`data-${attributeName}`),
             renderHTML: (attributes: Record<string, any>) => {
               if (!attributes[attributeName]) return {};
               return {
@@ -111,57 +117,37 @@ export const UniqueId = Extension.create({
     ];
   },
 
-  addProseMirrorPlugins() {
+  onInit() {
     const { attributeName, types, generateId, idleScanInterval } = this.options;
 
-    let idleScanTimer: ReturnType<typeof setInterval> | null = null;
-    let pendingIdleScan = false;
-    let lastDocSize = 0;
+    // Performance: Only start timer if we are in the browser
+    if (typeof window === "undefined") return;
 
-    const scheduleIdleScan = (editorView: EditorView) => {
-      if (pendingIdleScan) return;
-      pendingIdleScan = true;
+    this.storage.idleScanTimer = setInterval(() => {
+      const view = this.editor?.getView() as EditorView;
+      if (!view || (view as any).isDestroyed) return;
 
-      if ("requestIdleCallback" in window) {
-        requestIdleCallback(
-          () => {
-            pendingIdleScan = false;
-            if ((editorView as any).isDestroyed) return;
-            const tr = editorView.state.tr;
-            if (scanDocForIds(tr, editorView.state.doc, attributeName, types, generateId)) {
-              editorView.dispatch(tr);
-            }
-          },
-          { timeout: 2000 }
-        );
-      } else {
-        setTimeout(() => {
-          pendingIdleScan = false;
-          if ((editorView as any).isDestroyed) return;
-          const tr = editorView.state.tr;
-          if (scanDocForIds(tr, editorView.state.doc, attributeName, types, generateId)) {
-            editorView.dispatch(tr);
-          }
-        }, 100);
+      const docSize = view.state.doc.content.size;
+      if (docSize === this.storage.lastDocSize) return;
+
+      this.storage.lastDocSize = docSize;
+
+      const tr = view.state.tr;
+      if (scanDocForIds(tr, view.state.doc, attributeName, types, generateId)) {
+        view.dispatch(tr);
       }
-    };
+    }, idleScanInterval);
+  },
 
-    const startIdleScan = (editorView: EditorView) => {
-      if (idleScanTimer) clearInterval(idleScanTimer);
-      idleScanTimer = setInterval(() => {
-        if ((editorView as any).isDestroyed) return;
-        if (editorView.state.doc.content.size === lastDocSize) return;
-        lastDocSize = editorView.state.doc.content.size;
-        scheduleIdleScan(editorView);
-      }, idleScanInterval);
-    };
+  onDestroy() {
+    if (this.storage.idleScanTimer) {
+      clearInterval(this.storage.idleScanTimer);
+      this.storage.idleScanTimer = null;
+    }
+  },
 
-    const stopIdleScan = () => {
-      if (idleScanTimer) {
-        clearInterval(idleScanTimer);
-        idleScanTimer = null;
-      }
-    };
+  addProseMirrorPlugins() {
+    const { attributeName, types, generateId } = this.options;
 
     return [
       new Plugin({
@@ -182,15 +168,7 @@ export const UniqueId = Extension.create({
               map.forEach((_from: number, _to: number, newFrom: number, newTo: number) => {
                 newState.doc.nodesBetween(newFrom, newTo, (node: PMNode, pos: number) => {
                   if (
-                    ensureUniqueId(
-                      tr,
-                      newState.doc,
-                      pos,
-                      attributeName,
-                      types,
-                      generateId,
-                      seenIds
-                    )
+                    ensureUniqueId(tr, newState.doc, pos, attributeName, types, generateId, seenIds)
                   ) {
                     modified = true;
                   }
@@ -200,48 +178,7 @@ export const UniqueId = Extension.create({
             });
           });
 
-          if (modified) {
-            lastDocSize = newState.doc.content.size;
-          }
-
           return modified ? tr : null;
-        },
-
-        view(editorView) {
-          requestAnimationFrame(() => {
-            if ((editorView as any).isDestroyed) return;
-
-            const tr = editorView.state.tr;
-            if (scanDocForIds(tr, editorView.state.doc, attributeName, types, generateId)) {
-              editorView.dispatch(tr);
-            }
-
-            lastDocSize = editorView.state.doc.content.size;
-            startIdleScan(editorView);
-          });
-
-          const handleBlur = () => {
-            if ((editorView as any).isDestroyed) return;
-            const tr = editorView.state.tr;
-            if (scanDocForIds(tr, editorView.state.doc, attributeName, types, generateId)) {
-              editorView.dispatch(tr);
-            }
-          };
-
-          const handleDestroy = () => {
-            stopIdleScan();
-          };
-
-          return {
-            update(view: EditorView) {
-              if (!view.hasFocus()) {
-                handleBlur();
-              }
-            },
-            destroy() {
-              handleDestroy();
-            },
-          };
         },
       }),
     ];

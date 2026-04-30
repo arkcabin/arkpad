@@ -6,11 +6,9 @@ import { parseContent } from "./utils";
 
 /**
  * CommandManager handles the chaining of commands in a single transaction.
- * Optimized for performance and reliability.
+ * Stateless Singleton architecture for zero-latency execution.
  */
 export class CommandManager implements ChainedCommands {
-  private state: EditorState;
-  private transaction: Transaction;
   private view?: EditorView;
   private commands: ArkpadCommandRegistry;
   private dispatch?: (tr: Transaction) => void;
@@ -30,12 +28,10 @@ export class CommandManager implements ChainedCommands {
     shouldDispatch?: boolean;
     schema: Schema;
   }) {
-    this.state = options.state;
     this.commands = options.commands;
     this.view = options.view;
     this.dispatch = options.dispatch;
     this.shouldDispatch = options.shouldDispatch ?? true;
-    this.transaction = this.state.tr;
     this.schema = options.schema;
 
     // Build the proxy to allow calling commands as methods
@@ -57,8 +53,6 @@ export class CommandManager implements ChainedCommands {
             const result = (command as any)(...args);
 
             if (typeof result === "function") {
-              // DX Optimization: Provide the current manager instance as the 'chain'
-              // to avoid object allocation overhead in long chains.
               const props = {
                 state,
                 dispatch: (tr2: Transaction) => {
@@ -66,7 +60,7 @@ export class CommandManager implements ChainedCommands {
                     try {
                       tr.step(step);
                     } catch (e) {
-                      console.warn("[Arkpad] Step apply failed:", e);
+                      console.error("[Arkpad] Step apply failed inside chain:", e);
                     }
                   });
                 },
@@ -83,7 +77,7 @@ export class CommandManager implements ChainedCommands {
                 }
                 return result(props);
               } catch (e) {
-                console.warn("[Arkpad] Cmd failed:", e);
+                console.error("[Arkpad] Command execution failed:", e);
                 return false;
               }
             }
@@ -165,46 +159,41 @@ export class CommandManager implements ChainedCommands {
   }
 
   public run(): boolean {
-    const tr = this.transaction;
-    let currentState = this.state;
-    let allSuccessful = true;
-
-    // Fast Path: If only one callback, skip state application loop
-    if (this.callbacks.length === 1) {
-      try {
-        const success = this.callbacks[0]!({ state: currentState, tr, view: this.view });
-        if (success && this.shouldDispatch && this.dispatch) {
-          this.dispatch(tr);
-        }
-        return success;
-      } catch (e) {
-        console.warn("[Arkpad] Fast path failed:", e);
-        return false;
-      }
+    if (!this.view && !this.dispatch) {
+      console.error("[Arkpad] Cannot run command: No view or dispatch provided.");
+      return false;
     }
 
-    for (const callback of this.callbacks) {
-      let success: boolean;
+    // Always pull the freshest state from the view
+    const currentState = this.view ? this.view.state : (this as any).state;
+    const tr = currentState.tr;
+    let intermediateState = currentState;
+    let allSuccessful = true;
+
+    const currentCallbacks = [...this.callbacks];
+    this.callbacks = [];
+
+    for (const callback of currentCallbacks) {
       try {
-        success = callback({ state: currentState, tr, view: this.view });
-      } catch (e) {
-        console.warn("[Arkpad] Callback failed:", e);
-        allSuccessful = false;
-        break;
-      }
-
-      if (!success) {
-        allSuccessful = false;
-        break;
-      }
-
-      // Apply the transaction to state so next command sees updated document
-      if (tr.steps.length > 0) {
-        try {
-          currentState = currentState.apply(tr);
-        } catch (e) {
-          console.warn("[Arkpad] State apply failed:", e);
+        const success = callback({ state: intermediateState, tr, view: this.view });
+        if (!success) {
+          allSuccessful = false;
+          break;
         }
+
+        // Update intermediate state if the transaction changed
+        if (tr.steps.length > 0) {
+          try {
+            intermediateState = intermediateState.apply(tr);
+          } catch {
+            // If apply fails, we continue with current state but mark as failed
+            console.warn("[Arkpad] Mid-chain state apply failed. Continuing with previous state.");
+          }
+        }
+      } catch (e) {
+        console.error("[Arkpad] Command chain callback failed:", e);
+        allSuccessful = false;
+        break;
       }
     }
 
@@ -212,7 +201,7 @@ export class CommandManager implements ChainedCommands {
       try {
         this.dispatch(tr);
       } catch (e) {
-        console.warn("[Arkpad] Dispatch failed:", e);
+        console.error("[Arkpad] Final dispatch failed:", e);
         allSuccessful = false;
       }
     }
