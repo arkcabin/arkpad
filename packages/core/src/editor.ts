@@ -26,8 +26,8 @@ import type {
 } from "./types";
 import { parseContent, resolveEditorOptions } from "./utils";
 
-import { highlighterToolPluginKey } from "./extensions/highlighter-tool";
-import { eraserToolPluginKey } from "./extensions/eraser-tool";
+import { highlighterToolPluginKey } from "@arkpad/extension-highlighter";
+import { eraserToolPluginKey } from "@arkpad/extension-eraser";
 
 /**
  * The core editor class for Arkpad.
@@ -44,7 +44,9 @@ export class ArkpadEditor implements ArkpadEditorAPI {
   private readonly onTransaction?: ArkpadEditorOptions["onTransaction"];
   private readonly onSelectionUpdate?: ArkpadEditorOptions["onSelectionUpdate"];
   private readonly onPaste?: ArkpadEditorOptions["onPaste"];
-  private interceptors: Array<(props: { editor: ArkpadEditorAPI; transaction: Transaction }) => Transaction | boolean | null> = [];
+  private interceptors: Array<
+    (props: { editor: ArkpadEditorAPI; transaction: Transaction }) => Transaction | boolean | null
+  > = [];
   private readonly onInterceptor?: ArkpadEditorOptions["onInterceptor"];
   private readonly onDestroy?: ArkpadEditorOptions["onDestroy"];
   private readonly nodeViews: Record<string, any>;
@@ -239,7 +241,7 @@ export class ArkpadEditor implements ArkpadEditorAPI {
 
     // CRITICAL: Immediately notify React subscribers that the schema/state has been hot-reloaded
     this.emitUpdate(nextState);
-    
+
     return nextState;
   }
 
@@ -318,8 +320,9 @@ export class ArkpadEditor implements ArkpadEditorAPI {
       // If result is a function, we look for a dispatch in args or use view.dispatch
       // But actually, we should check if the LAST argument is a props object with dispatch
       const lastArg = args[args.length - 1];
-      const hasProps = lastArg && typeof lastArg === "object" && "state" in lastArg && "dispatch" in lastArg;
-      
+      const hasProps =
+        lastArg && typeof lastArg === "object" && "state" in lastArg && "dispatch" in lastArg;
+
       if (hasProps) {
         return result(lastArg);
       }
@@ -347,13 +350,13 @@ export class ArkpadEditor implements ArkpadEditorAPI {
     // Special Case: Mark Toggles (Bold, Italic, etc)
     // We want these to be "Always Ready" if the schema allows them in the current node.
     const markMap: Record<string, string> = {
-      'toggleBold': 'strong',
-      'toggleItalic': 'em',
-      'toggleUnderline': 'underline',
-      'toggleStrike': 'strike',
-      'toggleCode': 'code',
-      'toggleSuperscript': 'superscript',
-      'toggleSubscript': 'subscript',
+      toggleBold: "strong",
+      toggleItalic: "em",
+      toggleUnderline: "underline",
+      toggleStrike: "strike",
+      toggleCode: "code",
+      toggleSuperscript: "superscript",
+      toggleSubscript: "subscript",
     };
 
     if (name in markMap) {
@@ -365,7 +368,12 @@ export class ArkpadEditor implements ArkpadEditorAPI {
     }
 
     // Special Case: Block Toggles
-    if (name === 'toggleHeading' || name === 'toggleBlockquote' || name === 'toggleBulletList' || name === 'toggleOrderedList') {
+    if (
+      name === "toggleHeading" ||
+      name === "toggleBlockquote" ||
+      name === "toggleBulletList" ||
+      name === "toggleOrderedList"
+    ) {
       return true; // Simplified: usually always allowed if marks are allowed
     }
 
@@ -375,7 +383,7 @@ export class ArkpadEditor implements ArkpadEditorAPI {
     try {
       const { state } = this.view;
       const result = (command as any)(...args);
-      
+
       if (typeof result === "function") {
         return result({
           state,
@@ -717,7 +725,12 @@ export class ArkpadEditor implements ArkpadEditorAPI {
   /**
    * Registers a new interceptor.
    */
-  addInterceptor(interceptor: (props: { editor: ArkpadEditorAPI; transaction: Transaction }) => Transaction | boolean | null) {
+  addInterceptor(
+    interceptor: (props: {
+      editor: ArkpadEditorAPI;
+      transaction: Transaction;
+    }) => Transaction | boolean | null
+  ) {
     this.interceptors.push(interceptor);
   }
 

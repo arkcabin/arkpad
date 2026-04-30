@@ -16,7 +16,10 @@ import { Superscript } from "@arkpad/extension-superscript";
 import { Subscript } from "@arkpad/extension-subscript";
 import { CodeBlock } from "@arkpad/extension-code-block";
 import { Image } from "@arkpad/extension-image";
-import { createTextAlign, CharacterCount } from "@arkpad/core";
+import { CharacterCount } from "@arkpad/core";
+import { HighlighterTool } from "@arkpad/extension-highlighter";
+import { EraserTool } from "@arkpad/extension-eraser";
+import { createTextAlign } from "@arkpad/extension-alignment";
 import { history, undo, redo } from "prosemirror-history";
 import { placeholder as createPlaceholderPlugin } from "prosemirror-placeholder";
 
@@ -67,8 +70,9 @@ export const StarterKit = Extension.create({
     const extensions = [];
 
     if (this.options.history) extensions.push(History);
-    if (this.options.placeholder) extensions.push(Placeholder.configure({ placeholder: this.options.placeholder }));
-    
+    if (this.options.placeholder)
+      extensions.push(Placeholder.configure({ placeholder: this.options.placeholder }));
+
     // Solo Extensions
     extensions.push(Bold);
     extensions.push(Italic);
@@ -86,9 +90,11 @@ export const StarterKit = Extension.create({
     extensions.push(Subscript);
     extensions.push(CodeBlock);
     extensions.push(Image);
+    extensions.push(HighlighterTool);
+    extensions.push(EraserTool);
     extensions.push(createTextAlign());
     extensions.push(CharacterCount);
-    
+
     if (this.options.table) extensions.push(Table);
 
     return extensions;

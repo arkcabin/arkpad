@@ -1,4 +1,4 @@
-import { Extension } from "./Extension";
+import { Extension } from "@arkpad/core";
 import { Plugin, PluginKey } from "prosemirror-state";
 
 export interface EraserToolOptions {
@@ -40,7 +40,7 @@ export const EraserTool = Extension.create<EraserToolOptions, EraserToolStorage>
           const tr = state.tr;
           tr.setMeta(eraserToolPluginKey, options.active);
           if (options.active) {
-             tr.setMeta("eraser-tool-active", true); // For other plugins to react
+            tr.setMeta("eraser-tool-active", true); // For other plugins to react
           }
           dispatch(tr);
         }
@@ -80,7 +80,10 @@ export const EraserTool = Extension.create<EraserToolOptions, EraserToolStorage>
               return { active: meta };
             }
             // Deactivate if highlighter is activated or explicitly requested
-            if (tr.getMeta("highlighter-tool-active") === true || tr.getMeta("deactivate-painting-tools") === true) {
+            if (
+              tr.getMeta("highlighter-tool-active") === true ||
+              tr.getMeta("deactivate-painting-tools") === true
+            ) {
               return { active: false };
             }
             return value;
@@ -112,10 +115,12 @@ export const EraserTool = Extension.create<EraserToolOptions, EraserToolStorage>
           if (!pluginState?.active) return null;
 
           // Ignore our own eraser application to prevent loops
-          if (transactions.some(tr => tr.getMeta("eraser-tool-apply"))) return null;
+          if (transactions.some((tr) => tr.getMeta("eraser-tool-apply"))) return null;
 
           // If no transactions changed the selection or explicitly triggered an update, do nothing
-          const selectionChanged = transactions.some(tr => tr.selectionSet || tr.getMeta(eraserToolPluginKey) !== undefined);
+          const selectionChanged = transactions.some(
+            (tr) => tr.selectionSet || tr.getMeta(eraserToolPluginKey) !== undefined
+          );
           if (!selectionChanged) return null;
 
           const { selection } = newState;
@@ -126,13 +131,13 @@ export const EraserTool = Extension.create<EraserToolOptions, EraserToolStorage>
           const highlightMark = newState.schema.marks.highlight;
 
           if (highlightMark) {
-             // Specifically remove highlights
-             tr.removeMark(from, to, highlightMark);
+            // Specifically remove highlights
+            tr.removeMark(from, to, highlightMark);
           } else {
-             // Fallback to remove all if highlight mark not found (though it should be)
-             tr.removeMark(from, to, null);
+            // Fallback to remove all if highlight mark not found (though it should be)
+            tr.removeMark(from, to, null);
           }
-          
+
           tr.setMeta("eraser-tool-apply", true);
 
           return tr.steps.length > 0 ? tr : null;
@@ -141,3 +146,5 @@ export const EraserTool = Extension.create<EraserToolOptions, EraserToolStorage>
     ];
   },
 });
+
+export default EraserTool;

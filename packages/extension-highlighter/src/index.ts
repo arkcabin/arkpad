@@ -1,5 +1,5 @@
 import { Plugin, PluginKey } from "prosemirror-state";
-import { Extension } from "./Extension";
+import { Extension } from "@arkpad/core";
 
 export interface HighlighterToolOptions {
   /**
@@ -80,7 +80,10 @@ export const HighlighterTool = Extension.create<HighlighterToolOptions, Highligh
               return { active: meta };
             }
             // Deactivate if any other painting tool is activated or if explicitly requested
-            if (tr.getMeta("eraser-tool-active") === true || tr.getMeta("deactivate-painting-tools") === true) {
+            if (
+              tr.getMeta("eraser-tool-active") === true ||
+              tr.getMeta("deactivate-painting-tools") === true
+            ) {
               return { active: false };
             }
             return value;
@@ -112,11 +115,13 @@ export const HighlighterTool = Extension.create<HighlighterToolOptions, Highligh
           if (!pluginState?.active) return null;
 
           // If any transaction changed the selection or explicitly triggered an update
-          const selectionChanged = transactions.some(tr => tr.selectionSet || tr.getMeta(highlighterToolPluginKey) !== undefined);
+          const selectionChanged = transactions.some(
+            (tr) => tr.selectionSet || tr.getMeta(highlighterToolPluginKey) !== undefined
+          );
           if (!selectionChanged) return null;
 
           // Ignore our own highlight application to prevent loops
-          if (transactions.some(tr => tr.getMeta("highlighter-tool-apply"))) return null;
+          if (transactions.some((tr) => tr.getMeta("highlighter-tool-apply"))) return null;
 
           const { from, to, empty } = newState.selection;
           if (empty) return null;
@@ -146,3 +151,5 @@ export const HighlighterTool = Extension.create<HighlighterToolOptions, Highligh
     ];
   },
 });
+
+export default HighlighterTool;

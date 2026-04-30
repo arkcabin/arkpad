@@ -1,14 +1,6 @@
-import {
-  createDocument,
-  createParagraph,
-  createText,
-  createHardBreak,
-} from "./base";
+import { createDocument, createParagraph, createText, createHardBreak } from "./base";
 import { createMarkdownPaste } from "./markdown";
-import { createTextAlign } from "./alignment";
 import { createUniqueId } from "./unique-id";
-import { HighlighterTool } from "./highlighter-tool";
-import { EraserTool } from "./eraser-tool";
 import { BaseCommands } from "./commands";
 import { ArkpadExtension as Extension } from "../types";
 
@@ -22,10 +14,7 @@ export const CoreEssentials: Extension[] = [
   createText(),
   createHardBreak(),
   createMarkdownPaste(),
-  createTextAlign(),
   createUniqueId(),
-  HighlighterTool,
-  EraserTool,
   BaseCommands,
 ];
 
@@ -37,10 +26,7 @@ export function createCoreEssentials(): Extension[] {
 }
 
 export * from "./base";
-export * from "./alignment";
 export * from "./unique-id";
-export * from "./highlighter-tool";
-export * from "./eraser-tool";
 export * from "./utils";
 export { CharacterCount } from "./character-count";
 export { BaseCommands } from "./commands";
