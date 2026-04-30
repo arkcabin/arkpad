@@ -30,15 +30,10 @@ export function BoldDemo() {
 
   return (
     <ArkpadProvider editor={editor}>
-      <div className="h-full flex flex-col bg-slate-50 dark:bg-black p-4 md:p-8 animate-in fade-in duration-500">
-        <div className="max-w-4xl mx-auto w-full flex flex-col h-full">
-          <header className="mb-6">
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Isolated Extension Test</h2>
-            <p className="text-slate-500 text-sm mt-1">Environment: Isolated @arkpad/extension-bold</p>
-          </header>
-
-          <div className="bg-white dark:bg-[#0c0c0c] rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col flex-grow overflow-hidden">
-            <div className="p-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30 flex items-center gap-2">
+      <div className="h-full flex flex-col bg-white dark:bg-[#050505]">
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="toolbar-wrapper p-2 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md sticky top-0 z-10 flex items-center justify-between">
+            <div className="toolbar-group">
               <EditorButton
                 command="toggleBold"
                 name="strong"
@@ -47,24 +42,33 @@ export function BoldDemo() {
               >
                 <BoldIcon className="w-4 h-4" />
               </EditorButton>
-              <div className="h-4 w-px bg-slate-200 dark:bg-slate-800 mx-1" />
-              <div className="text-[10px] font-mono text-slate-400 uppercase tracking-widest px-2">
-                Schema: [doc, p, text, strong]
-              </div>
+              <div className="h-4 w-px bg-slate-200 dark:bg-slate-800 mx-2" />
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2 hidden md:inline">
+                Isolation Mode: @arkpad/extension-bold
+              </span>
             </div>
+            
+            <div className="text-[10px] font-mono text-brand font-bold uppercase tracking-widest px-4 border border-brand/20 bg-brand/5 rounded-full py-1">
+              Isolated Lab Environment
+            </div>
+          </div>
 
-            <div className="flex-grow overflow-y-auto p-8">
+          <div className="flex-1 overflow-y-auto p-4 md:p-12 lg:p-20">
+            <div className="max-w-4xl mx-auto">
               <ArkpadEditorContent 
                 editor={editor} 
-                className="prose dark:prose-invert max-w-none focus:outline-none min-h-full"
+                className="prose dark:prose-invert max-w-none focus:outline-none min-h-full arkpad-container"
               />
             </div>
           </div>
-          
-          <footer className="mt-6 flex justify-between items-center text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-            <div>Standalone Lab</div>
-            <div className="text-brand">Verified: 2026 Stable</div>
-          </footer>
+        </div>
+        
+        <div className="editor-footer px-6 border-t border-slate-100 dark:border-slate-900 h-10 flex items-center justify-between">
+            <div className="flex gap-4">
+              <span className="text-brand">Verified: Stable v1.6.13</span>
+              <span className="opacity-50">Schema: Isolated Marks</span>
+            </div>
+            <div className="text-slate-400">Production Engine: Arkpad Core</div>
         </div>
       </div>
     </ArkpadProvider>

@@ -8,7 +8,7 @@ export function Router() {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-white dark:bg-black">
+    <div className="flex h-screen w-screen overflow-hidden bg-white dark:bg-black text-slate-900 dark:text-slate-100">
       <Sidebar 
         currentView={view} 
         setView={setView} 
@@ -16,13 +16,13 @@ export function Router() {
         setIsCollapsed={setIsCollapsed} 
       />
       
-      <main className="flex-grow overflow-hidden relative">
+      <main className="flex-1 h-full overflow-hidden relative flex flex-col">
         {view === "main" ? (
-          <div className="h-full w-full overflow-y-auto">
+          <div className="flex-1 overflow-y-auto">
             <App />
           </div>
         ) : (
-          <div className="h-full w-full overflow-hidden">
+          <div className="flex-1 overflow-hidden">
             <BoldDemo />
           </div>
         )}

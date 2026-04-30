@@ -263,9 +263,9 @@ export function App() {
 
   return (
     <ArkpadProvider editor={editor}>
-      <div className="min-h-screen bg-[#fafafa] dark:bg-[#000000] py-8 md:py-12 px-4 transition-colors duration-300">
-        <div className="max-w-[1300px] mx-auto">
-          <div className="editor-wrapper border-slate-200/50 dark:border-slate-800/50 shadow-2xl">
+      <div className="h-full bg-white dark:bg-black transition-colors duration-300">
+        <div className="h-full flex flex-col">
+          <div className="flex-1 flex flex-col overflow-hidden">
             <div className="toolbar-wrapper p-2 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md sticky top-0 z-10">
               <div className="toolbar-group">
                 <MenuButton command="toggleBold" name="strong" title="Bold">
