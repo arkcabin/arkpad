@@ -1,30 +1,16 @@
 import React from "react";
 import { Italic as ItalicExtension } from "@arkpad/extension-italic";
 import { Heading } from "@arkpad/extension-heading";
-import { 
-  createDocument, 
-  createParagraph, 
-  createText 
-} from "@arkpad/core";
-import { 
-  useArkpadEditor, 
-  ArkpadEditorContent, 
-  ArkpadProvider, 
-  EditorButton 
-} from "@arkpad/react";
+import { Engine } from "@arkpad/core";
+import { useArkpadEditor, ArkpadEditorContent, ArkpadProvider, EditorButton } from "@arkpad/react";
 import { Italic as ItalicIcon } from "lucide-react";
 import { ShowcaseLayout } from "../layouts/ShowcaseLayout";
 
 export function ItalicDemo() {
   const editor = useArkpadEditor({
-    extensions: [
-      createDocument(),
-      createParagraph(),
-      createText(),
-      Heading,
-      ItalicExtension,
-    ],
-    content: "<h1>Italic Extension</h1><p>This editor <em>only</em> handles emphasis. <i>Italic text</i> helps highlight key points without changing the weight of the font.</p>",
+    extensions: [Engine, Heading, ItalicExtension],
+    content:
+      "<h1>Italic Extension</h1><p>This editor <em>only</em> handles emphasis. <i>Italic text</i> helps highlight key points without changing the weight of the font.</p>",
   });
 
   if (!editor) return null;
@@ -48,8 +34,8 @@ export function ItalicDemo() {
             </EditorButton>
           </div>
           <div className="flex-1 p-8 overflow-y-auto">
-            <ArkpadEditorContent 
-              editor={editor} 
+            <ArkpadEditorContent
+              editor={editor}
               className="prose dark:prose-invert max-w-none focus:outline-none arkpad-container"
             />
           </div>

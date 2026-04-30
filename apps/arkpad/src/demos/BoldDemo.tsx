@@ -1,30 +1,15 @@
-import React from "react";
 import { Bold as BoldExtension } from "@arkpad/extension-bold";
 import { Heading } from "@arkpad/extension-heading";
-import { 
-  createDocument, 
-  createParagraph, 
-  createText 
-} from "@arkpad/core";
-import { 
-  useArkpadEditor, 
-  ArkpadEditorContent, 
-  ArkpadProvider, 
-  EditorButton 
-} from "@arkpad/react";
+import { Engine } from "@arkpad/core";
+import { useArkpadEditor, ArkpadEditorContent, ArkpadProvider, EditorButton } from "@arkpad/react";
 import { Bold as BoldIcon } from "lucide-react";
 import { ShowcaseLayout } from "../layouts/ShowcaseLayout";
 
 export function BoldDemo() {
   const editor = useArkpadEditor({
-    extensions: [
-      createDocument(),
-      createParagraph(),
-      createText(),
-      Heading,
-      BoldExtension,
-    ],
-    content: "<h1>Bold Extension</h1><p>This editor <strong>only</strong> handles bold text. Try selecting this text and pressing Mod+B.</p>",
+    extensions: [Engine, Heading, BoldExtension],
+    content:
+      "<h1>Bold Extension</h1><p>This editor <strong>only</strong> handles bold text. Try selecting this text and pressing Mod+B.</p>",
   });
 
   if (!editor) return null;
@@ -48,8 +33,8 @@ export function BoldDemo() {
             </EditorButton>
           </div>
           <div className="p-8">
-            <ArkpadEditorContent 
-              editor={editor} 
+            <ArkpadEditorContent
+              editor={editor}
               className="prose dark:prose-invert focus:outline-none arkpad-container"
             />
           </div>
