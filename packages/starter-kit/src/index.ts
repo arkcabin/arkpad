@@ -97,7 +97,9 @@ export const StarterKit = Extension.create({
     extensions.push(createMarkdownPaste());
     extensions.push(CharacterCount);
 
-    if (this.options.table) extensions.push(Table);
+    if (this.options.table) {
+      extensions.push(Table);
+    }
 
     return extensions;
   },

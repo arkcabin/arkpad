@@ -10,7 +10,6 @@ import {
   getMarkAttributes,
   getNodeAttributes,
 } from "./extensions/utils";
-import { MarkdownSerializer } from "@arkpad/extension-markdown";
 import { CommandManager } from "./commands";
 import { SchemaBuilder } from "./schema-builder";
 import type {
@@ -26,9 +25,6 @@ import type {
   InterceptorConfig,
 } from "./types";
 import { parseContent, resolveEditorOptions } from "./utils";
-
-import { highlighterToolPluginKey } from "@arkpad/extension-highlighter";
-import { eraserToolPluginKey } from "@arkpad/extension-eraser";
 
 /**
  * The core editor class for Arkpad.
@@ -217,8 +213,9 @@ export class ArkpadEditor implements ArkpadEditorAPI {
           if (hasStructuralChange) {
             const tr = newState.tr;
             tr.setMeta("deactivate-painting-tools", true);
-            tr.setMeta(highlighterToolPluginKey, false);
-            tr.setMeta(eraserToolPluginKey, false);
+            // We use string-based meta keys to avoid direct dependency on extension packages
+            tr.setMeta("highlighter", false);
+            tr.setMeta("eraser", false);
             return tr;
           }
 
@@ -312,7 +309,14 @@ export class ArkpadEditor implements ArkpadEditorAPI {
    * Returns the document as a Markdown string.
    */
   getMarkdown(): string {
-    return new MarkdownSerializer().serialize(this.view.state.doc);
+    // We look for the markdown extension in the manager to avoid circular dependency
+    const markdownExtension = this.extensionManager.extensions.find((e) => e.name === "markdown");
+    if (markdownExtension && (markdownExtension as any).serializer) {
+      return (markdownExtension as any).serializer.serialize(this.view.state.doc);
+    }
+
+    console.warn("[Arkpad] Markdown extension not found. Returning plain text.");
+    return this.getText();
   }
 
   /**

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { BubbleMenu as BubbleMenuExtension, ArkpadEditorAPI } from "@arkpad/core";
+import { ArkpadEditorAPI } from "@arkpad/core";
+import { BubbleMenu as BubbleMenuExtension } from "@arkpad/extension-bubble-menu";
 import { EditorState } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
 

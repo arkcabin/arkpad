@@ -16,7 +16,6 @@ import {
   toggleHeaderCell,
   setCellAttr,
   fixTables,
-  tableNodes,
 } from "prosemirror-tables";
 
 export const Table = Extension.create({
@@ -31,21 +30,64 @@ export const Table = Extension.create({
   },
 
   addNodes() {
-    return tableNodes({
-      tableGroup: "block",
-      cellContent: "block+",
-      cellAttributes: {
-        background: {
-          default: null,
-          getFromDOM(dom: any) {
-            return dom.style.backgroundColor || null;
-          },
-          setDOMAttr(value: any, attrs: any) {
-            if (value) attrs.style = (attrs.style || "") + `background-color: ${value};`;
-          },
+    return {
+      table: {
+        content: "table_row+",
+        tableRole: "table",
+        isolating: true,
+        group: "block",
+        parseDOM: [{ tag: "table" }],
+        toDOM() {
+          return ["table", ["tbody", 0]];
         },
       },
-    });
+      table_row: {
+        content: "(table_cell | table_header)*",
+        tableRole: "row",
+        parseDOM: [{ tag: "tr" }],
+        toDOM() {
+          return ["tr", 0];
+        },
+      },
+      table_cell: {
+        content: "block+",
+        attrs: {
+          colspan: { default: 1 },
+          rowspan: { default: 1 },
+          background: { default: null },
+        },
+        tableRole: "cell",
+        isolating: true,
+        parseDOM: [{ tag: "td" }],
+        toDOM(node: any) {
+          const { colspan, rowspan, background } = node.attrs;
+          const attrs: any = {};
+          if (colspan !== 1) attrs.colspan = colspan;
+          if (rowspan !== 1) attrs.rowspan = rowspan;
+          if (background) attrs.style = `background-color: ${background}`;
+          return ["td", attrs, 0];
+        },
+      },
+      table_header: {
+        content: "block+",
+        attrs: {
+          colspan: { default: 1 },
+          rowspan: { default: 1 },
+          background: { default: null },
+        },
+        tableRole: "header_cell",
+        isolating: true,
+        parseDOM: [{ tag: "th" }],
+        toDOM(node: any) {
+          const { colspan, rowspan, background } = node.attrs;
+          const attrs: any = {};
+          if (colspan !== 1) attrs.colspan = colspan;
+          if (rowspan !== 1) attrs.rowspan = rowspan;
+          if (background) attrs.style = `background-color: ${background}`;
+          return ["th", attrs, 0];
+        },
+      },
+    };
   },
 
   addCommands() {
@@ -205,3 +247,5 @@ export const Table = Extension.create({
     return plugins;
   },
 });
+
+export default Table;

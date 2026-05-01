@@ -4,7 +4,6 @@ import { ArkpadExtension } from "./types";
 
 /**
  * SchemaBuilder dynamically constructs a ProseMirror schema from Arkpad extensions.
- * It also applies global attributes to nodes and marks.
  */
 export class SchemaBuilder {
   private extensions: ArkpadExtension[];
@@ -18,90 +17,96 @@ export class SchemaBuilder {
    * Builds and returns the ProseMirror schema.
    */
   build(): Schema {
-    // Generate a unique key based on extension names and order
-    const cacheKey = this.extensions
-      .map((ext) => ext.name)
-      .sort()
-      .join(",");
+    // PRESERVE ORDER: Schema composition is order-sensitive.
+    const cacheKey = JSON.stringify(this.extensions.map((ext) => ext.name || "anonymous"));
+
     if (SchemaBuilder.schemaCache.has(cacheKey)) {
       return SchemaBuilder.schemaCache.get(cacheKey)!;
     }
 
-    // Start with the base specs from arkpadSchema
     let nodes = arkpadSchema.spec.nodes as any;
     let marks = arkpadSchema.spec.marks as any;
 
     const allExtensions: ArkpadExtension[] = [];
-    const seenNames = new Set<string>();
 
     const flattenExtensions = (exts: ArkpadExtension[]) => {
       for (const extension of exts) {
-        if (!seenNames.has(extension.name)) {
-          allExtensions.push(extension);
-          seenNames.add(extension.name);
-        }
+        if (!extension || typeof extension !== "object") continue;
+        allExtensions.push(extension);
 
         if (extension.addExtensions) {
-          flattenExtensions(extension.addExtensions());
+          try {
+            const nested = extension.addExtensions();
+            if (Array.isArray(nested)) {
+              flattenExtensions(nested);
+            }
+          } catch (e) {
+            console.error(`[Arkpad] Failed to load nested extensions for ${extension.name}:`, e);
+          }
         }
       }
     };
 
     flattenExtensions(this.extensions);
 
-    // Merge nodes and marks from extensions
+    // Phase 1: Merge Nodes and Marks
     allExtensions.forEach((ext) => {
       if (ext.addNodes) {
         const extNodes = ext.addNodes();
-        Object.keys(extNodes).forEach((name) => {
-          if (nodes.get(name)) {
-            nodes = nodes.update(name, extNodes[name]);
-          } else {
-            nodes = nodes.addToEnd(name, extNodes[name]);
+        Object.entries(extNodes).forEach(([name, spec]) => {
+          if (marks.get(name)) {
+            throw new Error(`Collision: "${name}" is already defined as a mark. Cannot add as node.`);
           }
+          nodes = nodes.get(name) ? nodes.update(name, spec) : nodes.addToEnd(name, spec);
         });
       }
+
       if (ext.addMarks) {
         const extMarks = ext.addMarks();
-        Object.keys(extMarks).forEach((name) => {
-          if (marks.get(name)) {
-            marks = marks.update(name, extMarks[name]);
-          } else {
-            marks = marks.addToEnd(name, extMarks[name]);
+        Object.entries(extMarks).forEach(([name, spec]) => {
+          if (nodes.get(name)) {
+            throw new Error(`Collision: "${name}" is already defined as a node. Cannot add as mark.`);
           }
+          marks = marks.get(name) ? marks.update(name, spec) : marks.addToEnd(name, spec);
         });
       }
     });
 
-    // Apply Schema Extensions
+    // Phase 2: Schema Extensions (Decorators)
     allExtensions.forEach((ext) => {
       if (ext.extendNodeSchema) {
         nodes.forEach((spec: any, name: string) => {
-          nodes = nodes.update(name, ext.extendNodeSchema!(name, spec));
+          const newSpec = ext.extendNodeSchema!(name, spec);
+          if (!newSpec || typeof newSpec !== "object") {
+            throw new Error(`Extension "${ext.name}" returned invalid spec for node "${name}"`);
+          }
+          nodes = nodes.update(name, newSpec);
         });
       }
       if (ext.extendMarkSchema) {
         marks.forEach((spec: any, name: string) => {
-          marks = marks.update(name, ext.extendMarkSchema!(name, spec));
+          const newSpec = ext.extendMarkSchema!(name, spec);
+          if (!newSpec || typeof newSpec !== "object") {
+            throw new Error(`Extension "${ext.name}" returned invalid spec for mark "${name}"`);
+          }
+          marks = marks.update(name, newSpec);
         });
       }
     });
 
-    // Apply Global Attributes
+    // Phase 3: Global Attributes
     const globalAttributes = this.collectGlobalAttributes(allExtensions);
-
-    nodes = this.enhanceNodes(nodes, globalAttributes);
-    marks = this.enhanceMarks(marks, globalAttributes);
+    nodes = this.enhanceSchemaElements(nodes, globalAttributes, "node");
+    marks = this.enhanceSchemaElements(marks, globalAttributes, "mark");
 
     const schema = new Schema({ nodes, marks });
-
-    // Generate cache key again to ensure it's fresh
-    const finalCacheKey = this.extensions
-      .map((ext) => ext.name)
-      .sort()
-      .join(",");
-    SchemaBuilder.schemaCache.set(finalCacheKey, schema);
-
+    
+    // Simple LRU-like cache management
+    if (SchemaBuilder.schemaCache.size > 50) {
+      SchemaBuilder.schemaCache.clear();
+    }
+    SchemaBuilder.schemaCache.set(cacheKey, schema);
+    
     return schema;
   }
 
@@ -115,134 +120,63 @@ export class SchemaBuilder {
     return globals;
   }
 
-  private enhanceNodes(nodes: any, globals: any[]) {
-    let enhancedNodes = nodes;
-
+  private enhanceSchemaElements(elements: any, globals: any[], type: "node" | "mark") {
+    let enhancedElements = elements;
     globals.forEach((global) => {
-      if (!global.types) return;
+      if (!global.types || !Array.isArray(global.types)) return;
+      global.types.forEach((typeName: string) => {
+        const spec = enhancedElements.get(typeName);
+        if (!spec) return;
 
-      global.types.forEach((type: string) => {
-        const nodeSpec = enhancedNodes.get(type);
-        if (nodeSpec) {
-          enhancedNodes = enhancedNodes.update(type, {
-            ...nodeSpec,
-            attrs: {
-              ...nodeSpec.attrs,
-              ...global.attributes,
-            },
-            toDOM: (node: any) => {
-              const dom = nodeSpec.toDOM(node);
-              const attrs: Record<string, any> = {};
+        const renderMethod = type === "node" ? "toDOM" : "toDOM"; // Both use toDOM in PM
 
-              // 1. Collect and merge global attributes
-              Object.keys(global.attributes || {}).forEach((key) => {
-                const attr = global.attributes[key];
-                if (attr && attr.renderHTML) {
-                  const rendered = attr.renderHTML(node.attrs);
-                  if (rendered) {
-                    Object.entries(rendered).forEach(([rKey, rVal]) => {
-                      if (rKey === "class" && attrs["class"]) {
-                        attrs["class"] = `${attrs["class"]} ${rVal}`.trim();
-                      } else {
-                        attrs[rKey] = rVal;
-                      }
-                    });
-                  }
-                } else if (node.attrs[key] !== undefined && node.attrs[key] !== null) {
-                  attrs[key] = node.attrs[key];
-                }
-              });
+        enhancedElements = enhancedElements.update(typeName, {
+          ...spec,
+          attrs: {
+            ...spec.attrs,
+            ...Object.fromEntries(
+              Object.entries(global.attributes || {}).map(([key, attr]: [string, any]) => [
+                key,
+                { ...(spec.attrs?.[key] || {}), ...attr },
+              ])
+            ),
+          },
+          [renderMethod]: (element: any) => {
+            const originalDOM = spec[renderMethod] ? spec[renderMethod](element) : [type === "node" ? "div" : "span", 0];
+            
+            if (!Array.isArray(originalDOM)) return originalDOM;
 
-              // 2. Safely merge with existing DOM attributes
-              if (Array.isArray(dom)) {
-                const target = dom[1];
-                if (target && typeof target === "object" && !Array.isArray(target)) {
-                  Object.entries(attrs).forEach(([key, val]) => {
-                    if (key === "class" && target["class"]) {
-                      target["class"] = `${target["class"]} ${val}`.trim();
+            const [tag, maybeAttrs, ...rest] = originalDOM;
+            const hasAttrs = maybeAttrs && typeof maybeAttrs === "object" && !Array.isArray(maybeAttrs);
+            const originalAttrs = hasAttrs ? { ...maybeAttrs } : {};
+            const content = hasAttrs ? rest : [maybeAttrs, ...rest];
+
+            const newAttrs: Record<string, any> = { ...originalAttrs };
+
+            Object.entries(global.attributes || {}).forEach(([key, attr]: [string, any]) => {
+              if (attr.renderHTML) {
+                const rendered = attr.renderHTML(element.attrs);
+                if (rendered) {
+                  Object.entries(rendered).forEach(([rKey, rVal]) => {
+                    if (rKey === "class" && newAttrs["class"]) {
+                      newAttrs["class"] = `${newAttrs["class"]} ${rVal}`.trim();
+                    } else if (rKey === "style" && newAttrs["style"]) {
+                      newAttrs["style"] = `${newAttrs["style"]};${rVal}`.replace(/;;/g, ";");
                     } else {
-                      target[key] = val;
+                      newAttrs[rKey] = rVal;
                     }
                   });
-                } else {
-                  // No attributes object exists, inject one
-                  dom.splice(1, 0, attrs);
                 }
+              } else if (element.attrs[key] !== undefined && element.attrs[key] !== null) {
+                newAttrs[key] = element.attrs[key];
               }
+            });
 
-              return dom;
-            },
-          });
-        }
+            return [tag, newAttrs, ...content];
+          },
+        });
       });
     });
-
-    return enhancedNodes;
-  }
-
-  private enhanceMarks(marks: any, globals: any[]) {
-    let enhancedMarks = marks;
-
-    globals.forEach((global) => {
-      if (!global.types) return;
-
-      global.types.forEach((type: string) => {
-        const markSpec = enhancedMarks.get(type);
-        if (markSpec) {
-          enhancedMarks = enhancedMarks.update(type, {
-            ...markSpec,
-            attrs: {
-              ...markSpec.attrs,
-              ...Object.fromEntries(
-                Object.entries(global.attributes || {}).map(([key, attr]: [string, any]) => [
-                  key,
-                  { default: attr.default },
-                ])
-              ),
-            },
-            renderHTML: (mark: any) => {
-              const dom = markSpec.renderHTML(mark);
-              const attrs: Record<string, any> = {};
-
-              Object.entries(global.attributes || {}).forEach(([key, attr]: [string, any]) => {
-                if (attr && attr.renderHTML) {
-                  const rendered = attr.renderHTML(mark.attrs);
-                  if (rendered) {
-                    Object.entries(rendered).forEach(([rKey, rVal]) => {
-                      if (rKey === "class" && attrs["class"]) {
-                        attrs["class"] = `${attrs["class"]} ${rVal}`.trim();
-                      } else {
-                        attrs[rKey] = rVal;
-                      }
-                    });
-                  }
-                } else if (mark.attrs[key] !== undefined && mark.attrs[key] !== null) {
-                  attrs[key] = mark.attrs[key];
-                }
-              });
-
-              if (Array.isArray(dom)) {
-                const target = dom[1];
-                if (target && typeof target === "object" && !Array.isArray(target)) {
-                  Object.entries(attrs).forEach(([key, val]) => {
-                    if (key === "class" && target["class"]) {
-                      target["class"] = `${target["class"]} ${val}`.trim();
-                    } else {
-                      target[key] = val;
-                    }
-                  });
-                } else {
-                  dom.splice(1, 0, attrs);
-                }
-              }
-
-              return dom;
-            },
-          });
-        }
-      });
-    });
-
-    return enhancedMarks;
+    return enhancedElements;
   }
 }

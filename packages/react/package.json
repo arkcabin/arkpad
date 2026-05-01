@@ -53,6 +53,8 @@
   },
   "dependencies": {
     "@arkpad/core": "1.6.13",
+    "@arkpad/extension-bubble-menu": "1.0.0",
+    "@arkpad/extension-floating-menu": "1.0.0",
     "@radix-ui/react-checkbox": "^1.3.1",
     "clsx": "^2.1.1",
     "tailwind-merge": "^2.6.0"

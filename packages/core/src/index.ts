@@ -19,5 +19,3 @@ export type {
   NodeView,
   NodeViewConstructor,
 } from "./types";
-export { BubbleMenu, BubbleMenuPluginKey } from "@arkpad/extension-bubble-menu";
-export { FloatingMenu, FloatingMenuPluginKey } from "@arkpad/extension-floating-menu";
