@@ -126,14 +126,14 @@ export interface ExtensionConfig<Options = any, Storage = any> {
   addNodes?: (this: ExtensionContext<Options, Storage>) => Record<string, any>;
   extendNodeSchema?: (
     this: ExtensionContext<Options, Storage>,
-    nodeName: string,
-    spec: any
+    spec: any,
+    nodeName: string
   ) => any;
   addMarks?: (this: ExtensionContext<Options, Storage>) => Record<string, any>;
   extendMarkSchema?: (
     this: ExtensionContext<Options, Storage>,
-    markName: string,
-    spec: any
+    spec: any,
+    markName: string
   ) => any;
 
   addCommands?: (this: ExtensionContext<Options, Storage>) => Partial<ArkpadCommandRegistry>;
@@ -179,9 +179,9 @@ export interface ArkpadExtension {
   init?: (editor: ArkpadEditorAPI) => void;
   priority?: number;
   addNodes?: () => Record<string, any>;
-  extendNodeSchema?: (nodeName: string, spec: any) => any;
+  extendNodeSchema?: (spec: any, nodeName: string) => any;
   addMarks?: () => Record<string, any>;
-  extendMarkSchema?: (markName: string, spec: any) => any;
+  extendMarkSchema?: (spec: any, markName: string) => any;
 
   addGlobalAttributes?: () => any[];
   addCommands?: () => Partial<ArkpadCommandRegistry>;

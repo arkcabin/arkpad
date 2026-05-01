@@ -148,16 +148,16 @@ export class Extension<Options = any, Storage = any> implements ArkpadExtension 
     return this.config.addNodes?.call(this.createContext()) || {};
   }
 
-  extendNodeSchema(nodeName: string, spec: any) {
-    return this.config.extendNodeSchema?.call(this.createContext(), nodeName, spec) || spec;
+  extendNodeSchema(spec: any, nodeName: string) {
+    return this.config.extendNodeSchema?.call(this.createContext(), spec, nodeName) || spec;
   }
 
   addMarks() {
     return this.config.addMarks?.call(this.createContext()) || {};
   }
 
-  extendMarkSchema(markName: string, spec: any) {
-    return this.config.extendMarkSchema?.call(this.createContext(), markName, spec) || spec;
+  extendMarkSchema(spec: any, markName: string) {
+    return this.config.extendMarkSchema?.call(this.createContext(), spec, markName) || spec;
   }
 
 

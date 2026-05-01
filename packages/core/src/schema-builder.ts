@@ -24,8 +24,8 @@ export class SchemaBuilder {
     // 2. Sort extensions by priority (Tiptap standard: higher priority runs later/overwrites)
     allExtensions.sort((a, b) => (a.priority || 100) - (b.priority || 100));
 
-    // 3. Check Cache
-    const cacheKey = JSON.stringify(allExtensions.map((ext) => ext.name));
+    // 3. Check Cache (Tiptap standard: unique key for unique extension set)
+    const cacheKey = JSON.stringify(allExtensions.map((ext, i) => ext.name || `anon_${i}`));
     if (SchemaBuilder.schemaCache.has(cacheKey)) {
       return SchemaBuilder.schemaCache.get(cacheKey)!;
     }
@@ -39,10 +39,10 @@ export class SchemaBuilder {
       if (ext.addNodes) {
         const extNodes = ext.addNodes();
         Object.entries(extNodes).forEach(([name, spec]) => {
+          // Only throw if there's a CROSS-TYPE collision (Node vs Mark)
           if (marks.get(name)) {
-            throw new Error(`Collision: "${name}" is already defined as a mark.`);
+            throw new Error(`Collision: "${name}" is already defined as a mark. Cannot add as node.`);
           }
-          // Tiptap-style: Later extensions overwrite earlier ones if priority allows
           nodes = nodes.get(name) ? nodes.update(name, spec) : nodes.addToEnd(name, spec);
         });
       }
@@ -50,8 +50,9 @@ export class SchemaBuilder {
       if (ext.addMarks) {
         const extMarks = ext.addMarks();
         Object.entries(extMarks).forEach(([name, spec]) => {
+          // Only throw if there's a CROSS-TYPE collision (Mark vs Node)
           if (nodes.get(name)) {
-            throw new Error(`Collision: "${name}" is already defined as a node.`);
+            throw new Error(`Collision: "${name}" is already defined as a node. Cannot add as mark.`);
           }
           marks = marks.get(name) ? marks.update(name, spec) : marks.addToEnd(name, spec);
         });
@@ -61,15 +62,26 @@ export class SchemaBuilder {
     // Phase 2: Schema Extensions (Decorators)
     allExtensions.forEach((ext) => {
       if (ext.extendNodeSchema) {
-        nodes.forEach((spec: any, name: string) => {
-          const newSpec = ext.extendNodeSchema!(name, spec);
-          if (newSpec) nodes = nodes.update(name, newSpec);
+        nodes.forEach((a: any, b: any) => {
+          // Identify which argument is the name (string) and which is the spec (object)
+          const name = typeof a === "string" ? a : b;
+          const spec = typeof a === "object" ? a : b;
+
+          const newSpec = ext.extendNodeSchema!(spec, name);
+          if (newSpec) {
+            nodes = nodes.update(name, newSpec);
+          }
         });
       }
       if (ext.extendMarkSchema) {
-        marks.forEach((spec: any, name: string) => {
-          const newSpec = ext.extendMarkSchema!(name, spec);
-          if (newSpec) marks = marks.update(name, newSpec);
+        marks.forEach((a: any, b: any) => {
+          const name = typeof a === "string" ? a : b;
+          const spec = typeof a === "object" ? a : b;
+
+          const newSpec = ext.extendMarkSchema!(spec, name);
+          if (newSpec) {
+            marks = marks.update(name, newSpec);
+          }
         });
       }
     });
@@ -170,26 +182,19 @@ export class SchemaBuilder {
 
   private flattenExtensions(extensions: ArkpadExtension[]): ArkpadExtension[] {
     const flattened: ArkpadExtension[] = [];
-    const seen = new Set<string>();
+    const seen = new Set<ArkpadExtension>();
 
     const traverse = (exts: ArkpadExtension[]) => {
-      exts.forEach((ext, index) => {
-        if (!ext || typeof ext !== "object") return;
-        
-        // Ensure extension has a name for the cache key and duplicate prevention
-        if (!ext.name) {
-          ext.name = `anonymous_${index}`;
-        }
-
-        if (seen.has(ext.name)) return;
-        seen.add(ext.name);
+      exts.forEach((ext) => {
+        if (!ext || typeof ext !== "object" || seen.has(ext)) return;
+        seen.add(ext);
 
         if (ext.addExtensions) {
           try {
             const nested = ext.addExtensions();
             if (Array.isArray(nested)) traverse(nested);
           } catch (e) {
-            console.error(`[Arkpad] Failed to load nested extensions for ${ext.name}:`, e);
+            console.error(`[Arkpad] Failed to load nested extensions for ${ext.name || "anonymous"}:`, e);
           }
         }
         flattened.push(ext);
