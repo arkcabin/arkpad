@@ -66,7 +66,7 @@ export interface ChainedCommands extends TypedCommands<ChainedCommands> {
   /**
    * Inserts the given content at the current selection.
    */
-  insertContent(content: ArkpadContent, format?: "html" | "markdown" | "json"): ChainedCommands;
+  insertContent(content: ArkpadContent): ChainedCommands;
 
   /**
    * Scrolls the current selection into view.
@@ -334,7 +334,6 @@ export interface ArkpadEditorAPI {
   // Content Management
   setContent(
     content: ArkpadContent,
-    format?: "html" | "markdown" | "json",
     emitUpdate?: boolean
   ): void;
   clearContent(emitUpdate?: boolean): void;

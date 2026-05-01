@@ -75,7 +75,7 @@ export class SchemaBuilder {
     // Phase 2: Schema Extensions (Decorators)
     allExtensions.forEach((ext) => {
       if (ext.extendNodeSchema) {
-        nodes.forEach((spec: any, name: string) => {
+        nodes.forEach((name: string, spec: any) => {
           const newSpec = ext.extendNodeSchema!(name, spec);
           if (!newSpec || typeof newSpec !== "object") {
             throw new Error(`Extension "${ext.name}" returned invalid spec for node "${name}"`);
@@ -84,7 +84,7 @@ export class SchemaBuilder {
         });
       }
       if (ext.extendMarkSchema) {
-        marks.forEach((spec: any, name: string) => {
+        marks.forEach((name: string, spec: any) => {
           const newSpec = ext.extendMarkSchema!(name, spec);
           if (!newSpec || typeof newSpec !== "object") {
             throw new Error(`Extension "${ext.name}" returned invalid spec for mark "${name}"`);

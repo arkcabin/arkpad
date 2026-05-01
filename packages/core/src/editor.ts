@@ -618,9 +618,9 @@ export class ArkpadEditor implements ArkpadEditorAPI {
   /**
    * Sets the editor content.
    */
-  setContent(content: ArkpadContent, format?: "html" | "markdown" | "json", emitUpdate = true) {
+  setContent(content: ArkpadContent, emitUpdate = true) {
     const { schema } = this.extensionManager;
-    const parsedDoc = parseContent(content, schema, format);
+    const parsedDoc = parseContent(content, schema);
     const state = this.view.state;
     const nextState = EditorState.create({
       schema,
@@ -637,7 +637,7 @@ export class ArkpadEditor implements ArkpadEditorAPI {
    * Clears the editor content.
    */
   clearContent(emitUpdate = true) {
-    this.setContent("<p></p>", undefined, emitUpdate);
+    this.setContent("<p></p>", emitUpdate);
   }
 
   /**

@@ -1,12 +1,11 @@
-import React from "react";
-import { StarterKit } from "@arkpad/starter-kit";
 import { useArkpadEditor, ArkpadEditorContent, ArkpadProvider, EditorButton } from "@arkpad/react";
 import { Table as TableIcon } from "lucide-react";
 import { ShowcaseLayout } from "../layouts/ShowcaseLayout";
+import { Table } from "@arkpad/extension-table";
 
 export function TableDemo() {
   const editor = useArkpadEditor({
-    extensions: [StarterKit],
+    extensions: [Table],
     content: "<h1>Table Extension</h1><p>Insert and manage tables with rows and columns.</p>",
   });
 

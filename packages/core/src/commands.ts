@@ -118,11 +118,10 @@ class CommandManagerInstance {
 
 
   public insertContent(
-    content: ArkpadContent,
-    format?: "html" | "markdown" | "json"
+    content: ArkpadContent
   ): ChainedCommands {
     this.callbacks.push(({ tr }) => {
-      const parsedDoc = parseContent(content, this.schema, format);
+      const parsedDoc = parseContent(content, this.schema);
       const slice = new Slice(parsedDoc.content, 0, 0);
       tr.replaceSelection(slice);
       return true;

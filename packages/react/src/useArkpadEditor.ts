@@ -102,13 +102,13 @@ export function useArkpadEditor(options: UseArkpadEditorOptions = {}) {
     if (isHtmlContent) {
       const currentHtml = editor.getHTML();
       if (options.content !== currentHtml) {
-        editor.setContent(options.content, "html", false);
+        editor.setContent(options.content, false);
       }
     } else {
       const currentJson = editor.getJSON();
       const newJson = options.content as ArkpadDocJSON;
       if (JSON.stringify(newJson) !== JSON.stringify(currentJson)) {
-        editor.setContent(options.content, "json", false);
+        editor.setContent(options.content, false);
       }
     }
   }, [editor, options.content]);
