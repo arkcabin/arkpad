@@ -20,12 +20,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
       items: [
         { name: "Bold", path: "/extensions/bold" },
         { name: "Italic", path: "/extensions/italic" },
-      ]
-    },
-    {
-      title: "NODES",
-      items: [
-        { name: "Table", path: "/extensions/table" },
+        { name: "Underline", path: "/extensions/underline" },
       ]
     }
   ];

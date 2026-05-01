@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { App } from "./App";
 import { BoldDemo } from "./demos/BoldDemo";
 import { ItalicDemo } from "./demos/ItalicDemo";
-import { TableDemo } from "./demos/TableDemo";
+import { UnderlineDemo } from "./demos/UnderlineDemo";
 import { Sidebar } from "./components/Sidebar";
 
 export function Router() {
@@ -34,9 +34,11 @@ export function Router() {
               </div>
             } />
 
-            <Route path="/extensions/table" element={
+
+
+            <Route path="/extensions/underline" element={
               <div className="flex-1 overflow-hidden">
-                <TableDemo />
+                <UnderlineDemo />
               </div>
             } />
 
