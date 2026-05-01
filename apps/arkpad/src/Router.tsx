@@ -4,6 +4,10 @@ import { App } from "./App";
 import { BoldDemo } from "./demos/BoldDemo";
 import { ItalicDemo } from "./demos/ItalicDemo";
 import { UnderlineDemo } from "./demos/UnderlineDemo";
+import { StrikeDemo } from "./demos/StrikeDemo";
+import { CodeDemo } from "./demos/CodeDemo";
+import { SuperscriptDemo } from "./demos/SuperscriptDemo";
+import { SubscriptDemo } from "./demos/SubscriptDemo";
 import { Sidebar } from "./components/Sidebar";
 
 export function Router() {
@@ -39,6 +43,30 @@ export function Router() {
             <Route path="/extensions/underline" element={
               <div className="flex-1 overflow-hidden">
                 <UnderlineDemo />
+              </div>
+            } />
+
+            <Route path="/extensions/strike" element={
+              <div className="flex-1 overflow-hidden">
+                <StrikeDemo />
+              </div>
+            } />
+
+            <Route path="/extensions/code" element={
+              <div className="flex-1 overflow-hidden">
+                <CodeDemo />
+              </div>
+            } />
+
+            <Route path="/extensions/superscript" element={
+              <div className="flex-1 overflow-hidden">
+                <SuperscriptDemo />
+              </div>
+            } />
+
+            <Route path="/extensions/subscript" element={
+              <div className="flex-1 overflow-hidden">
+                <SubscriptDemo />
               </div>
             } />
 

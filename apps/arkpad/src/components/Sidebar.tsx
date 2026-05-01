@@ -21,6 +21,10 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
         { name: "Bold", path: "/extensions/bold" },
         { name: "Italic", path: "/extensions/italic" },
         { name: "Underline", path: "/extensions/underline" },
+        { name: "Strike", path: "/extensions/strike" },
+        { name: "Code", path: "/extensions/code" },
+        { name: "Superscript", path: "/extensions/superscript" },
+        { name: "Subscript", path: "/extensions/subscript" },
       ]
     }
   ];
