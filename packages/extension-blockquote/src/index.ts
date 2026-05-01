@@ -21,7 +21,7 @@ export const Blockquote = Extension.create({
   addCommands() {
     return {
       toggleBlockquote: () => ({ chain }: ArkpadCommandProps) => {
-        return chain().toggleBlock("blockquote").run();
+        return chain().toggleBlock("blockquote");
       },
     };
   },

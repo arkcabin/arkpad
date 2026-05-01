@@ -47,7 +47,7 @@ export const Heading = Extension.create<HeadingOptions>({
       toggleHeading:
         (attrs: { level: number }) =>
         ({ chain }: ArkpadCommandProps) => {
-          return chain().toggleBlock("heading", attrs).run();
+          return chain().toggleBlock("heading", attrs);
         },
     };
   },

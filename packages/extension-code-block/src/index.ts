@@ -22,7 +22,7 @@ export const CodeBlock = Extension.create({
   addCommands() {
     return {
       toggleCodeBlock: () => ({ chain }: ArkpadCommandProps) => {
-        return chain().toggleBlock("code_block").run();
+        return chain().toggleBlock("code_block");
       },
     };
   },

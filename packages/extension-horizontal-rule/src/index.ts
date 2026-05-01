@@ -23,15 +23,11 @@ export const HorizontalRule = Extension.create({
           const type = state.schema.nodes.horizontal_rule;
           if (!type) return false;
           return chain()
-            .command(({ tr, state: currentState }) => {
-              const { $from } = currentState.selection;
-              if (!$from.parent.canReplaceWith($from.index(), $from.indexAfter(), type)) {
-                return false;
-              }
-              tr.replaceSelectionWith(type.create());
+            .insertNode("horizontal_rule")
+            .command(({ tr }) => {
+              tr.scrollIntoView();
               return true;
-            })
-            .run();
+            });
         },
     };
   },

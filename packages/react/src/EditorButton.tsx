@@ -43,12 +43,15 @@ export const EditorButton: React.FC<EditorButtonProps> = ({
 }) => {
   const editor = useArkpadContext();
 
-  // Reactively track if the command is active
-  const isActive = useEditorState(editor, (s) => s.isActive(name || command, attrs)) ?? false;
-
-  // Reactively track if the command can be executed
-  const canRun =
-    useEditorState(editor, (s) => s.canRunCommand(command, ...(args as any[]))) ?? false;
+  // Reactively track editor state (active and executable)
+  const { isActive, canRun } = useEditorState(
+    editor,
+    (s) => ({
+      isActive: s.isActive(name || command, attrs),
+      canRun: s.canRunCommand(command, ...(args as any[])),
+    }),
+    (a, b) => a?.isActive === b?.isActive && a?.canRun === b?.canRun
+  ) ?? { isActive: false, canRun: false };
 
   return (
     <button

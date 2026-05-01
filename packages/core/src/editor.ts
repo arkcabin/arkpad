@@ -353,7 +353,17 @@ export class ArkpadEditor implements ArkpadEditorAPI {
         chain: () => this.chain(),
         can: () => this.can(),
       };
-      return result(props);
+      const cmdResult = result(props);
+      // If the command returned a chain, run it.
+      if (
+        cmdResult &&
+        typeof cmdResult === "object" &&
+        "run" in cmdResult &&
+        typeof (cmdResult as any).run === "function"
+      ) {
+        return (cmdResult as any).run();
+      }
+      return cmdResult;
     }
 
     return result;
@@ -418,7 +428,7 @@ export class ArkpadEditor implements ArkpadEditorAPI {
           view: this.view,
           tr: state.tr,
           editor: this,
-          chain: () => this.chain().command(({ dispatch }) => dispatch === undefined),
+          chain: () => this.can(),
           can: () => this.can(),
         });
       }
@@ -426,6 +436,20 @@ export class ArkpadEditor implements ArkpadEditorAPI {
     } catch {
       return false;
     }
+  }
+
+  /**
+   * Returns a command chain that NEVER dispatches.
+   * Useful for checking if a command can be executed.
+   */
+  can(): ChainedCommands {
+    return new CommandManager({
+      state: this.view.state,
+      commands: this.commands,
+      view: this.view,
+      dispatch: undefined,
+      schema: this.extensionManager.schema,
+    });
   }
 
   /**

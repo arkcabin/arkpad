@@ -23,7 +23,7 @@ export const Underline = Extension.create({
       toggleUnderline:
         () =>
         ({ chain }: ArkpadCommandProps) => {
-          return chain().toggleMark("underline").run();
+          return chain().toggleMark("underline");
         },
     };
   },

@@ -35,7 +35,7 @@ export const Image = Extension.create({
   addCommands() {
     return {
       setImage: (options: { src: string; alt?: string; title?: string }) => ({ chain }: ArkpadCommandProps) => {
-        return chain().insertNode("image", options).run();
+        return chain().insertNode("image", options);
       },
     };
   },

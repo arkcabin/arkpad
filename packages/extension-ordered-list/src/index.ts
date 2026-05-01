@@ -40,7 +40,7 @@ export const OrderedList = Extension.create({
       toggleOrderedList:
         () =>
         ({ chain }: ArkpadCommandProps) => {
-          return chain().toggleList("ordered_list", "list_item").run();
+          return chain().toggleList("ordered_list", "list_item");
         },
     };
   },

@@ -30,7 +30,7 @@ export const BulletList = Extension.create({
       toggleBulletList:
         () =>
         ({ chain }: ArkpadCommandProps) => {
-          return chain().toggleList("bullet_list", "list_item").run();
+          return chain().toggleList("bullet_list", "list_item");
         },
     };
   },

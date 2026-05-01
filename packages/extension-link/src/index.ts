@@ -32,7 +32,7 @@ export const Link = Extension.create({
   addCommands() {
     return {
       toggleLink: (url: string) => ({ chain }: ArkpadCommandProps) => {
-        return chain().toggleMark("link", { href: url }).run();
+        return chain().toggleMark("link", { href: url });
       },
     };
   },

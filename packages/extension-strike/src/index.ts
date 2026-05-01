@@ -28,7 +28,7 @@ export const Strike = Extension.create({
       toggleStrike:
         () =>
         ({ chain }: ArkpadCommandProps) => {
-          return chain().toggleMark("strike").run();
+          return chain().toggleMark("strike");
         },
     };
   },

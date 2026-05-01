@@ -17,7 +17,7 @@ export const Code = Extension.create({
   addCommands() {
     return {
       toggleCode: () => ({ chain }: ArkpadCommandProps) => {
-        return chain().toggleMark("code").run();
+        return chain().toggleMark("code");
       },
     };
   },

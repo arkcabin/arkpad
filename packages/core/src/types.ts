@@ -41,7 +41,7 @@ export type TypedCommands<T> = {
 export type ArkpadCommand =
   | Command
   | ((...args: any[]) => Command)
-  | ((...args: any[]) => (props: ArkpadCommandProps) => boolean | Promise<boolean>);
+  | ((...args: any[]) => (props: ArkpadCommandProps) => boolean | Promise<boolean> | ChainedCommands);
 export type ArkpadCommandRegistry = Record<string, ArkpadCommand>;
 
 export type InterceptorType = "all" | "docChanged" | "selectionChanged";

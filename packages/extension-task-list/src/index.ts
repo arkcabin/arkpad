@@ -115,7 +115,7 @@ export const TaskList = Extension.create({
   addCommands() {
     return {
       toggleTaskList: () => ({ chain }: ArkpadCommandProps) => {
-        return chain().toggleList("task_list", "task_item").run();
+        return chain().toggleList("task_list", "task_item");
       },
     };
   },

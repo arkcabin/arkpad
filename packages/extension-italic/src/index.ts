@@ -29,7 +29,7 @@ export const Italic = Extension.create({
       toggleItalic:
         () =>
         ({ chain }: ArkpadCommandProps) => {
-          return chain().toggleMark("em").run();
+          return chain().toggleMark("em");
         },
     };
   },
