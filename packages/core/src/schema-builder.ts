@@ -4,6 +4,7 @@ import { ArkpadExtension } from "./types";
 
 /**
  * SchemaBuilder dynamically constructs a ProseMirror schema from Arkpad extensions.
+ * Follows the Tiptap extension manager architecture for maximum stability and performance.
  */
 export class SchemaBuilder {
   private extensions: ArkpadExtension[];
@@ -17,46 +18,31 @@ export class SchemaBuilder {
    * Builds and returns the ProseMirror schema.
    */
   build(): Schema {
-    // PRESERVE ORDER: Schema composition is order-sensitive.
-    const cacheKey = JSON.stringify(this.extensions.map((ext) => ext.name || "anonymous"));
+    // 1. Flatten all extensions (including nested ones) with recursion protection
+    const allExtensions = this.flattenExtensions(this.extensions);
 
+    // 2. Sort extensions by priority (Tiptap standard: higher priority runs later/overwrites)
+    allExtensions.sort((a, b) => (a.priority || 100) - (b.priority || 100));
+
+    // 3. Check Cache
+    const cacheKey = JSON.stringify(allExtensions.map((ext) => ext.name));
     if (SchemaBuilder.schemaCache.has(cacheKey)) {
       return SchemaBuilder.schemaCache.get(cacheKey)!;
     }
 
+    // Initialize with base schema (doc, paragraph, text)
     let nodes = arkpadSchema.spec.nodes as any;
     let marks = arkpadSchema.spec.marks as any;
 
-    const allExtensions: ArkpadExtension[] = [];
-
-    const flattenExtensions = (exts: ArkpadExtension[]) => {
-      for (const extension of exts) {
-        if (!extension || typeof extension !== "object") continue;
-        allExtensions.push(extension);
-
-        if (extension.addExtensions) {
-          try {
-            const nested = extension.addExtensions();
-            if (Array.isArray(nested)) {
-              flattenExtensions(nested);
-            }
-          } catch (e) {
-            console.error(`[Arkpad] Failed to load nested extensions for ${extension.name}:`, e);
-          }
-        }
-      }
-    };
-
-    flattenExtensions(this.extensions);
-
-    // Phase 1: Merge Nodes and Marks
+    // Phase 1: Collect Base Nodes & Marks
     allExtensions.forEach((ext) => {
       if (ext.addNodes) {
         const extNodes = ext.addNodes();
         Object.entries(extNodes).forEach(([name, spec]) => {
           if (marks.get(name)) {
-            throw new Error(`Collision: "${name}" is already defined as a mark. Cannot add as node.`);
+            throw new Error(`Collision: "${name}" is already defined as a mark.`);
           }
+          // Tiptap-style: Later extensions overwrite earlier ones if priority allows
           nodes = nodes.get(name) ? nodes.update(name, spec) : nodes.addToEnd(name, spec);
         });
       }
@@ -65,7 +51,7 @@ export class SchemaBuilder {
         const extMarks = ext.addMarks();
         Object.entries(extMarks).forEach(([name, spec]) => {
           if (nodes.get(name)) {
-            throw new Error(`Collision: "${name}" is already defined as a node. Cannot add as mark.`);
+            throw new Error(`Collision: "${name}" is already defined as a node.`);
           }
           marks = marks.get(name) ? marks.update(name, spec) : marks.addToEnd(name, spec);
         });
@@ -75,36 +61,28 @@ export class SchemaBuilder {
     // Phase 2: Schema Extensions (Decorators)
     allExtensions.forEach((ext) => {
       if (ext.extendNodeSchema) {
-        nodes.forEach((name: string, spec: any) => {
+        nodes.forEach((spec: any, name: string) => {
           const newSpec = ext.extendNodeSchema!(name, spec);
-          if (!newSpec || typeof newSpec !== "object") {
-            throw new Error(`Extension "${ext.name}" returned invalid spec for node "${name}"`);
-          }
-          nodes = nodes.update(name, newSpec);
+          if (newSpec) nodes = nodes.update(name, newSpec);
         });
       }
       if (ext.extendMarkSchema) {
-        marks.forEach((name: string, spec: any) => {
+        marks.forEach((spec: any, name: string) => {
           const newSpec = ext.extendMarkSchema!(name, spec);
-          if (!newSpec || typeof newSpec !== "object") {
-            throw new Error(`Extension "${ext.name}" returned invalid spec for mark "${name}"`);
-          }
-          marks = marks.update(name, newSpec);
+          if (newSpec) marks = marks.update(name, newSpec);
         });
       }
     });
 
-    // Phase 3: Global Attributes
+    // Phase 3: Global Attributes (The Tiptap "Power-Up")
     const globalAttributes = this.collectGlobalAttributes(allExtensions);
     nodes = this.enhanceSchemaElements(nodes, globalAttributes, "node");
     marks = this.enhanceSchemaElements(marks, globalAttributes, "mark");
 
     const schema = new Schema({ nodes, marks });
-    
-    // Simple LRU-like cache management
-    if (SchemaBuilder.schemaCache.size > 50) {
-      SchemaBuilder.schemaCache.clear();
-    }
+
+    // Cache management
+    if (SchemaBuilder.schemaCache.size > 50) SchemaBuilder.schemaCache.clear();
     SchemaBuilder.schemaCache.set(cacheKey, schema);
     
     return schema;
@@ -122,38 +100,47 @@ export class SchemaBuilder {
 
   private enhanceSchemaElements(elements: any, globals: any[], type: "node" | "mark") {
     let enhancedElements = elements;
+    
+    // 1. Group global attributes by the types they apply to
+    const attributesByTypeName: Record<string, any[]> = {};
     globals.forEach((global) => {
       if (!global.types || !Array.isArray(global.types)) return;
       global.types.forEach((typeName: string) => {
-        const spec = enhancedElements.get(typeName);
-        if (!spec) return;
+        if (!attributesByTypeName[typeName]) attributesByTypeName[typeName] = [];
+        attributesByTypeName[typeName].push(global.attributes || {});
+      });
+    });
 
-        const renderMethod = type === "node" ? "toDOM" : "toDOM"; // Both use toDOM in PM
+    // 2. Apply all attributes in a single pass per node type
+    Object.entries(attributesByTypeName).forEach(([typeName, allAttrs]) => {
+      const spec = enhancedElements.get(typeName);
+      if (!spec) return;
 
-        enhancedElements = enhancedElements.update(typeName, {
-          ...spec,
-          attrs: {
-            ...spec.attrs,
-            ...Object.fromEntries(
-              Object.entries(global.attributes || {}).map(([key, attr]: [string, any]) => [
-                key,
-                { ...(spec.attrs?.[key] || {}), ...attr },
-              ])
-            ),
-          },
-          [renderMethod]: (element: any) => {
-            const originalDOM = spec[renderMethod] ? spec[renderMethod](element) : [type === "node" ? "div" : "span", 0];
-            
-            if (!Array.isArray(originalDOM)) return originalDOM;
+      const renderMethod = "toDOM";
+      
+      enhancedElements = enhancedElements.update(typeName, {
+        ...spec,
+        attrs: {
+          ...spec.attrs,
+          ...Object.assign({}, ...allAttrs.map(attrs => 
+            Object.fromEntries(Object.entries(attrs).map(([key, attr]: [string, any]) => [
+              key, { ...(spec.attrs?.[key] || {}), ...attr }
+            ]))
+          ))
+        },
+        [renderMethod]: (element: any) => {
+          const originalDOM = spec[renderMethod] ? spec[renderMethod](element) : [type === "node" ? "div" : "span", 0];
+          if (!Array.isArray(originalDOM)) return originalDOM;
 
-            const [tag, maybeAttrs, ...rest] = originalDOM;
-            const hasAttrs = maybeAttrs && typeof maybeAttrs === "object" && !Array.isArray(maybeAttrs);
-            const originalAttrs = hasAttrs ? { ...maybeAttrs } : {};
-            const content = hasAttrs ? rest : [maybeAttrs, ...rest];
+          const [tag, maybeAttrs, ...rest] = originalDOM;
+          const hasAttrs = maybeAttrs && typeof maybeAttrs === "object" && !Array.isArray(maybeAttrs);
+          const originalAttrs = hasAttrs ? { ...maybeAttrs } : {};
+          const content = hasAttrs ? rest : [maybeAttrs, ...rest];
 
-            const newAttrs: Record<string, any> = { ...originalAttrs };
+          const newAttrs: Record<string, any> = { ...originalAttrs };
 
-            Object.entries(global.attributes || {}).forEach(([key, attr]: [string, any]) => {
+          allAttrs.forEach(attrs => {
+            Object.entries(attrs).forEach(([key, attr]: [string, any]) => {
               if (attr.renderHTML) {
                 const rendered = attr.renderHTML(element.attrs);
                 if (rendered) {
@@ -171,12 +158,45 @@ export class SchemaBuilder {
                 newAttrs[key] = element.attrs[key];
               }
             });
+          });
 
-            return [tag, newAttrs, ...content];
-          },
-        });
+          return [tag, newAttrs, ...content];
+        }
       });
     });
+
     return enhancedElements;
+  }
+
+  private flattenExtensions(extensions: ArkpadExtension[]): ArkpadExtension[] {
+    const flattened: ArkpadExtension[] = [];
+    const seen = new Set<string>();
+
+    const traverse = (exts: ArkpadExtension[]) => {
+      exts.forEach((ext, index) => {
+        if (!ext || typeof ext !== "object") return;
+        
+        // Ensure extension has a name for the cache key and duplicate prevention
+        if (!ext.name) {
+          ext.name = `anonymous_${index}`;
+        }
+
+        if (seen.has(ext.name)) return;
+        seen.add(ext.name);
+
+        if (ext.addExtensions) {
+          try {
+            const nested = ext.addExtensions();
+            if (Array.isArray(nested)) traverse(nested);
+          } catch (e) {
+            console.error(`[Arkpad] Failed to load nested extensions for ${ext.name}:`, e);
+          }
+        }
+        flattened.push(ext);
+      });
+    };
+
+    traverse(extensions);
+    return flattened;
   }
 }

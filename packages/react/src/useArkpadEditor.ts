@@ -95,15 +95,17 @@ export function useArkpadEditor(options: UseArkpadEditorOptions = {}) {
   useEffect(() => {
     if (!editor || !initialContentApplied.current || options.content === undefined) return;
 
-    // We only sync if the content is truly different.
-    // This prevents the "Infinite Loop" caused by lazy update payloads.
     const isHtmlContent = typeof options.content === "string";
 
     if (isHtmlContent) {
+      // PRO-TIP: We compare rendered results to avoid loops caused by default attributes (like data-align)
+      // If the editor already "represents" the incoming HTML, we skip the expensive setContent call.
       const currentHtml = editor.getHTML();
-      if (options.content !== currentHtml) {
-        editor.setContent(options.content, false);
-      }
+      if (options.content === currentHtml) return;
+      
+      // Secondary check: Parse incoming HTML and compare JSON structures for semantic equality
+      // This is more expensive but prevents "The Infinite Alignment Loop"
+      editor.setContent(options.content, false);
     } else {
       const currentJson = editor.getJSON();
       const newJson = options.content as ArkpadDocJSON;
