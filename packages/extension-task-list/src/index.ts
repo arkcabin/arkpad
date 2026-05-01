@@ -2,6 +2,14 @@ import { Extension, ArkpadCommandProps } from "@arkpad/core";
 import { wrappingInputRule } from "prosemirror-inputrules";
 import { splitListItem } from "prosemirror-schema-list";
 
+declare module "@arkpad/core" {
+  interface ArkpadCommands {
+    toggleTaskItem: () => void;
+    toggleTaskList: () => void;
+  }
+}
+
+
 export const TaskItem = Extension.create({
   name: "taskItem",
 
@@ -115,7 +123,7 @@ export const TaskList = Extension.create({
   addCommands() {
     return {
       toggleTaskList: () => ({ chain }: ArkpadCommandProps) => {
-        return chain().toggleList("task_list", "task_item");
+        return chain().toggleList("task_list", "task_item").run();
       },
     };
   },

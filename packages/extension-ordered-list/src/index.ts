@@ -1,6 +1,12 @@
 import { Extension, ArkpadCommandProps } from "@arkpad/core";
 import ListItem from "@arkpad/extension-list-item";
 
+declare module "@arkpad/core" {
+  interface ArkpadCommands {
+    toggleOrderedList: () => void;
+  }
+}
+
 export const OrderedList = Extension.create({
   name: "orderedList",
 
@@ -40,7 +46,7 @@ export const OrderedList = Extension.create({
       toggleOrderedList:
         () =>
         ({ chain }: ArkpadCommandProps) => {
-          return chain().toggleList("ordered_list", "list_item");
+          return chain().toggleList("ordered_list", "list_item").run();
         },
     };
   },

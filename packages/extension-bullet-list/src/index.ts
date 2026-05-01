@@ -1,6 +1,12 @@
 import { Extension, ArkpadCommandProps } from "@arkpad/core";
 import ListItem from "@arkpad/extension-list-item";
 
+declare module "@arkpad/core" {
+  interface ArkpadCommands {
+    toggleBulletList: () => void;
+  }
+}
+
 export const BulletList = Extension.create({
   name: "bulletList",
 
@@ -30,7 +36,7 @@ export const BulletList = Extension.create({
       toggleBulletList:
         () =>
         ({ chain }: ArkpadCommandProps) => {
-          return chain().toggleList("bullet_list", "list_item");
+          return chain().toggleList("bullet_list", "list_item").run();
         },
     };
   },
