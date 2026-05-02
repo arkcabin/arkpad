@@ -51,11 +51,27 @@ export class ArkpadEditor implements ArkpadEditorAPI {
   private view: EditorView;
   private destroyed = false;
   private listeners = new Set<(editor: ArkpadEditorAPI) => void>();
+  private snapshots: Record<string, EditorState> = {};
 
   // Performance: Pre-indexed hooks to avoid iterating all extensions on every transaction
   private transactionHooks: ArkpadExtension[] = [];
   private updateHooks: ArkpadExtension[] = [];
   private destroyHooks: ArkpadExtension[] = [];
+
+  // Native Event Hooks
+  private eventHooks: {
+    onClick: ArkpadExtension[];
+    onDoubleClick: ArkpadExtension[];
+    onKeyDown: ArkpadExtension[];
+    onDrop: ArkpadExtension[];
+    onPaste: ArkpadExtension[];
+  } = {
+    onClick: [],
+    onDoubleClick: [],
+    onKeyDown: [],
+    onDrop: [],
+    onPaste: [],
+  };
 
   constructor(options: ArkpadEditorOptions) {
     const resolved = resolveEditorOptions(options);
@@ -111,6 +127,13 @@ export class ArkpadEditor implements ArkpadEditorAPI {
       if (ext.onDestroy) {
         this.destroyHooks.push(ext);
       }
+
+      // Index native event hooks
+      if (ext.onClick) this.eventHooks.onClick.push(ext);
+      if (ext.onDoubleClick) this.eventHooks.onDoubleClick.push(ext);
+      if (ext.onKeyDown) this.eventHooks.onKeyDown.push(ext);
+      if (ext.onDrop) this.eventHooks.onDrop.push(ext);
+      if (ext.onPaste) this.eventHooks.onPaste.push(ext);
     });
 
     extensionManager.storage = this.storage;
@@ -197,9 +220,39 @@ export class ArkpadEditor implements ArkpadEditorAPI {
     plugins.push(
       new Plugin({
         props: {
-          handlePaste: (view, event, slice) => {
+          handlePaste: (_view, event, slice) => {
             if (this.onPaste) {
-              return this.onPaste({ editor: this, event, slice }) === true;
+              return this.onPaste({ editor: this as any, event, slice }) === true;
+            }
+
+            // Also check indexed extension paste hooks
+            for (const ext of this.eventHooks.onPaste) {
+              if (ext.onPaste!(event, slice) === true) return true;
+            }
+
+            return false;
+          },
+          handleKeyDown: (_view, event) => {
+            for (const ext of this.eventHooks.onKeyDown) {
+              if (ext.onKeyDown!(event) === true) return true;
+            }
+            return false;
+          },
+          handleClick: (_view, pos, event) => {
+            for (const ext of this.eventHooks.onClick) {
+              if (ext.onClick!(event, pos) === true) return true;
+            }
+            return false;
+          },
+          handleDoubleClick: (_view, pos, event) => {
+            for (const ext of this.eventHooks.onDoubleClick) {
+              if (ext.onDoubleClick!(event, pos) === true) return true;
+            }
+            return false;
+          },
+          handleDrop: (_view, event, slice, moved) => {
+            for (const ext of this.eventHooks.onDrop) {
+              if (ext.onDrop!(event, slice, moved) === true) return true;
             }
             return false;
           },
@@ -695,6 +748,28 @@ export class ArkpadEditor implements ArkpadEditorAPI {
    */
   isEditable() {
     return this.editable;
+  }
+
+  /**
+   * Saves a snapshot of the current editor state.
+   */
+  saveSnapshot(name: string) {
+    this.snapshots[name] = this.view.state;
+  }
+
+  /**
+   * Restores a saved snapshot of the editor state.
+   */
+  restoreSnapshot(name: string): boolean {
+    const state = this.snapshots[name];
+    if (!state) {
+      console.warn(`[Arkpad] Snapshot "${name}" not found.`);
+      return false;
+    }
+
+    this.view.updateState(state);
+    this.emitUpdate(state);
+    return true;
   }
 
   /**

@@ -23,6 +23,7 @@ export const OrderedList = Extension.create({
       ordered_list: {
         content: "list_item+",
         group: "block",
+        trailingNode: true,
         attrs: { order: { default: 1 } },
         parseDOM: [
           {

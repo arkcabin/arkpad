@@ -23,6 +23,7 @@ export const BulletList = Extension.create({
       bullet_list: {
         content: "list_item+",
         group: "block",
+        trailingNode: true,
         parseDOM: [{ tag: "ul" }],
         toDOM() {
           return ["ul", 0];

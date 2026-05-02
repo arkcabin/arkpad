@@ -16,7 +16,9 @@ import {
   toggleHeaderCell,
   setCellAttr,
   fixTables,
+  goToNextCell,
 } from "prosemirror-tables";
+import { TextSelection } from "prosemirror-state";
 
 export const Table = Extension.create({
   name: "table",
@@ -36,6 +38,7 @@ export const Table = Extension.create({
         tableRole: "table",
         isolating: true,
         group: "block",
+        trailingNode: true,
         parseDOM: [{ tag: "table" }],
         toDOM() {
           return ["table", ["tbody", 0]];
@@ -122,98 +125,104 @@ export const Table = Extension.create({
               const table = type.create(null, rows_nodes);
               tr.replaceSelectionWith(table).scrollIntoView();
               return true;
-            })
+            }, "insertTable")
             .run();
         },
       addColumnBefore:
         () =>
         ({ chain }: ArkpadCommandProps) => {
           return chain()
-            .command(({ state, dispatch }) => addColumnBefore(state, dispatch))
+            .command(({ state, dispatch }) => addColumnBefore(state, dispatch), "addColumnBefore")
             .run();
         },
       addColumnAfter:
         () =>
         ({ chain }: ArkpadCommandProps) => {
           return chain()
-            .command(({ state, dispatch }) => addColumnAfter(state, dispatch))
+            .command(({ state, dispatch }) => addColumnAfter(state, dispatch), "addColumnAfter")
             .run();
         },
       deleteColumn:
         () =>
         ({ chain }: ArkpadCommandProps) => {
           return chain()
-            .command(({ state, dispatch }) => deleteColumn(state, dispatch))
+            .command(({ state, dispatch }) => deleteColumn(state, dispatch), "deleteColumn")
             .run();
         },
       addRowBefore:
         () =>
         ({ chain }: ArkpadCommandProps) => {
           return chain()
-            .command(({ state, dispatch }) => addRowBefore(state, dispatch))
+            .command(({ state, dispatch }) => addRowBefore(state, dispatch), "addRowBefore")
             .run();
         },
       addRowAfter:
         () =>
         ({ chain }: ArkpadCommandProps) => {
           return chain()
-            .command(({ state, dispatch }) => addRowAfter(state, dispatch))
+            .command(({ state, dispatch }) => addRowAfter(state, dispatch), "addRowAfter")
             .run();
         },
       deleteRow:
         () =>
         ({ chain }: ArkpadCommandProps) => {
           return chain()
-            .command(({ state, dispatch }) => deleteRow(state, dispatch))
+            .command(({ state, dispatch }) => deleteRow(state, dispatch), "deleteRow")
             .run();
         },
       deleteTable:
         () =>
         ({ chain }: ArkpadCommandProps) => {
           return chain()
-            .command(({ state, dispatch }) => deleteTable(state, dispatch))
+            .command(({ state, dispatch }) => deleteTable(state, dispatch), "deleteTable")
             .run();
         },
       mergeCells:
         () =>
         ({ chain }: ArkpadCommandProps) => {
           return chain()
-            .command(({ state, dispatch }) => mergeCells(state, dispatch))
+            .command(({ state, dispatch }) => mergeCells(state, dispatch), "mergeCells")
             .run();
         },
       splitCell:
         () =>
         ({ chain }: ArkpadCommandProps) => {
           return chain()
-            .command(({ state, dispatch }) => splitCell(state, dispatch))
+            .command(({ state, dispatch }) => splitCell(state, dispatch), "splitCell")
             .run();
         },
       toggleHeaderColumn:
         () =>
         ({ chain }: ArkpadCommandProps) => {
           return chain()
-            .command(({ state, dispatch }) => toggleHeaderColumn(state, dispatch))
+            .command(
+              ({ state, dispatch }) => toggleHeaderColumn(state, dispatch),
+              "toggleHeaderColumn"
+            )
             .run();
         },
       toggleHeaderRow:
         () =>
         ({ chain }: ArkpadCommandProps) => {
           return chain()
-            .command(({ state, dispatch }) => toggleHeaderRow(state, dispatch))
+            .command(({ state, dispatch }) => toggleHeaderRow(state, dispatch), "toggleHeaderRow")
             .run();
         },
       toggleHeaderCell:
         () =>
         ({ chain }: ArkpadCommandProps) => {
           return chain()
-            .command(({ state, dispatch }) => toggleHeaderCell(state, dispatch))
+            .command(({ state, dispatch }) => toggleHeaderCell(state, dispatch), "toggleHeaderCell")
             .run();
         },
       setCellAttr:
         (name: string, value: any) =>
         ({ chain }: ArkpadCommandProps) => {
           return chain()
-            .command(({ state, dispatch }) => setCellAttr(name, value)(state, dispatch))
+            .command(
+              ({ state, dispatch }) => setCellAttr(name, value)(state, dispatch),
+              "setCellAttr"
+            )
             .run();
         },
       fixTables:
@@ -227,9 +236,64 @@ export const Table = Extension.create({
                 return true;
               }
               return false;
-            })
+            }, "fixTables")
             .run();
         },
+      goToNextCell:
+        (direction: number = 1) =>
+        ({ state, dispatch }: ArkpadCommandProps) => {
+          return goToNextCell(direction as any)(state, dispatch);
+        },
+      exitTable:
+        () =>
+        ({ chain }: ArkpadCommandProps) => {
+          return chain()
+            .command(({ state, tr }) => {
+              const { selection } = state;
+              const { $from } = selection;
+
+              let tablePos = -1;
+              for (let d = $from.depth; d > 0; d--) {
+                if ($from.node(d).type.spec.tableRole === "table") {
+                  tablePos = $from.before(d);
+                  break;
+                }
+              }
+
+              if (tablePos === -1) return false;
+
+              // Use tr.doc to avoid stale positions if the document changed in the same chain
+              const tableNode = tr.doc.nodeAt(tablePos)!;
+              const endPos = tablePos + tableNode.nodeSize;
+
+              const paragraph = state.schema.nodes.paragraph!.create();
+              tr.insert(endPos, paragraph);
+              tr.setSelection(TextSelection.create(tr.doc, endPos + 1));
+              return true;
+            }, "exitTable")
+            .scrollIntoView()
+            .run();
+        },
+    };
+  },
+
+  addKeyboardShortcuts() {
+    return {
+      Tab: ({ state, dispatch, editor }: { state: any; dispatch: any; editor: any }) => {
+        if (goToNextCell(1)(state, dispatch)) {
+          return true;
+        }
+
+        // If at the last cell, add a new row and move focus
+        if (!editor.canRunCommand("addRowAfter")) {
+          return false;
+        }
+
+        return editor.chain().addRowAfter().goToNextCell().run();
+      },
+      "Shift-Tab": ({ state, dispatch }: { state: any; dispatch: any }) =>
+        goToNextCell(-1)(state, dispatch),
+      "Shift-Enter": ({ editor }: { editor: any }) => editor.runCommand("exitTable"),
     };
   },
 

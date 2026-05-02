@@ -23,6 +23,25 @@ export type ArkpadCommandProps = {
 export interface ArkpadCommands {
   /** @internal Internal placeholder to satisfy type safety. */
   _arkpad_placeholder?: never;
+
+  // Table Commands
+  insertTable(options?: { rows?: number; cols?: number; withHeaderRow?: boolean }): ArkpadCommand;
+  addColumnBefore(): ArkpadCommand;
+  addColumnAfter(): ArkpadCommand;
+  deleteColumn(): ArkpadCommand;
+  addRowBefore(): ArkpadCommand;
+  addRowAfter(): ArkpadCommand;
+  deleteRow(): ArkpadCommand;
+  deleteTable(): ArkpadCommand;
+  mergeCells(): ArkpadCommand;
+  splitCell(): ArkpadCommand;
+  toggleHeaderColumn(): ArkpadCommand;
+  toggleHeaderRow(): ArkpadCommand;
+  toggleHeaderCell(): ArkpadCommand;
+  setCellAttr(name: string, value: any): ArkpadCommand;
+  fixTables(): ArkpadCommand;
+  goToNextCell(direction?: number): ArkpadCommand;
+  exitTable(): ArkpadCommand;
 }
 
 /**
@@ -86,7 +105,8 @@ export interface ChainedCommands extends TypedCommands<ChainedCommands> {
       dispatch?: (tr: Transaction) => void;
       view?: EditorView;
       editor: ArkpadEditorAPI;
-    }) => boolean
+    }) => boolean,
+    label?: string
   ): ChainedCommands;
 
   /**
@@ -167,6 +187,32 @@ export interface ExtensionConfig<Options = any, Storage = any> {
   ) => Transaction | boolean | null;
 
   /**
+   * Native event listeners.
+   */
+  onClick?: (
+    this: ExtensionContext<Options, Storage>,
+    event: MouseEvent,
+    pos: number
+  ) => boolean | void;
+  onDoubleClick?: (
+    this: ExtensionContext<Options, Storage>,
+    event: MouseEvent,
+    pos: number
+  ) => boolean | void;
+  onKeyDown?: (this: ExtensionContext<Options, Storage>, event: KeyboardEvent) => boolean | void;
+  onDrop?: (
+    this: ExtensionContext<Options, Storage>,
+    event: DragEvent,
+    slice: any,
+    moved: boolean
+  ) => boolean | void;
+  onPaste?: (
+    this: ExtensionContext<Options, Storage>,
+    event: ClipboardEvent,
+    slice: any
+  ) => boolean | void;
+
+  /**
    * Called when the editor is initialized.
    */
   onInit?: (this: ExtensionContext<Options, Storage>) => void;
@@ -208,6 +254,10 @@ export interface NodeConfig<Options = any, Storage = any> extends ExtensionConfi
   isolating?: boolean;
   allowGapCursor?: boolean;
   tableRole?: string;
+  /**
+   * Whether to automatically append a trailing paragraph after this node if it's at the end of the document.
+   */
+  trailingNode?: boolean;
 }
 
 export interface MarkConfig<Options = any, Storage = any> extends ExtensionConfig<
@@ -250,6 +300,14 @@ export interface ArkpadExtension {
     editor: ArkpadEditorAPI;
     transaction: Transaction;
   }) => Transaction | boolean | null;
+  /**
+   * Native event listeners.
+   */
+  onClick?: (event: MouseEvent, pos: number) => boolean | void;
+  onDoubleClick?: (event: MouseEvent, pos: number) => boolean | void;
+  onKeyDown?: (event: KeyboardEvent) => boolean | void;
+  onDrop?: (event: DragEvent, slice: any, moved: boolean) => boolean | void;
+  onPaste?: (event: ClipboardEvent, slice: any) => boolean | void;
   /**
    * Called when the editor is initialized.
    */
@@ -403,6 +461,10 @@ export interface ArkpadEditorAPI {
   blur(): void;
   setEditable(editable: boolean): void;
   isEditable(): boolean;
+
+  // Snapshot API (Time Travel)
+  saveSnapshot(name: string): void;
+  restoreSnapshot(name: string): boolean;
 
   // Extension Management
   registerExtension(extension: ArkpadExtension): void;

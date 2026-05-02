@@ -1,7 +1,19 @@
-import { EditorState, Transaction, TextSelection, Selection, NodeSelection } from "prosemirror-state";
+import {
+  EditorState,
+  Transaction,
+  TextSelection,
+  Selection,
+  NodeSelection,
+} from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
 import { Slice, Schema } from "prosemirror-model";
-import { ChainedCommands, ArkpadCommandRegistry, ArkpadContent, ArkpadEditorAPI, ArkpadCommandProps } from "./types";
+import {
+  ChainedCommands,
+  ArkpadCommandRegistry,
+  ArkpadContent,
+  ArkpadEditorAPI,
+  ArkpadCommandProps,
+} from "./types";
 import { parseContent } from "./utils";
 
 /**
@@ -65,6 +77,7 @@ class CommandManagerInstance {
             const props: ArkpadCommandProps = {
               state: this.virtualState,
               dispatch: (tr2: Transaction) => {
+                const stepCountBefore = localTr.steps.length;
                 // Sync all steps from the dispatched transaction into our local tracker
                 tr2.steps.forEach((step) => {
                   try {
@@ -73,7 +86,14 @@ class CommandManagerInstance {
                     console.error("[Arkpad] Step apply failed inside shadow chain:", e);
                   }
                 });
-                if (tr2.selectionSet) localTr.setSelection(tr2.selection);
+                if (tr2.selectionSet) {
+                  // Map selection through the newly added steps to ensure it's relative to the new doc
+                  const mappedSelection = tr2.selection.map(
+                    localTr.doc,
+                    localTr.mapping.slice(stepCountBefore)
+                  );
+                  localTr.setSelection(mappedSelection);
+                }
               },
               view: this.view,
               tr: localTr,
@@ -140,7 +160,7 @@ class CommandManagerInstance {
           }
 
           return this;
-        }
+        };
       },
     });
   }
@@ -163,11 +183,15 @@ class CommandManagerInstance {
       if (localTr.selectionSet) {
         const { selection } = this.virtualState;
         const { from, to } = selection;
-        
+
         if (selection instanceof NodeSelection) {
-          this.masterTransaction.setSelection(NodeSelection.create(this.masterTransaction.doc, from));
+          this.masterTransaction.setSelection(
+            NodeSelection.create(this.masterTransaction.doc, from)
+          );
         } else {
-          this.masterTransaction.setSelection(TextSelection.create(this.masterTransaction.doc, from, to));
+          this.masterTransaction.setSelection(
+            TextSelection.create(this.masterTransaction.doc, from, to)
+          );
         }
       }
     } catch (e) {
@@ -226,7 +250,7 @@ class CommandManagerInstance {
       const parsedDoc = parseContent(content, this.schema);
       const slice = new Slice(parsedDoc.content, 0, 0);
       const localTr = this.virtualState.tr.replaceSelection(slice);
-      
+
       this.merge(localTr);
 
       this.executionLog.push({
@@ -266,7 +290,8 @@ class CommandManagerInstance {
       dispatch?: (tr: Transaction) => void;
       view?: EditorView;
       editor: ArkpadEditorAPI;
-    }) => boolean
+    }) => boolean,
+    label: string = "custom_command"
   ): ChainedCommands {
     if (!this.allSuccessful) return this as unknown as ChainedCommands;
 
@@ -274,6 +299,25 @@ class CommandManagerInstance {
     const success = fn({
       state: this.virtualState,
       tr: localTr,
+      dispatch: (tr2: Transaction) => {
+        const stepCountBefore = localTr.steps.length;
+        // Sync steps from dispatched transaction into our local transaction
+        tr2.steps.forEach((step) => {
+          try {
+            localTr.step(step);
+          } catch (e) {
+            console.error("[Arkpad] Step apply failed inside .command() shadow chain:", e);
+          }
+        });
+        if (tr2.selectionSet) {
+          const mappedSelection = tr2.selection.map(
+            localTr.doc,
+            localTr.mapping.slice(stepCountBefore)
+          );
+          localTr.setSelection(mappedSelection);
+        }
+      },
+
       view: this.view,
       editor: this.editor,
     });
@@ -281,14 +325,14 @@ class CommandManagerInstance {
     if (success) {
       this.merge(localTr);
       this.executionLog.push({
-        command: "custom_command",
+        command: label,
         status: "✅ Success",
         duration: "N/A",
       });
     } else {
       this.allSuccessful = false;
       this.executionLog.push({
-        command: "custom_command",
+        command: label,
         status: "❌ Rejected",
         duration: "N/A",
       });
@@ -298,14 +342,16 @@ class CommandManagerInstance {
   }
 
   public run(): boolean {
-    if (this.executionLog.length > 0) {
+    if (this.shouldDispatch && this.executionLog.length > 0) {
       console.group("🚀 Arkpad Shadow Engine Refinement Log");
       console.table(this.executionLog);
       console.groupEnd();
     }
 
     if (!this.allSuccessful) {
-      console.warn("[Arkpad] Shadow Engine execution failed. Log:", this.executionLog);
+      if (this.shouldDispatch) {
+        console.warn("[Arkpad] Shadow Engine execution failed. Log:", this.executionLog);
+      }
       return false;
     }
 

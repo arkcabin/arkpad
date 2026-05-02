@@ -1,0 +1,30 @@
+/* Arkpad Design Tokens */
+:root {
+  /* Colors */
+  --ark-primary: #3b82f6;
+  --ark-border: #eeeeee;
+  --ark-text: #000000;
+  --ark-text-muted: #666666;
+  --ark-selection: rgba(59, 130, 246, 0.1);
+  
+  /* Table Specific Tokens */
+  --ark-table-border: var(--ark-border);
+  --ark-table-header-bg: rgba(0, 0, 0, 0.05);
+  --ark-table-selected-cell-bg: rgba(59, 130, 246, 0.05);
+  --ark-table-resize-handle: var(--ark-primary);
+  
+  /* Spacing */
+  --ark-cell-padding: 8px 12px;
+  --ark-table-margin-bottom: 1.5rem;
+}
+
+/* Dark Mode Tokens */
+.dark {
+  --ark-border: #222222;
+  --ark-text: #ffffff;
+  --ark-text-muted: #888888;
+  --ark-selection: rgba(255, 255, 255, 0.1);
+  
+  --ark-table-header-bg: rgba(255, 255, 255, 0.05);
+  --ark-table-selected-cell-bg: rgba(255, 255, 255, 0.1);
+}

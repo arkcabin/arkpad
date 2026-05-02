@@ -55,6 +55,7 @@ export class SchemaBuilder {
           defining: config.defining,
           isolating: config.isolating,
           attrs: this.collectAttributes(ext),
+          trailingNode: config.trailingNode,
         };
 
         if ((ext as any).config.renderHTML) {

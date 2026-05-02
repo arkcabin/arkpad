@@ -11,6 +11,7 @@ export const CodeBlock = Extension.create({
         group: "block",
         code: true,
         defining: true,
+        trailingNode: true,
         parseDOM: [{ tag: "pre", preserveWhitespace: "full" }],
         toDOM() {
           return ["pre", ["code", 0]];

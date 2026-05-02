@@ -25,6 +25,7 @@ export const Heading = Node.create<HeadingOptions>({
   content: "inline*",
   group: "block",
   defining: true,
+  trailingNode: true,
 
   addAttributes() {
     return {

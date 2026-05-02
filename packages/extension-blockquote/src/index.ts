@@ -10,6 +10,7 @@ export const Blockquote = Extension.create({
         marks: "_",
         group: "block",
         defining: true,
+        trailingNode: true,
         parseDOM: [{ tag: "blockquote" }],
         toDOM() {
           return ["blockquote", 0];

@@ -112,6 +112,7 @@ export const TaskList = Extension.create({
       task_list: {
         content: "task_item+",
         group: "block",
+        trailingNode: true,
         parseDOM: [{ tag: "ul[data-type='task_list']" }],
         toDOM() {
           return ["ul", { "data-type": "task_list", class: "task-list" }, 0];

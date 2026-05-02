@@ -12,23 +12,24 @@ function trailingNodePlugin() {
     appendTransaction: (transactions, oldState, newState) => {
       const { doc, schema } = newState;
       const lastNode = doc.lastChild;
-      const paragraph = schema.nodes.paragraph!;
+      const paragraph = schema.nodes.paragraph;
+      if (!paragraph) return null;
 
       // Don't act if the last node is already a paragraph or if doc is empty
       if (!lastNode || lastNode.type === paragraph) {
         return null;
       }
 
-      // We only want to append a paragraph if the last node is a structural block 
+      // We only want to append a paragraph if the last node is a structural block
       // that users might get "stuck" in (like codeBlock, heading, list).
-      const structuralTypes = [
-        schema.nodes.codeBlock,
-        schema.nodes.heading,
-        schema.nodes.bulletList,
-        schema.nodes.orderedList,
-        schema.nodes.taskList,
-        schema.nodes.blockquote,
-      ].filter(Boolean);
+      // Performance: Cache structural types on schema to avoid re-filtering every transaction.
+      let structuralTypes = (schema as any)._structuralTypes;
+      if (!structuralTypes) {
+        structuralTypes = Object.values(schema.nodes).filter(
+          (nodeType) => (nodeType.spec as any).trailingNode
+        );
+        (schema as any)._structuralTypes = structuralTypes;
+      }
 
       if (structuralTypes.includes(lastNode.type)) {
         const tr = newState.tr;
@@ -107,7 +108,11 @@ export function createParagraph(): Extension {
           ],
           toDOM(node) {
             const { align } = node.attrs;
-            return ["p", { "data-align": align, style: align !== "left" ? `text-align: ${align}` : null }, 0];
+            return [
+              "p",
+              { "data-align": align, style: align !== "left" ? `text-align: ${align}` : null },
+              0,
+            ];
           },
         },
       };

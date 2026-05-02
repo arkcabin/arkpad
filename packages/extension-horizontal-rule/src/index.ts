@@ -7,6 +7,7 @@ export const HorizontalRule = Extension.create({
     return {
       horizontal_rule: {
         group: "block",
+        trailingNode: true,
         parseDOM: [{ tag: "hr" }],
         toDOM() {
           return ["hr"];
