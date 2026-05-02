@@ -23,7 +23,22 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
         { name: "Code", path: "/extensions/code" },
         { name: "Superscript", path: "/extensions/superscript" },
         { name: "Subscript", path: "/extensions/subscript" },
+      ],
+    },
+    {
+      title: "NODES",
+      items: [
         { name: "Table", path: "/extensions/table" },
+        { name: "Heading 🚧", path: "#" },
+        { name: "Blockquote 🚧", path: "#" },
+        { name: "CodeBlock 🚧", path: "#" },
+        { name: "Image 🚧", path: "#" },
+      ],
+    },
+    {
+      title: "UTILITIES",
+      items: [
+        { name: "Placeholder", path: "#" },
       ],
     },
   ];
@@ -50,16 +65,20 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
             )}
             {section.items.map((item) => (
               <NavLink
-                key={item.path}
+                key={item.name}
                 to={item.path}
                 className={({ isActive }) =>
                   cn(
                     "flex items-center px-3 py-1.5 text-sm rounded-none transition-colors",
-                    isActive
+                    isActive && item.path !== "#"
                       ? "bg-[var(--selection)] text-[var(--text-main)] font-medium"
-                      : "text-[var(--text-muted)] hover:text-[var(--text-main)]"
+                      : "text-[var(--text-muted)] hover:text-[var(--text-main)]",
+                    item.path === "#" && "cursor-default opacity-60 hover:text-[var(--text-muted)]"
                   )
                 }
+                onClick={(e) => {
+                  if (item.path === "#") e.preventDefault();
+                }}
               >
                 {item.name}
               </NavLink>
