@@ -144,6 +144,10 @@ export class Extension<Options = any, Storage = any> implements ArkpadExtension 
     return this.config.addGlobalAttributes?.call(this.createContext()) || [];
   }
 
+  addAttributes() {
+    return this.config.addAttributes?.call(this.createContext()) || {};
+  }
+
   addNodes() {
     return this.config.addNodes?.call(this.createContext()) || {};
   }
@@ -197,6 +201,10 @@ export class Extension<Options = any, Storage = any> implements ArkpadExtension 
     return this.config.addInterceptors?.call(this.createContext()) || [];
   }
 
+  addNodeView() {
+    return this.config.addNodeView?.call(this.createContext());
+  }
+
   onInterceptor(props: {
     editor: ArkpadEditorAPI;
     transaction: Transaction;
@@ -206,5 +214,13 @@ export class Extension<Options = any, Storage = any> implements ArkpadExtension 
 
   onDestroy() {
     this.config.onDestroy?.call(this.createContext());
+  }
+
+  renderHTML(props: any) {
+    return (this.config as any).renderHTML?.call(this.createContext(), props);
+  }
+
+  parseHTML() {
+    return (this.config as any).parseHTML?.call(this.createContext()) || [];
   }
 }

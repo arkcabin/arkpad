@@ -25,7 +25,7 @@ export function BoldDemo() {
           <div className="h-10 px-2 border-b border-[var(--border)] flex items-center">
             <EditorButton
               command="toggleBold"
-              name="strong"
+              name="bold"
               className="toolbar-btn"
               activeClassName="active"
             >

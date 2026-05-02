@@ -36,7 +36,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
 
   return (
     <aside className={cn(
-      "h-screen bg-[var(--bg-main)] border-r border-[var(--border)] flex flex-col",
+      "h-screen bg-[var(--bg-main)] border-r border-[var(--border)] flex flex-col transition-all duration-300 ease-in-out",
       isCollapsed ? "w-12" : "w-56"
     )}>
 

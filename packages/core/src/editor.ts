@@ -123,7 +123,10 @@ export class ArkpadEditor implements ArkpadEditorAPI {
     this.view = new EditorView(this.element, {
       state,
       editable: () => this.editable,
-      nodeViews: this.nodeViews,
+      nodeViews: {
+        ...this.extensionManager.nodeViews,
+        ...this.nodeViews,
+      },
       dispatchTransaction: (transaction) => {
         if (this.destroyed) return;
 
@@ -174,6 +177,9 @@ export class ArkpadEditor implements ArkpadEditorAPI {
         this.emitUpdate(nextState);
       },
     });
+
+    // Attach editor instance to view for access in node views
+    (this.view as any).editor = this;
 
     this.onCreate?.(this);
 
@@ -438,19 +444,6 @@ export class ArkpadEditor implements ArkpadEditorAPI {
     }
   }
 
-  /**
-   * Returns a command chain that NEVER dispatches.
-   * Useful for checking if a command can be executed.
-   */
-  can(): ChainedCommands {
-    return new CommandManager({
-      state: this.view.state,
-      commands: this.commands,
-      view: this.view,
-      dispatch: undefined,
-      schema: this.extensionManager.schema,
-    });
-  }
 
   /**
    * Returns a command chain.

@@ -1,36 +1,70 @@
-import { Extension, ArkpadCommandProps } from "@arkpad/core";
+import { Mark, ArkpadCommandProps, PMNode } from "@arkpad/core";
+import { toggleMark } from "@arkpad/core";
 
-export const Underline = Extension.create({
+declare module "@arkpad/core" {
+  interface ArkpadCommands {
+    setUnderline: () => void;
+    toggleUnderline: () => void;
+    unsetUnderline: () => void;
+  }
+}
+
+/**
+ * Underline extension.
+ */
+export const Underline = Mark.create({
   name: "underline",
 
-  activeMapping: {
-    toggleUnderline: "underline",
+  addOptions() {
+    return {
+      HTMLAttributes: {},
+    };
   },
 
-  addMarks() {
-    return {
-      underline: {
-        parseDOM: [{ tag: "u" }, { style: "text-decoration=underline" }],
-        toDOM() {
-          return ["u", 0];
-        },
-      },
-    };
+  parseHTML() {
+    return [
+      { tag: "u" },
+      { style: "text-decoration", getAttrs: (value: string) => value === "underline" && null },
+    ];
+  },
+
+  renderHTML({ HTMLAttributes }: { node: PMNode; HTMLAttributes: Record<string, any> }) {
+    return ["u", { ...this.options.HTMLAttributes, ...HTMLAttributes }, 0];
   },
 
   addCommands() {
     return {
-      toggleUnderline:
-        () =>
-        ({ chain }: ArkpadCommandProps) => {
-          return chain().toggleMark("underline");
-        },
+      setUnderline: () => (props: ArkpadCommandProps) => {
+        const { state, dispatch } = props;
+        const markType = state.schema.marks.underline;
+        if (!markType) return false;
+        if (dispatch) {
+          dispatch(state.tr.addMark(state.selection.from, state.selection.to, markType.create()));
+        }
+        return true;
+      },
+      toggleUnderline: () => (props: ArkpadCommandProps) => {
+        const { state, dispatch } = props;
+        const markType = state.schema.marks.underline;
+        if (!markType) return false;
+        return toggleMark(markType)(state, dispatch);
+      },
+      unsetUnderline: () => (props: ArkpadCommandProps) => {
+        const { state, dispatch } = props;
+        const markType = state.schema.marks.underline;
+        if (!markType) return false;
+        if (dispatch) {
+          dispatch(state.tr.removeMark(state.selection.from, state.selection.to, markType));
+        }
+        return true;
+      },
     };
   },
 
   addKeyboardShortcuts() {
     return {
-      "Mod-u": () => this.editor!.runCommand("toggleUnderline"),
+      "Mod-u": () => this.editor?.runCommand("toggleUnderline"),
+      "Mod-U": () => this.editor?.runCommand("toggleUnderline"),
     };
   },
 });

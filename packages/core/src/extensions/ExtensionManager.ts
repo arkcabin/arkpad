@@ -1,5 +1,5 @@
 import { ArkpadExtension, ArkpadCommandRegistry, ArkpadCommand } from "../types";
-import { type Schema } from "prosemirror-model";
+import { type Schema, Node as PMNode } from "prosemirror-model";
 import { Plugin, EditorState, Transaction } from "prosemirror-state";
 import { keymap } from "prosemirror-keymap";
 import { baseKeymap } from "prosemirror-commands";
@@ -20,6 +20,7 @@ export class ExtensionManager {
   public inputRules: any[] = [];
   public pasteRules: Plugin[] = [];
   public proseMirrorPlugins: Plugin[] = [];
+  public nodeViews: Record<string, any> = {};
   public activeMappings: Record<string, string> = {};
   private isBatching = false;
 
@@ -92,6 +93,7 @@ export class ExtensionManager {
     this.inputRules = this.collectInputRules(this.schema);
     this.pasteRules = this.collectPasteRules(this.schema);
     this.proseMirrorPlugins = this.collectProseMirrorPlugins(this.schema);
+    this.nodeViews = this.collectNodeViews();
   }
 
   /**
@@ -240,5 +242,30 @@ export class ExtensionManager {
       }
     }
     return plugins;
+  }
+
+  /**
+   * Aggregates node views from all registered extensions.
+   */
+  private collectNodeViews(): Record<string, any> {
+    const nodeViews: Record<string, any> = {};
+
+    for (const ext of this.extensions) {
+      if (!ext.addNodeView) continue;
+      const renderer = ext.addNodeView();
+      if (!renderer) continue;
+
+      nodeViews[ext.name] = (node: PMNode, view: EditorView, getPos: () => number | undefined, decorations: any) => {
+        return (renderer as any)({
+          editor: (view as any).editor,
+          node,
+          getPos,
+          decorations,
+          extension: ext,
+        });
+      };
+    }
+
+    return nodeViews;
   }
 }

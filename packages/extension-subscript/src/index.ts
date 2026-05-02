@@ -1,35 +1,69 @@
-import { Extension } from "@arkpad/core";
+import { Mark, ArkpadCommandProps, PMNode } from "@arkpad/core";
+import { toggleMark } from "@arkpad/core";
 
-export const Subscript = Extension.create({
+declare module "@arkpad/core" {
+  interface ArkpadCommands {
+    setSubscript: () => void;
+    toggleSubscript: () => void;
+    unsetSubscript: () => void;
+  }
+}
+
+/**
+ * Subscript extension.
+ */
+export const Subscript = Mark.create({
   name: "subscript",
 
-  addMarks() {
+  addOptions() {
     return {
-      subscript: {
-        parseDOM: [
-          { tag: "sub" },
-          { style: "vertical-align", getAttrs: (value: string) => value === "sub" && null },
-        ],
-        toDOM() {
-          return ["sub", 0];
-        },
-      },
+      HTMLAttributes: {},
     };
+  },
+
+  parseHTML() {
+    return [
+      { tag: "sub" },
+      { style: "vertical-align", getAttrs: (value: string) => value === "sub" && null },
+    ];
+  },
+
+  renderHTML({ HTMLAttributes }: { node: PMNode; HTMLAttributes: Record<string, any> }) {
+    return ["sub", { ...this.options.HTMLAttributes, ...HTMLAttributes }, 0];
   },
 
   addCommands() {
     return {
-      toggleSubscript: () => (props: any) => {
-        const type = props.state.schema.marks.subscript;
-        if (!type) return false;
-        return this.editor.runCommand('toggleMark', type, {}, props);
+      setSubscript: () => (props: ArkpadCommandProps) => {
+        const { state, dispatch } = props;
+        const markType = state.schema.marks.subscript;
+        if (!markType) return false;
+        if (dispatch) {
+          dispatch(state.tr.addMark(state.selection.from, state.selection.to, markType.create()));
+        }
+        return true;
+      },
+      toggleSubscript: () => (props: ArkpadCommandProps) => {
+        const { state, dispatch } = props;
+        const markType = state.schema.marks.subscript;
+        if (!markType) return false;
+        return toggleMark(markType)(state, dispatch);
+      },
+      unsetSubscript: () => (props: ArkpadCommandProps) => {
+        const { state, dispatch } = props;
+        const markType = state.schema.marks.subscript;
+        if (!markType) return false;
+        if (dispatch) {
+          dispatch(state.tr.removeMark(state.selection.from, state.selection.to, markType));
+        }
+        return true;
       },
     };
   },
 
   addKeyboardShortcuts() {
     return {
-      "Mod-,": () => this.editor.runCommand("toggleSubscript"),
+      "Mod-,": () => this.editor?.runCommand("toggleSubscript"),
     };
   },
 });

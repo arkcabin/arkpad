@@ -26,7 +26,7 @@ export function ItalicDemo() {
           <div className="h-10 px-3 border-b border-slate-100 dark:border-slate-900 flex items-center bg-slate-50/50 dark:bg-white/[0.02]">
             <EditorButton
               command="toggleItalic"
-              name="em"
+              name="italic"
               className="w-8 h-8 flex items-center justify-center rounded transition-colors text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 [&.active]:text-slate-900 dark:[&.active]:text-white [&.active]:bg-slate-100 dark:[&.active]:bg-slate-800"
               activeClassName="active"
             >

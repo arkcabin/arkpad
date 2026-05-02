@@ -33,8 +33,8 @@ export interface ArkpadCommands {
  */
 export type TypedCommands<T> = {
   [K in keyof ArkpadCommands]: ArkpadCommands[K] extends (...args: infer A) => any
-    ? (...args: A) => T
-    : never;
+  ? (...args: A) => T
+  : never;
 };
 
 
@@ -106,22 +106,37 @@ export interface ExtensionContext<Options = any, Storage = any> {
   parent?: (methodName: string, ...args: any[]) => any;
 }
 
+export interface AttributeConfig {
+  default: any;
+  rendered?: boolean;
+  parseHTML?: (element: HTMLElement) => any;
+  renderHTML?: (attributes: Record<string, any>) => Record<string, any> | null | undefined;
+  keepOnSplit?: boolean;
+}
+
+export type Attributes = Record<string, AttributeConfig>;
+
+export interface NodeViewRendererProps {
+  editor: ArkpadEditorAPI;
+  node: PMNode;
+  getPos: () => number | undefined;
+  decorations: any;
+  selected: boolean;
+  extension: ArkpadExtension;
+}
+
+export type NodeViewRenderer = (props: NodeViewRendererProps) => NodeView;
+
 export interface ExtensionConfig<Options = any, Storage = any> {
   name: string;
   priority?: number;
   addOptions?: () => Options;
 
   addStorage?: (this: ExtensionContext<Options, Storage>) => Storage;
+  addAttributes?: (this: ExtensionContext<Options, Storage>) => Attributes;
   addGlobalAttributes?: (this: ExtensionContext<Options, Storage>) => {
     types: string[];
-    attributes: Record<
-      string,
-      {
-        default: any;
-        parseHTML?: (element: HTMLElement) => any;
-        renderHTML?: (attributes: Record<string, any>) => any;
-      }
-    >;
+    attributes: Attributes;
   }[];
   addNodes?: (this: ExtensionContext<Options, Storage>) => Record<string, any>;
   extendNodeSchema?: (
@@ -170,7 +185,47 @@ export interface ExtensionConfig<Options = any, Storage = any> {
    * Use this to clear timers, remove event listeners, or close connections.
    */
   onDestroy?: (this: ExtensionContext<Options, Storage>) => void;
+  /**
+   * Register a custom node view for this extension.
+   */
+  addNodeView?: (this: ExtensionContext<Options, Storage>) => NodeViewRenderer;
+
+  renderHTML?: (props: {
+    node: PMNode;
+    HTMLAttributes: Record<string, any>;
+  }) => any;
+  parseHTML?: () => {
+    tag?: string;
+    style?: string;
+    getAttrs?: (node: any) => any;
+    priority?: number;
+  }[];
+
   [key: string]: any;
+}
+
+export interface NodeConfig<Options = any, Storage = any> extends ExtensionConfig<Options, Storage> {
+  inline?: boolean;
+  group?: string;
+  content?: string;
+  marks?: string;
+  atom?: boolean;
+  selectable?: boolean;
+  draggable?: boolean;
+  code?: boolean;
+  whitespace?: "pre" | "normal";
+  defining?: boolean;
+  isolating?: boolean;
+  allowGapCursor?: boolean;
+  tableRole?: string;
+}
+
+export interface MarkConfig<Options = any, Storage = any> extends ExtensionConfig<Options, Storage> {
+  inclusive?: boolean;
+  excludes?: string;
+  group?: string;
+  spanning?: boolean;
+  code?: boolean;
 }
 
 export interface ArkpadExtension {
@@ -212,22 +267,24 @@ export interface ArkpadExtension {
   onDestroy?: () => void;
   storage?: any;
   options?: any;
-  extend?: (config: Partial<ExtensionConfig>) => ArkpadExtension;
+  addAttributes?: () => Attributes;
+  addNodeView?: () => NodeViewRenderer | undefined;
+  extend?: (config: Partial<ExtensionConfig<any, any>>) => ArkpadExtension;
 }
 
 export type NodeViewConstructor =
   | (new (
-      node: PMNode,
-      view: EditorView,
-      getPos: () => number | undefined,
-      decorations: any
-    ) => NodeView)
+    node: PMNode,
+    view: EditorView,
+    getPos: () => number | undefined,
+    decorations: any
+  ) => NodeView)
   | ((
-      node: PMNode,
-      view: EditorView,
-      getPos: () => number | undefined,
-      decorations: any
-    ) => NodeView);
+    node: PMNode,
+    view: EditorView,
+    getPos: () => number | undefined,
+    decorations: any
+  ) => NodeView);
 
 export interface SelectionUpdatePayload {
   editor: ArkpadEditorAPI;

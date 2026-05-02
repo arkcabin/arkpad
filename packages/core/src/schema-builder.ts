@@ -1,6 +1,8 @@
 import { Schema } from "prosemirror-model";
 import { arkpadSchema } from "./schema";
 import { ArkpadExtension } from "./types";
+import { Node } from "./extensions/Node";
+import { Mark } from "./extensions/Mark";
 
 /**
  * SchemaBuilder dynamically constructs a ProseMirror schema from Arkpad extensions.
@@ -36,10 +38,99 @@ export class SchemaBuilder {
 
     // Phase 1: Collect Base Nodes & Marks
     allExtensions.forEach((ext) => {
+      // 1. Check for specialized Node/Mark classes
+      if (ext instanceof Node) {
+        const name = ext.name;
+        const config = (ext as any).config;
+        const spec: any = {
+          content: config.content,
+          marks: config.marks,
+          group: config.group,
+          inline: config.inline,
+          atom: config.atom,
+          selectable: config.selectable,
+          draggable: config.draggable,
+          code: config.code,
+          whitespace: config.whitespace,
+          defining: config.defining,
+          isolating: config.isolating,
+          attrs: this.collectAttributes(ext),
+        };
+
+        if ((ext as any).config.renderHTML) {
+          spec.toDOM = (node: any) => (ext as any).renderHTML({
+            node,
+            HTMLAttributes: this.getHTMLAttributes(node.attrs, ext),
+          });
+        }
+
+        if ((ext as any).config.parseHTML) {
+          spec.parseDOM = (ext as any).parseHTML().map((p: any) => ({
+            tag: p.tag,
+            getAttrs: (dom: HTMLElement) => {
+              const attrs = p.getAttrs ? p.getAttrs(dom) : {};
+              const parsedAttrs: Record<string, any> = { ...attrs };
+              
+              const localAttrs = ext.addAttributes?.() || {};
+              Object.entries(localAttrs).forEach(([key, config]) => {
+                if (config.parseHTML) {
+                  parsedAttrs[key] = config.parseHTML(dom);
+                }
+              });
+              
+              return parsedAttrs;
+            },
+            priority: p.priority,
+          }));
+        }
+
+        nodes = nodes.get(name) ? nodes.update(name, spec) : nodes.addToEnd(name, spec);
+      } else if (ext instanceof Mark) {
+        const name = ext.name;
+        const config = (ext as any).config;
+        const spec: any = {
+          inclusive: config.inclusive,
+          excludes: config.excludes,
+          group: config.group,
+          spanning: config.spanning,
+          code: config.code,
+          attrs: this.collectAttributes(ext),
+        };
+
+        if ((ext as any).config.renderHTML) {
+          spec.toDOM = (mark: any) => (ext as any).renderHTML({
+            node: mark,
+            HTMLAttributes: this.getHTMLAttributes(mark.attrs, ext),
+          });
+        }
+
+        if ((ext as any).config.parseHTML) {
+          spec.parseDOM = (ext as any).parseHTML().map((p: any) => ({
+            tag: p.tag,
+            getAttrs: (dom: HTMLElement) => {
+              const attrs = p.getAttrs ? p.getAttrs(dom) : {};
+              const parsedAttrs: Record<string, any> = { ...attrs };
+              
+              const localAttrs = ext.addAttributes?.() || {};
+              Object.entries(localAttrs).forEach(([key, config]) => {
+                if (config.parseHTML) {
+                  parsedAttrs[key] = config.parseHTML(dom);
+                }
+              });
+              
+              return parsedAttrs;
+            },
+            priority: p.priority,
+          }));
+        }
+
+        marks = marks.get(name) ? marks.update(name, spec) : marks.addToEnd(name, spec);
+      }
+
+      // 2. Legacy addNodes/addMarks support
       if (ext.addNodes) {
         const extNodes = ext.addNodes();
         Object.entries(extNodes).forEach(([name, spec]) => {
-          // Only throw if there's a CROSS-TYPE collision (Node vs Mark)
           if (marks.get(name)) {
             throw new Error(`Collision: "${name}" is already defined as a mark. Cannot add as node.`);
           }
@@ -50,7 +141,6 @@ export class SchemaBuilder {
       if (ext.addMarks) {
         const extMarks = ext.addMarks();
         Object.entries(extMarks).forEach(([name, spec]) => {
-          // Only throw if there's a CROSS-TYPE collision (Mark vs Node)
           if (nodes.get(name)) {
             throw new Error(`Collision: "${name}" is already defined as a node. Cannot add as mark.`);
           }
@@ -203,5 +293,33 @@ export class SchemaBuilder {
 
     traverse(extensions);
     return flattened;
+  }
+
+  private collectAttributes(extension: ArkpadExtension): Record<string, any> {
+    const attributes = extension.addAttributes ? extension.addAttributes() : {};
+    return Object.fromEntries(
+      Object.entries(attributes).map(([name, config]) => [
+        name,
+        { default: config.default }
+      ])
+    );
+  }
+
+  private getHTMLAttributes(attrs: Record<string, any>, extension: ArkpadExtension): Record<string, any> {
+    const localAttributes = extension.addAttributes ? extension.addAttributes() : {};
+    const HTMLAttributes: Record<string, any> = {};
+
+    Object.entries(localAttributes).forEach(([name, config]) => {
+      if (config.rendered === false) return;
+
+      if (config.renderHTML) {
+        const rendered = config.renderHTML(attrs);
+        if (rendered) Object.assign(HTMLAttributes, rendered);
+      } else if (attrs[name] !== undefined && attrs[name] !== null) {
+        HTMLAttributes[name] = attrs[name];
+      }
+    });
+
+    return HTMLAttributes;
   }
 }
