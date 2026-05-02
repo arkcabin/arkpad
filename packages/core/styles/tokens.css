@@ -11,7 +11,16 @@
   --ark-table-border: var(--ark-border);
   --ark-table-header-bg: rgba(0, 0, 0, 0.05);
   --ark-table-selected-cell-bg: rgba(59, 130, 246, 0.05);
-  --ark-table-resize-handle: var(--ark-primary);
+  --ark-table-selection-color: var(--ark-primary);
+  --ark-table-selection-width: 2px;
+  
+  --ark-table-resize-handle-width: 4px;
+  --ark-table-resize-handle-active-width: 2px;
+  --ark-table-resize-handle-color: var(--ark-primary);
+  
+  --ark-table-grip-size: 12px;
+  --ark-table-grip-color: var(--ark-border);
+  --ark-table-grip-color-hover: var(--ark-primary);
   
   /* Spacing */
   --ark-cell-padding: 6px 10px;

@@ -39,16 +39,16 @@
   }
 
   & .selectedCell {
-    box-shadow: inset 0 0 0 2px var(--ark-primary);
+    box-shadow: inset 0 0 0 var(--ark-table-selection-width) var(--ark-table-selection-color);
     z-index: 10;
   }
 
   & .column-resize-handle {
     position: absolute;
-    right: -2px;
+    right: calc(var(--ark-table-resize-handle-width) / -2);
     top: -1000px;
     bottom: -1000px;
-    width: 4px;
+    width: var(--ark-table-resize-handle-width);
     background-color: transparent;
     cursor: col-resize;
     z-index: 20;
@@ -58,7 +58,7 @@
 
   & .column-resize-handle:hover,
   &.resize-cursor .column-resize-handle {
-    background-color: var(--ark-primary);
+    background-color: var(--ark-table-resize-handle-color);
   }
 
   & .resize-cursor {
@@ -68,7 +68,7 @@
   & .grip-column,
   & .grip-row {
     position: absolute;
-    background-color: var(--ark-border);
+    background-color: var(--ark-table-grip-color);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -77,22 +77,22 @@
     transition: background-color 0.1s;
 
     &:hover {
-      background-color: var(--ark-primary);
+      background-color: var(--ark-table-grip-color-hover);
     }
   }
 
   & .grip-column {
     width: calc(100% + 1px);
     left: -1px;
-    top: -12px;
-    height: 12px;
+    top: calc(var(--ark-table-grip-size) * -1);
+    height: var(--ark-table-grip-size);
     border: 1px solid var(--ark-border);
     border-bottom: none;
   }
 
   & .grip-row {
-    width: 12px;
-    left: -12px;
+    width: var(--ark-table-grip-size);
+    left: calc(var(--ark-table-grip-size) * -1);
     top: -1px;
     height: calc(100% + 1px);
     border: 1px solid var(--ark-border);
