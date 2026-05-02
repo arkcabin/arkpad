@@ -1,8 +1,44 @@
 import { createHardBreak } from "./base";
 import { createUniqueId } from "./unique-id";
-import { BaseCommands } from "./commands";
 import { Extension } from "./Extension";
-import { ArkpadExtension } from "../types";
+import { ArkpadExtension, ArkpadCommandProps } from "../types";
+import {
+  toggleMark,
+  toggleBlock,
+  toggleList,
+  setTextAlign,
+  insertNode,
+  updateAttributes
+} from "../commands";
+import { type MarkType, type NodeType } from "prosemirror-model";
+
+/**
+ * BaseCommands - Registers global core commands.
+ */
+export const BaseCommands = Extension.create({
+  name: "baseCommands",
+
+  addCommands: () => ({
+    toggleMark: (type: string | MarkType, attrs?: Record<string, any>) => (props: ArkpadCommandProps) => {
+      return toggleMark(type, attrs)(props);
+    },
+    toggleBlock: (type: string | NodeType, attrs?: Record<string, any>) => (props: ArkpadCommandProps) => {
+      return toggleBlock(type, attrs)(props);
+    },
+    toggleList: (listType: string | NodeType, itemType: string | NodeType) => (props: ArkpadCommandProps) => {
+      return toggleList(listType, itemType)(props);
+    },
+    setTextAlign: (align: string) => (props: ArkpadCommandProps) => {
+      return setTextAlign(align)(props);
+    },
+    insertNode: (type: string | NodeType, attrs?: Record<string, any>) => (props: ArkpadCommandProps) => {
+      return insertNode(type, attrs)(props);
+    },
+    updateAttributes: (typeOrName: string, attributes: Record<string, any>) => (props: ArkpadCommandProps) => {
+      return updateAttributes(typeOrName, attributes)(props);
+    },
+  }),
+});
 
 /**
  * Engine - The essential skeleton for the editor.
@@ -37,4 +73,3 @@ export * from "./base";
 export * from "./unique-id";
 export * from "./utils";
 export { CharacterCount } from "./character-count";
-export { BaseCommands } from "./commands";

@@ -45,10 +45,9 @@ export const Italic = Mark.create({
         return true;
       },
       toggleItalic: () => (props: ArkpadCommandProps) => {
-        const { state, dispatch } = props;
-        const markType = state.schema.marks.italic;
+        const markType = props.state.schema.marks.italic;
         if (!markType) return false;
-        return toggleMark(markType)(state, dispatch);
+        return toggleMark(markType)(props);
       },
       unsetItalic: () => (props: ArkpadCommandProps) => {
         const { state, dispatch } = props;

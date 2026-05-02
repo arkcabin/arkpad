@@ -12,11 +12,15 @@ import {
   Plus
 } from "lucide-react";
 import { ShowcaseLayout } from "../layouts/ShowcaseLayout";
-import { StarterKit } from "@arkpad/starter-kit";
+import { Table } from "@arkpad/extension-table";
+import { Heading } from "@arkpad/extension-heading";
 
 export function TableDemo() {
   const editor = useArkpadEditor({
-    extensions: [StarterKit],
+    extensions: [
+      Heading,
+      Table.configure({ resizable: true })
+    ],
     content: "<h1>Table Extension</h1><p>Insert and manage tables with rows and columns.</p><p>Use the toolbar above to manipulate the table structure.</p>",
   });
 

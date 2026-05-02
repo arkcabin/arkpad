@@ -44,10 +44,9 @@ export const Underline = Mark.create({
         return true;
       },
       toggleUnderline: () => (props: ArkpadCommandProps) => {
-        const { state, dispatch } = props;
-        const markType = state.schema.marks.underline;
+        const markType = props.state.schema.marks.underline;
         if (!markType) return false;
-        return toggleMark(markType)(state, dispatch);
+        return toggleMark(markType)(props);
       },
       unsetUnderline: () => (props: ArkpadCommandProps) => {
         const { state, dispatch } = props;

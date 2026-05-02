@@ -44,10 +44,9 @@ export const Subscript = Mark.create({
         return true;
       },
       toggleSubscript: () => (props: ArkpadCommandProps) => {
-        const { state, dispatch } = props;
-        const markType = state.schema.marks.subscript;
+        const markType = props.state.schema.marks.subscript;
         if (!markType) return false;
-        return toggleMark(markType)(state, dispatch);
+        return toggleMark(markType)(props);
       },
       unsetSubscript: () => (props: ArkpadCommandProps) => {
         const { state, dispatch } = props;

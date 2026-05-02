@@ -43,10 +43,9 @@ export const Code = Mark.create({
         return true;
       },
       toggleCode: () => (props: ArkpadCommandProps) => {
-        const { state, dispatch } = props;
-        const markType = state.schema.marks.code;
+        const markType = props.state.schema.marks.code;
         if (!markType) return false;
-        return toggleMark(markType)(state, dispatch);
+        return toggleMark(markType)(props);
       },
       unsetCode: () => (props: ArkpadCommandProps) => {
         const { state, dispatch } = props;

@@ -42,6 +42,10 @@ export interface ArkpadCommands {
   fixTables(): ArkpadCommand;
   goToNextCell(direction?: number): ArkpadCommand;
   exitTable(): ArkpadCommand;
+  /**
+   * Updates attributes for a specific node or mark type.
+   */
+  updateAttributes(typeOrName: string, attributes: Record<string, any>): ArkpadCommand;
 }
 
 /**
@@ -94,6 +98,11 @@ export interface ChainedCommands extends TypedCommands<ChainedCommands> {
    * Sets metadata on the current transaction.
    */
   setMeta(key: any, value: any): ChainedCommands;
+
+  /**
+   * Updates attributes of the currently selected node or mark.
+   */
+  updateAttributes(typeOrName: string, attributes: Record<string, any>): ChainedCommands;
 
   /**
    * Runs a custom command function.
@@ -479,5 +488,11 @@ export interface ArkpadEditorAPI {
       transaction: Transaction;
     }) => Transaction | boolean | null
   ): void;
+
+  /**
+   * Batches multiple editor updates into a single re-render cycle.
+   */
+  batch(callback: (editor: ArkpadEditorAPI) => void): void;
+
   destroy(): void;
 }

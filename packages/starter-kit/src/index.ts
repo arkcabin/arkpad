@@ -98,7 +98,11 @@ export const StarterKit = Extension.create({
     extensions.push(CharacterCount);
 
     if (this.options.table) {
-      extensions.push(Table);
+      extensions.push(
+        typeof this.options.table === "object"
+          ? Table.configure(this.options.table)
+          : Table
+      );
     }
 
     return extensions;

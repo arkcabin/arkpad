@@ -6,6 +6,7 @@ export { Mark } from "./extensions/Mark";
 export { ExtensionManager } from "./extensions/ExtensionManager";
 export * from "./extensions/index";
 export { Engine } from "./extensions/index";
+export * from "./commands/index";
 export type {
   ArkpadCommandRegistry,
   ArkpadCommandProps,

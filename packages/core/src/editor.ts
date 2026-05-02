@@ -10,7 +10,7 @@ import {
   getMarkAttributes,
   getNodeAttributes,
 } from "./extensions/utils";
-import { CommandManager } from "./commands";
+import { CommandManager } from "./CommandManager";
 import { SchemaBuilder } from "./schema-builder";
 import type {
   ArkpadCommandProxy,
@@ -52,6 +52,7 @@ export class ArkpadEditor implements ArkpadEditorAPI {
   private destroyed = false;
   private listeners = new Set<(editor: ArkpadEditorAPI) => void>();
   private snapshots: Record<string, EditorState> = {};
+  private isBatching = false;
 
   // Performance: Pre-indexed hooks to avoid iterating all extensions on every transaction
   private transactionHooks: ArkpadExtension[] = [];
@@ -313,6 +314,8 @@ export class ArkpadEditor implements ArkpadEditorAPI {
   }
 
   private emitUpdate(state: EditorState) {
+    if (this.isBatching) return;
+
     const payload: ArkpadUpdatePayload = {
       editor: this,
       state,
@@ -872,6 +875,19 @@ export class ArkpadEditor implements ArkpadEditorAPI {
       this.interceptors.push({ on: "all", handler: interceptor });
     } else {
       this.interceptors.push(interceptor);
+    }
+  }
+
+  /**
+   * Batches multiple editor updates into a single re-render cycle.
+   */
+  batch(callback: (editor: ArkpadEditorAPI) => void) {
+    this.isBatching = true;
+    try {
+      callback(this);
+    } finally {
+      this.isBatching = false;
+      this.emitUpdate(this.view.state);
     }
   }
 

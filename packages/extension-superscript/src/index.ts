@@ -44,10 +44,9 @@ export const Superscript = Mark.create({
         return true;
       },
       toggleSuperscript: () => (props: ArkpadCommandProps) => {
-        const { state, dispatch } = props;
-        const markType = state.schema.marks.superscript;
+        const markType = props.state.schema.marks.superscript;
         if (!markType) return false;
-        return toggleMark(markType)(state, dispatch);
+        return toggleMark(markType)(props);
       },
       unsetSuperscript: () => (props: ArkpadCommandProps) => {
         const { state, dispatch } = props;

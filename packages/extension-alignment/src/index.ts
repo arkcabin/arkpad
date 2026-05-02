@@ -21,9 +21,9 @@ export function createTextAlign(): Extension {
        */
       setTextAlign:
         (args: string | { align: string }) =>
-        ({ state, dispatch }: ArkpadCommandProps) => {
+        (props: ArkpadCommandProps) => {
           const align = typeof args === "string" ? args : args.align;
-          return setTextAlign(align)(state, dispatch);
+          return setTextAlign(align)(props);
         },
 
       /**
@@ -31,20 +31,20 @@ export function createTextAlign(): Extension {
        */
       setTextAlignLeft:
         () =>
-        ({ state, dispatch }: ArkpadCommandProps) =>
-          setTextAlign(TEXT_ALIGN.LEFT)(state, dispatch),
+        (props: ArkpadCommandProps) =>
+          setTextAlign(TEXT_ALIGN.LEFT)(props),
       setTextAlignCenter:
         () =>
-        ({ state, dispatch }: ArkpadCommandProps) =>
-          setTextAlign(TEXT_ALIGN.CENTER)(state, dispatch),
+        (props: ArkpadCommandProps) =>
+          setTextAlign(TEXT_ALIGN.CENTER)(props),
       setTextAlignRight:
         () =>
-        ({ state, dispatch }: ArkpadCommandProps) =>
-          setTextAlign(TEXT_ALIGN.RIGHT)(state, dispatch),
+        (props: ArkpadCommandProps) =>
+          setTextAlign(TEXT_ALIGN.RIGHT)(props),
       setTextAlignJustify:
         () =>
-        ({ state, dispatch }: ArkpadCommandProps) =>
-          setTextAlign(TEXT_ALIGN.JUSTIFY)(state, dispatch),
+        (props: ArkpadCommandProps) =>
+          setTextAlign(TEXT_ALIGN.JUSTIFY)(props),
     }),
     addKeyboardShortcuts: () => ({
       "Mod-Shift-l": () => setTextAlign(TEXT_ALIGN.LEFT),

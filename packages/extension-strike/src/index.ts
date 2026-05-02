@@ -46,10 +46,9 @@ export const Strike = Mark.create({
         return true;
       },
       toggleStrike: () => (props: ArkpadCommandProps) => {
-        const { state, dispatch } = props;
-        const markType = state.schema.marks.strike;
+        const markType = props.state.schema.marks.strike;
         if (!markType) return false;
-        return toggleMark(markType)(state, dispatch);
+        return toggleMark(markType)(props);
       },
       unsetStrike: () => (props: ArkpadCommandProps) => {
         const { state, dispatch } = props;

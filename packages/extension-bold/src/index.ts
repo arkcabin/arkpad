@@ -48,10 +48,9 @@ export const Bold = Mark.create({
         return true;
       },
       toggleBold: () => (props: ArkpadCommandProps) => {
-        const { state, dispatch } = props;
-        const markType = state.schema.marks.bold;
+        const markType = props.state.schema.marks.bold;
         if (!markType) return false;
-        return toggleMark(markType)(state, dispatch);
+        return toggleMark(markType)(props);
       },
       unsetBold: () => (props: ArkpadCommandProps) => {
         const { state, dispatch } = props;
