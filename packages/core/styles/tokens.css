@@ -14,7 +14,7 @@
   --ark-table-resize-handle: var(--ark-primary);
   
   /* Spacing */
-  --ark-cell-padding: 8px 12px;
+  --ark-cell-padding: 6px 10px;
   --ark-table-margin-bottom: 1.5rem;
 }
 
