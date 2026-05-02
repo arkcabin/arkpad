@@ -444,7 +444,6 @@ export class ArkpadEditor implements ArkpadEditorAPI {
     }
   }
 
-
   /**
    * Returns a command chain.
    */
@@ -453,9 +452,10 @@ export class ArkpadEditor implements ArkpadEditorAPI {
       state: this.view.state,
       commands: this.commands,
       view: this.view,
+      editor: this,
       // Use the REAL dispatch. CommandManager should dispatch the master transaction directly.
       dispatch: (tr: Transaction) => {
-        if (tr.steps.length > 0) {
+        if (tr.steps.length > 0 || tr.selectionSet) {
           try {
             this.view.dispatch(tr);
           } catch (e) {
@@ -475,6 +475,7 @@ export class ArkpadEditor implements ArkpadEditorAPI {
       state: this.view.state,
       commands: this.commands,
       view: this.view,
+      editor: this,
       shouldDispatch: false,
       schema: this.extensionManager.schema,
     }) as unknown as ChainedCommands;

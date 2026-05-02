@@ -25,23 +25,22 @@ export interface ArkpadCommands {
   _arkpad_placeholder?: never;
 }
 
-
-
 /**
  * A utility type that transforms the ArkpadCommands interface into a version
  * suitable for the command proxy or chaining.
  */
 export type TypedCommands<T> = {
   [K in keyof ArkpadCommands]: ArkpadCommands[K] extends (...args: infer A) => any
-  ? (...args: A) => T
-  : never;
+    ? (...args: A) => T
+    : never;
 };
-
 
 export type ArkpadCommand =
   | Command
   | ((...args: any[]) => Command)
-  | ((...args: any[]) => (props: ArkpadCommandProps) => boolean | Promise<boolean> | ChainedCommands);
+  | ((
+      ...args: any[]
+    ) => (props: ArkpadCommandProps) => boolean | Promise<boolean> | ChainedCommands);
 export type ArkpadCommandRegistry = Record<string, ArkpadCommand>;
 
 export type InterceptorType = "all" | "docChanged" | "selectionChanged";
@@ -55,7 +54,6 @@ export interface InterceptorConfig {
   on?: InterceptorType;
   handler: (props: InterceptorProps) => Transaction | boolean | null;
 }
-
 
 export interface ChainedCommands extends TypedCommands<ChainedCommands> {
   /**
@@ -87,6 +85,7 @@ export interface ChainedCommands extends TypedCommands<ChainedCommands> {
       tr: Transaction;
       dispatch?: (tr: Transaction) => void;
       view?: EditorView;
+      editor: ArkpadEditorAPI;
     }) => boolean
   ): ChainedCommands;
 
@@ -95,7 +94,6 @@ export interface ChainedCommands extends TypedCommands<ChainedCommands> {
    */
   run(): boolean;
 }
-
 
 export interface ExtensionContext<Options = any, Storage = any> {
   editor: ArkpadEditorAPI;
@@ -139,17 +137,9 @@ export interface ExtensionConfig<Options = any, Storage = any> {
     attributes: Attributes;
   }[];
   addNodes?: (this: ExtensionContext<Options, Storage>) => Record<string, any>;
-  extendNodeSchema?: (
-    this: ExtensionContext<Options, Storage>,
-    spec: any,
-    nodeName: string
-  ) => any;
+  extendNodeSchema?: (this: ExtensionContext<Options, Storage>, spec: any, nodeName: string) => any;
   addMarks?: (this: ExtensionContext<Options, Storage>) => Record<string, any>;
-  extendMarkSchema?: (
-    this: ExtensionContext<Options, Storage>,
-    spec: any,
-    markName: string
-  ) => any;
+  extendMarkSchema?: (this: ExtensionContext<Options, Storage>, spec: any, markName: string) => any;
 
   addCommands?: (this: ExtensionContext<Options, Storage>) => Partial<ArkpadCommandRegistry>;
   addKeyboardShortcuts?: (
@@ -190,10 +180,7 @@ export interface ExtensionConfig<Options = any, Storage = any> {
    */
   addNodeView?: (this: ExtensionContext<Options, Storage>) => NodeViewRenderer;
 
-  renderHTML?: (props: {
-    node: PMNode;
-    HTMLAttributes: Record<string, any>;
-  }) => any;
+  renderHTML?: (props: { node: PMNode; HTMLAttributes: Record<string, any> }) => any;
   parseHTML?: () => {
     tag?: string;
     style?: string;
@@ -204,7 +191,10 @@ export interface ExtensionConfig<Options = any, Storage = any> {
   [key: string]: any;
 }
 
-export interface NodeConfig<Options = any, Storage = any> extends ExtensionConfig<Options, Storage> {
+export interface NodeConfig<Options = any, Storage = any> extends ExtensionConfig<
+  Options,
+  Storage
+> {
   inline?: boolean;
   group?: string;
   content?: string;
@@ -220,7 +210,10 @@ export interface NodeConfig<Options = any, Storage = any> extends ExtensionConfi
   tableRole?: string;
 }
 
-export interface MarkConfig<Options = any, Storage = any> extends ExtensionConfig<Options, Storage> {
+export interface MarkConfig<Options = any, Storage = any> extends ExtensionConfig<
+  Options,
+  Storage
+> {
   inclusive?: boolean;
   excludes?: string;
   group?: string;
@@ -274,17 +267,17 @@ export interface ArkpadExtension {
 
 export type NodeViewConstructor =
   | (new (
-    node: PMNode,
-    view: EditorView,
-    getPos: () => number | undefined,
-    decorations: any
-  ) => NodeView)
+      node: PMNode,
+      view: EditorView,
+      getPos: () => number | undefined,
+      decorations: any
+    ) => NodeView)
   | ((
-    node: PMNode,
-    view: EditorView,
-    getPos: () => number | undefined,
-    decorations: any
-  ) => NodeView);
+      node: PMNode,
+      view: EditorView,
+      getPos: () => number | undefined,
+      decorations: any
+    ) => NodeView);
 
 export interface SelectionUpdatePayload {
   editor: ArkpadEditorAPI;
@@ -361,7 +354,8 @@ export interface SearchResult {
   text: string;
 }
 
-export type ArkpadCommandProxy = TypedCommands<boolean> & Record<string, (...args: any[]) => boolean>;
+export type ArkpadCommandProxy = TypedCommands<boolean> &
+  Record<string, (...args: any[]) => boolean>;
 
 export interface ArkpadEditorAPI {
   readonly element: HTMLElement;
@@ -389,10 +383,7 @@ export interface ArkpadEditorAPI {
   can(): ChainedCommands;
 
   // Content Management
-  setContent(
-    content: ArkpadContent,
-    emitUpdate?: boolean
-  ): void;
+  setContent(content: ArkpadContent, emitUpdate?: boolean): void;
   clearContent(emitUpdate?: boolean): void;
 
   // Selection API

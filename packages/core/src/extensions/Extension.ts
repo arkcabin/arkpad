@@ -117,27 +117,38 @@ export class Extension<Options = any, Storage = any> implements ArkpadExtension 
 
   /**
    * Creates a context for calling extension methods.
+   * Performance: Uses getters to ensure properties are always up-to-date
+   * even if the context is captured in a closure before init().
    */
   public createContext(): ExtensionContext<Options, Storage> {
-    const context: ExtensionContext<Options, Storage> = {
-      editor: this.editor as any,
-      options: this.options,
-      storage: this.storage,
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const self = this;
+    return {
+      get editor() {
+        return self.editor as any;
+      },
+      get options() {
+        return self.options;
+      },
+      get storage() {
+        return self.storage;
+      },
       name: this.name,
-      utils: this.utils ?? {},
-    };
-
-    if (this.parent) {
-      context.parent = (methodName: string, ...args: any[]) => {
-        const parentMethod = (this.parent!.config as any)[methodName];
-        if (typeof parentMethod === "function") {
-          return parentMethod.call(this.parent!.createContext(), ...args);
-        }
-        return undefined;
-      };
-    }
-
-    return context;
+      get utils() {
+        return self.utils || {};
+      },
+      ...(this.parent
+        ? {
+            parent: (methodName: string, ...args: any[]) => {
+              const parentMethod = (this.parent!.config as any)[methodName];
+              if (typeof parentMethod === "function") {
+                return parentMethod.call(this.parent!.createContext(), ...args);
+              }
+              return undefined;
+            },
+          }
+        : {}),
+    } as any;
   }
 
   addGlobalAttributes() {

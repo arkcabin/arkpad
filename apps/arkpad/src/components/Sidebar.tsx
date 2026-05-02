@@ -11,9 +11,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
   const sections = [
     {
       title: "PLATFORM",
-      items: [
-        { name: "Full Editor", path: "/" },
-      ]
+      items: [{ name: "Full Editor", path: "/" }],
     },
     {
       title: "MARKS",
@@ -25,8 +23,9 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
         { name: "Code", path: "/extensions/code" },
         { name: "Superscript", path: "/extensions/superscript" },
         { name: "Subscript", path: "/extensions/subscript" },
-      ]
-    }
+        { name: "Table", path: "/extensions/table" },
+      ],
+    },
   ];
 
   const toggleTheme = () => {
@@ -35,29 +34,32 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
   };
 
   return (
-    <aside className={cn(
-      "h-screen bg-[var(--bg-main)] border-r border-[var(--border)] flex flex-col transition-all duration-300 ease-in-out",
-      isCollapsed ? "w-12" : "w-56"
-    )}>
-
+    <aside
+      className={cn(
+        "h-screen bg-[var(--bg-main)] border-r border-[var(--border)] flex flex-col transition-all duration-300 ease-in-out",
+        isCollapsed ? "w-12" : "w-56"
+      )}
+    >
       <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-6 scrollbar-hide">
-        {sections.map(section => (
+        {sections.map((section) => (
           <div key={section.title} className="space-y-1">
             {!isCollapsed && (
               <div className="px-3 text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">
                 {section.title}
               </div>
             )}
-            {section.items.map(item => (
+            {section.items.map((item) => (
               <NavLink
                 key={item.path}
                 to={item.path}
-                className={({ isActive }) => cn(
-                  "flex items-center px-3 py-1.5 text-sm rounded-none transition-colors",
-                  isActive
-                    ? "bg-[var(--selection)] text-[var(--text-main)] font-medium"
-                    : "text-[var(--text-muted)] hover:text-[var(--text-main)]"
-                )}
+                className={({ isActive }) =>
+                  cn(
+                    "flex items-center px-3 py-1.5 text-sm rounded-none transition-colors",
+                    isActive
+                      ? "bg-[var(--selection)] text-[var(--text-main)] font-medium"
+                      : "text-[var(--text-muted)] hover:text-[var(--text-main)]"
+                  )
+                }
               >
                 {item.name}
               </NavLink>
