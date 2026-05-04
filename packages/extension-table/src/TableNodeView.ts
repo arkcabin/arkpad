@@ -25,9 +25,11 @@ export class TableView implements NodeView {
   getPos: () => number | undefined;
   dom: HTMLElement;
   tableDOM: HTMLElement;
+  colgroup: HTMLElement;
   tbody: HTMLElement;
   gripsContainer: HTMLElement;
   resizeObserver: ResizeObserver;
+  mutationObserver: MutationObserver;
 
   constructor(props: NodeViewRendererProps) {
     this.node = props.node;
@@ -38,14 +40,16 @@ export class TableView implements NodeView {
     this.dom = document.createElement("div");
     this.dom.classList.add("tableWrapper");
 
-    // The table element managed by ProseMirror
+    // The table element
     this.tableDOM = document.createElement("table");
+    this.colgroup = document.createElement("colgroup");
+    this.tbody = document.createElement("tbody");
+    this.tableDOM.appendChild(this.colgroup);
+    this.tableDOM.appendChild(this.tbody);
+
     if (this.node.attrs.style) {
       this.tableDOM.setAttribute("style", this.node.attrs.style);
     }
-
-    this.tbody = document.createElement("tbody");
-    this.tableDOM.appendChild(this.tbody);
     this.dom.appendChild(this.tableDOM);
 
     // Overlay for grips
@@ -54,10 +58,80 @@ export class TableView implements NodeView {
     this.gripsContainer.style.pointerEvents = "none";
     this.dom.appendChild(this.gripsContainer);
 
+    this.mutationObserver = new MutationObserver(() => {
+      this.updateGripPositions();
+    });
+    this.mutationObserver.observe(this.colgroup, {
+      attributes: true,
+      childList: true,
+      subtree: true,
+      attributeFilter: ["style"],
+    });
+
     this.renderGrips();
+    this.updateColgroup();
+
+    this.resizeObserver = new ResizeObserver(() => {
+      if (this.view && !(this.view as any).isDestroyed) {
+        window.requestAnimationFrame(() => this.updateGripPositions());
+      }
+    });
+    this.resizeObserver.observe(this.tableDOM);
+
+    // Row Resizing Logic
+    let startY = 0;
+    let startHeight = 0;
+    let resizingRowIdx = -1;
+
+    const onMouseMove = (e: MouseEvent) => {
+      if (resizingRowIdx === -1) return;
+      const deltaY = e.clientY - startY;
+      const newHeight = Math.max(25, startHeight + deltaY);
+      const rows = this.tbody.querySelectorAll("tr");
+      const row = rows[resizingRowIdx] as HTMLElement;
+      if (row) {
+        row.style.height = `${newHeight}px`;
+        this.updateGripPositions();
+      }
+    };
+
+    const onMouseUp = () => {
+      if (resizingRowIdx !== -1) {
+        const rows = this.tbody.querySelectorAll("tr");
+        const row = rows[resizingRowIdx] as HTMLElement;
+        const newHeight = parseInt(row.style.height, 10);
+        const pos = this.getPos();
+        if (pos !== undefined) {
+          const { tr } = this.view.state;
+          const map = TableMap.get(this.node);
+          const rowPos = pos + map.positionAt(resizingRowIdx, 0, this.node) - 1;
+          this.view.dispatch(tr.setNodeMarkup(rowPos, undefined, { height: newHeight }));
+        }
+      }
+      resizingRowIdx = -1;
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+      this.dom.classList.remove("resize-cursor-row");
+    };
 
     this.gripsContainer.addEventListener("mousedown", (e) => {
       const target = e.target as HTMLElement;
+
+      // Handle Row Resizing
+      if (target.classList.contains("grip-row-handle")) {
+        e.preventDefault();
+        e.stopPropagation();
+        const grip = target.parentElement!;
+        resizingRowIdx = parseInt(grip.getAttribute("data-row")!, 10);
+        startY = e.clientY;
+        const rows = this.tbody.querySelectorAll("tr");
+        startHeight = (rows[resizingRowIdx] as HTMLElement).offsetHeight;
+        window.addEventListener("mousemove", onMouseMove);
+        window.addEventListener("mouseup", onMouseUp);
+        this.dom.classList.add("resize-cursor-row");
+        return;
+      }
+
       const pos = this.getPos();
       if (pos === undefined) return;
 
@@ -80,18 +154,69 @@ export class TableView implements NodeView {
       }
     });
 
+    this.mutationObserver = new MutationObserver(() => {
+      this.updateGripPositions();
+    });
+    this.mutationObserver.observe(this.colgroup, {
+      attributes: true,
+      childList: true,
+      subtree: true,
+      attributeFilter: ["style"],
+    });
+
     this.resizeObserver = new ResizeObserver(() => {
       if (this.view && !(this.view as any).isDestroyed) {
         window.requestAnimationFrame(() => this.updateGripPositions());
       }
     });
     this.resizeObserver.observe(this.tableDOM);
+  }
 
-    this.dom.addEventListener("scroll", () => {
-      if (this.view && !(this.view as any).isDestroyed) {
-        window.requestAnimationFrame(() => this.updateGripPositions());
+  updateColgroup() {
+    const map = TableMap.get(this.node);
+
+    // Sync number of <col> tags
+    while (this.colgroup.children.length < map.width) {
+      this.colgroup.appendChild(document.createElement("col"));
+    }
+    while (this.colgroup.children.length > map.width) {
+      this.colgroup.lastElementChild?.remove();
+    }
+
+    const firstRow = this.node.firstChild;
+    if (!firstRow) return;
+
+    let colIndex = 0;
+    let totalWidth = 0;
+    let hasVariableWidth = false;
+
+    firstRow.forEach((cell) => {
+      const { colspan, colwidth } = cell.attrs;
+      for (let i = 0; i < colspan; i++) {
+        const width = colwidth && colwidth[i] ? colwidth[i] : null;
+        const col = this.colgroup.children[colIndex] as HTMLElement;
+        if (col) {
+          if (width) {
+            col.style.width = `${width}px`;
+            totalWidth += width;
+          } else {
+            col.style.width = "";
+            totalWidth += 150; // Use a default for calculation to prevent table shrinking
+          }
+        }
+        colIndex++;
       }
     });
+
+    const newWidth = totalWidth > 0 ? `${totalWidth}px` : "100%";
+    const newMinWidth = "100%";
+
+    if (this.tableDOM.style.width !== newWidth) {
+      this.tableDOM.style.width = newWidth;
+    }
+    if (this.tableDOM.style.minWidth !== newMinWidth) {
+      this.tableDOM.style.minWidth = newMinWidth;
+    }
   }
 
   renderGrips() {
@@ -118,6 +243,11 @@ export class TableView implements NodeView {
         grip.classList.add("grip-row");
         grip.setAttribute("data-row", i.toString());
         grip.style.pointerEvents = "auto";
+
+        const handle = document.createElement("div");
+        handle.classList.add("grip-row-handle");
+        grip.appendChild(handle);
+
         this.gripsContainer.appendChild(grip);
       }
 
@@ -155,37 +285,29 @@ export class TableView implements NodeView {
       const rows = table.querySelectorAll("tr");
       if (rows.length === 0) return;
 
-      const firstRow = rows[0];
-      if (!firstRow) return;
-      const cells = firstRow.querySelectorAll("td, th");
+      // Column grips (Optimized: using table children instead of getBoundingClientRect in loop)
+      const colElements = this.colgroup.querySelectorAll("col");
       let currentLeft = 0;
-      let colIdx = 0;
-
-      cells.forEach((cell: any) => {
-        const rect = cell.getBoundingClientRect();
-        const colspan = parseInt(cell.getAttribute("colspan") || "1", 10);
-        const colWidth = rect.width / colspan;
-
-        for (let j = 0; j < colspan; j++) {
-          const grip = colGrips[colIdx] as HTMLElement | undefined;
-          if (grip) {
-            grip.style.left = `${currentLeft}px`;
-            grip.style.width = `${colWidth}px`;
-          }
-          currentLeft += colWidth;
-          colIdx++;
+      colElements.forEach((col, i) => {
+        const width = (col as HTMLElement).offsetWidth || (col as any).width || 0;
+        const grip = colGrips[i] as HTMLElement | undefined;
+        if (grip) {
+          grip.style.left = `${currentLeft}px`;
+          grip.style.width = `${width}px`;
         }
+        currentLeft += width;
       });
 
+      // Row grips (Optimized: using tr offsetHeight)
       let currentTop = 0;
       rows.forEach((row, i) => {
-        const rect = row.getBoundingClientRect();
+        const height = (row as HTMLElement).offsetHeight;
         const grip = rowGrips[i] as HTMLElement | undefined;
         if (grip) {
           grip.style.top = `${currentTop}px`;
-          grip.style.height = `${rect.height}px`;
+          grip.style.height = `${height}px`;
         }
-        currentTop += rect.height;
+        currentTop += height;
       });
 
       this.updateGripSelection();
@@ -223,25 +345,38 @@ export class TableView implements NodeView {
 
   update(node: PMNode) {
     if (node.type !== this.node.type) return false;
+
+    const oldNode = this.node;
     this.node = node;
 
-    // Sync attributes (critical for resizing and persistence)
-    if (this.node.attrs.style) {
-      this.tableDOM.setAttribute("style", this.node.attrs.style);
-    } else {
-      this.tableDOM.removeAttribute("style");
+    // Sync attributes
+    const newStyle = this.node.attrs.style || "";
+    if (this.tableDOM.getAttribute("style") !== newStyle) {
+      if (newStyle) {
+        this.tableDOM.setAttribute("style", newStyle);
+      } else {
+        this.tableDOM.removeAttribute("style");
+      }
     }
 
     try {
       const map = TableMap.get(this.node);
-      if (
-        this.gripsContainer.querySelectorAll(".grip-column").length !== map.width ||
-        this.gripsContainer.querySelectorAll(".grip-row").length !== map.height
-      ) {
+      const oldMap = TableMap.get(oldNode);
+
+      if (map.width !== oldMap.width || map.height !== oldMap.height) {
         this.renderGrips();
       } else {
         this.updateGripPositions();
         this.updateGripSelection();
+      }
+
+      // Only update colgroup if something actually changed to prevent scroll jumping
+      if (
+        map.width !== oldMap.width ||
+        JSON.stringify(this.node.attrs) !== JSON.stringify(oldNode.attrs) ||
+        this.node.content.size !== oldNode.content.size
+      ) {
+        this.updateColgroup();
       }
     } catch (error) {
       console.warn("TableView: Failed to update TableView", error);
@@ -251,11 +386,16 @@ export class TableView implements NodeView {
 
   destroy() {
     this.resizeObserver.disconnect();
+    this.mutationObserver.disconnect();
   }
 
   ignoreMutation(mutation: any) {
-    // Only ignore mutations to the grips container
-    return mutation.target === this.gripsContainer || this.gripsContainer.contains(mutation.target);
+    return (
+      mutation.target === this.gripsContainer ||
+      this.gripsContainer.contains(mutation.target) ||
+      mutation.target === this.colgroup ||
+      this.colgroup.contains(mutation.target)
+    );
   }
 
   get contentDOM() {

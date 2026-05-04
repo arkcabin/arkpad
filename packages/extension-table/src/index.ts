@@ -17,6 +17,7 @@ import {
   setCellAttr,
   fixTables,
   goToNextCell,
+  TableMap,
 } from "prosemirror-tables";
 import { TextSelection } from "prosemirror-state";
 import { TableView } from "./TableNodeView";
@@ -53,15 +54,27 @@ export const Table = Extension.create({
         ],
         toDOM(node: any) {
           const { style } = node.attrs;
-          return ["table", { style }, ["tbody", 0]];
+          return ["table", { style, class: "ark-table" }, ["colgroup"], ["tbody", 0]];
         },
       },
       table_row: {
         content: "(table_cell | table_header)*",
+        attrs: {
+          height: { default: null },
+        },
         tableRole: "row",
-        parseDOM: [{ tag: "tr" }],
-        toDOM() {
-          return ["tr", 0];
+        parseDOM: [
+          {
+            tag: "tr",
+            getAttrs: (dom: HTMLElement) => ({
+              height: dom.style.height ? parseInt(dom.style.height, 10) : null,
+            }),
+          },
+        ],
+        toDOM(node: any) {
+          const { height } = node.attrs;
+          const style = height ? `height: ${height}px` : null;
+          return ["tr", { style }, 0];
         },
       },
       table_cell: {
@@ -93,8 +106,8 @@ export const Table = Extension.create({
         toDOM(node: any) {
           const { colspan, rowspan, colwidth, background } = node.attrs;
           const attrs: any = {};
-          if (colspan !== 1) attrs.colspan = colspan;
-          if (rowspan !== 1) attrs.rowspan = rowspan;
+          if (colspan && colspan !== 1) attrs.colspan = colspan;
+          if (rowspan && rowspan !== 1) attrs.rowspan = rowspan;
           if (colwidth) attrs["data-colwidth"] = colwidth.join(",");
 
           if (background) {
@@ -133,8 +146,8 @@ export const Table = Extension.create({
         toDOM(node: any) {
           const { colspan, rowspan, colwidth, background } = node.attrs;
           const attrs: any = {};
-          if (colspan !== 1) attrs.colspan = colspan;
-          if (rowspan !== 1) attrs.rowspan = rowspan;
+          if (colspan && colspan !== 1) attrs.colspan = colspan;
+          if (rowspan && rowspan !== 1) attrs.rowspan = rowspan;
           if (colwidth) attrs["data-colwidth"] = colwidth.join(",");
 
           if (background) {
@@ -363,7 +376,8 @@ export const Table = Extension.create({
   },
 
   addProseMirrorPlugins() {
-    const plugins = [tableEditing()];
+    const plugins = [];
+
     if (this.options.resizable) {
       plugins.push(
         columnResizing({
@@ -373,6 +387,9 @@ export const Table = Extension.create({
         })
       );
     }
+
+    plugins.push(tableEditing());
+
     return plugins;
   },
 });

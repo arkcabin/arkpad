@@ -3,7 +3,7 @@
   top: 0;
   left: 0;
   pointer-events: none;
-  z-index: 100;
+  z-index: 10;
 }
 
 .grip-column,
@@ -98,4 +98,25 @@
 .dark .grip-table.selected {
   background-color: #3b82f6;
   border-color: #2563eb;
+}
+.grip-row-handle {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 4px;
+  cursor: row-resize;
+  z-index: 10;
+}
+
+.grip-row-handle:hover {
+  background-color: var(--ark-primary);
+}
+
+.tableWrapper.resize-cursor-row {
+  cursor: row-resize !important;
+}
+
+.tableWrapper.resize-cursor-row table {
+  user-select: none;
 }
