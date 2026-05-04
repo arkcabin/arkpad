@@ -1,5 +1,4 @@
 .tableWrapper {
-  overflow: hidden;
   overflow-x: auto;
   max-width: 100%;
   margin: 1.5rem 0;
@@ -11,20 +10,22 @@
 .prose table {
   border-collapse: collapse;
   table-layout: fixed;
-  width: 100%;
+  width: auto;
+  min-width: 100%;
   margin: 0 !important;
   position: relative;
   cursor: default;
 
   & td,
   & th {
-    min-width: 50px;
+    min-width: 25px;
     border: 1px solid var(--ark-table-border);
     padding: var(--ark-cell-padding);
     vertical-align: top;
     box-sizing: border-box;
     position: relative;
     text-align: left;
+    overflow-wrap: break-word;
   }
 
   & th {
@@ -32,73 +33,33 @@
     background-color: var(--ark-table-header-bg);
   }
 
-  /* The Resize Handle Hitbox */
+  /* Standard Tiptap Resize Handle */
   & .column-resize-handle {
     position: absolute;
-    right: -6px; /* Center the 12px hitbox on the border */
+    right: -2px;
     top: 0;
-    bottom: 0;
-    width: 12px;
-    z-index: 200;
+    bottom: -2px;
+    width: 4px;
+    z-index: 10;
     cursor: col-resize;
     pointer-events: auto;
-    background-color: transparent;
-  }
-}
-
-/* Notion-style: Only the first row generates the line and dot */
-.prose tr:first-child .column-resize-handle {
-  &::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 1px;
-    height: 10000px; /* Full height line */
     background-color: var(--ark-primary);
-    pointer-events: none;
     opacity: 0;
-    transition: opacity 0.15s;
-    z-index: 199;
+    transition: opacity 0.2s;
   }
 
-  &::before {
-    content: "";
-    position: absolute;
-    top: -6px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 10px;
-    height: 10px;
-    background-color: var(--ark-primary);
-    border: 2px solid white;
-    border-radius: 50%;
-    z-index: 201;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.15s;
+  & .column-resize-handle:hover,
+  &.resize-cursor .column-resize-handle {
+    opacity: 1;
+  }
+
+  &.resize-cursor {
+    cursor: col-resize !important;
+    user-select: none;
   }
 }
 
-/* Active states for resizing */
-.prose .column-resize-handle:hover::after,
-.prose .column-resize-handle:hover::before,
-.prose table.resize-cursor .column-resize-handle::after,
-.prose table.resize-cursor .column-resize-handle::before {
-  opacity: 1;
-}
-
-/* Hide handles/grips during resize to keep the UI clean and avoid blocking events */
-.prose table.resize-cursor ~ .table-grips-container {
-  display: none;
-}
-
-/* Hide handles in other rows visually but keep them interactive */
-.prose tr:not(:first-child) .column-resize-handle {
-  opacity: 0;
-}
-
+/* Selected Cells */
 .prose .selectedCell:after {
   z-index: 2;
   position: absolute;
@@ -114,4 +75,9 @@
 .prose .selectedCell {
   box-shadow: inset 0 0 0 var(--ark-table-selection-width) var(--ark-table-selection-color);
   z-index: 10;
+}
+
+/* Hide handles/grips during resize to keep the UI clean */
+.prose table.resize-cursor ~ .table-grips-container {
+  display: none;
 }

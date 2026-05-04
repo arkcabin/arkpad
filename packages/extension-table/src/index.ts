@@ -17,7 +17,6 @@ import {
   setCellAttr,
   fixTables,
   goToNextCell,
-  TableMap,
 } from "prosemirror-tables";
 import { TextSelection } from "prosemirror-state";
 import { TableView } from "./TableNodeView";
@@ -38,65 +37,31 @@ export const Table = Extension.create({
       table: {
         content: "table_row+",
         attrs: {
-          class: { default: null },
           style: { default: null },
         },
         tableRole: "table",
         isolating: true,
         group: "block",
-        trailingNode: true,
-        parseDOM: [{ tag: "table" }],
+        selectable: false,
+        parseDOM: [
+          {
+            tag: "table",
+            getAttrs: (dom: HTMLElement) => ({
+              style: dom.getAttribute("style"),
+            }),
+          },
+        ],
         toDOM(node: any) {
-          const { class: className, style } = node.attrs;
-
-          // 1. Determine total column count
-          const map = TableMap.get(node);
-          const colCount = map.width;
-
-          // 2. Build reactive colgroup
-          const colgroup: any[] = ["colgroup"];
-          const colWidths = new Array(colCount).fill(0);
-
-          // Find the first row to extract the current column widths
-          const firstRow = node.firstChild;
-          if (firstRow) {
-            let colIdx = 0;
-            for (let i = 0; i < firstRow.childCount; i++) {
-              const cell = firstRow.child(i);
-              const { colspan, colwidth } = cell.attrs;
-              for (let j = 0; j < (colspan || 1); j++) {
-                if (colwidth && colwidth[j]) {
-                  colWidths[colIdx] = colwidth[j];
-                }
-                colIdx++;
-              }
-            }
-          }
-
-          for (let i = 0; i < colCount; i++) {
-            const width = colWidths[i];
-            const colStyle = width ? `width: ${width}px;` : "";
-            colgroup.push(["col", { style: colStyle }]);
-          }
-
-          return [
-            "div",
-            { class: "tableWrapper" },
-            ["table", { class: className, style }, colgroup, ["tbody", 0]],
-          ];
+          const { style } = node.attrs;
+          return ["table", { style }, ["tbody", 0]];
         },
       },
       table_row: {
         content: "(table_cell | table_header)*",
-        attrs: {
-          class: { default: null },
-          style: { default: null },
-        },
         tableRole: "row",
         parseDOM: [{ tag: "tr" }],
-        toDOM(node: any) {
-          const { class: className, style } = node.attrs;
-          return ["tr", { class: className, style }, 0];
+        toDOM() {
+          return ["tr", 0];
         },
       },
       table_cell: {
@@ -106,39 +71,35 @@ export const Table = Extension.create({
           rowspan: { default: 1 },
           colwidth: { default: null },
           background: { default: null },
-          class: { default: null },
-          style: { default: null },
         },
         tableRole: "cell",
         isolating: true,
         parseDOM: [
           {
             tag: "td",
-            getAttrs: (dom: any) => ({
+            getAttrs: (dom: HTMLElement) => ({
               colspan: parseInt(dom.getAttribute("colspan") || "1", 10),
               rowspan: parseInt(dom.getAttribute("rowspan") || "1", 10),
               colwidth: dom.getAttribute("data-colwidth")
                 ? dom
-                    .getAttribute("data-colwidth")
+                    .getAttribute("data-colwidth")!
                     .split(",")
                     .map((v: string) => parseInt(v, 10))
                 : null,
-              class: dom.getAttribute("class"),
-              style: dom.getAttribute("style"),
+              background: dom.style.backgroundColor || null,
             }),
           },
         ],
         toDOM(node: any) {
-          const { colspan, rowspan, colwidth, background, class: className, style } = node.attrs;
+          const { colspan, rowspan, colwidth, background } = node.attrs;
           const attrs: any = {};
           if (colspan !== 1) attrs.colspan = colspan;
           if (rowspan !== 1) attrs.rowspan = rowspan;
           if (colwidth) attrs["data-colwidth"] = colwidth.join(",");
-          if (className) attrs.class = className;
 
-          let finalStyle = style || "";
-          if (background) finalStyle += `background-color: ${background};`;
-          if (finalStyle) attrs.style = finalStyle;
+          if (background) {
+            attrs.style = `background-color: ${background}`;
+          }
 
           return ["td", attrs, 0];
         },
@@ -150,39 +111,35 @@ export const Table = Extension.create({
           rowspan: { default: 1 },
           colwidth: { default: null },
           background: { default: null },
-          class: { default: null },
-          style: { default: null },
         },
         tableRole: "header_cell",
         isolating: true,
         parseDOM: [
           {
             tag: "th",
-            getAttrs: (dom: any) => ({
+            getAttrs: (dom: HTMLElement) => ({
               colspan: parseInt(dom.getAttribute("colspan") || "1", 10),
               rowspan: parseInt(dom.getAttribute("rowspan") || "1", 10),
               colwidth: dom.getAttribute("data-colwidth")
                 ? dom
-                    .getAttribute("data-colwidth")
+                    .getAttribute("data-colwidth")!
                     .split(",")
                     .map((v: string) => parseInt(v, 10))
                 : null,
-              class: dom.getAttribute("class"),
-              style: dom.getAttribute("style"),
+              background: dom.style.backgroundColor || null,
             }),
           },
         ],
         toDOM(node: any) {
-          const { colspan, rowspan, colwidth, background, class: className, style } = node.attrs;
+          const { colspan, rowspan, colwidth, background } = node.attrs;
           const attrs: any = {};
           if (colspan !== 1) attrs.colspan = colspan;
           if (rowspan !== 1) attrs.rowspan = rowspan;
           if (colwidth) attrs["data-colwidth"] = colwidth.join(",");
-          if (className) attrs.class = className;
 
-          let finalStyle = style || "";
-          if (background) finalStyle += `background-color: ${background};`;
-          if (finalStyle) attrs.style = finalStyle;
+          if (background) {
+            attrs.style = `background-color: ${background}`;
+          }
 
           return ["th", attrs, 0];
         },
@@ -226,130 +183,98 @@ export const Table = Extension.create({
               const table = type.create(null, rows_nodes);
               tr.replaceSelectionWith(table).scrollIntoView();
               return true;
-            }, "insertTable: create initial structure")
+            }, "insertTable")
             .run();
         },
       addColumnBefore:
         () =>
         ({ chain }: ArkpadCommandProps) => {
           return chain()
-            .command(
-              ({ state, dispatch }) => addColumnBefore(state, dispatch),
-              "addColumnBefore: insert column to the left"
-            )
+            .command(({ state, dispatch }) => addColumnBefore(state, dispatch))
             .run();
         },
       addColumnAfter:
         () =>
         ({ chain }: ArkpadCommandProps) => {
           return chain()
-            .command(
-              ({ state, dispatch }) => addColumnAfter(state, dispatch),
-              "addColumnAfter: insert column to the right"
-            )
+            .command(({ state, dispatch }) => addColumnAfter(state, dispatch))
             .run();
         },
       deleteColumn:
         () =>
         ({ chain }: ArkpadCommandProps) => {
           return chain()
-            .command(
-              ({ state, dispatch }) => deleteColumn(state, dispatch),
-              "deleteColumn: remove selected column"
-            )
+            .command(({ state, dispatch }) => deleteColumn(state, dispatch))
             .run();
         },
       addRowBefore:
         () =>
         ({ chain }: ArkpadCommandProps) => {
           return chain()
-            .command(
-              ({ state, dispatch }) => addRowBefore(state, dispatch),
-              "addRowBefore: insert row above"
-            )
+            .command(({ state, dispatch }) => addRowBefore(state, dispatch))
             .run();
         },
       addRowAfter:
         () =>
         ({ chain }: ArkpadCommandProps) => {
           return chain()
-            .command(
-              ({ state, dispatch }) => addRowAfter(state, dispatch),
-              "addRowAfter: insert row below"
-            )
+            .command(({ state, dispatch }) => addRowAfter(state, dispatch))
             .run();
         },
       deleteRow:
         () =>
         ({ chain }: ArkpadCommandProps) => {
           return chain()
-            .command(
-              ({ state, dispatch }) => deleteRow(state, dispatch),
-              "deleteRow: remove selected row"
-            )
+            .command(({ state, dispatch }) => deleteRow(state, dispatch))
             .run();
         },
       deleteTable:
         () =>
         ({ chain }: ArkpadCommandProps) => {
           return chain()
-            .command(
-              ({ state, dispatch }) => deleteTable(state, dispatch),
-              "deleteTable: remove entire table structure"
-            )
+            .command(({ state, dispatch }) => deleteTable(state, dispatch))
             .run();
         },
       mergeCells:
         () =>
         ({ chain }: ArkpadCommandProps) => {
           return chain()
-            .command(
-              ({ state, dispatch }) => mergeCells(state, dispatch),
-              "mergeCells: combine selected cells"
-            )
+            .command(({ state, dispatch }) => mergeCells(state, dispatch))
             .run();
         },
       splitCell:
         () =>
         ({ chain }: ArkpadCommandProps) => {
           return chain()
-            .command(
-              ({ state, dispatch }) => splitCell(state, dispatch),
-              "splitCell: divide merged cell"
-            )
+            .command(({ state, dispatch }) => splitCell(state, dispatch))
             .run();
         },
       toggleHeaderColumn:
         () =>
         ({ chain }: ArkpadCommandProps) => {
           return chain()
-            .command(
-              ({ state, dispatch }) => toggleHeaderColumn(state, dispatch),
-              "toggleHeaderColumn"
-            )
+            .command(({ state, dispatch }) => toggleHeaderColumn(state, dispatch))
             .run();
         },
       toggleHeaderRow:
         () =>
         ({ chain }: ArkpadCommandProps) => {
           return chain()
-            .command(({ state, dispatch }) => toggleHeaderRow(state, dispatch), "toggleHeaderRow")
+            .command(({ state, dispatch }) => toggleHeaderRow(state, dispatch))
             .run();
         },
       toggleHeaderCell:
         () =>
         ({ chain }: ArkpadCommandProps) => {
           return chain()
-            .command(({ state, dispatch }) => toggleHeaderCell(state, dispatch), "toggleHeaderCell")
+            .command(({ state, dispatch }) => toggleHeaderCell(state, dispatch))
             .run();
         },
       setCellAttr:
         (name: string, value: any) =>
         ({ chain }: ArkpadCommandProps) => {
           return chain()
-            .command(({ state, dispatch }) => {
-              return setCellAttr(name, value)(state, dispatch);
-            }, "setCellAttr")
+            .command(({ state, dispatch }) => setCellAttr(name, value)(state, dispatch))
             .run();
         },
       setCellBackground:
@@ -368,7 +293,7 @@ export const Table = Extension.create({
                 return true;
               }
               return !!tr;
-            }, "fixTables")
+            })
             .run();
         },
       goToNextCell:
@@ -397,7 +322,6 @@ export const Table = Extension.create({
               const tableNode = tr.doc.nodeAt(tablePos)!;
               const endPos = tablePos + tableNode.nodeSize;
 
-              // Check if there is already a paragraph after the table
               const nextNode = tr.doc.nodeAt(endPos);
               if (nextNode && nextNode.type.name === "paragraph") {
                 if (dispatch) {
@@ -415,7 +339,7 @@ export const Table = Extension.create({
                 dispatch(tr.scrollIntoView());
               }
               return true;
-            }, "exitTable")
+            })
             .run();
         },
     };
@@ -427,12 +351,9 @@ export const Table = Extension.create({
         if (goToNextCell(1)(state, dispatch)) {
           return true;
         }
-
-        // If at the last cell, add a new row and move focus
         if (!editor.canRunCommand("addRowAfter")) {
           return false;
         }
-
         return editor.chain().addRowAfter().goToNextCell().run();
       },
       "Shift-Tab": ({ state, dispatch }: { state: any; dispatch: any }) =>
@@ -446,8 +367,8 @@ export const Table = Extension.create({
     if (this.options.resizable) {
       plugins.push(
         columnResizing({
-          handleWidth: 12, // Match the 12px hitbox in CSS
-          cellMinWidth: 50,
+          handleWidth: 5,
+          cellMinWidth: 25,
           lastColumnResizable: this.options.lastColumnResizable,
         })
       );

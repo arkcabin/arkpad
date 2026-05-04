@@ -25,7 +25,6 @@ export class TableView implements NodeView {
   getPos: () => number | undefined;
   dom: HTMLElement;
   tableDOM: HTMLElement;
-  colgroup: HTMLElement;
   tbody: HTMLElement;
   gripsContainer: HTMLElement;
   resizeObserver: ResizeObserver;
@@ -35,27 +34,27 @@ export class TableView implements NodeView {
     this.view = props.view || props.editor?.view;
     this.getPos = props.getPos;
 
-    if (!this.view) {
-      console.warn("TableView: EditorView is missing in props");
-    }
-
+    // Create wrapper
     this.dom = document.createElement("div");
     this.dom.classList.add("tableWrapper");
 
+    // The table element managed by ProseMirror
     this.tableDOM = document.createElement("table");
-    this.colgroup = document.createElement("colgroup");
+    if (this.node.attrs.style) {
+      this.tableDOM.setAttribute("style", this.node.attrs.style);
+    }
+
     this.tbody = document.createElement("tbody");
-    this.tableDOM.appendChild(this.colgroup);
     this.tableDOM.appendChild(this.tbody);
     this.dom.appendChild(this.tableDOM);
 
+    // Overlay for grips
     this.gripsContainer = document.createElement("div");
     this.gripsContainer.classList.add("table-grips-container");
     this.gripsContainer.style.pointerEvents = "none";
     this.dom.appendChild(this.gripsContainer);
 
     this.renderGrips();
-    this.updateColgroup();
 
     this.gripsContainer.addEventListener("mousedown", (e) => {
       const target = e.target as HTMLElement;
@@ -81,10 +80,6 @@ export class TableView implements NodeView {
       }
     });
 
-    this.gripsContainer.addEventListener("dragstart", (e) => {
-      e.preventDefault();
-    });
-
     this.resizeObserver = new ResizeObserver(() => {
       if (this.view && !(this.view as any).isDestroyed) {
         window.requestAnimationFrame(() => this.updateGripPositions());
@@ -107,12 +102,14 @@ export class TableView implements NodeView {
 
       const corner = document.createElement("div");
       corner.classList.add("grip-table");
+      corner.style.pointerEvents = "auto";
       this.gripsContainer.appendChild(corner);
 
       for (let i = 0; i < map.width; i++) {
         const grip = document.createElement("div");
         grip.classList.add("grip-column");
         grip.setAttribute("data-col", i.toString());
+        grip.style.pointerEvents = "auto";
         this.gripsContainer.appendChild(grip);
       }
 
@@ -120,67 +117,13 @@ export class TableView implements NodeView {
         const grip = document.createElement("div");
         grip.classList.add("grip-row");
         grip.setAttribute("data-row", i.toString());
+        grip.style.pointerEvents = "auto";
         this.gripsContainer.appendChild(grip);
       }
 
       this.updateGripPositions();
     } catch (error) {
       console.warn("TableView: Failed to render grips", error);
-    }
-  }
-
-  updateColgroup() {
-    try {
-      // Sync table attributes
-      this.tableDOM.className = this.node.attrs.class || "";
-      if (this.node.attrs.style) {
-        this.tableDOM.setAttribute("style", this.node.attrs.style);
-      } else {
-        this.tableDOM.removeAttribute("style");
-      }
-
-      const map = TableMap.get(this.node);
-      if (!map) return;
-
-      const firstRow = this.node.firstChild;
-      if (!firstRow) return;
-
-      const colWidths = new Array(map.width).fill(0);
-      let colIdx = 0;
-
-      for (let i = 0; i < firstRow.childCount; i++) {
-        const cell = firstRow.child(i);
-        const { colspan, colwidth } = cell.attrs;
-        for (let j = 0; j < (colspan || 1); j++) {
-          if (colwidth && colwidth[j]) {
-            colWidths[colIdx] = colwidth[j];
-          }
-          colIdx++;
-        }
-      }
-
-      // Sync <col> elements without recreating them to avoid flicker
-      let col = this.colgroup.firstElementChild;
-      for (let i = 0; i < map.width; i++) {
-        if (!col) {
-          col = document.createElement("col");
-          this.colgroup.appendChild(col);
-        }
-        const width = colWidths[i];
-        const style = width ? `width: ${width}px;` : "";
-        if (col.getAttribute("style") !== style) {
-          col.setAttribute("style", style);
-        }
-        col = col.nextElementSibling;
-      }
-
-      while (col) {
-        const next = col.nextElementSibling;
-        this.colgroup.removeChild(col);
-        col = next;
-      }
-    } catch (error) {
-      console.warn("TableView: Failed to update colgroup", error);
     }
   }
 
@@ -209,51 +152,41 @@ export class TableView implements NodeView {
       const colGrips = this.gripsContainer.querySelectorAll(".grip-column");
       const rowGrips = this.gripsContainer.querySelectorAll(".grip-row");
 
-      for (let i = 0; i < map.width; i++) {
-        const grip = colGrips[i] as HTMLElement | undefined;
-        if (!grip) continue;
+      const rows = table.querySelectorAll("tr");
+      if (rows.length === 0) return;
 
-        const cellPos = map.map[i];
-        if (cellPos === undefined) continue;
+      const firstRow = rows[0];
+      if (!firstRow) return;
+      const cells = firstRow.querySelectorAll("td, th");
+      let currentLeft = 0;
+      let colIdx = 0;
 
-        const cellDOM = this.view.nodeDOM(pos + cellPos + 1) as HTMLElement;
-        if (cellDOM && typeof cellDOM.getBoundingClientRect === "function") {
-          const rect = cellDOM.getBoundingClientRect();
-          const colspan = parseInt(cellDOM.getAttribute("colspan") || "1", 10);
-          const colWidth = rect.width / colspan;
+      cells.forEach((cell: any) => {
+        const rect = cell.getBoundingClientRect();
+        const colspan = parseInt(cell.getAttribute("colspan") || "1", 10);
+        const colWidth = rect.width / colspan;
 
-          let subColIdx = 0;
-          for (let prevIdx = 0; prevIdx < i; prevIdx++) {
-            if (map.map[prevIdx] === cellPos) subColIdx++;
+        for (let j = 0; j < colspan; j++) {
+          const grip = colGrips[colIdx] as HTMLElement | undefined;
+          if (grip) {
+            grip.style.left = `${currentLeft}px`;
+            grip.style.width = `${colWidth}px`;
           }
-
-          grip.style.left = `${rect.left - tableRect.left + subColIdx * colWidth}px`;
-          grip.style.width = `${colWidth}px`;
+          currentLeft += colWidth;
+          colIdx++;
         }
-      }
+      });
 
-      for (let i = 0; i < map.height; i++) {
+      let currentTop = 0;
+      rows.forEach((row, i) => {
+        const rect = row.getBoundingClientRect();
         const grip = rowGrips[i] as HTMLElement | undefined;
-        if (!grip) continue;
-
-        const cellPos = map.map[i * map.width];
-        if (cellPos === undefined) continue;
-
-        const cellDOM = this.view.nodeDOM(pos + cellPos + 1) as HTMLElement;
-        if (cellDOM && typeof cellDOM.getBoundingClientRect === "function") {
-          const rect = cellDOM.getBoundingClientRect();
-          const rowspan = parseInt(cellDOM.getAttribute("rowspan") || "1", 10);
-          const rowHeight = rect.height / rowspan;
-
-          let subRowIdx = 0;
-          for (let prevIdx = 0; prevIdx < i; prevIdx++) {
-            if (map.map[prevIdx * map.width] === cellPos) subRowIdx++;
-          }
-
-          grip.style.top = `${rect.top - tableRect.top + subRowIdx * rowHeight}px`;
-          grip.style.height = `${rowHeight}px`;
+        if (grip) {
+          grip.style.top = `${currentTop}px`;
+          grip.style.height = `${rect.height}px`;
         }
-      }
+        currentTop += rect.height;
+      });
 
       this.updateGripSelection();
     } catch (error) {
@@ -288,12 +221,16 @@ export class TableView implements NodeView {
     }
   }
 
-  update(node: PMNode, decorations: any) {
-    void decorations;
+  update(node: PMNode) {
     if (node.type !== this.node.type) return false;
     this.node = node;
 
-    this.updateColgroup();
+    // Sync attributes (critical for resizing and persistence)
+    if (this.node.attrs.style) {
+      this.tableDOM.setAttribute("style", this.node.attrs.style);
+    } else {
+      this.tableDOM.removeAttribute("style");
+    }
 
     try {
       const map = TableMap.get(this.node);
@@ -303,6 +240,7 @@ export class TableView implements NodeView {
       ) {
         this.renderGrips();
       } else {
+        this.updateGripPositions();
         this.updateGripSelection();
       }
     } catch (error) {
@@ -316,17 +254,8 @@ export class TableView implements NodeView {
   }
 
   ignoreMutation(mutation: any) {
+    // Only ignore mutations to the grips container
     return mutation.target === this.gripsContainer || this.gripsContainer.contains(mutation.target);
-  }
-
-  selectNode() {
-    this.dom.classList.add("ProseMirror-selectednode");
-    this.updateGripSelection();
-  }
-
-  deselectNode() {
-    this.dom.classList.remove("ProseMirror-selectednode");
-    this.updateGripSelection();
   }
 
   get contentDOM() {

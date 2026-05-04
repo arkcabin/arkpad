@@ -1,4 +1,4 @@
-import { EditorState, TextSelection } from "prosemirror-state";
+import { EditorState, TextSelection, Selection } from "prosemirror-state";
 import { TableMap, CellSelection } from "prosemirror-tables";
 import { EditorView } from "prosemirror-view";
 
@@ -32,8 +32,8 @@ export function selectColumn(view: EditorView, tablePos: number, colIndex: numbe
   const headCellPos = tablePos + map.map[colIndex + (map.height - 1) * map.width]! + 1;
 
   if (isColumnSelected(state, tablePos, colIndex)) {
-    // Toggle off
-    dispatch(state.tr.setSelection(TextSelection.create(state.doc, anchorCellPos + 1)));
+    // Toggle off: Move selection safely into the cell content
+    dispatch(state.tr.setSelection(Selection.near(state.doc.resolve(anchorCellPos))));
   } else {
     dispatch(state.tr.setSelection(CellSelection.create(state.doc, anchorCellPos, headCellPos)));
   }
@@ -53,8 +53,8 @@ export function selectRow(view: EditorView, tablePos: number, rowIndex: number) 
   const headCellPos = tablePos + map.map[rowIndex * map.width + map.width - 1]! + 1;
 
   if (isRowSelected(state, tablePos, rowIndex)) {
-    // Toggle off
-    dispatch(state.tr.setSelection(TextSelection.create(state.doc, anchorCellPos + 1)));
+    // Toggle off: Move selection safely into the cell content
+    dispatch(state.tr.setSelection(Selection.near(state.doc.resolve(anchorCellPos))));
   } else {
     dispatch(state.tr.setSelection(CellSelection.create(state.doc, anchorCellPos, headCellPos)));
   }

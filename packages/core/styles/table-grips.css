@@ -48,21 +48,18 @@
 }
 
 .grip-column {
-  top: -10px;
-  /* Closer to the table */
+  top: -16px;
   height: 6px;
-  /* Sleeker, thinner bar */
 }
 
 .grip-row {
-  left: -15px;
-  /* Centered in padding */
+  left: -20px;
   width: 6px;
 }
 
 .grip-table {
-  top: -15px;
-  left: -15px;
+  top: -16px;
+  left: -20px;
   width: 10px;
   height: 10px;
   border-radius: 2px;
