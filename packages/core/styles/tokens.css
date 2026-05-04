@@ -1,27 +1,27 @@
 /* Arkpad Design Tokens */
 :root {
   /* Colors */
-  --ark-primary: #3b82f6;
+  --ark-primary: #7c3aed; /* Notion-like Purple */
   --ark-border: #eeeeee;
   --ark-text: #000000;
   --ark-text-muted: #666666;
   --ark-selection: rgba(59, 130, 246, 0.1);
-  
+
   /* Table Specific Tokens */
   --ark-table-border: var(--ark-border);
   --ark-table-header-bg: rgba(0, 0, 0, 0.05);
   --ark-table-selected-cell-bg: rgba(59, 130, 246, 0.05);
   --ark-table-selection-color: var(--ark-primary);
   --ark-table-selection-width: 2px;
-  
-  --ark-table-resize-handle-width: 4px;
+
+  --ark-table-resize-handle-width: 10px;
   --ark-table-resize-handle-active-width: 2px;
   --ark-table-resize-handle-color: var(--ark-primary);
-  
+
   --ark-table-grip-size: 12px;
   --ark-table-grip-color: var(--ark-border);
   --ark-table-grip-color-hover: var(--ark-primary);
-  
+
   /* Spacing */
   --ark-cell-padding: 6px 10px;
   --ark-table-margin-bottom: 1.5rem;
@@ -33,7 +33,7 @@
   --ark-text: #ffffff;
   --ark-text-muted: #888888;
   --ark-selection: rgba(255, 255, 255, 0.1);
-  
+
   --ark-table-header-bg: rgba(255, 255, 255, 0.05);
   --ark-table-selected-cell-bg: rgba(255, 255, 255, 0.1);
 }

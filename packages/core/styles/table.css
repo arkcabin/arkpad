@@ -1,21 +1,24 @@
 .tableWrapper {
+  overflow: hidden;
   overflow-x: auto;
-  overflow-y: hidden;
   max-width: 100%;
-  margin-bottom: var(--ark-table-margin-bottom);
+  margin: 1.5rem 0;
+  padding: 30px;
   position: relative;
+  scrollbar-width: thin;
 }
 
 .prose table {
   border-collapse: collapse;
   table-layout: fixed;
   width: 100%;
-  margin: 0;
-  overflow: hidden; /* Clip the infinite handles */
+  margin: 0 !important;
+  position: relative;
+  cursor: default;
 
   & td,
   & th {
-    min-width: 1em;
+    min-width: 50px;
     border: 1px solid var(--ark-table-border);
     padding: var(--ark-cell-padding);
     vertical-align: top;
@@ -29,73 +32,86 @@
     background-color: var(--ark-table-header-bg);
   }
 
-  & .selectedCell:after {
-    z-index: 2;
-    position: absolute;
-    content: "";
-    left: 0; right: 0; top: 0; bottom: 0;
-    background: var(--ark-table-selected-cell-bg);
-    pointer-events: none;
-  }
-
-  & .selectedCell {
-    box-shadow: inset 0 0 0 var(--ark-table-selection-width) var(--ark-table-selection-color);
-    z-index: 10;
-  }
-
+  /* The Resize Handle Hitbox */
   & .column-resize-handle {
     position: absolute;
-    right: calc(var(--ark-table-resize-handle-width) / -2);
-    top: -1000px;
-    bottom: -1000px;
-    width: var(--ark-table-resize-handle-width);
-    background-color: transparent;
+    right: -6px; /* Center the 12px hitbox on the border */
+    top: 0;
+    bottom: 0;
+    width: 12px;
+    z-index: 200;
     cursor: col-resize;
-    z-index: 20;
     pointer-events: auto;
-    transition: background-color 0.1s;
+    background-color: transparent;
   }
+}
 
-  & .column-resize-handle:hover,
-  &.resize-cursor .column-resize-handle {
-    background-color: var(--ark-table-resize-handle-color);
-  }
-
-  & .resize-cursor {
-    cursor: col-resize;
-  }
-
-  & .grip-column,
-  & .grip-row {
+/* Notion-style: Only the first row generates the line and dot */
+.prose tr:first-child .column-resize-handle {
+  &::after {
+    content: "";
     position: absolute;
-    background-color: var(--ark-table-grip-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 10;
-    transition: background-color 0.1s;
-
-    &:hover {
-      background-color: var(--ark-table-grip-color-hover);
-    }
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1px;
+    height: 10000px; /* Full height line */
+    background-color: var(--ark-primary);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+    z-index: 199;
   }
 
-  & .grip-column {
-    width: calc(100% + 1px);
-    left: -1px;
-    top: calc(var(--ark-table-grip-size) * -1);
-    height: var(--ark-table-grip-size);
-    border: 1px solid var(--ark-border);
-    border-bottom: none;
+  &::before {
+    content: "";
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 10px;
+    height: 10px;
+    background-color: var(--ark-primary);
+    border: 2px solid white;
+    border-radius: 50%;
+    z-index: 201;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
   }
+}
 
-  & .grip-row {
-    width: var(--ark-table-grip-size);
-    left: calc(var(--ark-table-grip-size) * -1);
-    top: -1px;
-    height: calc(100% + 1px);
-    border: 1px solid var(--ark-border);
-    border-right: none;
-  }
+/* Active states for resizing */
+.prose .column-resize-handle:hover::after,
+.prose .column-resize-handle:hover::before,
+.prose table.resize-cursor .column-resize-handle::after,
+.prose table.resize-cursor .column-resize-handle::before {
+  opacity: 1;
+}
+
+/* Hide handles/grips during resize to keep the UI clean and avoid blocking events */
+.prose table.resize-cursor ~ .table-grips-container {
+  display: none;
+}
+
+/* Hide handles in other rows visually but keep them interactive */
+.prose tr:not(:first-child) .column-resize-handle {
+  opacity: 0;
+}
+
+.prose .selectedCell:after {
+  z-index: 2;
+  position: absolute;
+  content: "";
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: var(--ark-table-selected-cell-bg);
+  pointer-events: none;
+}
+
+.prose .selectedCell {
+  box-shadow: inset 0 0 0 var(--ark-table-selection-width) var(--ark-table-selection-color);
+  z-index: 10;
 }

@@ -1,0 +1,104 @@
+.table-grips-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 100;
+}
+
+.grip-column,
+.grip-row,
+.grip-table {
+  position: absolute;
+  background-color: #94a3b8;
+  /* Slate-400 */
+  cursor: pointer;
+  z-index: 101;
+  pointer-events: auto;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 2px;
+}
+
+/* Expanded hit area */
+.grip-column::after {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: 0;
+  right: 0;
+  bottom: -2px; /* Don't bleed too much into the table */
+}
+
+.grip-row::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -8px;
+  right: -2px;
+}
+
+.grip-table::after {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  right: -8px;
+  bottom: -8px;
+}
+
+.grip-column {
+  top: -10px;
+  /* Closer to the table */
+  height: 6px;
+  /* Sleeker, thinner bar */
+}
+
+.grip-row {
+  left: -15px;
+  /* Centered in padding */
+  width: 6px;
+}
+
+.grip-table {
+  top: -15px;
+  left: -15px;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+.grip-column:hover,
+.grip-row:hover,
+.grip-table:hover {
+  background-color: #3b82f6;
+  opacity: 1;
+}
+
+.grip-column.selected,
+.grip-row.selected,
+.grip-table.selected {
+  background-color: #3b82f6;
+}
+
+/* Dark Mode */
+.dark .grip-column,
+.dark .grip-row,
+.dark .grip-table {
+  background-color: #1e293b;
+  border-color: #334155;
+}
+
+.dark .grip-column:hover,
+.dark .grip-row:hover,
+.dark .grip-table:hover {
+  background-color: #60a5fa;
+  border-color: #3b82f6;
+}
+
+.dark .grip-column.selected,
+.dark .grip-row.selected,
+.dark .grip-table.selected {
+  background-color: #3b82f6;
+  border-color: #2563eb;
+}

@@ -255,9 +255,15 @@ export class ExtensionManager {
       const renderer = ext.addNodeView();
       if (!renderer) continue;
 
-      nodeViews[ext.name] = (node: PMNode, view: EditorView, getPos: () => number | undefined, decorations: any) => {
+      nodeViews[ext.name] = (
+        node: PMNode,
+        view: EditorView,
+        getPos: () => number | undefined,
+        decorations: any
+      ) => {
         return (renderer as any)({
           editor: (view as any).editor,
+          view,
           node,
           getPos,
           decorations,
