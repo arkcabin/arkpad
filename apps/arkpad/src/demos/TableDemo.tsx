@@ -57,7 +57,7 @@ const complexTableContent = `
 
 export function TableDemo() {
   const editor = useArkpadEditor({
-    extensions: [Heading, Table.configure({ resizable: true })],
+    extensions: [Heading, Table],
     content: complexTableContent,
   });
 

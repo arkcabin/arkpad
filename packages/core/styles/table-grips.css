@@ -1,122 +1,45 @@
-.table-grips-container {
-  position: absolute;
-  top: 0;
-  left: 0;
-  pointer-events: none;
-  z-index: 10;
+/* Table Resizing Styles */
+.prose table {
+  table-layout: fixed;
 }
 
-.grip-column,
-.grip-row,
-.grip-table {
+.column-resize-handle {
   position: absolute;
-  background-color: #94a3b8;
-  /* Slate-400 */
-  cursor: pointer;
-  z-index: 101;
-  pointer-events: auto;
-  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-  border-radius: 2px;
-}
-
-/* Expanded hit area */
-.grip-column::after {
-  content: "";
-  position: absolute;
-  top: -8px;
-  left: 0;
-  right: 0;
-  bottom: -2px; /* Don't bleed too much into the table */
-}
-
-.grip-row::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: -8px;
   right: -2px;
+  top: 0;
+  bottom: -1px;
+  width: 4px;
+  z-index: 20;
+  background-color: var(--ark-table-resize-handle, #3b82f6);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  cursor: col-resize;
+  pointer-events: all;
 }
 
-.grip-table::after {
-  content: "";
-  position: absolute;
-  top: -8px;
-  left: -8px;
-  right: -8px;
-  bottom: -8px;
+.prose table th:hover .column-resize-handle,
+.prose table td:hover .column-resize-handle {
+  opacity: 0.3;
 }
 
-.grip-column {
-  top: -16px;
-  height: 6px;
+.column-resize-handle:hover {
+  opacity: 1 !important;
 }
 
-.grip-row {
-  left: -20px;
-  width: 6px;
+.resize-cursor {
+  cursor: col-resize;
 }
 
-.grip-table {
-  top: -16px;
-  left: -20px;
-  width: 10px;
-  height: 10px;
-  border-radius: 2px;
+
+.resize-cursor {
+  cursor: ew-resize;
 }
 
-.grip-column:hover,
-.grip-row:hover,
-.grip-table:hover {
-  background-color: #3b82f6;
-  opacity: 1;
-}
+/* Hide resizer handle when table is not focused? 
+   Actually, prosemirror-tables handles visibility.
+*/
 
-.grip-column.selected,
-.grip-row.selected,
-.grip-table.selected {
-  background-color: #3b82f6;
-}
-
-/* Dark Mode */
-.dark .grip-column,
-.dark .grip-row,
-.dark .grip-table {
-  background-color: #1e293b;
-  border-color: #334155;
-}
-
-.dark .grip-column:hover,
-.dark .grip-row:hover,
-.dark .grip-table:hover {
-  background-color: #60a5fa;
-  border-color: #3b82f6;
-}
-
-.dark .grip-column.selected,
-.dark .grip-row.selected,
-.dark .grip-table.selected {
-  background-color: #3b82f6;
-  border-color: #2563eb;
-}
-.grip-row-handle {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 4px;
-  cursor: row-resize;
-  z-index: 10;
-}
-
-.grip-row-handle:hover {
-  background-color: var(--ark-primary);
-}
-
-.tableWrapper.resize-cursor-row {
-  cursor: row-resize !important;
-}
-
-.tableWrapper.resize-cursor-row table {
-  user-select: none;
+.tableWrapper {
+  overflow-x: auto;
+  margin-bottom: var(--ark-table-margin-bottom);
 }

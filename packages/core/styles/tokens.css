@@ -14,13 +14,9 @@
   --ark-table-selection-color: var(--ark-primary);
   --ark-table-selection-width: 2px;
 
-  --ark-table-resize-handle-width: 10px;
-  --ark-table-resize-handle-active-width: 2px;
-  --ark-table-resize-handle-color: var(--ark-primary);
-
-  --ark-table-grip-size: 12px;
-  --ark-table-grip-color: var(--ark-border);
-  --ark-table-grip-color-hover: var(--ark-primary);
+  /* Resizer Grips */
+  --ark-table-resizer-color: var(--ark-primary);
+  --ark-table-resizer-width: 4px;
 
   /* Spacing */
   --ark-cell-padding: 6px 10px;

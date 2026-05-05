@@ -1,4 +1,5 @@
 /* Arkpad Core Extension Styles */
+@import "prosemirror-view/style/prosemirror.css";
 @import "./tokens.css";
 
 /* Base Elements */

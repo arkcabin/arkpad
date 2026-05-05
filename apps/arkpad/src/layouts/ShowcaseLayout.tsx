@@ -23,7 +23,7 @@ export function ShowcaseLayout({
             <p className="text-sm text-[var(--text-muted)] max-w-2xl">{description}</p>
           </div>
 
-          <div className="border border-[var(--border)] rounded-none bg-[var(--bg-main)]">
+          <div className="rounded-none bg-[var(--bg-main)]">
             {children}
           </div>
         </div>
