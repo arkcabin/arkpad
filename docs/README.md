@@ -12,6 +12,7 @@ This folder contains the complete planning and delivery documentation for Arkpad
 - [TODO](TODO.md): Actionable task list for implementation.
 - [QA Plan](QA_PLAN.md): Testing strategy and release quality gates.
 - [Developer Guide](./DEVELOPER_GUIDE.md): Advanced architectural patterns.
+- [Core Extensions](./CORE_EXTENSIONS.md): Enhanced keyboard shortcuts, clipboard, and lifecycle hooks.
 - [Custom Extension Guide](./CUSTOM_EXTENSION_GUIDE.md): **Start Here** for building your own features.
 - [Table API](./TABLE_API.md): Ultra-fast grid operations.
 - [Node Views Guide](./GUIDE_NODE_VIEWS.md): Building interactive React components.
