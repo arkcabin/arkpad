@@ -79,3 +79,27 @@ export {
   Plugin,
 } from "prosemirror-state";
 export { EditorView } from "prosemirror-view";
+
+// UI & Interaction Plugins
+export { dropCursor } from "prosemirror-dropcursor";
+export { gapCursor } from "prosemirror-gapcursor";
+export { keymap } from "prosemirror-keymap";
+export {
+  joinBackward,
+  selectParentNode,
+  joinForward,
+  deleteSelection,
+  newlineInCode,
+  createParagraphNear,
+  liftEmptyBlock,
+  splitBlock,
+  splitBlockKeepMarks,
+  selectNodeBackward,
+  selectNodeForward,
+  exitCode,
+  selectAll,
+  setBlockType,
+  toggleMark as togglePMMark,
+  autoJoin,
+  chainCommands,
+} from "prosemirror-commands";

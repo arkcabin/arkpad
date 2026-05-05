@@ -4,12 +4,12 @@
  * without being tightly coupled.
  */
 export class EventEmitter {
-  private callbacks: Record<string, Function[]> = {};
+  private callbacks: Record<string, ((...args: any[]) => void)[]> = {};
 
   /**
    * Subscribe to an event.
    */
-  on(event: string, callback: Function): this {
+  on(event: string, callback: (...args: any[]) => void): this {
     if (!this.callbacks[event]) {
       this.callbacks[event] = [];
     }
@@ -22,7 +22,7 @@ export class EventEmitter {
   /**
    * Unsubscribe from an event.
    */
-  off(event: string, callback: Function): this {
+  off(event: string, callback: (...args: any[]) => void): this {
     if (!this.callbacks[event]) {
       return this;
     }
@@ -50,7 +50,7 @@ export class EventEmitter {
   /**
    * Subscribe to an event once.
    */
-  once(event: string, callback: Function): this {
+  once(event: string, callback: (...args: any[]) => void): this {
     const on = (...args: any[]) => {
       this.off(event, on);
       callback(...args);
