@@ -1,6 +1,7 @@
 import { EditorState } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
 import { ArkpadEditorAPI, MenuConfig, MenuType } from "../types";
+import { findParentNode } from "./utils";
 
 export interface MenuState {
   active: boolean;
@@ -41,7 +42,6 @@ export class MenuEngine {
   lock(name: string) {
     this.activeLocks.add(name);
     this.updateStorageLocks();
-    // Manual trigger for instant UI reaction
     this.editor.refresh();
   }
 
@@ -51,7 +51,6 @@ export class MenuEngine {
   unlock(name: string) {
     this.activeLocks.delete(name);
     this.updateStorageLocks();
-    // Manual trigger for instant UI reaction
     this.editor.refresh();
   }
 
@@ -66,13 +65,22 @@ export class MenuEngine {
   /**
    * Recalculates all menu positions based on the current editor state.
    */
-  update(view: EditorView, prevState?: EditorState) {
+  update(view: EditorView, prevState?: EditorState, force = false) {
     if (view.isDestroyed) return;
 
     const { state } = view;
-
     const storage = this.editor.storage.menuEngine as GlobalMenuStorage;
     if (!storage) return;
+
+    if (force) return;
+
+    // Universal Guard: If locked, clear menus and stop
+    if (this.activeLocks.size > 0) {
+      if (Object.keys(storage.menus).length > 0) {
+        storage.menus = {};
+      }
+      return;
+    }
 
     // Optimization: Skip calculation if selection and document are identical
     if (prevState && prevState.selection.eq(state.selection) && prevState.doc.eq(state.doc)) {
@@ -126,13 +134,40 @@ export class MenuEngine {
     this.prevMenuKeys = currentMenuKeys;
   }
 
+  /**
+   * Calculates coordinates relative to the editor container.
+   * Uses structural node detection (e.g. Table Cells) for perfect alignment.
+   */
   private calculateCoords(view: EditorView, type: MenuType) {
     const { state } = view;
     const { from, to, empty } = state.selection;
 
     try {
+      const editorRect = view.dom.getBoundingClientRect();
+      const containerScrollTop = view.dom.scrollTop;
+      const containerScrollLeft = view.dom.scrollLeft;
+
+      // Superior Strategy: If we're in a structural node (Table Cell), use the Node's DOM boundary.
+      // This ignores line-height and padding issues seen in Range-based math.
+      const cellResult = findParentNode(
+        (node) => node.type.spec.tableRole === "cell" || node.type.spec.tableRole === "header_cell"
+      )(state.selection);
+
+      if (cellResult) {
+        const cellDom = view.nodeDOM(cellResult.pos) as HTMLElement;
+        if (cellDom) {
+          const rect = cellDom.getBoundingClientRect();
+          return {
+            top: rect.top - editorRect.top + containerScrollTop,
+            left: rect.left - editorRect.left + containerScrollLeft,
+            bottom: rect.bottom - editorRect.top + containerScrollTop,
+            right: rect.right - editorRect.left + containerScrollLeft,
+          };
+        }
+      }
+
+      // Standard Fallback: Use DOM Range for standard text selections
       if (type === "bubble" && !empty) {
-        // Industry-standard bounding box calculation using DOM Range
         const range = document.createRange();
         const start = view.domAtPos(from);
         const end = view.domAtPos(to);
@@ -140,36 +175,35 @@ export class MenuEngine {
         if (start.node && end.node) {
           range.setStart(start.node, start.offset);
           range.setEnd(end.node, end.offset);
-
           const rect = range.getBoundingClientRect();
 
           if (rect.width > 0) {
             return {
-              top: rect.top,
-              left: rect.left,
-              bottom: rect.bottom,
-              right: rect.right,
+              top: rect.top - editorRect.top + containerScrollTop,
+              left: rect.left - editorRect.left + containerScrollLeft,
+              bottom: rect.bottom - editorRect.top + containerScrollTop,
+              right: rect.right - editorRect.left + containerScrollLeft,
             };
           }
         }
 
-        // Fallback for complex selections that Range cannot handle reliably
         const startCoords = view.coordsAtPos(from);
         const endCoords = view.coordsAtPos(to);
         return {
-          top: Math.min(startCoords.top, endCoords.top),
-          left: Math.min(startCoords.left, endCoords.left),
-          bottom: Math.max(startCoords.bottom, endCoords.bottom),
-          right: Math.max(startCoords.right, endCoords.right),
+          top: Math.min(startCoords.top, endCoords.top) - editorRect.top + containerScrollTop,
+          left: Math.min(startCoords.left, endCoords.left) - editorRect.left + containerScrollLeft,
+          bottom:
+            Math.max(startCoords.bottom, endCoords.bottom) - editorRect.top + containerScrollTop,
+          right:
+            Math.max(startCoords.right, endCoords.right) - editorRect.left + containerScrollLeft,
         };
       } else {
-        // Floating menu (insertion point)
         const coords = view.coordsAtPos(from);
         return {
-          top: coords.top,
-          left: coords.left,
-          bottom: coords.bottom,
-          right: coords.right,
+          top: coords.top - editorRect.top + containerScrollTop,
+          left: coords.left - editorRect.left + containerScrollLeft,
+          bottom: coords.bottom - editorRect.top + containerScrollTop,
+          right: coords.right - editorRect.left + containerScrollLeft,
         };
       }
     } catch {

@@ -13,7 +13,7 @@ export function useMenuPositioner({
   editor,
   extensionName,
   type,
-  offset = 12,
+  offset = 2,
 }: UseMenuPositionerProps) {
   const menuState = useEditorState(
     editor,
@@ -52,13 +52,13 @@ export function useMenuPositioner({
         visibility: "hidden" as const,
         opacity: 0,
         pointerEvents: "none" as const,
-        position: "fixed" as const,
+        position: "absolute" as const,
       } as CSSProperties,
     };
   }
 
   const { menu, isLocked } = menuState;
-  const coords = menu.coords!; // We know coords exist because of the check above
+  const coords = menu.coords!;
   const isFirstShow = menu.isFirstShow;
 
   // Calculate final position
@@ -72,23 +72,23 @@ export function useMenuPositioner({
     y = coords.top - offset;
   } else {
     // Floating menu (left of cursor)
-    const floatingPadding = 48;
+    const floatingPadding = 4;
     x = coords.left - floatingPadding;
     y = coords.top;
   }
 
-  // Universal UI Lock Hiding (CSS Level)
+  // Positioning Strategy: Absolute
+  // By using absolute positioning inside a relative parent (the editor container),
+  // the menu moves automatically with the browser's hardware-accelerated scroll.
   const style: CSSProperties = {
-    position: "fixed",
+    position: "absolute",
     top: 0,
     left: 0,
     zIndex: 1000,
     transform: `translate3d(${x}px, ${y}px, 0) ${type === "bubble" ? "translate(-50%, -100%)" : "translate(0, -50%)"}`,
-    // Reactive CSS visibility
     visibility: isLocked ? "hidden" : "visible",
     opacity: isLocked ? 0 : 1,
     pointerEvents: isLocked ? "none" : "auto",
-    // Premium transition feel
     transition:
       isFirstShow || isLocked
         ? "none"

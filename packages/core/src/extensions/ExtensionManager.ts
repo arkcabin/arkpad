@@ -39,7 +39,11 @@ export class ExtensionManager {
    */
   public initMenuEngine(editor: ArkpadEditorAPI) {
     this.menuEngine = new MenuEngine(editor);
-    this.storage.menuEngine = { menus: {}, locks: [], isLocked: false } as GlobalMenuStorage;
+    this.storage.menuEngine = {
+      menus: {},
+      locks: [],
+      isLocked: false,
+    } as GlobalMenuStorage;
 
     this.extensions.forEach((ext) => {
       if (ext.addMenu) {
@@ -50,14 +54,12 @@ export class ExtensionManager {
       }
     });
 
-    // The menu engine is updated synchronously in editor.ts for zero-latency.
-    // We only need the plugin to handle updates that might not trigger a transaction (e.g. window resize).
+    // High-Performance Event Tracking
     this.proseMirrorPlugins.push(
       new Plugin({
         view: () => ({
           update: (view, prevState) => {
             // Only trigger if selection changed WITHOUT a doc change (handled by editor.ts)
-            // or if we need a periodic refresh.
             if (!prevState.selection.eq(view.state.selection)) {
               this.menuEngine?.update(view, prevState);
             }
@@ -65,6 +67,13 @@ export class ExtensionManager {
         }),
       })
     );
+  }
+
+  /**
+   * Cleans up listeners and resources.
+   */
+  public destroy() {
+    // Logic for future resource cleanup
   }
 
   /**

@@ -914,16 +914,10 @@ export class ArkpadEditor implements ArkpadEditorAPI {
    * Destroys the editor instance.
    */
   destroy() {
-    if (this.destroyed) return;
-
-    this.destroyed = true;
-    this.listeners.clear();
-
-    // Call onDestroy lifecycle for all indexed extensions
-    for (const ext of this.destroyHooks) {
-      ext.onDestroy!();
-    }
-
+    this.extensionManager.extensions.forEach((ext) => {
+      ext.onDestroy?.();
+    });
+    this.extensionManager.destroy();
     this.view.destroy();
     this.onDestroy?.(this);
   }
