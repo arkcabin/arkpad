@@ -14,7 +14,7 @@ import {
   toggleList,
   setTextAlign,
   insertNode,
-  updateAttributes
+  updateAttributes,
 } from "../commands";
 import { type MarkType, type NodeType } from "prosemirror-model";
 
@@ -25,24 +25,29 @@ export const BaseCommands = Extension.create({
   name: "baseCommands",
 
   addCommands: () => ({
-    toggleMark: (type: string | MarkType, attrs?: Record<string, any>) => (props: ArkpadCommandProps) => {
-      return toggleMark(type, attrs)(props);
-    },
-    toggleBlock: (type: string | NodeType, attrs?: Record<string, any>) => (props: ArkpadCommandProps) => {
-      return toggleBlock(type, attrs)(props);
-    },
-    toggleList: (listType: string | NodeType, itemType: string | NodeType) => (props: ArkpadCommandProps) => {
-      return toggleList(listType, itemType)(props);
-    },
+    toggleMark:
+      (type: string | MarkType, attrs?: Record<string, any>) => (props: ArkpadCommandProps) => {
+        return toggleMark(type, attrs)(props);
+      },
+    toggleBlock:
+      (type: string | NodeType, attrs?: Record<string, any>) => (props: ArkpadCommandProps) => {
+        return toggleBlock(type, attrs)(props);
+      },
+    toggleList:
+      (listType: string | NodeType, itemType: string | NodeType) => (props: ArkpadCommandProps) => {
+        return toggleList(listType, itemType)(props);
+      },
     setTextAlign: (align: string) => (props: ArkpadCommandProps) => {
       return setTextAlign(align)(props);
     },
-    insertNode: (type: string | NodeType, attrs?: Record<string, any>) => (props: ArkpadCommandProps) => {
-      return insertNode(type, attrs)(props);
-    },
-    updateAttributes: (typeOrName: string, attributes: Record<string, any>) => (props: ArkpadCommandProps) => {
-      return updateAttributes(typeOrName, attributes)(props);
-    },
+    insertNode:
+      (type: string | NodeType, attrs?: Record<string, any>) => (props: ArkpadCommandProps) => {
+        return insertNode(type, attrs)(props);
+      },
+    updateAttributes:
+      (typeOrName: string, attributes: Record<string, any>) => (props: ArkpadCommandProps) => {
+        return updateAttributes(typeOrName, attributes)(props);
+      },
     first: (commands: any[]) => (props: ArkpadCommandProps) => {
       for (const command of commands) {
         // If it's a function, call it with props.
@@ -51,7 +56,7 @@ export const BaseCommands = Extension.create({
         if (typeof result === "function") {
           result = result(props);
         }
-        
+
         if (result === true) return true;
       }
       return false;

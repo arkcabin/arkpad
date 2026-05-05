@@ -11,19 +11,26 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
-      "react": path.resolve(__dirname, "../../node_modules/react"),
+      react: path.resolve(__dirname, "../../node_modules/react"),
       "react-dom": path.resolve(__dirname, "../../node_modules/react-dom"),
-      "@arkpad/react": path.resolve(__dirname, "../../packages/react/src")
-    }
+      "@arkpad/react": path.resolve(__dirname, "../../packages/react/src"),
+    },
   },
   optimizeDeps: {
-    exclude: ["@arkpad/core", "@arkpad/react", "@arkpad/starter-kit", "@arkpad/extension-ai"]
+    exclude: [
+      "@arkpad/core",
+      "@arkpad/react",
+      "@arkpad/starter-kit",
+      "@arkpad/extension-ai",
+      "@arkpad/extension-highlight",
+    ],
   },
   build: {
     rollupOptions: {
       output: {
         manualChunks: {
           "editor-core": ["@arkpad/core", "@arkpad/react"],
+          "editor-extensions": ["@arkpad/extension-highlight"],
           prosemirror: [
             "prosemirror-model",
             "prosemirror-state",

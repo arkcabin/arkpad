@@ -21,6 +21,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
         { name: "Underline", path: "/extensions/underline" },
         { name: "Strike", path: "/extensions/strike" },
         { name: "Code", path: "/extensions/code" },
+        { name: "Highlight", path: "/extensions/highlight" },
         { name: "Superscript", path: "/extensions/superscript" },
         { name: "Subscript", path: "/extensions/subscript" },
       ],
@@ -37,9 +38,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
     },
     {
       title: "UTILITIES",
-      items: [
-        { name: "Placeholder", path: "#" },
-      ],
+      items: [{ name: "Placeholder", path: "#" }],
     },
   ];
 

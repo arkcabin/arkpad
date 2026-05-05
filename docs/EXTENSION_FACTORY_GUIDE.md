@@ -167,3 +167,54 @@ export const AutoSave = Extension.create({
   },
 });
 ```
+
+### 6. 🚀 V1 Lifecycle Hooks & Interceptors (Competitive Edge)
+
+Arkpad V1 introduces "Plugin-less" logic. You no longer need to write raw ProseMirror plugins for most tasks.
+
+#### A. `onTransaction`
+Instead of using `appendTransaction` in a plugin, use the `onTransaction` hook directly. It's safer and cleaner.
+
+```typescript
+onTransaction({ transaction, editor }) {
+  if (transaction.docChanged) {
+    // Automatically repair document or trigger sync
+    console.log('Document state changed!');
+  }
+},
+```
+
+#### B. `onInterceptor`
+This is the **Transaction Router**. It allows you to "capture" a transaction before it is applied to the state. You can modify it or even cancel it.
+
+```typescript
+onInterceptor({ transaction, editor }) {
+  // Example: Prevent all changes if the editor is in "Locked" mode
+  if (editor.storage.lock.isLocked) {
+    return false; // Transaction cancelled!
+  }
+  return transaction; // Continue as normal
+},
+```
+
+#### C. `Telemetry-Aware Commands`
+When building commands for V1, always return `true` or `false` accurately. This allows the Arkpad **Command Manager** to log telemetry for debugging.
+
+```typescript
+addCommands() {
+  return {
+    safeInsert: (content: string) => ({ editor, dispatch }) => {
+      if (content.length > 100) return false; // Log: "Command failed - content too long"
+      if (dispatch) {
+        editor.state.tr.insertText(content);
+      }
+      return true;
+    }
+  }
+}
+```
+
+---
+
+## 🏁 Conclusion
+The Extension Factory is designed to be **Developer First**. By using these high-level hooks instead of raw ProseMirror code, you ensure your extensions are compatible with Arkpad's future features like **Snapshotting** and **AI Ghost-Text**.

@@ -22,6 +22,9 @@ const SubscriptDemo = lazy(() =>
   import("./demos/SubscriptDemo").then((m) => ({ default: m.SubscriptDemo }))
 );
 const TableDemo = lazy(() => import("./demos/TableDemo").then((m) => ({ default: m.TableDemo })));
+const HighlightDemo = lazy(() =>
+  import("./demos/HighlightDemo").then((m) => ({ default: m.HighlightDemo }))
+);
 
 /**
  * A simple, clean loader component.
@@ -112,6 +115,14 @@ export function Router() {
                 element={
                   <div className="flex-1 overflow-hidden">
                     <TableDemo />
+                  </div>
+                }
+              />
+              <Route
+                path="/extensions/highlight"
+                element={
+                  <div className="flex-1 overflow-hidden">
+                    <HighlightDemo />
                   </div>
                 }
               />
