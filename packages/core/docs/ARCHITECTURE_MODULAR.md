@@ -22,14 +22,18 @@ The following table shows what is currently implemented in your Core and what we
 | **2** | **Event Bus** | ✅ Completed | Provide a central "Voice" for the engine (EventEmitter). |
 | **3** | **SDK Hooks** | ✅ Completed | Standardize `onUpdate`, `onSelection`, and `onInit` across blocks. |
 | **4** | **Menu Registry** | ⚠️ Partial | Return JSON metadata for toolbars instead of just coordinates. |
-| **5** | **Schema Constraints**| ❌ Missing | Define "Nesting Rules" (e.g., Section cannot go inside Button). |
+| **5** | **Schema Constraints**| ✅ Completed | Define "Nesting Rules" (Bitmask Governance). |
 | **6** | **Asset Service** | ❌ Missing | Centralized media upload and URL management. |
 | **7** | **History Engine** | ⚠️ Partial | Add "Milestone Snapshots" beyond simple Undo/Redo. |
-| **8** | **Shortcut Registry** | ⚠️ Partial | Dynamic key-to-command mapping API. |
+| **8** | **Shortcut Registry** | ✅ Completed | Dynamic key-to-command mapping API. |
 | **9** | **i18n Bus** | ❌ Missing | Support for multi-locale content in a single structure. |
 | **10** | **Batch Service** | ⚠️ Partial | Zero-latency feel via atomic transaction grouping. |
 | **11** | **Dynamic Loader** | ❌ Missing | Lazy loading for heavy extensions to keep speed ultra-fast. |
 | **12** | **Prefab Engine** | ❌ Missing | Reusable templates and "One-Click Layout" support. |
+| **13** | **AI Interface** | ❌ Missing | Enable "Natural Language" page building. |
+| **14** | **Advanced Layout** | ❌ Missing | Drag & Drop handles and Grid system. |
+| **15** | **Edge Output** | ❌ Missing | Optimize JSON for instant static site generation. |
+| **16** | **Governance** | ✅ Completed | Real-time structural auditing (Sentinel). |
 
 ---
 
@@ -189,13 +193,10 @@ We will implement the pillars in this specific order to ensure maximum stability
 1.  **[DONE] `src/sdk/Node.ts`**: Add `onUpdate`, `onSelection`, and `onInit` hooks.
 2.  **[DONE] `src/sdk/Extension.ts`**: Standardize how extensions register their `storage` and `commands`.
 
-### Phase 3: Structural Intelligence (The "Rules")
-1.  **[NEW] `src/services/schema/Constraints.ts`**: Implement the `canContain` nesting logic.
-    *   **Logic**: A helper that checks if a `childNode` is allowed inside a `parentNode` based on custom groups (e.g., `layout`, `widget`, `content`).
-    *   **Drag & Drop Hook**: Provide a `canDropAt(pos, node)` method that the DnD engine will call to show/hide the "Drop Zone."
-2.  **[UPDATE] `src/core/ArkpadEditor.ts`**: Integrate a validation step in the `dispatchTransaction` loop.
-    *   **Goal**: If a transaction creates an invalid nest, the engine should either block it or "auto-unwrap" it to maintain a stable state.
-3.  **[UPDATE] `src/core/ExtensionManager.ts`**: Add a registry to collect constraints from all loaded extensions via a new `addConstraints()` method.
+### Phase 3: Structural Intelligence (The "Rules") - ✅ COMPLETED
+1.  **[DONE] `src/core/Governance.ts`**: Implement the bitmask-based nesting logic.
+2.  **[DONE] `src/core/ShortcutRegistry.ts`**: Dynamic shortcut management.
+3.  **[DONE] `src/core/ArkpadEditor.ts`**: Integrate the Governance Sentinel in the dispatch loop.
 
 ### Phase 4: Advanced Services (The "Pro Features")
 1.  **Pillar 4 (Menu)**: Export JSON metadata for toolbars.

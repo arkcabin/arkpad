@@ -56,13 +56,19 @@ export class SchemaBuilder {
           isolating: config.isolating,
           attrs: this.collectAttributes(ext),
           trailingNode: config.trailingNode,
+          // Governance Metadata (Passed to PM NodeSpec)
+          isLayout: config.isLayout,
+          isWidget: config.isWidget,
+          role: config.role,
+          allowedRoles: config.allowedRoles,
         };
 
         if ((ext as any).config.renderHTML) {
-          spec.toDOM = (node: any) => (ext as any).renderHTML({
-            node,
-            HTMLAttributes: this.getHTMLAttributes(node.attrs, ext),
-          });
+          spec.toDOM = (node: any) =>
+            (ext as any).renderHTML({
+              node,
+              HTMLAttributes: this.getHTMLAttributes(node.attrs, ext),
+            });
         }
 
         if ((ext as any).config.parseHTML) {
@@ -71,14 +77,14 @@ export class SchemaBuilder {
             getAttrs: (dom: HTMLElement) => {
               const attrs = p.getAttrs ? p.getAttrs(dom) : {};
               const parsedAttrs: Record<string, any> = { ...attrs };
-              
+
               const localAttrs = ext.addAttributes?.() || {};
               Object.entries(localAttrs).forEach(([key, config]) => {
                 if (config.parseHTML) {
                   parsedAttrs[key] = config.parseHTML(dom);
                 }
               });
-              
+
               return parsedAttrs;
             },
             priority: p.priority,
@@ -99,10 +105,11 @@ export class SchemaBuilder {
         };
 
         if ((ext as any).config.renderHTML) {
-          spec.toDOM = (mark: any) => (ext as any).renderHTML({
-            node: mark,
-            HTMLAttributes: this.getHTMLAttributes(mark.attrs, ext),
-          });
+          spec.toDOM = (mark: any) =>
+            (ext as any).renderHTML({
+              node: mark,
+              HTMLAttributes: this.getHTMLAttributes(mark.attrs, ext),
+            });
         }
 
         if ((ext as any).config.parseHTML) {
@@ -111,14 +118,14 @@ export class SchemaBuilder {
             getAttrs: (dom: HTMLElement) => {
               const attrs = p.getAttrs ? p.getAttrs(dom) : {};
               const parsedAttrs: Record<string, any> = { ...attrs };
-              
+
               const localAttrs = ext.addAttributes?.() || {};
               Object.entries(localAttrs).forEach(([key, config]) => {
                 if (config.parseHTML) {
                   parsedAttrs[key] = config.parseHTML(dom);
                 }
               });
-              
+
               return parsedAttrs;
             },
             priority: p.priority,
@@ -133,7 +140,9 @@ export class SchemaBuilder {
         const extNodes = ext.addNodes();
         Object.entries(extNodes).forEach(([name, spec]) => {
           if (marks.get(name)) {
-            throw new Error(`Collision: "${name}" is already defined as a mark. Cannot add as node.`);
+            throw new Error(
+              `Collision: "${name}" is already defined as a mark. Cannot add as node.`
+            );
           }
           nodes = nodes.get(name) ? nodes.update(name, spec) : nodes.addToEnd(name, spec);
         });
@@ -143,7 +152,9 @@ export class SchemaBuilder {
         const extMarks = ext.addMarks();
         Object.entries(extMarks).forEach(([name, spec]) => {
           if (nodes.get(name)) {
-            throw new Error(`Collision: "${name}" is already defined as a node. Cannot add as mark.`);
+            throw new Error(
+              `Collision: "${name}" is already defined as a node. Cannot add as mark.`
+            );
           }
           marks = marks.get(name) ? marks.update(name, spec) : marks.addToEnd(name, spec);
         });
@@ -187,7 +198,7 @@ export class SchemaBuilder {
     // Cache management
     if (SchemaBuilder.schemaCache.size > 50) SchemaBuilder.schemaCache.clear();
     SchemaBuilder.schemaCache.set(cacheKey, schema);
-    
+
     return schema;
   }
 
@@ -203,7 +214,7 @@ export class SchemaBuilder {
 
   private enhanceSchemaElements(elements: any, globals: any[], type: "node" | "mark") {
     let enhancedElements = elements;
-    
+
     // 1. Group global attributes by the types they apply to
     const attributesByTypeName: Record<string, any[]> = {};
     globals.forEach((global) => {
@@ -220,29 +231,38 @@ export class SchemaBuilder {
       if (!spec) return;
 
       const renderMethod = "toDOM";
-      
+
       enhancedElements = enhancedElements.update(typeName, {
         ...spec,
         attrs: {
           ...spec.attrs,
-          ...Object.assign({}, ...allAttrs.map(attrs => 
-            Object.fromEntries(Object.entries(attrs).map(([key, attr]: [string, any]) => [
-              key, { ...(spec.attrs?.[key] || {}), ...attr }
-            ]))
-          ))
+          ...Object.assign(
+            {},
+            ...allAttrs.map((attrs) =>
+              Object.fromEntries(
+                Object.entries(attrs).map(([key, attr]: [string, any]) => [
+                  key,
+                  { ...(spec.attrs?.[key] || {}), ...attr },
+                ])
+              )
+            )
+          ),
         },
         [renderMethod]: (element: any) => {
-          const originalDOM = spec[renderMethod] ? spec[renderMethod](element) : [type === "node" ? "div" : "span", 0];
+          const originalDOM = spec[renderMethod]
+            ? spec[renderMethod](element)
+            : [type === "node" ? "div" : "span", 0];
           if (!Array.isArray(originalDOM)) return originalDOM;
 
           const [tag, maybeAttrs, ...rest] = originalDOM;
-          const hasAttrs = maybeAttrs && typeof maybeAttrs === "object" && !Array.isArray(maybeAttrs);
+          const hasAttrs =
+            maybeAttrs && typeof maybeAttrs === "object" && !Array.isArray(maybeAttrs);
           const originalAttrs = hasAttrs ? { ...maybeAttrs } : {};
           const content = hasAttrs ? rest : [maybeAttrs, ...rest];
 
           const newAttrs: Record<string, any> = { ...originalAttrs };
 
-          allAttrs.forEach(attrs => {
+          allAttrs.forEach((attrs) => {
             Object.entries(attrs).forEach(([key, attr]: [string, any]) => {
               if (attr.renderHTML) {
                 const rendered = attr.renderHTML(element.attrs);
@@ -264,7 +284,7 @@ export class SchemaBuilder {
           });
 
           return [tag, newAttrs, ...content];
-        }
+        },
       });
     });
 
@@ -285,7 +305,10 @@ export class SchemaBuilder {
             const nested = ext.addExtensions();
             if (Array.isArray(nested)) traverse(nested);
           } catch (e) {
-            console.error(`[Arkpad] Failed to load nested extensions for ${ext.name || "anonymous"}:`, e);
+            console.error(
+              `[Arkpad] Failed to load nested extensions for ${ext.name || "anonymous"}:`,
+              e
+            );
           }
         }
         flattened.push(ext);
@@ -299,14 +322,14 @@ export class SchemaBuilder {
   private collectAttributes(extension: ArkpadExtension): Record<string, any> {
     const attributes = extension.addAttributes ? extension.addAttributes() : {};
     return Object.fromEntries(
-      Object.entries(attributes).map(([name, config]) => [
-        name,
-        { default: config.default }
-      ])
+      Object.entries(attributes).map(([name, config]) => [name, { default: config.default }])
     );
   }
 
-  private getHTMLAttributes(attrs: Record<string, any>, extension: ArkpadExtension): Record<string, any> {
+  private getHTMLAttributes(
+    attrs: Record<string, any>,
+    extension: ArkpadExtension
+  ): Record<string, any> {
     const localAttributes = extension.addAttributes ? extension.addAttributes() : {};
     const HTMLAttributes: Record<string, any> = {};
 

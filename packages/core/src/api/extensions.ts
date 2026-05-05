@@ -111,8 +111,11 @@ export interface NodeConfig<Options = any, Storage = any> extends ExtensionConfi
   tableRole?: string;
   trailingNode?: boolean;
   isLayout?: boolean;
+  isWidget?: boolean;
   isContainer?: boolean;
   allowedContent?: string;
+  role?: number;
+  allowedRoles?: number;
 }
 
 export interface MarkConfig<Options = any, Storage = any> extends ExtensionConfig<

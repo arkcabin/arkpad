@@ -48,6 +48,7 @@ export { ExtensionManager } from "./core/ExtensionManager";
 export { EventEmitter } from "./core/EventEmitter";
 export { Storage } from "./core/Storage";
 export { ShortcutRegistry } from "./core/ShortcutRegistry";
+export { Governance, NodeRole } from "./core/Governance";
 
 // Services
 export { MenuEngine } from "./services/menu/MenuEngine";

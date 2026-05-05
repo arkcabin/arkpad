@@ -41,6 +41,20 @@ export class Node<Options = any, Storage = any> extends Extension<Options, Stora
   }
 
   /**
+   * Returns true if this node is a specialized widget.
+   */
+  get isWidget(): boolean {
+    return !!this.config.isWidget;
+  }
+
+  /**
+   * Returns the structural role bitmask for this node.
+   */
+  get role(): number {
+    return this.config.role || 0;
+  }
+
+  /**
    * Returns true if this node can contain other nodes.
    */
   get isContainer(): boolean {

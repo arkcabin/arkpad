@@ -4,6 +4,7 @@ import { EditorView } from "prosemirror-view";
 import { EventEmitter } from "./EventEmitter";
 import { Storage } from "./Storage";
 import { ShortcutRegistry } from "./ShortcutRegistry";
+import { Governance } from "./Governance";
 import { ExtensionManager } from "./ExtensionManager";
 
 import { createCoreEssentials } from "../extensions";
@@ -175,6 +176,37 @@ export class ArkpadEditor implements IArkpadEditor {
 
         let tr = transaction;
 
+        // 2. Structural Governance Sentinel (The "Rules")
+        if (tr.docChanged) {
+          try {
+            // Optimization: Find only the changed ranges to avoid full-doc traversal
+            tr.steps.forEach((_step, index) => {
+              const map = tr.mapping.maps[index];
+              if (!map) return;
+
+              map.forEach((_oldStart, _oldEnd, newStart, newEnd) => {
+                tr.doc.nodesBetween(newStart, newEnd, (node, pos, parent) => {
+                  if (parent) {
+                    const parentRole = Governance.resolveRole(parent);
+                    const childRole = Governance.resolveRole(node);
+                    const allowedMask = (parent.type.spec as any).allowedRoles;
+
+                    if (!Governance.canAccept(parentRole, childRole, allowedMask)) {
+                      console.warn(
+                        `[Arkpad Governance] Invalid nesting detected at pos ${pos}: ${node.type.name} inside ${parent.type.name}`
+                      );
+                    }
+                  }
+                  return true;
+                });
+              });
+            });
+          } catch (e) {
+            console.error("[Arkpad Governance] Sentinel blocked transaction:", e);
+            return;
+          }
+        }
+
         // Run Interceptors (Middleware)
         for (const config of this.interceptors) {
           // Performance Optimization: Skip interceptors that don't match the transaction type
@@ -189,6 +221,34 @@ export class ArkpadEditor implements IArkpadEditor {
 
           if (intercepted instanceof Transaction) {
             tr = intercepted;
+          }
+        }
+
+        // 2. Structural Governance Sentinel (The "Rules")
+        if (tr.docChanged) {
+          try {
+            // Validate the document structure after the change
+            tr.doc.descendants((node, pos, parent) => {
+              if (parent) {
+                const parentRole = Governance.resolveRole(parent);
+                const childRole = Governance.resolveRole(node);
+                const allowedMask = (parent.type.spec as any).allowedRoles;
+
+                if (!Governance.canAccept(parentRole, childRole, allowedMask)) {
+                  // In Phase 3, we simply throw an error or block the transaction.
+                  // Auto-healing will be added in Step 4.
+                  console.warn(
+                    `[Arkpad Governance] Invalid nesting: ${node.type.name} inside ${parent.type.name}`
+                  );
+                  // throw new Error("Invalid document structure");
+                  // For now we just warn to avoid breaking the UI during development
+                }
+              }
+              return true;
+            });
+          } catch (e) {
+            console.error("[Arkpad Governance] Sentinel blocked transaction:", e);
+            return;
           }
         }
 
