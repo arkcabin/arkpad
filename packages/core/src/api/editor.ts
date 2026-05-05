@@ -8,10 +8,17 @@ import type {
   ArkpadContent,
 } from "./services";
 
+import type { EventEmitter } from "../core/EventEmitter";
+import type { Storage } from "../core/Storage";
+import type { ShortcutRegistry } from "../core/ShortcutRegistry";
+
 export interface IArkpadEditor {
   readonly element: HTMLElement;
   readonly commands: ArkpadCommandProxy;
   readonly storage: Record<string, any>;
+  readonly storageService: Storage;
+  readonly shortcuts: ShortcutRegistry;
+  readonly events: EventEmitter;
   readonly extensionManager: any;
 
   getState(): EditorState;

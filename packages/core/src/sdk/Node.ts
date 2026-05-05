@@ -32,4 +32,18 @@ export class Node<Options = any, Storage = any> extends Extension<Options, Stora
   extend<O = Options, S = Storage>(config: Partial<NodeConfig<O, S>>): Node<O, S> {
     return super.extend(config as any) as Node<O, S>;
   }
+
+  /**
+   * Returns true if this node is a layout container.
+   */
+  get isLayout(): boolean {
+    return !!this.config.isLayout;
+  }
+
+  /**
+   * Returns true if this node can contain other nodes.
+   */
+  get isContainer(): boolean {
+    return !!this.config.isContainer || !!this.config.content;
+  }
 }

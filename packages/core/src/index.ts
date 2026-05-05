@@ -2,36 +2,36 @@
 
 // Contracts
 export type { IArkpadEditor } from "./api/editor";
-export type { 
-  ChainedCommands, 
-  ArkpadCommandProxy, 
-  ArkpadCommand, 
+export type {
+  ChainedCommands,
+  ArkpadCommandProxy,
+  ArkpadCommand,
   ArkpadCommandRegistry,
   ArkpadCommandProps,
-  SearchResult, 
-  ArkpadDocJSON, 
-  ArkpadContent, 
-  ICommandRegistry, 
-  ISelectionService, 
-  ISchemaService, 
-  ArkpadEditorOptions, 
+  SearchResult,
+  ArkpadDocJSON,
+  ArkpadContent,
+  ICommandRegistry,
+  ISelectionService,
+  ISchemaService,
+  ArkpadEditorOptions,
   ResolvedArkpadEditorOptions,
-  ArkpadUpdatePayload, 
+  ArkpadUpdatePayload,
   InterceptorConfig,
-  Dispatch
+  Dispatch,
 } from "./api/services";
-export type { 
-  ArkpadExtension, 
-  ExtensionConfig, 
-  NodeConfig, 
-  MarkConfig, 
-  MenuConfig, 
+export type {
+  ArkpadExtension,
+  ExtensionConfig,
+  NodeConfig,
+  MarkConfig,
+  MenuConfig,
   MenuType,
-  AttributeConfig, 
-  Attributes, 
-  ExtensionContext, 
+  AttributeConfig,
+  Attributes,
+  ExtensionContext,
   NodeViewConstructor,
-  NodeView
+  NodeView,
 } from "./api/extensions";
 
 // SDK
@@ -45,6 +45,9 @@ import { ArkpadEditor, createArkpadEditor } from "./core/ArkpadEditor";
 export { ArkpadEditor, createArkpadEditor };
 export { ArkpadEditor as ArkpadEditorAPI };
 export { ExtensionManager } from "./core/ExtensionManager";
+export { EventEmitter } from "./core/EventEmitter";
+export { Storage } from "./core/Storage";
+export { ShortcutRegistry } from "./core/ShortcutRegistry";
 
 // Services
 export { MenuEngine } from "./services/menu/MenuEngine";

@@ -97,9 +97,23 @@ export class Extension<Options = any, Storage = any> implements ArkpadExtension 
     if (this.config.addStorage) {
       const storage = this.config.addStorage.call(this.createContext());
       if (storage && typeof storage === "object" && !Array.isArray(storage)) {
-        // Update existing storage object to preserve references
-        Object.keys(this.storage as any).forEach((key) => delete (this.storage as any)[key]);
-        Object.assign(this.storage as any, storage);
+        // Create Proxy for reactive storage
+        this.storage = new Proxy(storage, {
+          set: (target, key: string, value) => {
+            target[key] = value;
+            if (this.editor) {
+              (this.editor as any).storageService.set(this.name, key, value);
+            }
+            return true;
+          },
+        });
+
+        // Initialize storage service with initial values (silent to avoid boot flood)
+        Object.entries(storage).forEach(([key, value]) => {
+          if (editor) {
+            (editor as any).storageService.set(this.name, key, value, true);
+          }
+        });
       } else {
         this.storage = storage;
       }
@@ -136,6 +150,12 @@ export class Extension<Options = any, Storage = any> implements ArkpadExtension 
       },
       get storage() {
         return self.storage;
+      },
+      get storageService() {
+        return (self.editor as any)?.storageService;
+      },
+      get events() {
+        return (self.editor as any)?.events;
       },
       name: this.name,
       get utils() {
@@ -209,6 +229,10 @@ export class Extension<Options = any, Storage = any> implements ArkpadExtension 
 
   onTransaction(props: { editor: IArkpadEditor; transaction: Transaction }) {
     this.config.onTransaction?.call(this.createContext(), props);
+  }
+
+  onSelection(props: { editor: IArkpadEditor; transaction: Transaction; node: any; pos: number }) {
+    this.config.onSelection?.call(this.createContext(), props);
   }
 
   addInterceptors(): InterceptorConfig[] {

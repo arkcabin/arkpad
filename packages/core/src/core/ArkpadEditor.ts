@@ -1,6 +1,9 @@
 import { DOMSerializer } from "prosemirror-model";
 import { EditorState, TextSelection, Transaction, Plugin } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
+import { EventEmitter } from "./EventEmitter";
+import { Storage } from "./Storage";
+import { ShortcutRegistry } from "./ShortcutRegistry";
 import { ExtensionManager } from "./ExtensionManager";
 
 import { createCoreEssentials } from "../extensions";
@@ -30,6 +33,9 @@ export class ArkpadEditor implements IArkpadEditor {
   public commands: ArkpadCommandProxy;
   public extensionManager: ExtensionManager;
   public readonly storage: Record<string, any>;
+  public readonly storageService: Storage;
+  public readonly shortcuts: ShortcutRegistry;
+  public readonly events: EventEmitter;
 
   private readonly onCreate?: ArkpadEditorOptions["onCreate"];
   private readonly onUpdate?: ArkpadEditorOptions["onUpdate"];
@@ -51,6 +57,7 @@ export class ArkpadEditor implements IArkpadEditor {
 
   // Performance: Pre-indexed hooks to avoid iterating all extensions on every transaction
   private transactionHooks: ArkpadExtension[] = [];
+  private selectionHooks: ArkpadExtension[] = [];
   private updateHooks: ArkpadExtension[] = [];
   private destroyHooks: ArkpadExtension[] = [];
 
@@ -90,6 +97,11 @@ export class ArkpadEditor implements IArkpadEditor {
     this.onDestroy = resolved.onDestroy;
     this.nodeViews = resolved.nodeViews;
 
+    // 0. Initialize Core Services
+    this.events = new EventEmitter();
+    this.storageService = new Storage(this.events);
+    this.shortcuts = new ShortcutRegistry(this);
+
     // 1. Collect Extensions and Build Dynamic Schema
     const extensions = [...createCoreEssentials(), ...(resolved.extensions || [])];
 
@@ -120,6 +132,9 @@ export class ArkpadEditor implements IArkpadEditor {
       }
       if (ext.onTransaction) {
         this.transactionHooks.push(ext);
+      }
+      if (ext.onSelection) {
+        this.selectionHooks.push(ext);
       }
       if (ext.onUpdate) {
         this.updateHooks.push(ext);
@@ -185,13 +200,41 @@ export class ArkpadEditor implements IArkpadEditor {
           ext.onTransaction!({ editor: this, transaction: tr });
         }
 
+        // Emit central transaction event
+        this.events.emit("transaction", { editor: this, transaction: tr });
+
         // Trigger onSelectionUpdate if selection changed
-        if (tr.selectionSet && this.onSelectionUpdate) {
-          this.onSelectionUpdate({
+        if (tr.selectionSet) {
+          const { from } = tr.selection;
+          // Resolve meaningful node: Leaf node (like image) or Parent (like paragraph)
+          const selection = tr.selection as any;
+          const node = selection.node || tr.selection.$from.parent;
+
+          this.events.emit("selection", {
             editor: this,
             transaction: tr,
-            coords: this.getCoords(tr.selection.from),
+            node,
+            pos: from,
+            coords: this.getCoords(from),
           });
+
+          // Trigger onSelection SDK hook
+          for (const ext of this.selectionHooks) {
+            ext.onSelection!({
+              editor: this,
+              transaction: tr,
+              node,
+              pos: from,
+            });
+          }
+
+          if (this.onSelectionUpdate) {
+            this.onSelectionUpdate({
+              editor: this,
+              transaction: tr,
+              coords: this.getCoords(from),
+            });
+          }
         }
 
         const nextState = this.view.state.apply(tr);
@@ -309,9 +352,11 @@ export class ArkpadEditor implements IArkpadEditor {
 
     // Performance: Re-index hooks on refresh
     this.transactionHooks = [];
+    this.selectionHooks = [];
     this.updateHooks = [];
     this.extensionManager.extensions.forEach((ext) => {
       if (ext.onTransaction) this.transactionHooks.push(ext);
+      if (ext.onSelection) this.selectionHooks.push(ext);
       if (ext.onUpdate) this.updateHooks.push(ext);
     });
 
@@ -728,6 +773,7 @@ export class ArkpadEditor implements IArkpadEditor {
     if (this.view.hasFocus() && pos === undefined) return;
 
     this.view.focus();
+    this.events.emit("focus", { editor: this });
 
     if (pos === "start") {
       this.setSelection(0);
@@ -743,6 +789,7 @@ export class ArkpadEditor implements IArkpadEditor {
    */
   blur() {
     this.view.dom.blur();
+    this.events.emit("blur", { editor: this });
   }
 
   /**

@@ -17,6 +17,8 @@ export interface ExtensionContext<Options = any, Storage = any> {
   editor: any;
   options: Options;
   storage: Storage;
+  storageService: any;
+  events: any;
   name: string;
   utils: Record<string, any>;
   parent?: (methodName: string, ...args: any[]) => any;
@@ -79,6 +81,10 @@ export interface ExtensionConfig<Options = any, Storage = any> {
   ) => boolean | void;
   onFocus?: (this: ExtensionContext<Options, Storage>) => boolean | void;
   onBlur?: (this: ExtensionContext<Options, Storage>) => boolean | void;
+  onSelection?: (
+    this: ExtensionContext<Options, Storage>,
+    props: { editor: any; transaction: Transaction; node: PMNode | null; pos: number }
+  ) => void;
   onInit?: (this: ExtensionContext<Options, Storage>) => void;
   addMenu?: (this: ExtensionContext<Options, Storage>) => any;
   onDestroy?: (this: ExtensionContext<Options, Storage>) => void;
@@ -104,6 +110,9 @@ export interface NodeConfig<Options = any, Storage = any> extends ExtensionConfi
   allowGapCursor?: boolean;
   tableRole?: string;
   trailingNode?: boolean;
+  isLayout?: boolean;
+  isContainer?: boolean;
+  allowedContent?: string;
 }
 
 export interface MarkConfig<Options = any, Storage = any> extends ExtensionConfig<
@@ -160,6 +169,12 @@ export interface ArkpadExtension {
   onPaste?: (event: ClipboardEvent, slice: any) => boolean | void;
   onFocus?: () => boolean | void;
   onBlur?: () => boolean | void;
+  onSelection?: (props: {
+    editor: any;
+    transaction: Transaction;
+    node: PMNode | null;
+    pos: number;
+  }) => void;
   onInit?: () => void;
   addMenu?: () => MenuConfig | MenuConfig[];
   onDestroy?: () => void;
@@ -185,4 +200,4 @@ export type NodeViewConstructor =
     ) => NodeView);
 
 export type { NodeView };
-export type MenuType = 'bubble' | 'floating';
+export type MenuType = "bubble" | "floating";

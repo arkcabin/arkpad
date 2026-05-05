@@ -18,9 +18,9 @@ The following table shows what is currently implemented in your Core and what we
 
 | Pillar | Capability | Status | Goal |
 | :--- | :--- | :--- | :--- |
-| **1** | **Reactive Storage** | ❌ Missing | Enable real-time syncing between blocks and UI sidebars. |
-| **2** | **Event Bus** | ❌ Missing | Provide a central "Voice" for the engine (EventEmitter). |
-| **3** | **SDK Hooks** | ⚠️ Partial | Standardize `onUpdate`, `onSelection`, and `onInit` across blocks. |
+| **1** | **Reactive Storage** | ✅ Completed | Enable real-time syncing between blocks and UI sidebars. |
+| **2** | **Event Bus** | ✅ Completed | Provide a central "Voice" for the engine (EventEmitter). |
+| **3** | **SDK Hooks** | ✅ Completed | Standardize `onUpdate`, `onSelection`, and `onInit` across blocks. |
 | **4** | **Menu Registry** | ⚠️ Partial | Return JSON metadata for toolbars instead of just coordinates. |
 | **5** | **Schema Constraints**| ❌ Missing | Define "Nesting Rules" (e.g., Section cannot go inside Button). |
 | **6** | **Asset Service** | ❌ Missing | Centralized media upload and URL management. |
@@ -180,18 +180,22 @@ To reach the absolute "Best of the Best" status, we will follow these advanced e
 
 We will implement the pillars in this specific order to ensure maximum stability:
 
-### Phase 1: Core Infrastructure (The "Nervous System")
-1.  **[NEW] `src/core/EventEmitter.ts`**: The central communication hub.
-2.  **[NEW] `src/core/Storage.ts`**: Reactive state management for extensions.
-3.  **[UPDATE] `src/core/ArkpadEditor.ts`**: Initialize these services and emit standard lifecycle events.
+### Phase 1: Core Infrastructure (The "Nervous System") - ✅ COMPLETED
+1.  **[DONE] `src/core/EventEmitter.ts`**: The central communication hub.
+2.  **[DONE] `src/core/Storage.ts`**: Reactive state management for extensions.
+3.  **[DONE] `src/core/ArkpadEditor.ts`**: Initialize these services and emit standard lifecycle events.
 
-### Phase 2: SDK Standardization (The "Body")
-1.  **[UPDATE] `src/sdk/Node.ts`**: Add `onUpdate`, `onSelection`, and `onInit` hooks.
-2.  **[UPDATE] `src/sdk/Extension.ts`**: Standardize how extensions register their `storage` and `commands`.
+### Phase 2: SDK Standardization (The "Body") - ✅ COMPLETED
+1.  **[DONE] `src/sdk/Node.ts`**: Add `onUpdate`, `onSelection`, and `onInit` hooks.
+2.  **[DONE] `src/sdk/Extension.ts`**: Standardize how extensions register their `storage` and `commands`.
 
 ### Phase 3: Structural Intelligence (The "Rules")
 1.  **[NEW] `src/services/schema/Constraints.ts`**: Implement the `canContain` nesting logic.
-2.  **[UPDATE] `src/services/commands/CommandManager.ts`**: Integrate validation so commands fail if they break nesting rules.
+    *   **Logic**: A helper that checks if a `childNode` is allowed inside a `parentNode` based on custom groups (e.g., `layout`, `widget`, `content`).
+    *   **Drag & Drop Hook**: Provide a `canDropAt(pos, node)` method that the DnD engine will call to show/hide the "Drop Zone."
+2.  **[UPDATE] `src/core/ArkpadEditor.ts`**: Integrate a validation step in the `dispatchTransaction` loop.
+    *   **Goal**: If a transaction creates an invalid nest, the engine should either block it or "auto-unwrap" it to maintain a stable state.
+3.  **[UPDATE] `src/core/ExtensionManager.ts`**: Add a registry to collect constraints from all loaded extensions via a new `addConstraints()` method.
 
 ### Phase 4: Advanced Services (The "Pro Features")
 1.  **Pillar 4 (Menu)**: Export JSON metadata for toolbars.
@@ -234,3 +238,18 @@ graph TD
     Core -->|Handle Media| Assets[Asset Service]
     Core -->|Manage Keys| Shortcuts[Shortcut Registry]
 ```
+## 13. Core Engine Dependencies (ProseMirror Stack)
+
+To build the "Best of the Best" modular engine, we rely on these specific packages:
+
+| Feature | Package | Role |
+| :--- | :--- | :--- |
+| **Logic & State** | `prosemirror-state` | Handles the `Transaction` loop and the "Immortality" of the data. |
+| **Schema & Rules** | `prosemirror-model` | The foundation for Pillar 5 (Constraints) and `content` expressions. |
+| **Rendering** | `prosemirror-view` | Handles the Canvas, NodeViews, and Drag/Drop events. |
+| **Visual DnD** | `prosemirror-dropcursor`| Shows the high-fidelity insertion line during block dragging. |
+| **Selection** | `prosemirror-gapcursor` | Essential for clicking between blocks (Pillar 14). |
+| **Commands** | `prosemirror-commands`| Basic building blocks for the `CommandManager`. |
+
+> [!TIP]
+> **Performance Rule**: We avoid "High-Level" wrappers. By working directly with these "Low-Level" packages, we keep the engine **Ultra-Fast** and **Lean**.

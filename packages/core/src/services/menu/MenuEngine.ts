@@ -10,6 +10,12 @@ export interface MenuState {
   side: "top" | "bottom";
   extensionName: string;
   isFirstShow: boolean;
+  metadata?: {
+    activeNode: string | null;
+    attributes: Record<string, any>;
+    availableCommands: string[];
+    path: string[];
+  };
 }
 
 export interface GlobalMenuStorage {
@@ -115,6 +121,7 @@ export class MenuEngine {
             side: "top",
             extensionName,
             isFirstShow,
+            metadata: this.generateMetadata(state),
           };
         } else {
           newMenus[menuKey] = {
@@ -132,6 +139,43 @@ export class MenuEngine {
     // Atomic update to storage
     storage.menus = newMenus;
     this.prevMenuKeys = currentMenuKeys;
+  }
+
+  /**
+   * Generates JSON metadata for the current selection.
+   * This is the "Headless" heart of the Page Builder UI.
+   */
+  private generateMetadata(state: EditorState) {
+    const { $from } = state.selection;
+
+    // 1. Resolve Active Node (Smart fallback for Leaf nodes)
+    const selection = state.selection as any;
+    const node = selection.node || $from.parent;
+    const activeNode = node.type.name;
+    const attributes = node.attrs;
+
+    // 2. Resolve Selection Path (Breadcrumbs)
+    const path: string[] = [];
+    for (let i = 0; i <= $from.depth; i++) {
+      path.push($from.node(i).type.name);
+    }
+
+    // 3. Fast Command Indexing
+    const availableCommands: string[] = [];
+    const commandNames = Object.keys(this.editor.extensionManager.commands);
+
+    for (const name of commandNames) {
+      if (this.editor.canRunCommand(name)) {
+        availableCommands.push(name);
+      }
+    }
+
+    return {
+      activeNode,
+      attributes,
+      availableCommands,
+      path,
+    };
   }
 
   /**
