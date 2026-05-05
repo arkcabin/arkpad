@@ -61,6 +61,14 @@ export const BaseCommands = Extension.create({
       }
       return false;
     },
+    lockUI: (name: string) => (props: ArkpadCommandProps) => {
+      props.editor.extensionManager.menuEngine?.lock(name);
+      return true;
+    },
+    unlockUI: (name: string) => (props: ArkpadCommandProps) => {
+      props.editor.extensionManager.menuEngine?.unlock(name);
+      return true;
+    },
   }),
 });
 

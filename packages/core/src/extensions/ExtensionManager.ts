@@ -39,7 +39,7 @@ export class ExtensionManager {
    */
   public initMenuEngine(editor: ArkpadEditorAPI) {
     this.menuEngine = new MenuEngine(editor);
-    this.storage.menuEngine = { menus: {} } as GlobalMenuStorage;
+    this.storage.menuEngine = { menus: {}, locks: [], isLocked: false } as GlobalMenuStorage;
 
     this.extensions.forEach((ext) => {
       if (ext.addMenu) {
@@ -184,23 +184,23 @@ export class ExtensionManager {
           const prevCommand = commands[key]!;
           commands[key] =
             (...args: any[]) =>
-              (props: {
-                state: EditorState;
-                dispatch?: (tr: Transaction) => void;
-                view?: EditorView;
-              }) => {
-                const run = (cmd: ArkpadCommand) => {
-                  if (typeof cmd !== "function") return false;
-                  const result = (cmd as any)(...args);
-                  if (typeof result === "function") {
-                    return result(props);
-                  }
-                  return result;
-                };
-
-                // Specialized (newest) command runs first
-                return run(newCommand) || run(prevCommand);
+            (props: {
+              state: EditorState;
+              dispatch?: (tr: Transaction) => void;
+              view?: EditorView;
+            }) => {
+              const run = (cmd: ArkpadCommand) => {
+                if (typeof cmd !== "function") return false;
+                const result = (cmd as any)(...args);
+                if (typeof result === "function") {
+                  return result(props);
+                }
+                return result;
               };
+
+              // Specialized (newest) command runs first
+              return run(newCommand) || run(prevCommand);
+            };
         } else {
           commands[key] = newCommand;
         }

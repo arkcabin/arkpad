@@ -93,12 +93,45 @@ export const Table = Extension.create<TableOptions>({
   },
 
   addProseMirrorPlugins() {
-    const plugins = [tableEditing()];
+    const plugins: Plugin[] = [];
+
+    if (this.options.resizable) {
+      plugins.push(
+        columnResizing({
+          handleWidth: this.options.handleWidth,
+          cellMinWidth: this.options.cellMinWidth,
+          lastColumnResizable: this.options.lastColumnResizable,
+        })
+      );
+    }
+
+    plugins.push(tableEditing());
 
     // Add Paste Handler for HTML Tables and Excel/TSV Data
     plugins.push(
       new Plugin({
         props: {
+          handleDOMEvents: {
+            mousedown: (view, event) => {
+              const target = event.target as HTMLElement;
+              const isResizeHandle = target.classList.contains("column-resize-handle");
+
+              if (isResizeHandle) {
+                this.editor.runCommand("lockUI", "table-resizing");
+
+                // Add one-time window listener to reset resizing state
+                const onMouseUp = () => {
+                  this.editor.runCommand("unlockUI", "table-resizing");
+                  window.removeEventListener("mouseup", onMouseUp);
+                };
+                window.addEventListener("mouseup", onMouseUp);
+
+                // Stop propagation to prevent tableEditing from starting a cell selection
+                event.stopPropagation();
+              }
+              return false;
+            },
+          },
           handlePaste: (view, event: ClipboardEvent) => {
             // If we're already in a table, let prosemirror-tables handle internal cell paste
             if (isInTable(view.state)) return false;
@@ -121,7 +154,9 @@ export const Table = Extension.create<TableOptions>({
               if (data.length > 0 && data[0] && data[0].length > 1) {
                 const tableNode = createTableFromData(view.state.schema, data);
                 if (tableNode) {
-                  view.dispatch(view.state.tr.replaceSelection(new Slice(Fragment.from(tableNode), 0, 0)));
+                  view.dispatch(
+                    view.state.tr.replaceSelection(new Slice(Fragment.from(tableNode), 0, 0))
+                  );
                   return true;
                 }
               }
@@ -129,19 +164,26 @@ export const Table = Extension.create<TableOptions>({
 
             return false;
           },
+          // Fix for the "Greedy Selection" bug - prioritize text selection over table node selection
+          handleKeyDown: (view, event) => {
+            if ((event.ctrlKey || event.metaKey) && event.key === "c") {
+              const { selection } = view.state;
+              if (selection.empty) return false;
+
+              if (isInTable(view.state)) {
+                // If selection spans multiple cells, prosemirror-tables will handle it.
+                // But if it's within one block (like a paragraph inside a cell),
+                // we return false to let the default text-copy behavior win.
+                if (selection.$from.parent === selection.$to.parent) {
+                  return false;
+                }
+              }
+            }
+            return false;
+          },
         },
       })
     );
-
-    if (this.options.resizable) {
-      plugins.push(
-        columnResizing({
-          handleWidth: this.options.handleWidth,
-          cellMinWidth: this.options.cellMinWidth,
-          lastColumnResizable: this.options.lastColumnResizable,
-        })
-      );
-    }
 
     return plugins;
   },

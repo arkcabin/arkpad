@@ -9,11 +9,11 @@
   top: 0;
   bottom: -1px;
   width: 4px;
-  z-index: 20;
+  z-index: 100;
   background-color: var(--ark-table-resize-handle, #3b82f6);
   opacity: 0;
   transition: opacity 0.2s ease;
-  cursor: col-resize;
+  cursor: col-resize !important;
   pointer-events: all;
 }
 
@@ -29,7 +29,6 @@
 .resize-cursor {
   cursor: col-resize;
 }
-
 
 .resize-cursor {
   cursor: ew-resize;

@@ -854,6 +854,13 @@ export class ArkpadEditor implements ArkpadEditorAPI {
   }
 
   /**
+   * Manually notifies all subscribers that the editor state has changed.
+   */
+  refresh() {
+    this.emitUpdate(this.view.state);
+  }
+
+  /**
    * Internal helper to create the commands proxy for superior DX.
    */
   private createCommandsProxy(): ArkpadCommandProxy {

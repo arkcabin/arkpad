@@ -25,24 +25,27 @@ export function useMenuPositioner({
         (k) => k.startsWith(`${extensionName}-`) && storage.menus[k]?.type === type
       );
 
-      return key ? storage.menus[key] : null;
+      const menu = key ? storage.menus[key] : null;
+      return {
+        menu,
+        isLocked: storage.isLocked || false,
+      };
     },
     (a, b) => {
       if (!a || !b) return a === b;
       return (
-        a.active === b.active &&
-        a.coords?.top === b.coords?.top &&
-        a.coords?.left === b.coords?.left &&
-        a.coords?.bottom === b.coords?.bottom &&
-        a.coords?.right === b.coords?.right &&
-        a.isFirstShow === b.isFirstShow
+        a.isLocked === b.isLocked &&
+        a.menu?.active === b.menu?.active &&
+        a.menu?.coords?.top === b.menu?.coords?.top &&
+        a.menu?.coords?.left === b.menu?.coords?.left &&
+        a.menu?.coords?.bottom === b.menu?.coords?.bottom &&
+        a.menu?.coords?.right === b.menu?.coords?.right &&
+        a.menu?.isFirstShow === b.menu?.isFirstShow
       );
     }
   );
 
-  const state = menuState as MenuState | null;
-
-  if (!state || !state.active || !state.coords) {
+  if (!menuState || !menuState.menu || !menuState.menu.active || !menuState.menu.coords) {
     return {
       active: false,
       style: {
@@ -54,7 +57,9 @@ export function useMenuPositioner({
     };
   }
 
-  const { coords, isFirstShow } = state;
+  const { menu, isLocked } = menuState;
+  const coords = menu.coords!; // We know coords exist because of the check above
+  const isFirstShow = menu.isFirstShow;
 
   // Calculate final position
   let x: number;
@@ -72,18 +77,22 @@ export function useMenuPositioner({
     y = coords.top;
   }
 
+  // Universal UI Lock Hiding (CSS Level)
   const style: CSSProperties = {
     position: "fixed",
     top: 0,
     left: 0,
     zIndex: 1000,
     transform: `translate3d(${x}px, ${y}px, 0) ${type === "bubble" ? "translate(-50%, -100%)" : "translate(0, -50%)"}`,
-    visibility: "visible",
-    opacity: 1,
-    transition: isFirstShow
-      ? "none"
-      : "opacity 0.15s ease-out, transform 0.15s cubic-bezier(0.2, 0, 0, 1)",
-    pointerEvents: "auto",
+    // Reactive CSS visibility
+    visibility: isLocked ? "hidden" : "visible",
+    opacity: isLocked ? 0 : 1,
+    pointerEvents: isLocked ? "none" : "auto",
+    // Premium transition feel
+    transition:
+      isFirstShow || isLocked
+        ? "none"
+        : "opacity 0.15s ease-out, transform 0.15s cubic-bezier(0.2, 0, 0, 1), visibility 0.15s",
     willChange: "transform, opacity",
     minWidth: type === "floating" ? "32px" : "auto",
   };

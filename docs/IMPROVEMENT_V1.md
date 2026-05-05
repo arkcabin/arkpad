@@ -55,6 +55,7 @@ Simplifying the barrier to entry.
 1.  **Refactor `ArkpadExtension`:** Add native event hooks to bypass ProseMirror plugin boilerplate.
 2.  **Snapshot API:** Implement memory-based state snapshotting.
 3.  **Command Telemetry:** Add a logging system to track command execution and failure reasons.
+4.  **Contextual Table Selection:** Modern, non-intrusive selection system integrated into the Floating Toolbar (Select Column, Select Row, Select All).
 
 ### Phase 2: Performance & Scalability
 

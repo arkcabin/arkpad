@@ -1,8 +1,8 @@
 import type { ArkpadCommandProps } from "@arkpad/core";
-import { 
-  addColumnBefore as pmAddColumnBefore, 
-  addColumnAfter as pmAddColumnAfter, 
-  deleteColumn as pmDeleteColumn 
+import {
+  addColumnBefore as pmAddColumnBefore,
+  addColumnAfter as pmAddColumnAfter,
+  deleteColumn as pmDeleteColumn
 } from "prosemirror-tables";
 import type { CommandFactory } from "../types";
 

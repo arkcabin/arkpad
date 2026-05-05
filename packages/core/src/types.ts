@@ -50,6 +50,15 @@ export interface ArkpadCommands {
    * Executes the first command that returns true.
    */
   first(commands: ArkpadCommand[]): ArkpadCommand;
+  /**
+   * Locks the UI for a specific operation (e.g. table resizing, dragging).
+   * This suppresses all floating menus.
+   */
+  lockUI(name: string): ArkpadCommand;
+  /**
+   * Unlocks the UI for a specific operation.
+   */
+  unlockUI(name: string): ArkpadCommand;
 }
 
 /**
@@ -477,6 +486,7 @@ export interface ArkpadEditorAPI {
   readonly element: HTMLElement;
   readonly commands: ArkpadCommandProxy;
   readonly storage: Record<string, any>;
+  readonly extensionManager: any; // Keep as any for now to avoid massive circular ref chain, but noted for future interface extraction
   getState(): EditorState;
   getView(): EditorView;
   getHTML(): string;
@@ -542,6 +552,12 @@ export interface ArkpadEditorAPI {
    * Batches multiple editor updates into a single re-render cycle.
    */
   batch(callback: (editor: ArkpadEditorAPI) => void): void;
+
+  /**
+   * Manually notifies all subscribers that the editor state has changed.
+   * Useful for "Side-Effect" updates that don't trigger a ProseMirror transaction.
+   */
+  refresh(): void;
 
   destroy(): void;
 }

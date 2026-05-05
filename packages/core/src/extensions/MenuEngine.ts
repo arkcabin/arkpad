@@ -13,12 +13,15 @@ export interface MenuState {
 
 export interface GlobalMenuStorage {
   menus: Record<string, MenuState>;
+  locks: string[];
+  isLocked: boolean;
 }
 
 export class MenuEngine {
   private editor: ArkpadEditorAPI;
   private menuConfigs: Map<string, MenuConfig[]>;
   private prevMenuKeys: Set<string> = new Set();
+  private activeLocks: Set<string> = new Set();
 
   constructor(editor: ArkpadEditorAPI) {
     this.editor = editor;
@@ -33,21 +36,48 @@ export class MenuEngine {
   }
 
   /**
+   * Locks the UI to suppress menus.
+   */
+  lock(name: string) {
+    this.activeLocks.add(name);
+    this.updateStorageLocks();
+    // Manual trigger for instant UI reaction
+    this.editor.refresh();
+  }
+
+  /**
+   * Unlocks the UI.
+   */
+  unlock(name: string) {
+    this.activeLocks.delete(name);
+    this.updateStorageLocks();
+    // Manual trigger for instant UI reaction
+    this.editor.refresh();
+  }
+
+  private updateStorageLocks() {
+    const storage = this.editor.storage.menuEngine as GlobalMenuStorage;
+    if (storage) {
+      storage.locks = Array.from(this.activeLocks);
+      storage.isLocked = this.activeLocks.size > 0;
+    }
+  }
+
+  /**
    * Recalculates all menu positions based on the current editor state.
-   * Uses native DOM Range for pixel-perfect bounding boxes.
    */
   update(view: EditorView, prevState?: EditorState) {
     if (view.isDestroyed) return;
 
     const { state } = view;
 
+    const storage = this.editor.storage.menuEngine as GlobalMenuStorage;
+    if (!storage) return;
+
     // Optimization: Skip calculation if selection and document are identical
     if (prevState && prevState.selection.eq(state.selection) && prevState.doc.eq(state.doc)) {
       return;
     }
-
-    const storage = this.editor.storage.menuEngine as GlobalMenuStorage;
-    if (!storage) return;
 
     const newMenus: Record<string, MenuState> = {};
     const currentMenuKeys = new Set<string>();
@@ -113,7 +143,6 @@ export class MenuEngine {
 
           const rect = range.getBoundingClientRect();
 
-          // If the rect has no width (e.g. selection across lines), fallback to ProseMirror coords
           if (rect.width > 0) {
             return {
               top: rect.top,
