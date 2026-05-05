@@ -18,6 +18,8 @@ import { Heading } from "@arkpad/extension-heading";
 import { Engine } from "@arkpad/core";
 import { Bold } from "@arkpad/extension-bold";
 import { Italic } from "@arkpad/extension-italic";
+import { BubbleMenu } from "@arkpad/extension-bubble-menu";
+import { TableFloatingToolbar } from "./TableFloatingToolbar";
 
 const complexTableContent = `
 <h1>Complex Table Demo</h1>
@@ -60,7 +62,16 @@ const complexTableContent = `
 
 export function TableDemo() {
   const editor = useArkpadEditor({
-    extensions: [Engine, Bold, Italic, Heading, Table],
+    extensions: [
+      Engine,
+      Bold,
+      Italic,
+      Heading,
+      Table,
+      BubbleMenu.configure({
+        shouldShow: ({ editor }) => editor.isActive("table") && editor.isEditable(),
+      }),
+    ],
     content: complexTableContent,
   });
 
@@ -77,7 +88,8 @@ export function TableDemo() {
       description="Create complex data structures with tables."
     >
       <ArkpadProvider editor={editor}>
-        <div className="flex flex-col bg-[var(--bg-main)]">
+        <div className="flex flex-col bg-[var(--bg-main)] relative">
+          <TableFloatingToolbar editor={editor} />
           <div className="h-12 px-3 border-b border-[var(--border)] flex items-center gap-1 overflow-x-auto scrollbar-hide">
             <EditorButton command="insertTable" title="Insert Table" className="toolbar-btn">
               <Plus className="w-3.5 h-3.5" />

@@ -8,6 +8,7 @@ export interface MenuState {
   coords: { top: number; left: number; bottom: number; right: number } | null;
   side: "top" | "bottom";
   extensionName: string;
+  isFirstShow: boolean;
 }
 
 export interface GlobalMenuStorage {
@@ -17,6 +18,7 @@ export interface GlobalMenuStorage {
 export class MenuEngine {
   private editor: ArkpadEditorAPI;
   private menuConfigs: Map<string, MenuConfig[]>;
+  private prevMenuKeys: Set<string> = new Set();
 
   constructor(editor: ArkpadEditorAPI) {
     this.editor = editor;
@@ -32,22 +34,23 @@ export class MenuEngine {
 
   /**
    * Recalculates all menu positions based on the current editor state.
+   * Uses native DOM Range for pixel-perfect bounding boxes.
    */
   update(view: EditorView, prevState?: EditorState) {
     if (view.isDestroyed) return;
 
     const { state } = view;
 
-    // Optimization: Skip if selection hasn't changed and document is same
+    // Optimization: Skip calculation if selection and document are identical
     if (prevState && prevState.selection.eq(state.selection) && prevState.doc.eq(state.doc)) {
-      // We might still need to update if the window was resized or scrolled,
-      // but scroll is handled separately or by the browser.
+      return;
     }
 
     const storage = this.editor.storage.menuEngine as GlobalMenuStorage;
     if (!storage) return;
 
     const newMenus: Record<string, MenuState> = {};
+    const currentMenuKeys = new Set<string>();
 
     this.menuConfigs.forEach((configs, extensionName) => {
       configs.forEach((config, index) => {
@@ -63,13 +66,17 @@ export class MenuEngine {
           : !state.selection.empty;
 
         if (shouldShow) {
+          currentMenuKeys.add(menuKey);
           const coords = this.calculateCoords(view, config.type);
+          const isFirstShow = !this.prevMenuKeys.has(menuKey);
+
           newMenus[menuKey] = {
             active: true,
             type: config.type,
             coords,
             side: "top",
             extensionName,
+            isFirstShow,
           };
         } else {
           newMenus[menuKey] = {
@@ -78,6 +85,7 @@ export class MenuEngine {
             coords: null,
             side: "top",
             extensionName,
+            isFirstShow: false,
           };
         }
       });
@@ -85,54 +93,48 @@ export class MenuEngine {
 
     // Atomic update to storage
     storage.menus = newMenus;
+    this.prevMenuKeys = currentMenuKeys;
   }
 
   private calculateCoords(view: EditorView, type: MenuType) {
     const { state } = view;
-    const { from, to } = state.selection;
+    const { from, to, empty } = state.selection;
 
     try {
-      if (type === "bubble") {
-        // More robust bounding box for multi-line selections
-        // We use the view's internal range mapping to get the true selection bounding box
-        const { node } = view.domAtPos(from);
-        if (!node) return null;
-
+      if (type === "bubble" && !empty) {
+        // Industry-standard bounding box calculation using DOM Range
         const range = document.createRange();
-        range.setStart(node, 0); // Placeholder
+        const start = view.domAtPos(from);
+        const end = view.domAtPos(to);
 
-        // Use ProseMirror's native way to get coordinates for the selection
-        // coordsAtPos gives specific points, but for a bubble menu we want the whole rect.
-        const start = view.coordsAtPos(from);
-        const end = view.coordsAtPos(to);
+        if (start.node && end.node) {
+          range.setStart(start.node, start.offset);
+          range.setEnd(end.node, end.offset);
 
-        // For single-line or small selections, the simple math works.
-        // For complex selections, we'd ideally iterate through all Rects in the range.
-        // But for "Super Ultra Fast", we take the min/max of the start/end points
-        // and adjust for multi-line by checking if they are on different vertical planes.
+          const rect = range.getBoundingClientRect();
 
-        const isMultiLine = Math.abs(start.top - end.top) > 5; // Tolerance for small differences
-
-        if (isMultiLine) {
-          // If multi-line, we use the editor's bounding box for horizontal centering
-          // but the start point's top for vertical positioning.
-          const editorRect = view.dom.getBoundingClientRect();
-          return {
-            top: Math.min(start.top, end.top),
-            left: editorRect.left,
-            bottom: Math.max(start.bottom, end.bottom),
-            right: editorRect.right,
-          };
+          // If the rect has no width (e.g. selection across lines), fallback to ProseMirror coords
+          if (rect.width > 0) {
+            return {
+              top: rect.top,
+              left: rect.left,
+              bottom: rect.bottom,
+              right: rect.right,
+            };
+          }
         }
 
+        // Fallback for complex selections that Range cannot handle reliably
+        const startCoords = view.coordsAtPos(from);
+        const endCoords = view.coordsAtPos(to);
         return {
-          top: Math.min(start.top, end.top),
-          left: Math.min(start.left, end.left),
-          bottom: Math.max(start.bottom, end.bottom),
-          right: Math.max(start.right, end.right),
+          top: Math.min(startCoords.top, endCoords.top),
+          left: Math.min(startCoords.left, endCoords.left),
+          bottom: Math.max(startCoords.bottom, endCoords.bottom),
+          right: Math.max(startCoords.right, endCoords.right),
         };
       } else {
-        // Floating menu (start of line)
+        // Floating menu (insertion point)
         const coords = view.coordsAtPos(from);
         return {
           top: coords.top,

@@ -1,5 +1,5 @@
 import { useEditorState } from "./useEditorState";
-import { ArkpadEditorAPI, GlobalMenuStorage } from "@arkpad/core";
+import { ArkpadEditorAPI, GlobalMenuStorage, MenuState } from "@arkpad/core";
 import { CSSProperties } from "react";
 
 export interface UseMenuPositionerProps {
@@ -34,12 +34,15 @@ export function useMenuPositioner({
         a.coords?.top === b.coords?.top &&
         a.coords?.left === b.coords?.left &&
         a.coords?.bottom === b.coords?.bottom &&
-        a.coords?.right === b.coords?.right
+        a.coords?.right === b.coords?.right &&
+        a.isFirstShow === b.isFirstShow
       );
     }
   );
 
-  if (!menuState || !menuState.active || !menuState.coords) {
+  const state = menuState as MenuState | null;
+
+  if (!state || !state.active || !state.coords) {
     return {
       active: false,
       style: {
@@ -51,7 +54,7 @@ export function useMenuPositioner({
     };
   }
 
-  const { coords } = menuState;
+  const { coords, isFirstShow } = state;
 
   // Calculate final position
   let x: number;
@@ -64,7 +67,6 @@ export function useMenuPositioner({
     y = coords.top - offset;
   } else {
     // Floating menu (left of cursor)
-    // We add a default padding for the floating menu to avoid overlapping text
     const floatingPadding = 48;
     x = coords.left - floatingPadding;
     y = coords.top;
@@ -78,9 +80,11 @@ export function useMenuPositioner({
     transform: `translate3d(${x}px, ${y}px, 0) ${type === "bubble" ? "translate(-50%, -100%)" : "translate(0, -50%)"}`,
     visibility: "visible",
     opacity: 1,
-    transition: "opacity 0.2s, transform 0.2s cubic-bezier(0.2, 0, 0, 1)",
+    transition: isFirstShow
+      ? "none"
+      : "opacity 0.15s ease-out, transform 0.15s cubic-bezier(0.2, 0, 0, 1)",
     pointerEvents: "auto",
-    // Prevent layout shift by setting min-width if known
+    willChange: "transform, opacity",
     minWidth: type === "floating" ? "32px" : "auto",
   };
 

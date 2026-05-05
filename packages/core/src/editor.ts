@@ -207,6 +207,9 @@ export class ArkpadEditor implements ArkpadEditorAPI {
           ext.onUpdate!({ editor: this });
         }
 
+        // 5. Zero-Latency Menu Update (Synchronous for first-click feel)
+        this.extensionManager.menuEngine?.update(this.view, undefined);
+
         this.emitUpdate(nextState);
       },
     });

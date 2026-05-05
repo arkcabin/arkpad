@@ -50,14 +50,17 @@ export class ExtensionManager {
       }
     });
 
-    // Add high-performance selection tracking plugin
+    // The menu engine is updated synchronously in editor.ts for zero-latency.
+    // We only need the plugin to handle updates that might not trigger a transaction (e.g. window resize).
     this.proseMirrorPlugins.push(
       new Plugin({
         view: () => ({
           update: (view, prevState) => {
-            requestAnimationFrame(() => {
+            // Only trigger if selection changed WITHOUT a doc change (handled by editor.ts)
+            // or if we need a periodic refresh.
+            if (!prevState.selection.eq(view.state.selection)) {
               this.menuEngine?.update(view, prevState);
-            });
+            }
           },
         }),
       })
@@ -181,23 +184,23 @@ export class ExtensionManager {
           const prevCommand = commands[key]!;
           commands[key] =
             (...args: any[]) =>
-            (props: {
-              state: EditorState;
-              dispatch?: (tr: Transaction) => void;
-              view?: EditorView;
-            }) => {
-              const run = (cmd: ArkpadCommand) => {
-                if (typeof cmd !== "function") return false;
-                const result = (cmd as any)(...args);
-                if (typeof result === "function") {
-                  return result(props);
-                }
-                return result;
-              };
+              (props: {
+                state: EditorState;
+                dispatch?: (tr: Transaction) => void;
+                view?: EditorView;
+              }) => {
+                const run = (cmd: ArkpadCommand) => {
+                  if (typeof cmd !== "function") return false;
+                  const result = (cmd as any)(...args);
+                  if (typeof result === "function") {
+                    return result(props);
+                  }
+                  return result;
+                };
 
-              // Specialized (newest) command runs first
-              return run(newCommand) || run(prevCommand);
-            };
+                // Specialized (newest) command runs first
+                return run(newCommand) || run(prevCommand);
+              };
         } else {
           commands[key] = newCommand;
         }
