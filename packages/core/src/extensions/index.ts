@@ -1,4 +1,4 @@
-import { createHardBreak } from "./base";
+import { createHardBreak, createHistory } from "./base";
 import { createUniqueId } from "./unique-id";
 import { Extension } from "./Extension";
 import { ArkpadExtension, ArkpadCommandProps } from "../types";
@@ -49,7 +49,7 @@ export const BaseCommands = Extension.create({
 export const Engine = Extension.create({
   name: "engine",
   addExtensions() {
-    return [createHardBreak(), createUniqueId(), BaseCommands];
+    return [createHardBreak(), createUniqueId(), createHistory(), BaseCommands];
   },
 });
 

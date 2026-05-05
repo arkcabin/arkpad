@@ -1,5 +1,7 @@
 import { Extension } from "@arkpad/core";
-import { tableEditing, columnResizing } from "prosemirror-tables";
+import { tableEditing, columnResizing, isInTable } from "prosemirror-tables";
+import { Plugin } from "prosemirror-state";
+import { Slice, Fragment } from "prosemirror-model";
 
 // Nodes
 import { tableNode } from "./nodes/table";
@@ -25,6 +27,9 @@ import {
 
 // Keyboard
 import { keyboardShortcuts } from "./keyboard";
+
+// Utils
+import { parseHTMLTable, parseTableData, createTableFromData } from "./utilities/parsePaste";
 
 export * from "./types";
 
@@ -89,6 +94,44 @@ export const Table = Extension.create<TableOptions>({
 
   addProseMirrorPlugins() {
     const plugins = [tableEditing()];
+
+    // Add Paste Handler for HTML Tables and Excel/TSV Data
+    plugins.push(
+      new Plugin({
+        props: {
+          handlePaste: (view, event: ClipboardEvent) => {
+            // If we're already in a table, let prosemirror-tables handle internal cell paste
+            if (isInTable(view.state)) return false;
+
+            const html = event.clipboardData?.getData("text/html");
+            const text = event.clipboardData?.getData("text/plain");
+
+            // 1. Handle HTML Table Paste
+            if (html && html.includes("<table")) {
+              const fragment = parseHTMLTable(html, view.state.schema);
+              if (fragment) {
+                view.dispatch(view.state.tr.replaceSelection(new Slice(fragment, 0, 0)));
+                return true;
+              }
+            }
+
+            // 2. Handle Excel/TSV/CSV Paste
+            if (text && (text.includes("\t") || text.includes(","))) {
+              const data = parseTableData(text);
+              if (data.length > 0 && data[0] && data[0].length > 1) {
+                const tableNode = createTableFromData(view.state.schema, data);
+                if (tableNode) {
+                  view.dispatch(view.state.tr.replaceSelection(new Slice(Fragment.from(tableNode), 0, 0)));
+                  return true;
+                }
+              }
+            }
+
+            return false;
+          },
+        },
+      })
+    );
 
     if (this.options.resizable) {
       plugins.push(

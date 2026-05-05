@@ -15,6 +15,9 @@ import {
 import { ShowcaseLayout } from "../layouts/ShowcaseLayout";
 import { Table } from "@arkpad/extension-table";
 import { Heading } from "@arkpad/extension-heading";
+import { Engine } from "@arkpad/core";
+import { Bold } from "@arkpad/extension-bold";
+import { Italic } from "@arkpad/extension-italic";
 
 const complexTableContent = `
 <h1>Complex Table Demo</h1>
@@ -57,7 +60,7 @@ const complexTableContent = `
 
 export function TableDemo() {
   const editor = useArkpadEditor({
-    extensions: [Heading, Table],
+    extensions: [Engine, Bold, Italic, Heading, Table],
     content: complexTableContent,
   });
 

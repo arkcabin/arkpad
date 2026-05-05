@@ -123,6 +123,7 @@ export class ExtensionManager {
       inputRules({ rules: this.inputRules }),
       keymap(this.keyboardShortcuts),
       keymap(baseKeymap),
+      ...this.pasteRules,
       ...this.proseMirrorPlugins,
     ];
   }
