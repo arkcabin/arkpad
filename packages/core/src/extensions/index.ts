@@ -1,5 +1,11 @@
 import { createHardBreak, createHistory } from "./base";
 import { createUniqueId } from "./unique-id";
+import { FocusEvents } from "./focusEvents";
+import { ClipboardTextSerializer } from "./clipboardTextSerializer";
+import { Keymap } from "./keymap";
+import { ListKeymap } from "./listKeymap";
+import { Dropcursor } from "./dropcursor";
+import { Gapcursor } from "./gapcursor";
 import { Extension } from "./Extension";
 import { ArkpadExtension, ArkpadCommandProps } from "../types";
 import {
@@ -37,6 +43,19 @@ export const BaseCommands = Extension.create({
     updateAttributes: (typeOrName: string, attributes: Record<string, any>) => (props: ArkpadCommandProps) => {
       return updateAttributes(typeOrName, attributes)(props);
     },
+    first: (commands: any[]) => (props: ArkpadCommandProps) => {
+      for (const command of commands) {
+        // If it's a function, call it with props.
+        // If that result is another function (higher-order), call it again.
+        let result = typeof command === "function" ? command(props) : command;
+        if (typeof result === "function") {
+          result = result(props);
+        }
+        
+        if (result === true) return true;
+      }
+      return false;
+    },
   }),
 });
 
@@ -49,7 +68,16 @@ export const BaseCommands = Extension.create({
 export const Engine = Extension.create({
   name: "engine",
   addExtensions() {
-    return [createHardBreak(), createUniqueId(), createHistory(), BaseCommands];
+    return [
+      createHardBreak(),
+      createUniqueId(),
+      createHistory(),
+      FocusEvents,
+      ClipboardTextSerializer,
+      Keymap,
+      ListKeymap,
+      BaseCommands,
+    ];
   },
 });
 
@@ -59,7 +87,9 @@ export const Engine = Extension.create({
  * Note: Document, Paragraph, and Text are provided by the base arkpadSchema.
  */
 export const CoreEssentials: ArkpadExtension[] = [
-  Engine, // Includes HardBreak, UniqueId, BaseCommands
+  Engine, // Includes HardBreak, UniqueId, BaseCommands, Focus, Clipboard, Keymaps
+  Dropcursor,
+  Gapcursor,
 ];
 
 /**
@@ -71,5 +101,12 @@ export function createCoreEssentials(): ArkpadExtension[] {
 
 export * from "./base";
 export * from "./unique-id";
+export * from "./focusEvents";
+export * from "./clipboardTextSerializer";
+export * from "./keymap";
+export * from "./listKeymap";
+export * from "./textDirection";
+export * from "./dropcursor";
+export * from "./gapcursor";
 export * from "./utils";
 export { CharacterCount } from "./character-count";

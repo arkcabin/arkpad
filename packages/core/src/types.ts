@@ -46,6 +46,10 @@ export interface ArkpadCommands {
    * Updates attributes for a specific node or mark type.
    */
   updateAttributes(typeOrName: string, attributes: Record<string, any>): ArkpadCommand;
+  /**
+   * Executes the first command that returns true.
+   */
+  first(commands: ArkpadCommand[]): ArkpadCommand;
 }
 
 /**
@@ -222,6 +226,15 @@ export interface ExtensionConfig<Options = any, Storage = any> {
   ) => boolean | void;
 
   /**
+   * Called when the editor is focused.
+   */
+  onFocus?: (this: ExtensionContext<Options, Storage>) => boolean | void;
+  /**
+   * Called when the editor is blurred.
+   */
+  onBlur?: (this: ExtensionContext<Options, Storage>) => boolean | void;
+
+  /**
    * Called when the editor is initialized.
    */
   onInit?: (this: ExtensionContext<Options, Storage>) => void;
@@ -317,6 +330,14 @@ export interface ArkpadExtension {
   onKeyDown?: (event: KeyboardEvent) => boolean | void;
   onDrop?: (event: DragEvent, slice: any, moved: boolean) => boolean | void;
   onPaste?: (event: ClipboardEvent, slice: any) => boolean | void;
+  /**
+   * Called when the editor is focused.
+   */
+  onFocus?: () => boolean | void;
+  /**
+   * Called when the editor is blurred.
+   */
+  onBlur?: () => boolean | void;
   /**
    * Called when the editor is initialized.
    */

@@ -66,12 +66,16 @@ export class ArkpadEditor implements ArkpadEditorAPI {
     onKeyDown: ArkpadExtension[];
     onDrop: ArkpadExtension[];
     onPaste: ArkpadExtension[];
+    onFocus: ArkpadExtension[];
+    onBlur: ArkpadExtension[];
   } = {
     onClick: [],
     onDoubleClick: [],
     onKeyDown: [],
     onDrop: [],
     onPaste: [],
+    onFocus: [],
+    onBlur: [],
   };
 
   constructor(options: ArkpadEditorOptions) {
@@ -135,6 +139,8 @@ export class ArkpadEditor implements ArkpadEditorAPI {
       if (ext.onKeyDown) this.eventHooks.onKeyDown.push(ext);
       if (ext.onDrop) this.eventHooks.onDrop.push(ext);
       if (ext.onPaste) this.eventHooks.onPaste.push(ext);
+      if (ext.onFocus) this.eventHooks.onFocus.push(ext);
+      if (ext.onBlur) this.eventHooks.onBlur.push(ext);
     });
 
     extensionManager.storage = this.storage;

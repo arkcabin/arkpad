@@ -17,6 +17,15 @@ import { Subscript } from "@arkpad/extension-subscript";
 import { CodeBlock } from "@arkpad/extension-code-block";
 import { Image } from "@arkpad/extension-image";
 import { CharacterCount } from "@arkpad/core";
+import {
+  FocusEvents,
+  ClipboardTextSerializer,
+  Keymap,
+  ListKeymap,
+  TextDirection,
+  Dropcursor,
+  Gapcursor,
+} from "@arkpad/core";
 import { HighlighterTool } from "@arkpad/extension-highlighter";
 import { EraserTool } from "@arkpad/extension-eraser";
 import { createTextAlign } from "@arkpad/extension-alignment";
@@ -96,6 +105,11 @@ export const StarterKit = Extension.create({
     extensions.push(createTextAlign());
     extensions.push(createMarkdownPaste());
     extensions.push(CharacterCount);
+
+    // Functional Core Extensions
+    extensions.push(FocusEvents, ClipboardTextSerializer, Keymap, ListKeymap);
+    extensions.push(Dropcursor, Gapcursor);
+    extensions.push(TextDirection);
 
     if (this.options.table) {
       extensions.push(
