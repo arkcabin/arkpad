@@ -1,5 +1,5 @@
 import { useEditorState } from "./useEditorState";
-import { ArkpadEditorAPI, GlobalMenuStorage, MenuState } from "@arkpad/core";
+import { ArkpadEditorAPI, GlobalMenuStorage } from "@arkpad/core";
 import { CSSProperties } from "react";
 
 export interface UseMenuPositionerProps {

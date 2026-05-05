@@ -164,19 +164,20 @@ export const Table = Extension.create<TableOptions>({
 
             return false;
           },
-          // Fix for the "Greedy Selection" bug - prioritize text selection over table node selection
+          /**
+           * Safety Guard for "Greedy Selection" during copy.
+           * Ensures that standard text selection inside a cell doesn't accidentally
+           * trigger a whole-cell node copy.
+           */
           handleKeyDown: (view, event) => {
             if ((event.ctrlKey || event.metaKey) && event.key === "c") {
               const { selection } = view.state;
               if (selection.empty) return false;
 
-              if (isInTable(view.state)) {
-                // If selection spans multiple cells, prosemirror-tables will handle it.
-                // But if it's within one block (like a paragraph inside a cell),
-                // we return false to let the default text-copy behavior win.
-                if (selection.$from.parent === selection.$to.parent) {
-                  return false;
-                }
+              // If it's a standard text selection contained within a single block inside a cell,
+              // we yield control to the default browser/core copy logic.
+              if (isInTable(view.state) && selection.$from.parent === selection.$to.parent) {
+                return false;
               }
             }
             return false;
