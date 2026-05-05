@@ -115,6 +115,10 @@ export class Extension<Options = any, Storage = any> implements ArkpadExtension 
     this.config.onInit?.call(this.createContext());
   }
 
+  addMenu() {
+    return this.config.addMenu?.call(this.createContext()) || [];
+  }
+
   /**
    * Creates a context for calling extension methods.
    * Performance: Uses getters to ensure properties are always up-to-date
@@ -174,7 +178,6 @@ export class Extension<Options = any, Storage = any> implements ArkpadExtension 
   extendMarkSchema(spec: any, markName: string) {
     return this.config.extendMarkSchema?.call(this.createContext(), spec, markName) || spec;
   }
-
 
   addCommands(): Partial<ArkpadCommandRegistry> {
     return this.config.addCommands?.call(this.createContext()) || {};

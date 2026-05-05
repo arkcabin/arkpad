@@ -239,6 +239,10 @@ export interface ExtensionConfig<Options = any, Storage = any> {
    */
   onInit?: (this: ExtensionContext<Options, Storage>) => void;
   /**
+   * Define a menu for this extension.
+   */
+  addMenu?: (this: ExtensionContext<Options, Storage>) => MenuConfig | MenuConfig[];
+  /**
    * Called when the editor is destroyed.
    * Use this to clear timers, remove event listeners, or close connections.
    */
@@ -293,6 +297,26 @@ export interface MarkConfig<Options = any, Storage = any> extends ExtensionConfi
   code?: boolean;
 }
 
+export type MenuType = "bubble" | "floating";
+
+export interface MenuConfig {
+  type: MenuType;
+  /**
+   * Whether the menu should be shown.
+   */
+  shouldShow?: (props: {
+    editor: ArkpadEditorAPI;
+    state: EditorState;
+    from: number;
+    to: number;
+    empty: boolean;
+  }) => boolean;
+  /**
+   * Priority of the menu.
+   */
+  priority?: number;
+}
+
 export interface ArkpadExtension {
   name: string;
   id?: string;
@@ -342,6 +366,10 @@ export interface ArkpadExtension {
    * Called when the editor is initialized.
    */
   onInit?: () => void;
+  /**
+   * Returns menu configurations for this extension.
+   */
+  addMenu?: () => MenuConfig | MenuConfig[];
   /**
    * Called when the editor is destroyed.
    */

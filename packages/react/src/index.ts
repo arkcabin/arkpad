@@ -6,6 +6,6 @@ export * from "./context";
 export * from "./ArkpadEditorContent";
 export * from "./BubbleMenu";
 export * from "./FloatingMenu";
+export * from "./useMenuPositioner";
 export * from "./EditorButton";
-export * from "./BubbleMenu";
 export * from "./SmartBar";

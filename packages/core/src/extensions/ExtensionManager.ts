@@ -1,4 +1,4 @@
-import { ArkpadExtension, ArkpadCommandRegistry, ArkpadCommand } from "../types";
+import { ArkpadExtension, ArkpadCommandRegistry, ArkpadCommand, ArkpadEditorAPI } from "../types";
 import { type Schema, Node as PMNode } from "prosemirror-model";
 import { Plugin, EditorState, Transaction } from "prosemirror-state";
 import { keymap } from "prosemirror-keymap";
@@ -6,6 +6,7 @@ import { baseKeymap } from "prosemirror-commands";
 import { inputRules } from "prosemirror-inputrules";
 import { EditorView } from "prosemirror-view";
 import { SchemaBuilder } from "../schema-builder";
+import { MenuEngine, GlobalMenuStorage } from "./MenuEngine";
 
 /**
  * ExtensionManager coordinates all editor extensions, collecting their commands,
@@ -23,6 +24,7 @@ export class ExtensionManager {
   public nodeViews: Record<string, any> = {};
   public activeMappings: Record<string, string> = {};
   private isBatching = false;
+  public menuEngine?: MenuEngine;
 
   constructor(schema: Schema, extensions: ArkpadExtension[] = []) {
     this.schema = schema;
@@ -30,6 +32,36 @@ export class ExtensionManager {
     this.registerExtensions(extensions);
     this.isBatching = false;
     this.rebuild();
+  }
+
+  /**
+   * Initializes the menu engine once the editor is available.
+   */
+  public initMenuEngine(editor: ArkpadEditorAPI) {
+    this.menuEngine = new MenuEngine(editor);
+    this.storage.menuEngine = { menus: {} } as GlobalMenuStorage;
+
+    this.extensions.forEach((ext) => {
+      if (ext.addMenu) {
+        const configs = ext.addMenu();
+        if (configs) {
+          this.menuEngine!.registerExtensionMenus(ext.name, configs);
+        }
+      }
+    });
+
+    // Add high-performance selection tracking plugin
+    this.proseMirrorPlugins.push(
+      new Plugin({
+        view: () => ({
+          update: (view, prevState) => {
+            requestAnimationFrame(() => {
+              this.menuEngine?.update(view, prevState);
+            });
+          },
+        }),
+      })
+    );
   }
 
   /**

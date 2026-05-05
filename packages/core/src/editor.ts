@@ -145,7 +145,10 @@ export class ArkpadEditor implements ArkpadEditorAPI {
 
     extensionManager.storage = this.storage;
 
-    // 3. Setup Commands Proxy (The DX "Secret Sauce")
+    // 3. Initialize Menu Engine (Core Positioning Service)
+    this.extensionManager.initMenuEngine(this);
+
+    // 4. Setup Commands Proxy (The DX "Secret Sauce")
     this.commands = this.createCommandsProxy();
 
     const state = this.createState(resolved.content);

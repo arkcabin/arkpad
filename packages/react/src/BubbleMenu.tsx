@@ -1,12 +1,12 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { ArkpadEditorAPI } from "@arkpad/core";
 import { BubbleMenu as BubbleMenuExtension } from "@arkpad/extension-bubble-menu";
 import { EditorState } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
+import { useMenuPositioner } from "./useMenuPositioner";
 
 export interface BubbleMenuProps {
-  id?: string;
   editor: ArkpadEditorAPI | null;
   children: React.ReactNode;
   className?: string;
@@ -21,49 +21,42 @@ export interface BubbleMenuProps {
 }
 
 /**
- * BubbleMenu component that uses the high-performance CSS Variable positioning engine.
+ * BubbleMenu component that leverages the Headless Menu Engine in @arkpad/core.
+ * It provides zero-flicker, GPU-accelerated positioning.
  */
 export const BubbleMenu: React.FC<BubbleMenuProps> = ({
-  id,
   editor,
   children,
   className = "",
-  offset,
+  offset = 12,
   shouldShow,
 }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const extensionRef = useRef<ReturnType<typeof BubbleMenuExtension> | null>(null);
+  const { style, active } = useMenuPositioner({
+    editor,
+    extensionName: "bubbleMenu",
+    type: "bubble",
+    offset,
+  });
 
   useEffect(() => {
     if (!editor) return;
 
-    const element = containerRef.current;
-    if (!element) return;
-
-    const extension = BubbleMenuExtension({
-      id,
-      editor,
-      element,
-      offset,
-      shouldShow,
+    // Register the bubble menu extension logic with the core
+    const extension = BubbleMenuExtension.configure({
+      shouldShow: shouldShow as any,
     });
 
-    extensionRef.current = extension;
     editor.registerExtension(extension);
 
     return () => {
-      if (extensionRef.current) {
-        // Use ID for unregistration if provided, otherwise fallback to name (though name collision still possible without ID)
-        editor.unregisterExtension(extensionRef.current.id || extensionRef.current.name);
-        extensionRef.current = null;
-      }
+      editor.unregisterExtension(extension.name);
     };
-  }, [editor, id]);
+  }, [editor, shouldShow]);
 
-  if (typeof document === "undefined") return null;
+  if (typeof document === "undefined" || !active) return null;
 
   return createPortal(
-    <div ref={containerRef} className={className}>
+    <div style={style} className={className}>
       {children}
     </div>,
     document.body
