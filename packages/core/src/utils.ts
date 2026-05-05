@@ -1,5 +1,5 @@
 import { DOMParser as PMDOMParser, Node as PMNode, type Schema } from "prosemirror-model";
-import type { ArkpadContent, ArkpadEditorOptions, ResolvedArkpadEditorOptions } from "./types";
+import type { ArkpadContent, ArkpadEditorOptions, ResolvedArkpadEditorOptions } from "./api";
 
 /**
  * Parses HTML string into a ProseMirror Document.

@@ -8,18 +8,18 @@ import type { CommandFactory } from "../types";
 
 export const addRowBefore: CommandFactory = () => ({ chain }: ArkpadCommandProps) => {
   return chain()
-    .command(({ state, dispatch }) => pmAddRowBefore(state, dispatch))
+    .command(({ state, dispatch }: ArkpadCommandProps) => pmAddRowBefore(state, dispatch))
     .run();
 };
 
 export const addRowAfter: CommandFactory = () => ({ chain }: ArkpadCommandProps) => {
   return chain()
-    .command(({ state, dispatch }) => pmAddRowAfter(state, dispatch))
+    .command(({ state, dispatch }: ArkpadCommandProps) => pmAddRowAfter(state, dispatch))
     .run();
 };
 
 export const deleteRow: CommandFactory = () => ({ chain }: ArkpadCommandProps) => {
   return chain()
-    .command(({ state, dispatch }) => pmDeleteRow(state, dispatch))
+    .command(({ state, dispatch }: ArkpadCommandProps) => pmDeleteRow(state, dispatch))
     .run();
 };

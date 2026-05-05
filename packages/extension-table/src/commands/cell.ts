@@ -12,37 +12,37 @@ import type { CommandFactory } from "../types";
 
 export const mergeCells: CommandFactory = () => ({ chain }: ArkpadCommandProps) => {
   return chain()
-    .command(({ state, dispatch }) => pmMergeCells(state, dispatch))
+    .command(({ state, dispatch }: ArkpadCommandProps) => pmMergeCells(state, dispatch))
     .run();
 };
 
 export const splitCell: CommandFactory = () => ({ chain }: ArkpadCommandProps) => {
   return chain()
-    .command(({ state, dispatch }) => pmSplitCell(state, dispatch))
+    .command(({ state, dispatch }: ArkpadCommandProps) => pmSplitCell(state, dispatch))
     .run();
 };
 
 export const toggleHeaderColumn: CommandFactory = () => ({ chain }: ArkpadCommandProps) => {
   return chain()
-    .command(({ state, dispatch }) => pmToggleHeaderColumn(state, dispatch))
+    .command(({ state, dispatch }: ArkpadCommandProps) => pmToggleHeaderColumn(state, dispatch))
     .run();
 };
 
 export const toggleHeaderRow: CommandFactory = () => ({ chain }: ArkpadCommandProps) => {
   return chain()
-    .command(({ state, dispatch }) => pmToggleHeaderRow(state, dispatch))
+    .command(({ state, dispatch }: ArkpadCommandProps) => pmToggleHeaderRow(state, dispatch))
     .run();
 };
 
 export const toggleHeaderCell: CommandFactory = () => ({ chain }: ArkpadCommandProps) => {
   return chain()
-    .command(({ state, dispatch }) => pmToggleHeaderCell(state, dispatch))
+    .command(({ state, dispatch }: ArkpadCommandProps) => pmToggleHeaderCell(state, dispatch))
     .run();
 };
 
 export const setCellAttr: CommandFactory = (name: string, value: any) => ({ chain }: ArkpadCommandProps) => {
   return chain()
-    .command(({ state, dispatch }) => pmSetCellAttr(name, value)(state, dispatch))
+    .command(({ state, dispatch }: ArkpadCommandProps) => pmSetCellAttr(name, value)(state, dispatch))
     .run();
 };
 

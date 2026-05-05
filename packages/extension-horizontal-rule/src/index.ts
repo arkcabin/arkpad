@@ -1,4 +1,4 @@
-import { Extension, ArkpadCommandProps } from "@arkpad/core";
+import { Extension, ArkpadCommandProps, Transaction } from "@arkpad/core";
 
 export const HorizontalRule = Extension.create({
   name: "horizontalRule",
@@ -25,7 +25,7 @@ export const HorizontalRule = Extension.create({
           if (!type) return false;
           return chain()
             .insertNode("horizontal_rule")
-            .command(({ tr }) => {
+            .command(({ tr }: { tr: Transaction }) => {
               tr.scrollIntoView();
               return true;
             });

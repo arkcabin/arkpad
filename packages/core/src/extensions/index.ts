@@ -1,13 +1,13 @@
-import { createHardBreak, createHistory } from "./base";
-import { createUniqueId } from "./unique-id";
-import { FocusEvents } from "./focusEvents";
-import { ClipboardTextSerializer } from "./clipboardTextSerializer";
-import { Keymap } from "./keymap";
-import { ListKeymap } from "./listKeymap";
-import { Dropcursor } from "./dropcursor";
-import { Gapcursor } from "./gapcursor";
-import { Extension } from "./Extension";
-import { ArkpadExtension, ArkpadCommandProps } from "../types";
+import { Extension } from "../sdk/Extension";
+import { createHardBreak, createHistory } from "./essentials/base";
+import { createUniqueId } from "./infrastructure/unique-id";
+import { FocusEvents } from "./infrastructure/focusEvents";
+import { ClipboardTextSerializer } from "./infrastructure/clipboardTextSerializer";
+import { Keymap } from "./infrastructure/keymap";
+import { ListKeymap } from "./infrastructure/listKeymap";
+import { Dropcursor } from "./ux/dropcursor";
+import { Gapcursor } from "./ux/gapcursor";
+import { ArkpadExtension } from "../api/extensions";
 import {
   toggleMark,
   toggleBlock,
@@ -15,7 +15,7 @@ import {
   setTextAlign,
   insertNode,
   updateAttributes,
-} from "../commands";
+} from "../services/commands";
 import { type MarkType, type NodeType } from "prosemirror-model";
 
 /**
@@ -26,46 +26,43 @@ export const BaseCommands = Extension.create({
 
   addCommands: () => ({
     toggleMark:
-      (type: string | MarkType, attrs?: Record<string, any>) => (props: ArkpadCommandProps) => {
+      (type: string | MarkType, attrs?: Record<string, any>) => (props: any) => {
         return toggleMark(type, attrs)(props);
       },
     toggleBlock:
-      (type: string | NodeType, attrs?: Record<string, any>) => (props: ArkpadCommandProps) => {
+      (type: string | NodeType, attrs?: Record<string, any>) => (props: any) => {
         return toggleBlock(type, attrs)(props);
       },
     toggleList:
-      (listType: string | NodeType, itemType: string | NodeType) => (props: ArkpadCommandProps) => {
-        return toggleList(listType, itemType)(props);
+      (listType: string | NodeType) => (props: any) => {
+        return toggleList(listType)(props);
       },
-    setTextAlign: (align: string) => (props: ArkpadCommandProps) => {
+    setTextAlign: (align: string) => (props: any) => {
       return setTextAlign(align)(props);
     },
     insertNode:
-      (type: string | NodeType, attrs?: Record<string, any>) => (props: ArkpadCommandProps) => {
+      (type: string | NodeType, attrs?: Record<string, any>) => (props: any) => {
         return insertNode(type, attrs)(props);
       },
     updateAttributes:
-      (typeOrName: string, attributes: Record<string, any>) => (props: ArkpadCommandProps) => {
+      (typeOrName: string, attributes: Record<string, any>) => (props: any) => {
         return updateAttributes(typeOrName, attributes)(props);
       },
-    first: (commands: any[]) => (props: ArkpadCommandProps) => {
+    first: (commands: any[]) => (props: any) => {
       for (const command of commands) {
-        // If it's a function, call it with props.
-        // If that result is another function (higher-order), call it again.
         let result = typeof command === "function" ? command(props) : command;
         if (typeof result === "function") {
           result = result(props);
         }
-
         if (result === true) return true;
       }
       return false;
     },
-    lockUI: (name: string) => (props: ArkpadCommandProps) => {
+    lockUI: (name: string) => (props: any) => {
       props.editor.extensionManager.menuEngine?.lock(name);
       return true;
     },
-    unlockUI: (name: string) => (props: ArkpadCommandProps) => {
+    unlockUI: (name: string) => (props: any) => {
       props.editor.extensionManager.menuEngine?.unlock(name);
       return true;
     },
@@ -74,9 +71,6 @@ export const BaseCommands = Extension.create({
 
 /**
  * Engine - The essential skeleton for the editor.
- * Note: The base `arkpadSchema` already provides Document, Paragraph, and Text.
- * This Engine bundle is now a no-op container for utility extensions
- * like History, UniqueId, etc., ensuring a clean separation of concerns.
  */
 export const Engine = Extension.create({
   name: "engine",
@@ -96,11 +90,9 @@ export const Engine = Extension.create({
 
 /**
  * Core Essentials - Minimal set of extensions required for the editor to function.
- * Users should typically use @arkpad/starter-kit instead.
- * Note: Document, Paragraph, and Text are provided by the base arkpadSchema.
  */
 export const CoreEssentials: ArkpadExtension[] = [
-  Engine, // Includes HardBreak, UniqueId, BaseCommands, Focus, Clipboard, Keymaps
+  Engine,
   Dropcursor,
   Gapcursor,
 ];
@@ -112,14 +104,13 @@ export function createCoreEssentials(): ArkpadExtension[] {
   return CoreEssentials;
 }
 
-export * from "./base";
-export * from "./unique-id";
-export * from "./focusEvents";
-export * from "./clipboardTextSerializer";
-export * from "./keymap";
-export * from "./listKeymap";
-export * from "./textDirection";
-export * from "./dropcursor";
-export * from "./gapcursor";
-export * from "./utils";
-export { CharacterCount } from "./character-count";
+export * from "./essentials/base";
+export * from "./infrastructure/unique-id";
+export * from "./infrastructure/focusEvents";
+export * from "./infrastructure/clipboardTextSerializer";
+export * from "./infrastructure/keymap";
+export * from "./infrastructure/listKeymap";
+export * from "./infrastructure/textDirection";
+export * from "./ux/dropcursor";
+export * from "./ux/gapcursor";
+export { CharacterCount } from "./infrastructure/character-count";

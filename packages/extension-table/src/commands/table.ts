@@ -28,13 +28,13 @@ export const insertTable: CommandFactory =
 
 export const deleteTable: CommandFactory = () => ({ chain }: ArkpadCommandProps) => {
   return chain()
-    .command(({ state, dispatch }) => pmDeleteTable(state, dispatch))
+    .command(({ state, dispatch }: ArkpadCommandProps) => pmDeleteTable(state, dispatch))
     .run();
 };
 
 export const exitTable: CommandFactory = () => ({ chain }: ArkpadCommandProps) => {
   return chain()
-    .command(({ state, tr, dispatch }) => {
+    .command(({ state, tr, dispatch }: ArkpadCommandProps) => {
       const { selection } = state;
       const { $from } = selection;
 
@@ -74,7 +74,7 @@ export const exitTable: CommandFactory = () => ({ chain }: ArkpadCommandProps) =
 
 export const fixTables: CommandFactory = () => ({ chain }: ArkpadCommandProps) => {
   return chain()
-    .command(({ state, dispatch }) => {
+    .command(({ state, dispatch }: ArkpadCommandProps) => {
       const tr = pmFixTables(state);
       if (tr && dispatch) {
         dispatch(tr);

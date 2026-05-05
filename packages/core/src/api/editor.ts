@@ -1,0 +1,60 @@
+import type { EditorState } from "prosemirror-state";
+import type { EditorView } from "prosemirror-view";
+import type {
+  ArkpadCommandProxy,
+  ChainedCommands,
+  SearchResult,
+  ArkpadDocJSON,
+  ArkpadContent,
+} from "./services";
+
+export interface IArkpadEditor {
+  readonly element: HTMLElement;
+  readonly commands: ArkpadCommandProxy;
+  readonly storage: Record<string, any>;
+  readonly extensionManager: any;
+
+  getState(): EditorState;
+  getView(): EditorView;
+  getHTML(): string;
+  getJSON(): ArkpadDocJSON;
+  getMarkdown(): string;
+  getText(): string;
+  isActive(name: string, attrs?: Record<string, any>): boolean;
+  getAttributes(name: string): Record<string, any> | null;
+  runCommand(name: string, ...args: any[]): boolean;
+  canRunCommand(name: string, ...args: any[]): boolean;
+
+  chain(): ChainedCommands;
+  can(): ChainedCommands;
+
+  setContent(content: ArkpadContent, emitUpdate?: boolean): void;
+  clearContent(emitUpdate?: boolean): void;
+
+  getSelection(): { from: number; to: number; empty: boolean };
+  setSelection(range: { from: number; to: number } | number): void;
+  selectAll(): void;
+
+  getCoords(pos?: number): { top: number; left: number; bottom: number; right: number } | null;
+
+  search(query: string | RegExp): SearchResult[];
+  replace(query: string | RegExp, replacement: string): boolean;
+
+  focus(pos?: "start" | "end" | number): void;
+  blur(): void;
+  setEditable(editable: boolean): void;
+  isEditable(): boolean;
+
+  saveSnapshot(name: string): void;
+  restoreSnapshot(name: string): boolean;
+
+  registerExtension(extension: any): void;
+  registerExtensions(extensions: any[]): void;
+  unregisterExtension(name: string): void;
+
+  subscribe(callback: (editor: IArkpadEditor) => void): () => void;
+  addInterceptor(interceptor: any): void;
+  batch(callback: (editor: IArkpadEditor) => void): void;
+  refresh(): void;
+  destroy(): void;
+}

@@ -1,33 +1,63 @@
-export { ArkpadEditor, createArkpadEditor } from "./editor";
-export { arkpadSchema } from "./schema";
-export { Extension } from "./extensions/Extension";
-export { Node } from "./extensions/Node";
-export { Mark } from "./extensions/Mark";
-export { MenuEngine } from "./extensions/MenuEngine";
-export type { GlobalMenuStorage, MenuState } from "./extensions/MenuEngine";
-export { ExtensionManager } from "./extensions/ExtensionManager";
-export * from "./extensions/index";
-export { Engine } from "./extensions/index";
-export * from "./commands/index";
-export type {
+// THE STOREFRONT (Public API)
+
+// Contracts
+export type { IArkpadEditor } from "./api/editor";
+export type { 
+  ChainedCommands, 
+  ArkpadCommandProxy, 
+  ArkpadCommand, 
   ArkpadCommandRegistry,
   ArkpadCommandProps,
-  ArkpadCommandProxy,
-  ArkpadCommands,
-  ArkpadExtension,
-  ArkpadContent,
-  ArkpadDocJSON,
-  ArkpadEditorAPI,
-  ArkpadEditorOptions,
-  ArkpadUpdatePayload,
-  Dispatch,
-  NodeView,
-  NodeViewConstructor,
-  MenuConfig,
+  SearchResult, 
+  ArkpadDocJSON, 
+  ArkpadContent, 
+  ICommandRegistry, 
+  ISelectionService, 
+  ISchemaService, 
+  ArkpadEditorOptions, 
+  ResolvedArkpadEditorOptions,
+  ArkpadUpdatePayload, 
+  InterceptorConfig,
+  Dispatch
+} from "./api/services";
+export type { 
+  ArkpadExtension, 
+  ExtensionConfig, 
+  NodeConfig, 
+  MarkConfig, 
+  MenuConfig, 
   MenuType,
-} from "./types";
+  AttributeConfig, 
+  Attributes, 
+  ExtensionContext, 
+  NodeViewConstructor,
+  NodeView
+} from "./api/extensions";
 
-// Re-export ProseMirror types for extension development
+// SDK
+export { Extension } from "./sdk/Extension";
+export { Node } from "./sdk/Node";
+export { Mark } from "./sdk/Mark";
+export * from "./sdk/utils";
+
+// Core
+import { ArkpadEditor, createArkpadEditor } from "./core/ArkpadEditor";
+export { ArkpadEditor, createArkpadEditor };
+export { ArkpadEditor as ArkpadEditorAPI };
+export { ExtensionManager } from "./core/ExtensionManager";
+
+// Services
+export { MenuEngine } from "./services/menu/MenuEngine";
+export type { GlobalMenuStorage, MenuState } from "./services/menu/MenuEngine";
+export { CommandManager } from "./services/commands/CommandManager";
+
+// Extensions
+export * from "./extensions";
+
+// Helper Commands (Previously in src/commands)
+export * from "./services/commands";
+
+// Re-export ProseMirror types for extension development (Essential for compatibility)
 export {
   Schema,
   Node as PMNode,
@@ -43,5 +73,6 @@ export {
   Selection,
   TextSelection,
   NodeSelection,
+  Plugin,
 } from "prosemirror-state";
 export { EditorView } from "prosemirror-view";

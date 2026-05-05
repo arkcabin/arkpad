@@ -89,7 +89,7 @@ export const Table = Extension.create<TableOptions>({
   },
 
   addNodeView() {
-    return ({ node }) => new TableView(node, this.options.cellMinWidth) as any;
+    return ({ node }: { node: any }) => new TableView(node, this.options.cellMinWidth) as any;
   },
 
   addProseMirrorPlugins() {

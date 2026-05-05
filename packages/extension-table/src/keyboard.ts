@@ -2,7 +2,7 @@ import type { EditorState } from "prosemirror-state";
 import { TextSelection } from "prosemirror-state";
 import type { EditorView } from "prosemirror-view";
 import { goToNextCell, isInTable } from "prosemirror-tables";
-import type { ArkpadEditorAPI } from "@arkpad/core";
+import type { ArkpadEditor } from "@arkpad/core";
 import { findParentNode } from "@arkpad/core";
 
 export const keyboardShortcuts = {
@@ -37,7 +37,7 @@ export const keyboardShortcuts = {
   },
   Tab: (state: EditorState, dispatch?: (tr: any) => void, view?: EditorView) => {
     if (!isInTable(state)) return false;
-    const editor = (view as any)?.editor as ArkpadEditorAPI;
+    const editor = (view as any)?.editor as ArkpadEditor;
     if (!editor) return false;
 
     if (goToNextCell(1)(state, dispatch)) return true;
@@ -50,7 +50,7 @@ export const keyboardShortcuts = {
     return goToNextCell(-1)(state, dispatch);
   },
   "Shift-Enter": (_state: EditorState, _dispatch: any, view?: EditorView) => {
-    const editor = (view as any)?.editor as ArkpadEditorAPI;
+    const editor = (view as any)?.editor as ArkpadEditor;
     if (!editor) return false;
     return editor.runCommand("exitTable");
   },
