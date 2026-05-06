@@ -404,7 +404,7 @@ export class ArkpadEditor implements IArkpadEditor {
         props: {
           decorations: (state) => {
             const decorations: Decoration[] = [];
-            this.virtualSelections.forEach((val, _id) => {
+            this.virtualSelections.forEach((val) => {
               const { from, to, color, label } = val;
               const docSize = state.doc.content.size;
               const safeFrom = Math.max(0, Math.min(from, docSize));
