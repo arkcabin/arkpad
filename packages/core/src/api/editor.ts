@@ -69,8 +69,8 @@ export interface IArkpadEditor {
 
   subscribe(callback: (editor: IArkpadEditor) => void): () => void;
   addInterceptor(interceptor: any): void;
-  addAsyncInterceptor(interceptor: any): void;
-  dispatch(transaction: any): void;
+  addAsyncInterceptor(interceptor: AsyncInterceptor): void;
+  dispatch(transaction: Transaction): void;
   batch(callback: (editor: IArkpadEditor) => void): void;
   refresh(): void;
   emitUpdate(state: EditorState): void;
