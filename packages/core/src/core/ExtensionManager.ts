@@ -24,6 +24,7 @@ export class ExtensionManager {
   public proseMirrorPlugins: Plugin[] = [];
   public nodeViews: Record<string, any> = {};
   public activeMappings: Record<string, string> = {};
+  public commandToExtension: Map<string, ArkpadExtension> = new Map();
   private isBatching = false;
   public menuEngine?: MenuEngine;
 
@@ -189,6 +190,9 @@ export class ExtensionManager {
       Object.keys(extCommands).forEach((key) => {
         const newCommand = extCommands[key];
         if (!newCommand) return;
+
+        // Track which extension provides this command for Governance
+        this.commandToExtension.set(key, ext);
 
         if (commands[key]) {
           const prevCommand = commands[key]!;

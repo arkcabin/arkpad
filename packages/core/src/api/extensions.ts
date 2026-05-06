@@ -185,6 +185,7 @@ export interface ArkpadExtension {
   options?: any;
   addAttributes?: () => Attributes;
   addNodeView?: () => any;
+  role?: number;
   extend?: (config: Partial<ExtensionConfig<any, any>>) => ArkpadExtension;
 }
 

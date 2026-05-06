@@ -1,7 +1,6 @@
 import { EditorState } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
 import { IArkpadEditor, MenuConfig, MenuType } from "../../api";
-import { findParentNode } from "../../sdk/utils";
 
 export interface MenuState {
   active: boolean;
@@ -185,27 +184,35 @@ export class MenuEngine {
   private calculateCoords(view: EditorView, type: MenuType) {
     const { state } = view;
     const { from, to, empty } = state.selection;
+    const selection = state.selection as any;
 
     try {
       const editorRect = view.dom.getBoundingClientRect();
       const containerScrollTop = view.dom.scrollTop;
       const containerScrollLeft = view.dom.scrollLeft;
 
-      // Superior Strategy: If we're in a structural node (Table Cell), use the Node's DOM boundary.
-      // This ignores line-height and padding issues seen in Range-based math.
-      const cellResult = findParentNode(
-        (node) => node.type.spec.tableRole === "cell" || node.type.spec.tableRole === "header_cell"
-      )(state.selection);
+      // Cell selections should anchor to the selected cell rectangle.
+      // Regular caret/text selections inside a cell should anchor to the actual selection.
+      const anchorCellPos = selection.anchorCell || selection.$anchorCell?.pos;
+      const headCellPos = selection.headCell || selection.$headCell?.pos;
+      const isCellSelection = Number.isInteger(anchorCellPos) && Number.isInteger(headCellPos);
 
-      if (cellResult) {
-        const cellDom = view.nodeDOM(cellResult.pos) as HTMLElement;
-        if (cellDom) {
-          const rect = cellDom.getBoundingClientRect();
+      if (isCellSelection) {
+        const anchorCellDom = view.nodeDOM(anchorCellPos) as HTMLElement | null;
+        const headCellDom = view.nodeDOM(headCellPos) as HTMLElement | null;
+
+        if (anchorCellDom && headCellDom) {
+          const anchorRect = anchorCellDom.getBoundingClientRect();
+          const headRect = headCellDom.getBoundingClientRect();
           return {
-            top: rect.top - editorRect.top + containerScrollTop,
-            left: rect.left - editorRect.left + containerScrollLeft,
-            bottom: rect.bottom - editorRect.top + containerScrollTop,
-            right: rect.right - editorRect.left + containerScrollLeft,
+            top: Math.min(anchorRect.top, headRect.top) - editorRect.top + containerScrollTop,
+            left: Math.min(anchorRect.left, headRect.left) - editorRect.left + containerScrollLeft,
+            bottom:
+              Math.max(anchorRect.bottom, headRect.bottom) - editorRect.top + containerScrollTop,
+            right:
+              Math.max(anchorRect.right, headRect.right) -
+              editorRect.left +
+              containerScrollLeft,
           };
         }
       }

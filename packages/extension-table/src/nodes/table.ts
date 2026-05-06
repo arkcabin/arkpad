@@ -1,5 +1,6 @@
 import type { NodeSpec } from "prosemirror-model";
 import { createColGroup } from "./utilities/createColGroup";
+import { NodeRole } from "@arkpad/core";
 
 export const tableNode: NodeSpec = {
   content: "table_row+",
@@ -8,6 +9,8 @@ export const tableNode: NodeSpec = {
   },
   tableRole: "table",
   isolating: true,
+  role: NodeRole.WIDGET | NodeRole.ISOLATED,
+  allowedRoles: NodeRole.LAYOUT,
   group: "block",
   selectable: false,
   parseDOM: [

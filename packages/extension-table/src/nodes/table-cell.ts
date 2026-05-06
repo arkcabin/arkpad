@@ -1,4 +1,5 @@
 import type { NodeSpec } from "prosemirror-model";
+import { NodeRole } from "@arkpad/core";
 import type { TableCellAttrs } from "../types";
 
 export function parseCellAttrs(dom: HTMLElement): Partial<TableCellAttrs> {
@@ -6,13 +7,19 @@ export function parseCellAttrs(dom: HTMLElement): Partial<TableCellAttrs> {
     colspan: parseInt(dom.getAttribute("colspan") || "1", 10),
     rowspan: parseInt(dom.getAttribute("rowspan") || "1", 10),
     colwidth: dom.getAttribute("data-colwidth")
-      ? dom.getAttribute("data-colwidth")!.split(",").map((v) => parseInt(v, 10))
+      ? dom
+          .getAttribute("data-colwidth")!
+          .split(",")
+          .map((v) => parseInt(v, 10))
       : null,
     background: dom.style.backgroundColor || null,
   };
 }
 
-export function renderCellAttrs(attrs: TableCellAttrs, tag: string): [string, Record<string, any>, number] {
+export function renderCellAttrs(
+  attrs: TableCellAttrs,
+  tag: string
+): [string, Record<string, any>, number] {
   const domAttrs: Record<string, any> = {};
   if (attrs.colspan !== 1) domAttrs.colspan = attrs.colspan;
   if (attrs.rowspan !== 1) domAttrs.rowspan = attrs.rowspan;
@@ -23,7 +30,7 @@ export function renderCellAttrs(attrs: TableCellAttrs, tag: string): [string, Re
 }
 
 export const tableCellNode: NodeSpec = {
-  content: "paragraph+",
+  content: "block+",
   attrs: {
     colspan: { default: 1 },
     rowspan: { default: 1 },
@@ -31,6 +38,7 @@ export const tableCellNode: NodeSpec = {
     background: { default: null },
   },
   tableRole: "cell",
+  role: NodeRole.LAYOUT,
   isolating: true,
   parseDOM: [{ tag: "td", getAttrs: parseCellAttrs }],
   toDOM(node) {

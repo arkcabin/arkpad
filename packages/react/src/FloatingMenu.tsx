@@ -25,7 +25,7 @@ export const FloatingMenu: React.FC<FloatingMenuProps> = ({
   offset = 40,
   shouldShow,
 }) => {
-  const { style, active } = useMenuPositioner({
+  const { ref, style, active } = useMenuPositioner({
     editor,
     extensionName: "floatingMenu",
     type: "floating",
@@ -49,7 +49,7 @@ export const FloatingMenu: React.FC<FloatingMenuProps> = ({
   if (typeof document === "undefined" || !active) return null;
 
   return createPortal(
-    <div style={style} className={className}>
+    <div ref={ref} style={style} className={className}>
       {children}
     </div>,
     document.body

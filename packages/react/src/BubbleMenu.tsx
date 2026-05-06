@@ -31,7 +31,7 @@ export const BubbleMenu: React.FC<BubbleMenuProps> = ({
   offset = 12,
   shouldShow,
 }) => {
-  const { style, active } = useMenuPositioner({
+  const { ref, style, active } = useMenuPositioner({
     editor,
     extensionName: "bubbleMenu",
     type: "bubble",
@@ -56,7 +56,7 @@ export const BubbleMenu: React.FC<BubbleMenuProps> = ({
   if (typeof document === "undefined" || !active) return null;
 
   return createPortal(
-    <div style={style} className={className}>
+    <div ref={ref} style={style} className={className}>
       {children}
     </div>,
     document.body

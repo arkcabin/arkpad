@@ -63,6 +63,19 @@ export class SchemaBuilder {
           allowedRoles: config.allowedRoles,
         };
 
+        // Bridge: Map Bitmask Role to Native ProseMirror Groups
+        if (spec.role) {
+          const roles: string[] = [];
+          if (spec.role & 2) roles.push("block"); // NodeRole.CONTENT
+          if (spec.role & 8) roles.push("layout"); // NodeRole.LAYOUT
+          if (spec.role & 4) roles.push("widget"); // NodeRole.WIDGET
+
+          if (roles.length > 0) {
+            const existingGroups = spec.group ? spec.group.split(" ") : [];
+            spec.group = Array.from(new Set([...existingGroups, ...roles])).join(" ");
+          }
+        }
+
         if ((ext as any).config.renderHTML) {
           spec.toDOM = (node: any) =>
             (ext as any).renderHTML({

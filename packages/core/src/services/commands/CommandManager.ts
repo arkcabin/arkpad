@@ -121,10 +121,10 @@ class CommandManagerInstance {
                   : (result as any)(props);
 
               if (success) {
-                this.merge(localTr);
+                const merged = this.merge(localTr);
                 this.executionLog.push({
                   command: prop,
-                  status: "✅ Success",
+                  status: merged ? "✅ Success" : "💥 Merge Failed",
                   duration: `${(performance.now() - startTime).toFixed(2)}ms`,
                 });
               } else {
@@ -169,9 +169,9 @@ class CommandManagerInstance {
    * Refined Merge Strategy:
    * 1. Updates master transaction steps.
    * 2. Updates virtual state.
-   * 3. Syncs selection from state back to master transaction.
+   * 3. Syncs selection from the updated virtual state back to the master transaction.
    */
-  private merge(localTr: Transaction) {
+  private merge(localTr: Transaction): boolean {
     try {
       // 1. Accumulate steps into master transaction
       localTr.steps.forEach((step) => this.masterTransaction.step(step));
@@ -182,21 +182,37 @@ class CommandManagerInstance {
       // 3. Sync Selection-Last: Derive selection from the NEW state to ensure document integrity
       if (localTr.selectionSet) {
         const { selection } = this.virtualState;
-        const { from, to } = selection;
+        if (!selection) return true;
+
+        // Size Guard: Safety clamp to prevent RangeErrors
+        const docSizeNow = this.masterTransaction.doc.content.size;
+        const safeFrom = Math.max(0, Math.min(selection.from, docSizeNow));
+        const safeTo = Math.max(0, Math.min(selection.to, docSizeNow));
 
         if (selection instanceof NodeSelection) {
-          this.masterTransaction.setSelection(
-            NodeSelection.create(this.masterTransaction.doc, from)
-          );
+          // Verify that a node actually exists at safeFrom
+          const nodeAtPos = this.masterTransaction.doc.nodeAt(safeFrom);
+          if (nodeAtPos && nodeAtPos.type.spec.selectable !== false) {
+            this.masterTransaction.setSelection(
+              NodeSelection.create(this.masterTransaction.doc, safeFrom)
+            );
+          } else {
+            // Fallback to text selection if node is gone
+            this.masterTransaction.setSelection(
+              TextSelection.create(this.masterTransaction.doc, safeFrom)
+            );
+          }
         } else {
           this.masterTransaction.setSelection(
-            TextSelection.create(this.masterTransaction.doc, from, to)
+            TextSelection.create(this.masterTransaction.doc, safeFrom, safeTo)
           );
         }
       }
+      return true;
     } catch (e) {
       console.error("[Arkpad] Shadow merge failed (Refined):", e);
       this.allSuccessful = false;
+      return false;
     }
   }
 
@@ -224,9 +240,9 @@ class CommandManagerInstance {
     }
 
     const localTr = this.virtualState.tr.setSelection(selection);
-    this.merge(localTr);
+    const merged = this.merge(localTr);
 
-    if (this.allSuccessful) {
+    if (merged) {
       this.executionLog.push({
         command: `focus(${position})`,
         status: "✅ Success",
@@ -251,11 +267,10 @@ class CommandManagerInstance {
       const slice = new Slice(parsedDoc.content, 0, 0);
       const localTr = this.virtualState.tr.replaceSelection(slice);
 
-      this.merge(localTr);
-
+      const merged = this.merge(localTr);
       this.executionLog.push({
         command: "insertContent",
-        status: "✅ Success",
+        status: merged ? "✅ Success" : "💥 Merge Failed",
         duration: "N/A",
       });
     } catch (e) {
@@ -319,10 +334,10 @@ class CommandManagerInstance {
     });
 
     if (success) {
-      this.merge(localTr);
+      const merged = this.merge(localTr);
       this.executionLog.push({
         command: label,
-        status: "✅ Success",
+        status: merged ? "✅ Success" : "💥 Merge Failed",
         duration: "N/A",
       });
     } else {
@@ -369,7 +384,7 @@ class CommandManagerInstance {
  * Type-safe export for CommandManager.
  */
 export const CommandManager = CommandManagerInstance as unknown as {
-  new(options: {
+  new (options: {
     state: EditorState;
     commands: ArkpadCommandRegistry;
     view?: EditorView;

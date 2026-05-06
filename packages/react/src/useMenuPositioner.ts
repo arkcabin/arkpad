@@ -1,6 +1,6 @@
 import { useEditorState } from "./useEditorState";
 import { ArkpadEditorAPI, GlobalMenuStorage } from "@arkpad/core";
-import { CSSProperties } from "react";
+import { CSSProperties, useEffect, useRef } from "react";
 
 export interface UseMenuPositionerProps {
   editor: ArkpadEditorAPI | null;
@@ -15,6 +15,8 @@ export function useMenuPositioner({
   type,
   offset = 2,
 }: UseMenuPositionerProps) {
+  const menuRef = useRef<HTMLDivElement | null>(null);
+
   const menuState = useEditorState(
     editor,
     (editor) => {
@@ -45,47 +47,105 @@ export function useMenuPositioner({
     }
   );
 
-  if (!menuState || !menuState.menu || !menuState.menu.active || !menuState.menu.coords) {
+  const menu = menuState?.menu;
+  const isActive = !!(menuState && menu && menu.active && menu.coords);
+  const coords = menu?.coords;
+  const isLocked = menuState?.isLocked ?? false;
+  const isFirstShow = menu?.isFirstShow ?? false;
+
+  useEffect(() => {
+    if (!editor || !menuRef.current || typeof window === "undefined" || !isActive || !coords) {
+      return;
+    }
+
+    let frame = 0;
+
+    const updatePosition = () => {
+      const node = menuRef.current;
+      if (!node) return;
+
+      const editorRect = editor.element.getBoundingClientRect();
+      const editorScrollTop = editor.element.scrollTop;
+      const editorScrollLeft = editor.element.scrollLeft;
+
+      const viewportCoords = {
+        top: editorRect.top + coords.top - editorScrollTop,
+        left: editorRect.left + coords.left - editorScrollLeft,
+        bottom: editorRect.top + coords.bottom - editorScrollTop,
+        right: editorRect.left + coords.right - editorScrollLeft,
+      };
+
+      let x: number;
+      let y: number;
+
+      if (type === "bubble") {
+        const centerX = (viewportCoords.left + viewportCoords.right) / 2;
+        x = centerX;
+        y = viewportCoords.top - offset;
+      } else {
+        const floatingPadding = 4;
+        x = viewportCoords.left - floatingPadding;
+        y = viewportCoords.top;
+      }
+
+      node.style.transform = `translate3d(${x}px, ${y}px, 0) ${
+        type === "bubble" ? "translate(-50%, -100%)" : "translate(0, -50%)"
+      }`;
+    };
+
+    const scheduleUpdate = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        updatePosition();
+      });
+    };
+
+    updatePosition();
+    window.addEventListener("scroll", scheduleUpdate, true);
+    window.addEventListener("resize", scheduleUpdate);
+    editor.element.addEventListener("scroll", scheduleUpdate);
+
+    return () => {
+      window.removeEventListener("scroll", scheduleUpdate, true);
+      window.removeEventListener("resize", scheduleUpdate);
+      editor.element.removeEventListener("scroll", scheduleUpdate);
+      if (frame) {
+        window.cancelAnimationFrame(frame);
+      }
+    };
+  }, [
+    coords?.bottom,
+    coords?.left,
+    coords?.right,
+    coords?.top,
+    editor,
+    isActive,
+    offset,
+    type,
+  ]);
+
+  if (!isActive) {
     return {
       active: false,
+      ref: menuRef,
       style: {
         visibility: "hidden" as const,
         opacity: 0,
         pointerEvents: "none" as const,
-        position: "absolute" as const,
+        position: "fixed" as const,
       } as CSSProperties,
     };
   }
 
-  const { menu, isLocked } = menuState;
-  const coords = menu.coords!;
-  const isFirstShow = menu.isFirstShow;
-
-  // Calculate final position
-  let x: number;
-  let y: number;
-
-  if (type === "bubble") {
-    // Center horizontally, position above selection
-    const centerX = (coords.left + coords.right) / 2;
-    x = centerX;
-    y = coords.top - offset;
-  } else {
-    // Floating menu (left of cursor)
-    const floatingPadding = 4;
-    x = coords.left - floatingPadding;
-    y = coords.top;
-  }
-
-  // Positioning Strategy: Absolute
-  // By using absolute positioning inside a relative parent (the editor container),
-  // the menu moves automatically with the browser's hardware-accelerated scroll.
+  // Position menus in viewport space so they stay aligned even when rendered
+  // outside the editor DOM tree (for example in portals or demo wrappers).
   const style: CSSProperties = {
-    position: "absolute",
+    position: "fixed",
     top: 0,
     left: 0,
     zIndex: 1000,
-    transform: `translate3d(${x}px, ${y}px, 0) ${type === "bubble" ? "translate(-50%, -100%)" : "translate(0, -50%)"}`,
+    transform: "translate3d(-9999px, -9999px, 0)",
     visibility: isLocked ? "hidden" : "visible",
     opacity: isLocked ? 0 : 1,
     pointerEvents: isLocked ? "none" : "auto",
@@ -99,6 +159,7 @@ export function useMenuPositioner({
 
   return {
     active: true,
+    ref: menuRef,
     style,
   };
 }

@@ -34,15 +34,22 @@ export class EventEmitter {
 
   /**
    * Emit an event.
+   * Supports hierarchical "Pulse" emissions (e.g., emitting "selection:update"
+   * also triggers listeners for "selection").
    */
   emit(event: string, ...args: any[]): this {
-    if (!this.callbacks[event]) {
-      return this;
+    // 1. Trigger exact match
+    if (this.callbacks[event]) {
+      this.callbacks[event].forEach((callback) => callback(...args));
     }
 
-    this.callbacks[event].forEach((callback) => {
-      callback(...args);
-    });
+    // 2. Pulse: Trigger parent namespace if applicable
+    if (event.includes(":")) {
+      const parentEvent = event.split(":")[0]!;
+      if (this.callbacks[parentEvent]) {
+        this.callbacks[parentEvent].forEach((callback) => callback(...args));
+      }
+    }
 
     return this;
   }

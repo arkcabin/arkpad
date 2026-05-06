@@ -10,6 +10,17 @@ export enum NodeRole {
   WIDGET = 4, // Self-contained features (Image, Video, Table)
   LAYOUT = 8, // Structural containers (Section, Column, Grid)
   ROOT = 16, // The document root
+  ISOLATED = 32, // Cannot be merged or split (CodeBlock, Table)
+}
+
+/**
+ * Healing actions to resolve structural violations.
+ */
+export enum HealingAction {
+  NONE = "NONE",
+  LIFT = "LIFT",
+  WRAP = "WRAP",
+  DELETE = "DELETE",
 }
 
 /**
@@ -17,6 +28,10 @@ export enum NodeRole {
  * Ensures the document tree follows strict nesting rules.
  */
 export class Governance {
+  private static hasRole(roleMask: number, role: NodeRole): boolean {
+    return (roleMask & role) !== 0;
+  }
+
   /**
    * Checks if a parent node can accept a child node based on their roles.
    * This is a high-performance bitmask comparison.
@@ -28,27 +43,56 @@ export class Governance {
     }
 
     // Default "Best of Best" Industry Rules:
-    // 1. ROOT accepts LAYOUT and CONTENT
-    if (parentRole === NodeRole.ROOT) {
-      return (childRole & (NodeRole.LAYOUT | NodeRole.CONTENT | NodeRole.WIDGET)) !== 0;
+    // 1. ROOT accepts LAYOUT, CONTENT, WIDGET, and ISOLATED (Tables/CodeBlocks)
+    if (this.hasRole(parentRole, NodeRole.ROOT)) {
+      return (childRole & (NodeRole.LAYOUT | NodeRole.CONTENT | NodeRole.WIDGET | NodeRole.ISOLATED)) !== 0;
     }
 
-    // 2. LAYOUT accepts LAYOUT, CONTENT, and WIDGET
-    if (parentRole === NodeRole.LAYOUT) {
-      return (childRole & (NodeRole.LAYOUT | NodeRole.CONTENT | NodeRole.WIDGET)) !== 0;
+    // 2. LAYOUT accepts LAYOUT, CONTENT, WIDGET, and ISOLATED
+    if (this.hasRole(parentRole, NodeRole.LAYOUT)) {
+      return (childRole & (NodeRole.LAYOUT | NodeRole.CONTENT | NodeRole.WIDGET | NodeRole.ISOLATED)) !== 0;
     }
 
-    // 3. CONTENT accepts ATOM and specialized inline WIDGETS
-    if (parentRole === NodeRole.CONTENT) {
-      return (childRole & (NodeRole.ATOM | NodeRole.WIDGET)) !== 0;
+    // 3. CONTENT accepts ATOM, WIDGETS, and other CONTENT (unblocks Lists, Blockquotes, etc.)
+    if (this.hasRole(parentRole, NodeRole.CONTENT)) {
+      return (childRole & (NodeRole.ATOM | NodeRole.WIDGET | NodeRole.CONTENT)) !== 0;
     }
 
-    // 4. ATOM cannot accept anything (Leaf)
-    if (parentRole === NodeRole.ATOM) {
+    // 4. ISOLATED nodes (Tables, CodeBlocks) act as containers
+    if (this.hasRole(parentRole, NodeRole.ISOLATED)) {
+      return (childRole & (NodeRole.LAYOUT | NodeRole.CONTENT | NodeRole.ATOM | NodeRole.WIDGET)) !== 0;
+    }
+
+    // 5. ATOM cannot accept anything (Leaf)
+    if (this.hasRole(parentRole, NodeRole.ATOM)) {
       return false;
     }
 
     return false;
+  }
+
+  /**
+   * Resolves the healing action required for a child-parent violation.
+   */
+  static resolveHealingAction(parentRole: number, childRole: number): HealingAction {
+    // If child is LAYOUT/CONTENT and parent is CONTENT, we must LIFT it out.
+    if (
+      this.hasRole(parentRole, NodeRole.CONTENT) &&
+      (childRole & (NodeRole.LAYOUT | NodeRole.CONTENT)) !== 0
+    ) {
+      return HealingAction.LIFT;
+    }
+
+    // If child is ATOM and parent is ROOT/LAYOUT, we must WRAP it in CONTENT (Paragraph).
+    if (
+      childRole === NodeRole.ATOM &&
+      (this.hasRole(parentRole, NodeRole.ROOT) || this.hasRole(parentRole, NodeRole.LAYOUT))
+    ) {
+      return HealingAction.WRAP;
+    }
+
+    // If it's a structural orphan that can't be lifted or wrapped, DELETE.
+    return HealingAction.DELETE;
   }
 
   /**
@@ -61,23 +105,17 @@ export class Governance {
     if (spec.role) return spec.role;
 
     // 2. Structural Helpers
-    if (spec.isLayout) return NodeRole.LAYOUT;
-    if (spec.isWidget) return NodeRole.WIDGET;
+    let role = 0;
+    if (spec.isLayout) role |= NodeRole.LAYOUT;
+    if (spec.isWidget) role |= NodeRole.WIDGET;
+    if (spec.code || spec.isolating) role |= NodeRole.ISOLATED;
+
+    if (role !== 0) return role;
 
     // 3. Fallbacks
     if (node.type.name === "doc") return NodeRole.ROOT;
     if (node.isLeaf || node.isText) return NodeRole.ATOM;
 
     return NodeRole.CONTENT;
-  }
-
-  /**
-   * Automatically heals invalid document structures by wrapping or relocating nodes.
-   * This is what makes the engine "Immortal".
-   */
-  static heal(node: PMNode): PMNode {
-    // This will be implemented in Step 4 with full ProseMirror Transform logic.
-    // For now, it returns the node as-is.
-    return node;
   }
 }

@@ -1,11 +1,13 @@
 import { DOMSerializer } from "prosemirror-model";
-import { EditorState, TextSelection, Transaction, Plugin } from "prosemirror-state";
-import { EditorView } from "prosemirror-view";
+import { EditorState, TextSelection, Transaction, Plugin, NodeSelection } from "prosemirror-state";
+import { EditorView, DecorationSet, Decoration } from "prosemirror-view";
 import { EventEmitter } from "./EventEmitter";
 import { Storage } from "./Storage";
 import { ShortcutRegistry } from "./ShortcutRegistry";
-import { Governance } from "./Governance";
+import { Governance, NodeRole, HealingAction } from "./Governance";
 import { ExtensionManager } from "./ExtensionManager";
+
+declare const process: any;
 
 import { createCoreEssentials } from "../extensions";
 import { isMarkActive, isNodeActive, getMarkAttributes, getNodeAttributes } from "../sdk/utils";
@@ -24,6 +26,11 @@ import {
   InterceptorConfig,
 } from "../api";
 import { parseContent, resolveEditorOptions } from "../utils";
+
+export type AsyncInterceptor = (props: {
+  editor: IArkpadEditor;
+  transaction: Transaction;
+}) => Promise<boolean | Transaction | null>;
 
 /**
  * The core editor class for Arkpad.
@@ -44,6 +51,11 @@ export class ArkpadEditor implements IArkpadEditor {
   private readonly onSelectionUpdate?: ArkpadEditorOptions["onSelectionUpdate"];
   private readonly onPaste?: ArkpadEditorOptions["onPaste"];
   private interceptors: InterceptorConfig[] = [];
+  private asyncInterceptors: AsyncInterceptor[] = [];
+  private virtualSelections: Map<
+    string,
+    { from: number; to: number; color: string; label?: string }
+  > = new Map();
   private readonly onInterceptor?: ArkpadEditorOptions["onInterceptor"];
   private readonly onDestroy?: ArkpadEditorOptions["onDestroy"];
   private readonly nodeViews: Record<string, any>;
@@ -55,6 +67,10 @@ export class ArkpadEditor implements IArkpadEditor {
   private listeners = new Set<(editor: IArkpadEditor) => void>();
   private snapshots: Record<string, EditorState> = {};
   private isBatching = false;
+  private isPending = false;
+  private isDispatching = false;
+  private dispatchQueue: Transaction[] = [];
+  private dispatchTimeout = 500; // Default 500ms for async middleware
 
   // Performance: Pre-indexed hooks to avoid iterating all extensions on every transaction
   private transactionHooks: ArkpadExtension[] = [];
@@ -172,143 +188,7 @@ export class ArkpadEditor implements IArkpadEditor {
         ...this.nodeViews,
       },
       dispatchTransaction: (transaction) => {
-        if (this.destroyed) return;
-
-        let tr = transaction;
-
-        // 2. Structural Governance Sentinel (The "Rules")
-        if (tr.docChanged) {
-          try {
-            // Optimization: Find only the changed ranges to avoid full-doc traversal
-            tr.steps.forEach((_step, index) => {
-              const map = tr.mapping.maps[index];
-              if (!map) return;
-
-              map.forEach((_oldStart, _oldEnd, newStart, newEnd) => {
-                tr.doc.nodesBetween(newStart, newEnd, (node, pos, parent) => {
-                  if (parent) {
-                    const parentRole = Governance.resolveRole(parent);
-                    const childRole = Governance.resolveRole(node);
-                    const allowedMask = (parent.type.spec as any).allowedRoles;
-
-                    if (!Governance.canAccept(parentRole, childRole, allowedMask)) {
-                      console.warn(
-                        `[Arkpad Governance] Invalid nesting detected at pos ${pos}: ${node.type.name} inside ${parent.type.name}`
-                      );
-                    }
-                  }
-                  return true;
-                });
-              });
-            });
-          } catch (e) {
-            console.error("[Arkpad Governance] Sentinel blocked transaction:", e);
-            return;
-          }
-        }
-
-        // Run Interceptors (Middleware)
-        for (const config of this.interceptors) {
-          // Performance Optimization: Skip interceptors that don't match the transaction type
-          if (config.on === "docChanged" && !tr.docChanged) continue;
-          if (config.on === "selectionChanged" && !tr.selectionSet) continue;
-
-          const intercepted = config.handler({ editor: this, transaction: tr });
-
-          if (intercepted === false || intercepted === null) {
-            return; // Cancel transaction
-          }
-
-          if (intercepted instanceof Transaction) {
-            tr = intercepted;
-          }
-        }
-
-        // 2. Structural Governance Sentinel (The "Rules")
-        if (tr.docChanged) {
-          try {
-            // Validate the document structure after the change
-            tr.doc.descendants((node, pos, parent) => {
-              if (parent) {
-                const parentRole = Governance.resolveRole(parent);
-                const childRole = Governance.resolveRole(node);
-                const allowedMask = (parent.type.spec as any).allowedRoles;
-
-                if (!Governance.canAccept(parentRole, childRole, allowedMask)) {
-                  // In Phase 3, we simply throw an error or block the transaction.
-                  // Auto-healing will be added in Step 4.
-                  console.warn(
-                    `[Arkpad Governance] Invalid nesting: ${node.type.name} inside ${parent.type.name}`
-                  );
-                  // throw new Error("Invalid document structure");
-                  // For now we just warn to avoid breaking the UI during development
-                }
-              }
-              return true;
-            });
-          } catch (e) {
-            console.error("[Arkpad Governance] Sentinel blocked transaction:", e);
-            return;
-          }
-        }
-
-        // Call onTransaction hook
-        this.onTransaction?.({ editor: this, transaction: tr });
-
-        // Trigger onTransaction lifecycle for indexed extensions ONLY (Fast Path)
-        for (const ext of this.transactionHooks) {
-          ext.onTransaction!({ editor: this, transaction: tr });
-        }
-
-        // Emit central transaction event
-        this.events.emit("transaction", { editor: this, transaction: tr });
-
-        // Trigger onSelectionUpdate if selection changed
-        if (tr.selectionSet) {
-          const { from } = tr.selection;
-          // Resolve meaningful node: Leaf node (like image) or Parent (like paragraph)
-          const selection = tr.selection as any;
-          const node = selection.node || tr.selection.$from.parent;
-
-          this.events.emit("selection", {
-            editor: this,
-            transaction: tr,
-            node,
-            pos: from,
-            coords: this.getCoords(from),
-          });
-
-          // Trigger onSelection SDK hook
-          for (const ext of this.selectionHooks) {
-            ext.onSelection!({
-              editor: this,
-              transaction: tr,
-              node,
-              pos: from,
-            });
-          }
-
-          if (this.onSelectionUpdate) {
-            this.onSelectionUpdate({
-              editor: this,
-              transaction: tr,
-              coords: this.getCoords(from),
-            });
-          }
-        }
-
-        const nextState = this.view.state.apply(tr);
-        this.view.updateState(nextState);
-
-        // Trigger onUpdate lifecycle for indexed extensions ONLY (Fast Path)
-        for (const ext of this.updateHooks) {
-          ext.onUpdate!({ editor: this });
-        }
-
-        // 5. Zero-Latency Menu Update (Synchronous for first-click feel)
-        this.extensionManager.menuEngine?.update(this.view, undefined);
-
-        this.emitUpdate(nextState);
+        this.dispatch(transaction);
       },
     });
 
@@ -319,6 +199,153 @@ export class ArkpadEditor implements IArkpadEditor {
 
     if (resolved.autofocus) {
       this.focus();
+    }
+  }
+
+  /**
+   * Central Dispatch Pipeline
+   * Handles async middleware, sync interceptors, and governance.
+   */
+  public dispatch(transaction: Transaction): void {
+    if (this.destroyed) return;
+
+    // 1. Global Recursion Guard: Prevent re-entrant calls
+    if (this.isDispatching) {
+      // Logic: If we are already dispatching, we should probably ignore selection-only
+      // updates to avoid infinite loops, but structural changes should NEVER be dropped.
+      // For now, we block all re-entry to maintain strict state integrity.
+      return;
+    }
+    this.isDispatching = true;
+
+    try {
+      let tr = transaction;
+
+      // 2. Pulse: Emit pre-dispatch event
+      this.events.emit("transaction:pre", { editor: this, transaction: tr });
+
+      // 3. Async Middleware Pipeline (Fired in background to keep UI sync)
+      if (this.asyncInterceptors.length > 0) {
+        this.runAsyncPipeline(tr);
+      }
+
+      // 4. Run Sync Interceptors
+      for (const config of this.interceptors) {
+        if (config.on === "docChanged" && !tr.docChanged) continue;
+        if (config.on === "selectionChanged" && !tr.selectionSet) continue;
+        const intercepted = config.handler({ editor: this, transaction: tr });
+        if (intercepted === false || intercepted === null) return;
+        if (intercepted instanceof Transaction) tr = intercepted;
+      }
+
+      // 5. Finalize & Commit (Synchronous)
+      this.commit(tr);
+    } finally {
+      this.isDispatching = false;
+    }
+  }
+
+  /**
+   * Runs the async interceptor pipeline in the background.
+   */
+  private async runAsyncPipeline(tr: Transaction) {
+    this.isPending = true;
+    this.events.emit("dispatch:pending", { editor: this, isPending: true });
+
+    try {
+      const middlewarePromise = (async () => {
+        for (const interceptor of this.asyncInterceptors) {
+          const result = await interceptor({ editor: this, transaction: tr });
+          if (result === false || result === null) return null;
+          // Note: Async middleware results after the sync commit are ignored
+          // or would require a new follow-up transaction.
+        }
+        return true;
+      })();
+
+      const timeoutPromise = new Promise<null>((resolve) =>
+        setTimeout(() => resolve(null), this.dispatchTimeout)
+      );
+
+      const result = await Promise.race([middlewarePromise, timeoutPromise]);
+
+      if (result === null) {
+        console.warn("[Arkpad] Async background middleware timed out or blocked.");
+      }
+    } finally {
+      this.isPending = false;
+      this.events.emit("dispatch:pending", { editor: this, isPending: false });
+    }
+  }
+
+  /**
+   * Internal method to commit the transaction to the view.
+   */
+  private commit(tr: Transaction) {
+    // Structural Governance Sentinel (Dev-Only warning)
+    if (tr.docChanged && typeof process !== "undefined" && process.env.NODE_ENV === "development") {
+      this.runGovernanceSentinel(tr);
+    }
+
+    this.onTransaction?.({ editor: this, transaction: tr });
+    for (const ext of this.transactionHooks) {
+      ext.onTransaction!({ editor: this, transaction: tr });
+    }
+
+    this.events.emit("transaction", { editor: this, transaction: tr });
+    if (tr.docChanged) this.events.emit("transaction:doc", { editor: this, transaction: tr });
+
+    if (tr.selectionSet) {
+      const { from } = tr.selection;
+      const node = (tr.selection as any).node || tr.selection.$from.parent;
+      this.events.emit("selection", {
+        editor: this,
+        transaction: tr,
+        node,
+        pos: from,
+        coords: this.getCoords(from),
+      });
+      for (const ext of this.selectionHooks) {
+        ext.onSelection!({ editor: this, transaction: tr, node, pos: from });
+      }
+      if (this.onSelectionUpdate) {
+        this.onSelectionUpdate({ editor: this, transaction: tr, coords: this.getCoords(from) });
+      }
+    }
+
+    const nextState = this.view.state.apply(tr);
+    this.view.updateState(nextState);
+
+    for (const ext of this.updateHooks) {
+      ext.onUpdate!({ editor: this });
+    }
+    this.extensionManager.menuEngine?.update(this.view, undefined);
+    this.emitUpdate(nextState);
+  }
+
+  private runGovernanceSentinel(tr: Transaction) {
+    try {
+      tr.steps.forEach((_step, index) => {
+        const map = tr.mapping.maps[index];
+        if (!map) return;
+        map.forEach((_oldStart, _oldEnd, newStart, newEnd) => {
+          tr.doc.nodesBetween(newStart, newEnd, (node, pos, parent) => {
+            if (parent) {
+              const parentRole = Governance.resolveRole(parent);
+              const childRole = Governance.resolveRole(node);
+              const allowedMask = (parent.type.spec as any).allowedRoles;
+              if (!Governance.canAccept(parentRole, childRole, allowedMask)) {
+                console.warn(
+                  `[Arkpad Governance] Invalid nesting at ${pos}: ${node.type.name} in ${parent.type.name}`
+                );
+              }
+            }
+            return true;
+          });
+        });
+      });
+    } catch (e) {
+      console.error("[Arkpad Governance] Sentinel error:", e);
     }
   }
 
@@ -371,7 +398,216 @@ export class ArkpadEditor implements IArkpadEditor {
       })
     );
 
+    // Add Ghost Selection Plugin
+    plugins.push(
+      new Plugin({
+        props: {
+          decorations: (state) => {
+            const decorations: Decoration[] = [];
+            this.virtualSelections.forEach((val, _id) => {
+              const { from, to, color, label } = val;
+              const docSize = state.doc.content.size;
+              const safeFrom = Math.max(0, Math.min(from, docSize));
+              const safeTo = Math.max(0, Math.min(to, docSize));
+
+              if (safeFrom === safeTo) {
+                // Render as Cursor
+                const cursor = document.createElement("span");
+                cursor.className = "ark-ghost-cursor";
+                cursor.style.borderLeft = `2px solid ${color}`;
+                cursor.style.height = "1.2em";
+                cursor.style.marginLeft = "-1px";
+                cursor.style.position = "relative";
+                cursor.style.pointerEvents = "none";
+                cursor.style.display = "inline-block";
+                cursor.style.verticalAlign = "middle";
+
+                if (label) {
+                  const tag = document.createElement("span");
+                  tag.className = "ark-ghost-label";
+                  tag.textContent = label;
+                  tag.style.position = "absolute";
+                  tag.style.top = "-1.4em";
+                  tag.style.left = "0";
+                  tag.style.fontSize = "10px";
+                  tag.style.padding = "1px 4px";
+                  tag.style.borderRadius = "2px";
+                  tag.style.color = "white";
+                  tag.style.whiteSpace = "nowrap";
+                  tag.style.background = color;
+                  cursor.appendChild(tag);
+                }
+
+                decorations.push(Decoration.widget(safeFrom, cursor));
+              } else {
+                // Render as Highlight
+                decorations.push(
+                  Decoration.inline(safeFrom, safeTo, {
+                    style: `background-color: ${color}33; border-bottom: 2px solid ${color}`,
+                    class: "ark-ghost-selection",
+                  })
+                );
+              }
+            });
+            return DecorationSet.create(state.doc, decorations);
+          },
+        },
+      })
+    );
+
     // Add Painting Tool Deactivation Plugin
+    plugins.push(
+      new Plugin({
+        appendTransaction: (transactions, oldState, newState) => {
+          // 1. Recursion Guard: Ignore if this is already a healing transaction
+          const isHealing = transactions.some((tr) => tr.getMeta("governance-healing") === true);
+          if (isHealing) return null;
+
+          // 2. Identify structural changes
+          const hasStructuralChange = transactions.some((tr) => tr.docChanged);
+          if (!hasStructuralChange) return null;
+
+          const tr = newState.tr;
+          const docSize = newState.doc.content.size;
+          const ranges: { from: number; to: number }[] = [];
+          const violations: { pos: number; action: HealingAction; typeName: string }[] = [];
+          const seenViolations = new Set<string>();
+
+          // 3. Impact Zone Sentinel: collect changed ranges in the final document
+          transactions.forEach((transaction) => {
+            transaction.steps.forEach((step) => {
+              const map = step.getMap();
+              map.forEach((_oldStart, _oldEnd, newStart, newEnd) => {
+                const from = Math.max(0, Math.min(newStart, docSize));
+                const to = Math.max(0, Math.min(newEnd, docSize));
+
+                if (from < to) {
+                  ranges.push({ from, to });
+                }
+              });
+            });
+          });
+
+          const mergedRanges = ranges
+            .sort((a, b) => a.from - b.from)
+            .reduce((acc, curr) => {
+              const last = acc[acc.length - 1];
+              if (!last) return [curr];
+
+              if (curr.from <= last.to) {
+                last.to = Math.max(last.to, curr.to);
+              } else {
+                acc.push(curr);
+              }
+
+              return acc;
+            }, [] as { from: number; to: number }[]);
+
+          if (mergedRanges.length === 0) return null;
+
+          mergedRanges.forEach((range) => {
+            newState.doc.nodesBetween(range.from, range.to, (node, pos, parent) => {
+              if (!parent) return true;
+
+              const parentRole = Governance.resolveRole(parent);
+              const childRole = Governance.resolveRole(node);
+              const allowedMask = (parent.type.spec as any).allowedRoles;
+
+              if (!Governance.canAccept(parentRole, childRole, allowedMask)) {
+                const action = Governance.resolveHealingAction(parentRole, childRole);
+                if (action !== HealingAction.NONE) {
+                  const key = `${pos}:${action}:${node.type.name}`;
+                  if (!seenViolations.has(key)) {
+                    seenViolations.add(key);
+                    violations.push({ pos, action, typeName: node.type.name });
+                  }
+                }
+              }
+              return true;
+            });
+          });
+
+          if (violations.length === 0) return null;
+
+          // 4. Resolve Violations in REVERSE order to avoid position shifting
+          let docChanged = false;
+          violations
+            .sort((a, b) => b.pos - a.pos)
+            .forEach(({ pos, action, typeName }) => {
+              try {
+                // Safety: Re-resolve against the LATEST document state during the loop
+                const currentDocSize = tr.doc.content.size;
+                if (pos < 0 || pos >= currentDocSize) return;
+
+                const currentNode = tr.doc.nodeAt(pos);
+                if (!currentNode || currentNode.type.name !== typeName) return;
+
+                const from = tr.doc.resolve(pos);
+                const to = tr.doc.resolve(Math.min(pos + currentNode.nodeSize, currentDocSize));
+
+                if (action === HealingAction.LIFT) {
+                  const range = from.blockRange(to);
+                  if (range) {
+                    const stepCountBefore = tr.steps.length;
+                    tr.lift(range, Math.max(0, range.depth - 1));
+                    docChanged = docChanged || tr.steps.length > stepCountBefore;
+                  }
+                } else if (action === HealingAction.WRAP) {
+                  const range = from.blockRange(to);
+                  const paragraph = newState.schema.nodes.paragraph;
+                  if (range && paragraph) {
+                    const stepCountBefore = tr.steps.length;
+                    tr.wrap(range, [{ type: paragraph }]);
+                    docChanged = docChanged || tr.steps.length > stepCountBefore;
+                  }
+                } else if (action === HealingAction.DELETE) {
+                  const size = currentNode.nodeSize;
+                  if (size > 0) {
+                    const stepCountBefore = tr.steps.length;
+                    tr.delete(pos, Math.min(pos + size, tr.doc.content.size));
+                    docChanged = docChanged || tr.steps.length > stepCountBefore;
+                  }
+                }
+              } catch (e) {
+                console.error("[Arkpad Governance] Individual healing action failed:", e);
+              }
+            });
+
+          let selectionChanged = false;
+          if (docChanged && newState.selection) {
+            const mappedSelection = newState.selection.map(tr.doc, tr.mapping);
+            const finalSize = tr.doc.content.size;
+            const safeFrom = Math.max(0, Math.min(mappedSelection.from, finalSize));
+            const safeTo = Math.max(0, Math.min(mappedSelection.to, finalSize));
+
+            if (mappedSelection instanceof NodeSelection) {
+              const nodeAtPos = tr.doc.nodeAt(safeFrom);
+              const nextSelection =
+                nodeAtPos && nodeAtPos.type.spec.selectable !== false
+                  ? NodeSelection.create(tr.doc, safeFrom)
+                  : TextSelection.create(tr.doc, safeFrom);
+
+              if (!nextSelection.eq(tr.selection)) {
+                tr.setSelection(nextSelection);
+                selectionChanged = true;
+              }
+            } else {
+              const nextSelection = TextSelection.create(tr.doc, safeFrom, safeTo);
+              if (!nextSelection.eq(tr.selection)) {
+                tr.setSelection(nextSelection);
+                selectionChanged = true;
+              }
+            }
+          }
+
+          if (!docChanged && !selectionChanged) return null;
+
+          tr.setMeta("governance-healing", true);
+          return tr;
+        },
+      })
+    );
+
     plugins.push(
       new Plugin({
         appendTransaction: (transactions, oldState, newState) => {
@@ -498,6 +734,12 @@ export class ArkpadEditor implements IArkpadEditor {
    */
   runCommand(name: string, ...args: any[]): any {
     if (this.destroyed) return false;
+
+    // Strict Mode: Command Guard
+    if (!this.isCommandAllowed(name)) {
+      console.warn(`[Arkpad Governance] Command "${name}" blocked by structural rules.`);
+      return false;
+    }
 
     const command = this.extensionManager.commands[name];
     if (!command) {
@@ -653,8 +895,24 @@ export class ArkpadEditor implements IArkpadEditor {
    * Selection API
    */
   getSelection() {
-    const { from, to, empty } = this.view.state.selection;
-    return { from, to, empty };
+    const { selection } = this.view.state;
+    const { from, to, empty } = selection;
+
+    // Detect Table Cell Selection (Duck Typing to avoid direct dependency in core)
+    const cellSelection = selection as any;
+    if (cellSelection.anchorCell && cellSelection.headCell) {
+      return {
+        from,
+        to,
+        empty: false,
+        isCellSelection: true,
+        anchorCell: cellSelection.anchorCell,
+        headCell: cellSelection.headCell,
+        ranges: cellSelection.ranges,
+      };
+    }
+
+    return { from, to, empty, isCellSelection: false };
   }
 
   setSelection(range: { from: number; to: number } | number) {
@@ -674,8 +932,36 @@ export class ArkpadEditor implements IArkpadEditor {
    */
   getCoords(pos?: number) {
     const { state } = this.view;
+    const { selection } = state;
     const docSize = state.doc.content.size;
-    const position = pos ?? state.selection.from;
+
+    // Handle Table Cell Selection coordinates
+    if (!pos && (selection as any).anchorCell) {
+      try {
+        const cellSelection = selection as any;
+        const anchorPos =
+          cellSelection.anchorCell ||
+          (cellSelection.$anchorCell ? cellSelection.$anchorCell.pos : 0);
+        const headPos =
+          cellSelection.headCell || (cellSelection.$headCell ? cellSelection.$headCell.pos : 0);
+
+        if (anchorPos && headPos) {
+          const anchorCoords = this.view.coordsAtPos(anchorPos + 1);
+          const headCoords = this.view.coordsAtPos(headPos + 1);
+
+          return {
+            top: Math.min(anchorCoords.top, headCoords.top),
+            bottom: Math.max(anchorCoords.bottom, headCoords.bottom),
+            left: Math.min(anchorCoords.left, headCoords.left),
+            right: Math.max(anchorCoords.right, headCoords.right),
+          };
+        }
+      } catch (e) {
+        console.warn("Arkpad: Failed to get cell selection coordinates", e);
+      }
+    }
+
+    const position = pos ?? selection.from;
 
     // Safety guard: Clamp position to document bounds
     const safePos = Math.max(0, Math.min(position, docSize));
@@ -890,6 +1176,37 @@ export class ArkpadEditor implements IArkpadEditor {
   }
 
   /**
+   * Sets a virtual selection (Ghost Cursor) for an external entity (e.g., an AI Agent).
+   */
+  setVirtualSelection(
+    id: string,
+    options: { from: number; to: number; color: string; label?: string }
+  ) {
+    this.virtualSelections.set(id, options);
+    // Dispatch a meta-only transaction to refresh decorations without causing infinite loops
+    const tr = this.view.state.tr;
+    tr.setMeta("virtual-selection-update", id);
+    this.view.dispatch(tr);
+  }
+
+  /**
+   * Removes a virtual selection.
+   */
+  removeVirtualSelection(id: string) {
+    this.virtualSelections.delete(id);
+    const tr = this.view.state.tr;
+    tr.setMeta("virtual-selection-update", id);
+    this.view.dispatch(tr);
+  }
+
+  /**
+   * Registers an async interceptor (Agentic Middleware).
+   */
+  addAsyncInterceptor(interceptor: AsyncInterceptor) {
+    this.asyncInterceptors.push(interceptor);
+  }
+
+  /**
    * Registers a new extension.
    */
   registerExtension(extension: ArkpadExtension) {
@@ -960,6 +1277,63 @@ export class ArkpadEditor implements IArkpadEditor {
    */
   refresh() {
     this.emitUpdate(this.view.state);
+  }
+
+  /**
+   * Returns the current structural governance rules for the editor.
+   * Useful for AI Agents or dynamic UI components.
+   */
+  getGovernanceRules() {
+    const rules: Record<string, any> = {};
+    const { nodes } = this.view.state.schema;
+
+    Object.keys(nodes).forEach((key) => {
+      const type = nodes[key]!;
+      rules[key] = {
+        role: Governance.resolveRole({ type } as any),
+        allowedRoles: (type.spec as any).allowedRoles,
+        group: type.spec.group,
+        content: type.spec.content,
+      };
+    });
+
+    return rules;
+  }
+
+  /**
+   * Internal helper to check if a command is allowed at the current selection.
+   */
+  private isCommandAllowed(name: string): boolean {
+    const { state } = this.view;
+    const { $from } = state.selection;
+    const parent = $from.parent;
+
+    // 0. Resolve the extension that provides this command
+    const ext = this.extensionManager.commandToExtension.get(name);
+
+    // 1. If it's a Mark extension command (Bold, Italic, etc.), always allow by node governance
+    // We check the extension's config or name for 'mark' status
+    if (state.schema.marks[name] || (ext && (ext as any).config?.addMarks)) {
+      return true;
+    }
+
+    // 2. Resolve what this command intends to create
+    let targetRole = NodeRole.CONTENT; // Default
+
+    if (ext && ext.role !== undefined) {
+      targetRole = ext.role;
+    } else {
+      // Fallback: Smart heuristic if extension doesn't declare a role
+      if (name.toLowerCase().includes("heading")) targetRole = NodeRole.CONTENT;
+      if (name.toLowerCase().includes("list")) targetRole = NodeRole.LAYOUT;
+      if (name.toLowerCase().includes("image") || name.toLowerCase().includes("table"))
+        targetRole = NodeRole.WIDGET;
+    }
+
+    const parentRole = Governance.resolveRole(parent);
+    const allowedMask = (parent.type.spec as any).allowedRoles;
+
+    return Governance.canAccept(parentRole, targetRole, allowedMask);
   }
 
   /**

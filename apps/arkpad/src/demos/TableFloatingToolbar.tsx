@@ -21,7 +21,7 @@ export interface TableFloatingToolbarProps {
  * Uses Glassmorphism design and the high-performance Menu Engine.
  */
 export function TableFloatingToolbar({ editor }: TableFloatingToolbarProps) {
-  const { style, active } = useMenuPositioner({
+  const { ref, style, active } = useMenuPositioner({
     editor,
     extensionName: "bubbleMenu",
     type: "bubble",
@@ -32,6 +32,7 @@ export function TableFloatingToolbar({ editor }: TableFloatingToolbarProps) {
 
   return (
     <div
+      ref={ref}
       style={style}
       className="flex items-center gap-0.5 p-1 bg-[var(--bg-main)]/80 backdrop-blur-md border border-[var(--border)] rounded-lg shadow-xl ring-1 ring-black/5 z-[1000]"
     >

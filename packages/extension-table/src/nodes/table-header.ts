@@ -1,9 +1,10 @@
 import type { NodeSpec } from "prosemirror-model";
+import { NodeRole } from "@arkpad/core";
 import type { TableCellAttrs } from "../types";
 import { parseCellAttrs, renderCellAttrs } from "./table-cell";
 
 export const tableHeaderNode: NodeSpec = {
-  content: "paragraph+",
+  content: "block+",
   attrs: {
     colspan: { default: 1 },
     rowspan: { default: 1 },
@@ -11,6 +12,7 @@ export const tableHeaderNode: NodeSpec = {
     background: { default: null },
   },
   tableRole: "header_cell",
+  role: NodeRole.LAYOUT,
   isolating: true,
   parseDOM: [{ tag: "th", getAttrs: parseCellAttrs }],
   toDOM(node) {

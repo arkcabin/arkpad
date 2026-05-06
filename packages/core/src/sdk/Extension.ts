@@ -21,6 +21,7 @@ export class Extension<Options = any, Storage = any> implements ArkpadExtension 
   public options: Options = {} as Options;
   public storage: Storage = {} as Storage;
   public priority: number = 100;
+  public role?: number;
   public editor: IArkpadEditor | null = null;
   public utils!: Record<string, any>;
   public activeMapping?: Record<string, string>;
@@ -37,6 +38,10 @@ export class Extension<Options = any, Storage = any> implements ArkpadExtension 
 
     if (config.priority !== undefined) {
       this.priority = config.priority;
+    }
+
+    if (config.role !== undefined) {
+      this.role = config.role;
     }
 
     // Pre-initialize options from config so they are available before init()

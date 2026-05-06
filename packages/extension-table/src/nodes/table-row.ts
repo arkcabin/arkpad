@@ -1,4 +1,5 @@
 import type { NodeSpec } from "prosemirror-model";
+import { NodeRole } from "@arkpad/core";
 
 export const tableRowNode: NodeSpec = {
   content: "(table_cell | table_header)*",
@@ -6,6 +7,8 @@ export const tableRowNode: NodeSpec = {
     height: { default: null },
   },
   tableRole: "row",
+  role: NodeRole.LAYOUT,
+  allowedRoles: NodeRole.LAYOUT,
   parseDOM: [
     {
       tag: "tr",

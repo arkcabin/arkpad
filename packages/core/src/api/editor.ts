@@ -55,12 +55,21 @@ export interface IArkpadEditor {
   saveSnapshot(name: string): void;
   restoreSnapshot(name: string): boolean;
 
+  getGovernanceRules(): Record<string, any>;
+  setVirtualSelection(
+    id: string,
+    options: { from: number; to: number; color: string; label?: string }
+  ): void;
+  removeVirtualSelection(id: string): void;
+
   registerExtension(extension: any): void;
   registerExtensions(extensions: any[]): void;
   unregisterExtension(name: string): void;
 
   subscribe(callback: (editor: IArkpadEditor) => void): () => void;
   addInterceptor(interceptor: any): void;
+  addAsyncInterceptor(interceptor: any): void;
+  dispatch(transaction: any): void;
   batch(callback: (editor: IArkpadEditor) => void): void;
   refresh(): void;
   destroy(): void;

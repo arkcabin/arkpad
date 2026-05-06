@@ -48,7 +48,9 @@ export const exitTable: CommandFactory = () => ({ chain }: ArkpadCommandProps) =
 
       if (tablePos === -1) return false;
 
-      const tableNode = tr.doc.nodeAt(tablePos)!;
+      const tableNode = tr.doc.nodeAt(tablePos);
+      if (!tableNode) return false;
+
       const endPos = tablePos + tableNode.nodeSize;
 
       const nextNode = tr.doc.nodeAt(endPos);
