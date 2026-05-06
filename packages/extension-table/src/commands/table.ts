@@ -17,72 +17,77 @@ export const insertTable: CommandFactory =
 
         const offset = tr.selection.from + 1;
         tr.replaceSelectionWith(node).scrollIntoView();
-        
+
         const resolvedPos = tr.doc.resolve(offset);
         tr.setSelection(TextSelection.near(resolvedPos));
-        
+
         return true;
       }, "insertTable")
       .run();
   };
 
-export const deleteTable: CommandFactory = () => ({ chain }: ArkpadCommandProps) => {
-  return chain()
-    .command(({ state, dispatch }: ArkpadCommandProps) => pmDeleteTable(state, dispatch))
-    .run();
-};
+export const deleteTable: CommandFactory =
+  () =>
+  ({ chain }: ArkpadCommandProps) => {
+    return chain()
+      .command(
+        ({ state, dispatch }: ArkpadCommandProps) => pmDeleteTable(state, dispatch),
+        "deleteTable"
+      )
+      .run();
+  };
 
-export const exitTable: CommandFactory = () => ({ chain }: ArkpadCommandProps) => {
-  return chain()
-    .command(({ state, tr, dispatch }: ArkpadCommandProps) => {
-      const { selection } = state;
-      const { $from } = selection;
+export const exitTable: CommandFactory =
+  () =>
+  ({ chain }: ArkpadCommandProps) => {
+    return chain()
+      .command(({ state, tr, dispatch }: ArkpadCommandProps) => {
+        const { selection } = state;
+        const { $from } = selection;
+        let tablePos = -1;
 
-      let tablePos = -1;
-      for (let d = $from.depth; d > 0; d--) {
-        if ($from.node(d).type.spec.tableRole === "table") {
-          tablePos = $from.before(d);
-          break;
+        for (let d = $from.depth; d > 0; d--) {
+          if ($from.node(d).type.spec.tableRole === "table") {
+            tablePos = $from.before(d);
+            break;
+          }
         }
-      }
 
-      if (tablePos === -1) return false;
+        if (tablePos === -1) return false;
 
-      const tableNode = tr.doc.nodeAt(tablePos);
-      if (!tableNode) return false;
+        const node = tr.doc.nodeAt(tablePos);
+        if (!node) return false;
 
-      const endPos = tablePos + tableNode.nodeSize;
+        const after = tablePos + node.nodeSize;
+        const nodeAfter = tr.doc.nodeAt(after);
 
-      const nextNode = tr.doc.nodeAt(endPos);
-      if (nextNode && nextNode.type.name === "paragraph") {
-        if (dispatch) {
-          dispatch(
-            tr.setSelection(TextSelection.create(tr.doc, endPos + 1)).scrollIntoView()
-          );
+        if (nodeAfter && nodeAfter.type.name === "paragraph") {
+          if (dispatch)
+            dispatch(tr.setSelection(TextSelection.create(tr.doc, after + 1)).scrollIntoView());
+          return true;
         }
-        return true;
-      }
 
-      const paragraph = state.schema.nodes.paragraph!.create();
-      tr.insert(endPos, paragraph);
-      tr.setSelection(TextSelection.create(tr.doc, endPos + 1));
-      if (dispatch) {
-        dispatch(tr.scrollIntoView());
-      }
-      return true;
-    })
-    .run();
-};
+        const paragraph = state.schema.nodes.paragraph!.create();
+        tr.insert(after, paragraph);
+        tr.setSelection(TextSelection.create(tr.doc, after + 1));
+        if (dispatch) dispatch(tr.scrollIntoView());
 
-export const fixTables: CommandFactory = () => ({ chain }: ArkpadCommandProps) => {
-  return chain()
-    .command(({ state, dispatch }: ArkpadCommandProps) => {
-      const tr = pmFixTables(state);
-      if (tr && dispatch) {
-        dispatch(tr);
         return true;
-      }
-      return !!tr;
-    })
-    .run();
-};
+      }, "exitTable")
+      .run();
+  };
+
+export const fixTables: CommandFactory =
+  () =>
+  ({ chain }: ArkpadCommandProps) => {
+    return chain()
+      .command(({ state, dispatch }: ArkpadCommandProps) => {
+        const tr = pmFixTables(state);
+        if (tr && dispatch) {
+          dispatch(tr);
+          return true;
+        }
+        return !!tr;
+      }, "fixTables")
+      .run();
+  };

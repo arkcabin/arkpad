@@ -29,10 +29,11 @@ export const CharacterCount = Extension.create<CharacterCountOptions, CharacterC
     if (!transaction.docChanged) return;
 
     const text = editor.getText();
+    if (this.storage.characters === text.length) return;
     this.storage.characters = text.length;
 
     const wordCount = [...text.matchAll(/\S+/g)].length;
-
+    if (this.storage.words === wordCount) return;
     this.storage.words = wordCount;
   },
 });

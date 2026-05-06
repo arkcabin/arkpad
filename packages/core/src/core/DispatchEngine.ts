@@ -134,7 +134,6 @@ export class DispatchEngine {
     this.documentVersion++;
 
     this.hooks.triggerUpdate();
-    this.editor.extensionManager.menuEngine?.update(view, undefined);
     this.editor.emitUpdate(nextState);
   }
 

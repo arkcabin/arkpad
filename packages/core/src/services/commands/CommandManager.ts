@@ -9,6 +9,7 @@ import { EditorView } from "prosemirror-view";
 import { Slice, Schema } from "prosemirror-model";
 import {
   ChainedCommands,
+  ArkpadCommand,
   ArkpadCommandRegistry,
   ArkpadContent,
   IArkpadEditor,
@@ -34,13 +35,14 @@ class CommandManagerInstance {
 
   constructor(options: {
     state: EditorState;
-    commands: ArkpadCommandRegistry;
+    commands: Record<string, ArkpadCommand>;
     view?: EditorView;
     dispatch?: (tr: Transaction) => void;
     shouldDispatch?: boolean;
     schema: Schema;
     editor: IArkpadEditor;
   }) {
+    // console.log("[Arkpad] CommandManager created. shouldDispatch:", options.shouldDispatch ?? true);
     this.commands = options.commands;
     this.view = options.view;
     this.dispatch = options.dispatch;
@@ -124,18 +126,22 @@ class CommandManagerInstance {
 
               if (success) {
                 const merged = this.merge(localTr);
-                this.executionLog.push({
-                  command: prop,
-                  status: merged ? "✅ Success" : "💥 Merge Failed",
-                  duration: `${(performance.now() - startTime).toFixed(2)}ms`,
-                });
+                if (this.shouldDispatch) {
+                  this.executionLog.push({
+                    command: prop,
+                    status: merged ? "✅ Success" : "💥 Merge Failed",
+                    duration: `${(performance.now() - startTime).toFixed(2)}ms`,
+                  });
+                }
               } else {
                 this.allSuccessful = false;
-                this.executionLog.push({
-                  command: prop,
-                  status: "❌ Rejected",
-                  duration: "0ms",
-                });
+                if (this.shouldDispatch) {
+                  this.executionLog.push({
+                    command: prop,
+                    status: "❌ Rejected",
+                    duration: "0ms",
+                  });
+                }
               }
             } catch (e) {
               console.error(`[Arkpad] Shadow command "${prop}" execution crashed:`, e);
@@ -175,14 +181,16 @@ class CommandManagerInstance {
    */
   private merge(localTr: Transaction): boolean {
     try {
-      // 1. Accumulate steps into master transaction
-      localTr.steps.forEach((step) => this.masterTransaction.step(step));
+      // 1. Accumulate steps into master transaction (Only if we are actually going to dispatch)
+      if (this.shouldDispatch) {
+        localTr.steps.forEach((step) => this.masterTransaction.step(step));
+      }
 
-      // 2. Move virtual state forward
+      // 2. Move virtual state forward (Always, to allow chaining)
       this.virtualState = this.virtualState.apply(localTr);
 
       // 3. Sync Selection-Last: Derive selection from the NEW state to ensure document integrity
-      if (localTr.selectionSet) {
+      if (localTr.selectionSet && this.shouldDispatch) {
         const { selection } = this.virtualState;
         if (!selection) return true;
 
@@ -221,7 +229,7 @@ class CommandManagerInstance {
   public focus(position?: "start" | "end" | number | null): ChainedCommands {
     if (!this.allSuccessful) return this as unknown as ChainedCommands;
 
-    if (this.view) {
+    if (this.view && this.shouldDispatch) {
       this.view.focus();
     }
 
@@ -245,17 +253,21 @@ class CommandManagerInstance {
     const merged = this.merge(localTr);
 
     if (merged) {
-      this.executionLog.push({
-        command: `focus(${position})`,
-        status: "✅ Success",
-        duration: "N/A",
-      });
+      if (this.shouldDispatch) {
+        this.executionLog.push({
+          command: `focus(${position})`,
+          status: "✅ Success",
+          duration: "N/A",
+        });
+      }
     } else {
-      this.executionLog.push({
-        command: `focus(${position})`,
-        status: "❌ Error",
-        duration: "N/A",
-      });
+      if (this.shouldDispatch) {
+        this.executionLog.push({
+          command: `focus(${position})`,
+          status: "❌ Error",
+          duration: "N/A",
+        });
+      }
     }
 
     return this as unknown as ChainedCommands;
@@ -270,11 +282,14 @@ class CommandManagerInstance {
       const localTr = this.virtualState.tr.replaceSelection(slice);
 
       const merged = this.merge(localTr);
-      this.executionLog.push({
-        command: "insertContent",
-        status: merged ? "✅ Success" : "💥 Merge Failed",
-        duration: "N/A",
-      });
+
+      if (this.shouldDispatch) {
+        this.executionLog.push({
+          command: "insertContent",
+          status: merged ? "✅ Success" : "💥 Merge Failed",
+          duration: "N/A",
+        });
+      }
     } catch (e) {
       console.warn("[Arkpad] insertContent failed:", e);
       this.allSuccessful = false;
@@ -337,18 +352,22 @@ class CommandManagerInstance {
 
     if (success) {
       const merged = this.merge(localTr);
-      this.executionLog.push({
-        command: label,
-        status: merged ? "✅ Success" : "💥 Merge Failed",
-        duration: "N/A",
-      });
+      if (this.shouldDispatch) {
+        this.executionLog.push({
+          command: label,
+          status: merged ? "✅ Success" : "💥 Merge Failed",
+          duration: "N/A",
+        });
+      }
     } else {
       this.allSuccessful = false;
-      this.executionLog.push({
-        command: label,
-        status: "❌ Rejected",
-        duration: "N/A",
-      });
+      if (this.shouldDispatch) {
+        this.executionLog.push({
+          command: label,
+          status: "❌ Rejected",
+          duration: "N/A",
+        });
+      }
     }
 
     return this as unknown as ChainedCommands;
@@ -369,6 +388,10 @@ class CommandManagerInstance {
     }
 
     if (this.shouldDispatch && this.dispatch) {
+      // High-Grade Guard: Never dispatch empty transactions to the engine
+      if (this.masterTransaction.steps.length === 0 && !this.masterTransaction.selectionSet) {
+        return true;
+      }
       try {
         this.dispatch(this.masterTransaction);
         return true;

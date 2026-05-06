@@ -70,74 +70,106 @@ export class MenuEngine {
   /**
    * Recalculates all menu positions based on the current editor state.
    */
+  private isUpdating = false;
+
+  private updateCounter = 0;
+
   update(view: EditorView, prevState?: EditorState, force = false) {
-    if (view.isDestroyed) return;
+    const callId = ++this.updateCounter;
+    console.log(`[MenuEngine] update() #${callId} called. Caller:`, new Error().stack?.split("\n")[2]?.trim());
 
-    const { state } = view;
-    const storage = this.editor.storage.menuEngine as GlobalMenuStorage;
-    if (!storage) return;
+    if (view.isDestroyed || this.isUpdating) {
+      console.log(
+        `[MenuEngine] update() #${callId} early exit: destroyed=${view.isDestroyed}, isUpdating=${this.isUpdating}`
+      );
+      return;
+    }
 
-    if (force) return;
-
-    // Universal Guard: If locked, clear menus and stop
-    if (this.activeLocks.size > 0) {
-      if (Object.keys(storage.menus).length > 0) {
-        storage.menus = {};
+    this.isUpdating = true;
+    try {
+      const { state } = view;
+      const storage = this.editor.storage.menuEngine as GlobalMenuStorage;
+      if (!storage) {
+        console.log(`[MenuEngine] update() #${callId} early exit: no storage`);
+        return;
       }
-      return;
-    }
 
-    // Optimization: Skip calculation if selection and document are identical
-    if (prevState && prevState.selection.eq(state.selection) && prevState.doc.eq(state.doc)) {
-      return;
-    }
+      // Handle force update or selection/doc change
+      if (!force && prevState && prevState.selection.eq(state.selection) && prevState.doc.eq(state.doc)) {
+        return;
+      }
 
-    const newMenus: Record<string, MenuState> = {};
-    const currentMenuKeys = new Set<string>();
-
-    this.menuConfigs.forEach((configs, extensionName) => {
-      configs.forEach((config, index) => {
-        const menuKey = `${extensionName}-${index}`;
-        const shouldShow = config.shouldShow
-          ? config.shouldShow({
-              editor: this.editor,
-              state,
-              from: state.selection.from,
-              to: state.selection.to,
-              empty: state.selection.empty,
-            })
-          : !state.selection.empty;
-
-        if (shouldShow) {
-          currentMenuKeys.add(menuKey);
-          const coords = this.calculateCoords(view, config.type);
-          const isFirstShow = !this.prevMenuKeys.has(menuKey);
-
-          newMenus[menuKey] = {
-            active: true,
-            type: config.type,
-            coords,
-            side: "top",
-            extensionName,
-            isFirstShow,
-            metadata: this.generateMetadata(state),
-          };
-        } else {
-          newMenus[menuKey] = {
-            active: false,
-            type: config.type,
-            coords: null,
-            side: "top",
-            extensionName,
-            isFirstShow: false,
-          };
+      // Universal Guard: If locked, clear menus and stop
+      if (this.activeLocks.size > 0) {
+        if (Object.keys(storage.menus).length > 0) {
+          storage.menus = {};
         }
-      });
-    });
+        return;
+      }
 
-    // Atomic update to storage
-    storage.menus = newMenus;
-    this.prevMenuKeys = currentMenuKeys;
+
+      const newMenus: Record<string, MenuState> = {};
+      const currentMenuKeys = new Set<string>();
+
+      this.menuConfigs.forEach((configs, extensionName) => {
+        configs.forEach((config, index) => {
+          const menuKey = `${extensionName}-${index}`;
+          const shouldShow = config.shouldShow
+            ? config.shouldShow({
+                editor: this.editor,
+                state,
+                from: state.selection.from,
+                to: state.selection.to,
+                empty: state.selection.empty,
+              })
+            : !state.selection.empty;
+
+          if (shouldShow) {
+            currentMenuKeys.add(menuKey);
+            const coords = this.calculateCoords(view, config.type);
+            const isFirstShow = !this.prevMenuKeys.has(menuKey);
+
+            newMenus[menuKey] = {
+              active: true,
+              type: config.type,
+              coords,
+              side: "top",
+              extensionName,
+              isFirstShow,
+              metadata: this.getCachedMetadata(state),
+            };
+          } else {
+            newMenus[menuKey] = {
+              active: false,
+              type: config.type,
+              coords: null,
+              side: "top",
+              extensionName,
+              isFirstShow: false,
+            };
+          }
+        });
+      });
+
+      // Atomic update to storage
+      storage.menus = newMenus;
+      this.prevMenuKeys = currentMenuKeys;
+    } finally {
+      this.isUpdating = false;
+    }
+  }
+
+  private metadataCache: { state?: EditorState; data?: any } = {};
+
+  private getCachedMetadata(state: EditorState) {
+    if (this.metadataCache.state === state) {
+      return this.metadataCache.data;
+    }
+    this.metadataCache = {
+      state,
+      data: this.generateMetadata(state),
+    };
+    return this.metadataCache.data;
   }
 
   /**
@@ -146,6 +178,8 @@ export class MenuEngine {
    */
   private generateMetadata(state: EditorState) {
     const { $from } = state.selection;
+
+    // console.log(`[MenuEngine] generateMetadata() called, active node: ${$from.parent.type.name}`);
 
     // 1. Resolve Active Node (Smart fallback for Leaf nodes)
     const selection = state.selection as any;
@@ -159,11 +193,18 @@ export class MenuEngine {
       path.push($from.node(i).type.name);
     }
 
-    // 3. Fast Command Indexing
+    // 3. Fast Command Indexing (Only check top-level marks/nodes, skip expensive factories for now)
     const availableCommands: string[] = [];
     const commandNames = Object.keys(this.editor.extensionManager.commands);
+    // console.log(`[MenuEngine] generateMetadata() checking ${commandNames.length} commands`);
+
+    // Optimized Sweep: Only check commands that are likely to be in a menu
+    // Maintenance commands like 'fixTables' or generic factories like 'setCellAttr'
+    // are skipped during the global sweep.
+    const skipList = ["fixTables", "setCellAttr", "setCellBackground", "insertContent"];
 
     for (const name of commandNames) {
+      if (skipList.includes(name)) continue;
       if (this.editor.canRunCommand(name)) {
         availableCommands.push(name);
       }
@@ -186,6 +227,10 @@ export class MenuEngine {
     const { from, to, empty } = state.selection;
     const selection = state.selection as any;
 
+    console.log(
+      `[MenuEngine] calculateCoords() called, selection type: ${selection.constructor.name}, from: ${from}, to: ${to}, empty: ${empty}`
+    );
+
     try {
       const editorRect = view.dom.getBoundingClientRect();
       const containerScrollTop = view.dom.scrollTop;
@@ -196,6 +241,10 @@ export class MenuEngine {
       const anchorCellPos = selection.anchorCell || selection.$anchorCell?.pos;
       const headCellPos = selection.headCell || selection.$headCell?.pos;
       const isCellSelection = Number.isInteger(anchorCellPos) && Number.isInteger(headCellPos);
+
+      console.log(
+        `[MenuEngine] calculateCoords() isCellSelection: ${isCellSelection}, anchorCellPos: ${anchorCellPos}, headCellPos: ${headCellPos}`
+      );
 
       if (isCellSelection) {
         const anchorCellDom = view.nodeDOM(anchorCellPos) as HTMLElement | null;
@@ -210,9 +259,7 @@ export class MenuEngine {
             bottom:
               Math.max(anchorRect.bottom, headRect.bottom) - editorRect.top + containerScrollTop,
             right:
-              Math.max(anchorRect.right, headRect.right) -
-              editorRect.left +
-              containerScrollLeft,
+              Math.max(anchorRect.right, headRect.right) - editorRect.left + containerScrollLeft,
           };
         }
       }
