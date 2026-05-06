@@ -14,6 +14,7 @@ export type {
   ArkpadEditorOptions, ResolvedArkpadEditorOptions,
   ArkpadUpdatePayload,
   InterceptorConfig,
+  AsyncInterceptor,
 } from "./services";
 export type {
   ArkpadExtension,

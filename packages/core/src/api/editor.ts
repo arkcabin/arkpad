@@ -1,4 +1,4 @@
-import type { EditorState } from "prosemirror-state";
+import type { EditorState, Transaction } from "prosemirror-state";
 import type { EditorView } from "prosemirror-view";
 import type {
   ArkpadCommandProxy,
@@ -6,6 +6,7 @@ import type {
   SearchResult,
   ArkpadDocJSON,
   ArkpadContent,
+  AsyncInterceptor,
 } from "./services";
 
 import type { EventEmitter } from "../core/EventEmitter";
@@ -72,5 +73,6 @@ export interface IArkpadEditor {
   dispatch(transaction: any): void;
   batch(callback: (editor: IArkpadEditor) => void): void;
   refresh(): void;
+  emitUpdate(state: EditorState): void;
   destroy(): void;
 }

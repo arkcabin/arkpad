@@ -99,6 +99,8 @@ export interface InterceptorConfig {
   handler: (props: { editor: any; transaction: Transaction }) => any;
 }
 
+export type AsyncInterceptor = (props: { editor: any; transaction: Transaction }) => Promise<Transaction | boolean | null>;
+
 export interface ResolvedArkpadEditorOptions extends Omit<ArkpadEditorOptions, "content" | "extensions" | "nodeViews"> {
   content: ArkpadContent;
   extensions: ArkpadExtension[];
