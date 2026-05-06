@@ -20,6 +20,9 @@ export class DispatchEngine {
   ) {}
 
   public dispatch(transaction: Transaction): void {
+    if (transaction.steps.length > 0) {
+      console.log("[Arkpad] Transaction with steps dispatched:", transaction.steps);
+    }
     if (this.isDispatching) {
       this.transactionQueue.push(transaction);
       return;

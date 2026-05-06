@@ -179,7 +179,7 @@ export class MenuEngine {
   private generateMetadata(state: EditorState) {
     const { $from } = state.selection;
 
-    // console.log(`[MenuEngine] generateMetadata() called, active node: ${$from.parent.type.name}`);
+    console.log(`[MenuEngine] generateMetadata() called, active node: ${$from.parent.type.name}`);
 
     // 1. Resolve Active Node (Smart fallback for Leaf nodes)
     const selection = state.selection as any;
@@ -196,7 +196,7 @@ export class MenuEngine {
     // 3. Fast Command Indexing (Only check top-level marks/nodes, skip expensive factories for now)
     const availableCommands: string[] = [];
     const commandNames = Object.keys(this.editor.extensionManager.commands);
-    // console.log(`[MenuEngine] generateMetadata() checking ${commandNames.length} commands`);
+    console.log(`[MenuEngine] generateMetadata() checking ${commandNames.length} commands`);
 
     // Optimized Sweep: Only check commands that are likely to be in a menu
     // Maintenance commands like 'fixTables' or generic factories like 'setCellAttr'
@@ -206,6 +206,9 @@ export class MenuEngine {
     for (const name of commandNames) {
       if (skipList.includes(name)) continue;
       if (this.editor.canRunCommand(name)) {
+        if (name.toLowerCase().includes("bold")) {
+          console.log(`[MenuEngine] Bold command "${name}" is available`);
+        }
         availableCommands.push(name);
       }
     }

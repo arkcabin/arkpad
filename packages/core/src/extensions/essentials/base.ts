@@ -58,7 +58,7 @@ export function createDocument(): Extension {
        */
       focus: (position?: "start" | "end" | number | boolean | null) => (props: any) => {
         const { state, dispatch, view } = props;
-        if (view) {
+        if (view && dispatch) {
           view.focus();
 
           if (position === false || position === null) {
