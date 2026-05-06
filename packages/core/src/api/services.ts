@@ -4,6 +4,12 @@ import type { Schema } from "prosemirror-model";
 import type { ArkpadExtension } from "./extensions";
 
 export type Dispatch = (tr: Transaction) => void;
+export type EditorSubscriptionScope = "state" | "ui" | "all";
+export type CommandManagerMode = "execute" | "probe";
+
+export interface EditorDebugOptions {
+  commandLogs?: boolean;
+}
 
 export type ArkpadCommandProps = {
   state: EditorState;
@@ -79,6 +85,7 @@ export interface ArkpadEditorOptions {
   editable?: boolean;
   extensions?: ArkpadExtension[];
   nodeViews?: Record<string, any>;
+  debug?: EditorDebugOptions;
   autofocus?: boolean;
   onCreate?: (editor: any) => void;
   onUpdate?: (payload: ArkpadUpdatePayload) => void;
@@ -101,10 +108,12 @@ export interface InterceptorConfig {
 
 export type AsyncInterceptor = (props: { editor: any; transaction: Transaction }) => Promise<Transaction | boolean | null>;
 
-export interface ResolvedArkpadEditorOptions extends Omit<ArkpadEditorOptions, "content" | "extensions" | "nodeViews"> {
+export interface ResolvedArkpadEditorOptions
+  extends Omit<ArkpadEditorOptions, "content" | "extensions" | "nodeViews"> {
   content: ArkpadContent;
   extensions: ArkpadExtension[];
   nodeViews: Record<string, any>;
   editable: boolean;
   autofocus: boolean;
+  debug: EditorDebugOptions;
 }

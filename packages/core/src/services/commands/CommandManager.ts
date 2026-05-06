@@ -107,7 +107,9 @@ class CommandManagerInstance {
                     tr.steps.forEach((step) => localTr.step(step));
                     if (tr.selectionSet) localTr.setSelection(tr.selection);
                   },
-                  shouldDispatch: true,
+                  // Preserve dispatch mode for nested chains.
+                  // This prevents can()/capability checks from behaving like real runs.
+                  shouldDispatch: this.shouldDispatch,
                   schema: this.schema,
                   editor: this.editor,
                 }),

@@ -25,6 +25,8 @@ import {
   ArkpadEditorOptions,
   InterceptorConfig,
   AsyncInterceptor,
+  EditorSubscriptionScope,
+  EditorDebugOptions,
 } from "../api";
 import { resolveEditorOptions } from "../utils";
 
@@ -54,7 +56,9 @@ export class ArkpadEditor implements IArkpadEditor {
   private editable: boolean;
   private view: EditorView;
   private destroyed = false;
-  private listeners = new Set<(editor: IArkpadEditor) => void>();
+  private uiVersion = 0;
+  private debug: EditorDebugOptions;
+  private listeners = new Map<(editor: IArkpadEditor) => void, EditorSubscriptionScope>();
   private isBatching = false;
 
   // Sub-Managers (The modular core)
@@ -74,6 +78,7 @@ export class ArkpadEditor implements IArkpadEditor {
     this.onInterceptor = resolved.onInterceptor;
     this.onDestroy = resolved.onDestroy;
     this.nodeViews = resolved.nodeViews;
+    this.debug = resolved.debug;
 
     // 1. Initialize Sub-Managers
     this.events = new EventEmitter();
@@ -226,6 +231,15 @@ export class ArkpadEditor implements IArkpadEditor {
       // Governance healing failed, likely due to document change
     }
     return false;
+  }
+
+  public getCommandAvailability(names?: string[]): Record<string, boolean> {
+    const commands = names || Object.keys(this.extensionManager.commands);
+    const availability: Record<string, boolean> = {};
+    commands.forEach((name) => {
+      availability[name] = this.canRunCommand(name);
+    });
+    return availability;
   }
 
   public chain(): ChainedCommands {
@@ -418,6 +432,16 @@ export class ArkpadEditor implements IArkpadEditor {
     return true;
   }
 
+  public getUpdateVersion(scope: Exclude<EditorSubscriptionScope, "all">): number {
+    if (scope === "state") return this.dispatchEngine.documentVersion;
+    if (scope === "ui") return this.uiVersion;
+    return 0;
+  }
+
+  public shouldLogCommandRuns(): boolean {
+    return !!this.debug.commandLogs;
+  }
+
   public setVirtualSelection(
     id: string,
     options: { from: number; to: number; color: string; label?: string }
@@ -483,8 +507,11 @@ export class ArkpadEditor implements IArkpadEditor {
     );
   }
 
-  public subscribe(callback: (editor: IArkpadEditor) => void): () => void {
-    this.listeners.add(callback);
+  public subscribe(
+    callback: (editor: IArkpadEditor) => void,
+    scope: EditorSubscriptionScope = "all"
+  ): () => void {
+    this.listeners.set(callback, scope);
     return () => this.listeners.delete(callback);
   }
 
@@ -554,10 +581,20 @@ export class ArkpadEditor implements IArkpadEditor {
     }
   }
 
+  public emitUiUpdate(): void {
+    this.uiVersion++;
+    this.listeners.forEach((scope, listener) => {
+      if (scope === "all" || scope === "ui") listener(this);
+    });
+    this.events.emit("ui-update", { editor: this });
+  }
+
   public emitUpdate(state: EditorState) {
     if (this.isBatching) return;
     this.onUpdate?.({ editor: this, state });
-    this.listeners.forEach((listener) => listener(this));
+    this.listeners.forEach((scope, listener) => {
+      if (scope === "all" || scope === "state") listener(this);
+    });
   }
 
   public destroy() {

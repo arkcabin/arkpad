@@ -36,6 +36,7 @@ export function resolveEditorOptions(options: ArkpadEditorOptions): ResolvedArkp
     editable: options.editable ?? true,
     extensions: options.extensions ?? [],
     nodeViews: options.nodeViews ?? {},
+    debug: options.debug ?? {},
     autofocus: options.autofocus ?? false,
     onCreate: options.onCreate,
     onUpdate: options.onUpdate,

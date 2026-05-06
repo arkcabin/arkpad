@@ -27,21 +27,7 @@ export class StateManager {
     plugins.push(PluginFactory.createGhostSelectionPlugin(virtualSelections));
     plugins.push(PluginFactory.createStructuralHealerPlugin());
 
-    // Painting Deactivation Plugin (Simple enough to keep here or move to factory)
-    plugins.push(
-      new Plugin({
-        appendTransaction: (transactions, oldState, newState) => {
-          if (transactions.some((tr) => tr.docChanged || tr.getMeta("deactivate-painting-tools"))) {
-            const tr = newState.tr;
-            tr.setMeta("deactivate-painting-tools", true);
-            tr.setMeta("highlighter", false);
-            tr.setMeta("eraser", false);
-            return tr;
-          }
-          return null;
-        },
-      })
-    );
+    plugins.push(PluginFactory.createPaintingDeactivationPlugin());
 
     return EditorState.create({ schema, doc: parsedDoc, plugins });
   }

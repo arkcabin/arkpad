@@ -7,6 +7,7 @@ import type {
   ArkpadDocJSON,
   ArkpadContent,
   AsyncInterceptor,
+  EditorSubscriptionScope,
 } from "./services";
 
 import type { EventEmitter } from "../core/EventEmitter";
@@ -32,6 +33,7 @@ export interface IArkpadEditor {
   getAttributes(name: string): Record<string, any> | null;
   runCommand(name: string, ...args: any[]): boolean;
   canRunCommand(name: string, ...args: any[]): boolean;
+  getCommandAvailability(names?: string[]): Record<string, boolean>;
 
   chain(): ChainedCommands;
   can(): ChainedCommands;
@@ -67,12 +69,15 @@ export interface IArkpadEditor {
   registerExtensions(extensions: any[]): void;
   unregisterExtension(name: string): void;
 
-  subscribe(callback: (editor: IArkpadEditor) => void): () => void;
+  subscribe(callback: (editor: IArkpadEditor) => void, scope?: EditorSubscriptionScope): () => void;
   addInterceptor(interceptor: any): void;
   addAsyncInterceptor(interceptor: AsyncInterceptor): void;
   dispatch(transaction: Transaction): void;
   batch(callback: (editor: IArkpadEditor) => void): void;
   refresh(): void;
   emitUpdate(state: EditorState): void;
+  emitUiUpdate(): void;
+  getUpdateVersion(scope: Exclude<EditorSubscriptionScope, "all">): number;
+  shouldLogCommandRuns(): boolean;
   destroy(): void;
 }

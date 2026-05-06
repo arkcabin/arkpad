@@ -203,4 +203,26 @@ export class PluginFactory {
       },
     });
   }
+
+  /**
+   * Creates a plugin that deactivates painting tools on document change.
+   * Includes logic to prevent infinite transaction loops.
+   */
+  static createPaintingDeactivationPlugin() {
+    return new Plugin({
+      appendTransaction: (transactions, oldState, newState) => {
+        const docChanged = transactions.some((tr) => tr.docChanged);
+        const alreadyDeactivated = transactions.some((tr) => tr.getMeta("deactivate-painting-tools"));
+
+        if (docChanged && !alreadyDeactivated) {
+          const tr = newState.tr;
+          tr.setMeta("deactivate-painting-tools", true);
+          tr.setMeta("highlighter", false);
+          tr.setMeta("eraser", false);
+          return tr;
+        }
+        return null;
+      },
+    });
+  }
 }
