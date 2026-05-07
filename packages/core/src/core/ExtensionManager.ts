@@ -27,6 +27,7 @@ export class ExtensionManager {
   public commandToExtension: Map<string, ArkpadExtension> = new Map();
   private isBatching = false;
   public menuEngine?: MenuEngine;
+  private editor?: IArkpadEditor;
 
   constructor(schema: Schema, extensions: ArkpadExtension[] = []) {
     this.schema = schema;
@@ -40,6 +41,7 @@ export class ExtensionManager {
    * Initializes the menu engine once the editor is available.
    */
   public initMenuEngine(editor: IArkpadEditor) {
+    this.editor = editor;
     this.menuEngine = new MenuEngine(editor);
     this.storage.menuEngine = {
       menus: {},
@@ -65,17 +67,21 @@ export class ExtensionManager {
 
             const target = event.target as HTMLElement;
             const isInsideEditor = view.dom.contains(target);
-            const isInsideMenu = target.closest('[data-arkpad-menu="true"]');
+            const isInsideMenu =
+              target.closest('[data-arkpad-menu="true"]') ||
+              target.closest('[data-arkpad-ignore="true"]');
 
             if (!isInsideEditor && !isInsideMenu) {
-              // If we are clicked outside, we must ensure the editor loses focus 
+              // If we are clicked outside, we must ensure the editor loses focus
               // so that isFocused() returns false and menus hide.
               if (view.hasFocus()) {
                 view.dom.blur();
               }
-              
+
               // Force the menu engine to recalculate immediately with forceHide=true
+              // We also emit a UI update to ensure React components re-render
               this.menuEngine?.update(view, undefined, true, true);
+              this.editor?.emitUiUpdate();
             }
           };
 

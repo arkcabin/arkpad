@@ -60,6 +60,7 @@ export const EditorButton: React.FC<EditorButtonProps> = ({
       onClick={() => editor.runCommand(command, ...(args as any[]))}
       disabled={!canRun || props.disabled}
       className={`${className} ${isActive ? activeClassName : ""}`.trim()}
+      data-arkpad-ignore="true"
       {...props}
     >
       {children}
