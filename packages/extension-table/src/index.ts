@@ -139,7 +139,7 @@ export const Table = Extension.create<TableOptions>({
                 this.editor.runCommand("lockUI", "table-resizing");
                 this.storage.resizing = true;
 
-                let startX = event.clientX;
+                const startX = event.clientX;
                 let startWidth = 0;
 
                 const tableDOM = target.closest("table");
@@ -152,7 +152,7 @@ export const Table = Extension.create<TableOptions>({
                     const pos = view.posAtDOM(tableDOM, 0);
                     const desc = (view as any).docView.descendantAndContextAt(pos);
                     if (desc && desc.nodeView) actualTableView = desc.nodeView;
-                  } catch (e) {
+                  } catch {
                     // Fallback mechanism if ProseMirror internals change
                   }
 

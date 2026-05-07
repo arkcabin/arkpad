@@ -19,15 +19,13 @@ export function updateColumns(
   const isResizing = overrideCol !== undefined;
 
   if (row !== null) {
-    const colCount = (node.type.spec as any).columnCount?.(node) ?? row.childCount;
-
     // Map column index to its effective width
     for (let i = 0, col = 0; i < row.childCount; i += 1) {
       const child = row.child(i);
       const { colspan, colwidth } = child.attrs;
 
       for (let j = 0; j < colspan; j += 1, col += 1) {
-        let hasWidth =
+        const hasWidth =
           overrideCol === col ? overrideValue : colwidth && (colwidth[j] as number | undefined);
         let effectiveWidth = hasWidth;
 
