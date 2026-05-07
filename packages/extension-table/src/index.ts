@@ -121,12 +121,13 @@ export const Table = Extension.create<TableOptions>({
       );
     }
 
+    // Our custom plugin must be FIRST so it intercepts events before prosemirror-tables
     plugins.unshift(
       new Plugin({
         props: {
           handleDOMEvents: {
             mousedown: (view, event) => {
-              // 1. Handle Resize Handle Click
+              // ── 1. RESIZE HANDLE CLICK ─────────────────────────────────────────
               const target = event.target as HTMLElement;
               const isResizeHandle = target.classList.contains("column-resize-handle");
 
@@ -140,89 +141,93 @@ export const Table = Extension.create<TableOptions>({
                 const startX = event.clientX;
                 let startWidth = 0;
 
-                const tableDOM = target.closest("table");
-                const cellDOM = target.closest("td, th");
+                const tableDOM = target.closest("table") as HTMLTableElement | null;
+                const cellDOM = target.closest("td, th") as HTMLTableCellElement | null;
 
                 if (cellDOM && tableDOM) {
-                  // Find actual TableView instance reliably from ProseMirror
-                  let actualTableView: any = null;
+                  let actualTableView: TableView | null = null;
                   let tablePos = -1;
                   let actualCellPos = -1;
-                  
+
+                  // ── Step 1: Resolve absolute ProseMirror positions ────────────
                   try {
-                    // 1. Reliable way to find the exact ProseMirror node position of the table and cell
-                    const rawCellPos = view.posAtDOM(cellDOM as HTMLElement, 0);
-                    const $cellPos = view.state.doc.resolve(rawCellPos);
-                    
-                    for (let d = $cellPos.depth; d > 0; d--) {
-                      const role = $cellPos.node(d).type.spec.tableRole;
-                      if (role === "cell" || role === "header_cell") {
-                        actualCellPos = $cellPos.before(d);
+                    const rawPos = view.posAtDOM(cellDOM, 0);
+                    const $pos = view.state.doc.resolve(rawPos);
+
+                    for (let d = $pos.depth; d > 0; d--) {
+                      const role = $pos.node(d).type.spec.tableRole;
+                      if ((role === "cell" || role === "header_cell") && actualCellPos === -1) {
+                        actualCellPos = $pos.before(d);
                       }
                       if (role === "table") {
-                        tablePos = $cellPos.before(d);
+                        tablePos = $pos.before(d);
                         break;
                       }
                     }
-                  } catch (e) {
-                    console.warn("[Table Resize] Failed to calculate tablePos:", e);
+                  } catch {
+                    // pos resolution failed — bail out gracefully
                   }
 
+                  // ── Step 2: Locate the TableView instance ─────────────────────
                   try {
-                    // 2. Find actual TableView instance reliably from ProseMirror
                     const pos = view.posAtDOM(tableDOM, 0);
                     const desc = (view as any).docView.descendantAndContextAt(pos);
-                    if (desc && desc.nodeView) actualTableView = desc.nodeView;
+                    if (desc?.nodeView) actualTableView = desc.nodeView as TableView;
                   } catch {
-                    // Fallback mechanism if ProseMirror internals change
+                    // Internal PM API unavailable — live without TableView reference
                   }
 
+                  // ── Step 3: Snapshot all column widths from the live DOM ───────
+                  // This "locks" columns so they don't auto-shift during the drag.
                   const firstRow = tableDOM.querySelector("tr");
                   if (firstRow) {
-                    // Lock all columns first to prevent auto-shifts
                     const columnWidths: number[] = [];
-                    const cells = Array.from(firstRow.children) as HTMLElement[];
-
-                    cells.forEach((cell) => {
+                    (Array.from(firstRow.children) as HTMLElement[]).forEach((cell) => {
                       const rect = cell.getBoundingClientRect();
-                      const colspan = parseInt(cell.getAttribute("colspan") || "1", 10);
-                      const widthPerColumn = rect.width / colspan;
-                      for (let i = 0; i < colspan; i++) {
-                        columnWidths.push(widthPerColumn);
-                      }
+                      const cs = parseInt(cell.getAttribute("colspan") || "1", 10);
+                      const perCol = rect.width / cs;
+                      for (let i = 0; i < cs; i++) columnWidths.push(perCol);
                     });
 
+                    // Persist snapshot to ProseMirror doc (no undo entry)
                     this.editor.runCommand("fixTableColumnWidths", columnWidths, tablePos);
 
-                    // Sync the internal cache of the TableView immediately 
+                    // Sync the TableView cache so setColumnWidth has correct data immediately
                     if (actualTableView) {
                       actualTableView.savedColWidths = [...columnWidths];
                     }
 
-                    // Calculate the exact mathematical column index using TableMap
+                    // ── Step 4: Calculate column index via TableMap ────────────
+                    // TableMap.findCell expects the offset relative to the TABLE NODE's
+                    // own content start. The table node starts at tablePos, its content
+                    // starts at tablePos + 1. So offset = actualCellPos - tablePos.
                     if (tablePos !== -1 && actualCellPos !== -1) {
                       try {
-                        // Offset must be relative to the start of the table node
-                        const cellPosInsideTable = actualCellPos - tablePos;
+                        const cellMapOffset = actualCellPos - tablePos;
                         const tableNode = view.state.doc.nodeAt(tablePos);
                         if (tableNode) {
                           const map = TableMap.get(tableNode);
-                          const cellRect = map.findCell(cellPosInsideTable);
+                          const cellRect = map.findCell(cellMapOffset);
+                          // cellRect.right - 1 gives us the rightmost 0-based column index
                           this.storage.resizingCol = cellRect.right - 1;
-                          
-                          // Safely get the startWidth directly from ProseMirror attributes to avoid CSS interference
+
+                          // Read startWidth from the PM colwidth attribute
+                          // This is the most reliable source — never affected by CSS layout.
                           const cellNode = view.state.doc.nodeAt(actualCellPos);
-                          if (cellNode && cellNode.attrs.colwidth) {
-                            const widths = cellNode.attrs.colwidth;
-                            startWidth = widths[widths.length - 1];
+                          if (cellNode?.attrs.colwidth) {
+                            const widths: number[] = cellNode.attrs.colwidth;
+                            // subIndex within a colspan cell = resizingCol - cellRect.left
+                            const subIndex = this.storage.resizingCol - cellRect.left;
+                            const attrWidth = widths[subIndex];
+                            if (attrWidth && attrWidth > 0) startWidth = attrWidth;
                           }
                         }
-                      } catch(e) {
-                        console.warn("[Table Resize] Failed to calculate colIndex using TableMap", e);
+                      } catch {
+                        // TableMap lookup failed — fall through to DOM fallback
                       }
                     }
 
-                    // Fallback DOM calculation if TableMap failed
+                    // ── Step 5: Fallback column index from DOM ────────────────
                     if (this.storage.resizingCol === -1) {
                       let prev = cellDOM.previousElementSibling;
                       let idx = 0;
@@ -230,76 +235,65 @@ export const Table = Extension.create<TableOptions>({
                         idx += parseInt(prev.getAttribute("colspan") || "1", 10);
                         prev = prev.previousElementSibling;
                       }
-                      const colspan = parseInt(cellDOM.getAttribute("colspan") || "1", 10);
-                      this.storage.resizingCol = idx + colspan - 1;
+                      const cs = parseInt(cellDOM.getAttribute("colspan") || "1", 10);
+                      this.storage.resizingCol = idx + cs - 1;
                     }
 
-                    // Fallback startWidth calculation
-                    if (!startWidth || startWidth === 0) {
-                      const colElements = tableDOM.querySelectorAll("col");
-                      const colEl = colElements.item(this.storage.resizingCol);
+                    // ── Step 6: Fallback startWidth from <col> or bounding rect ─
+                    if (!startWidth || startWidth <= 0) {
+                      const colEl = tableDOM.querySelectorAll("col").item(this.storage.resizingCol);
                       if (colEl) {
-                        startWidth = parseInt(colEl.getAttribute("width") || "0", 10);
-                      }
-                      
-                      // Absolute last resort
-                      if (!startWidth || startWidth === 0) {
-                        const rect = cellDOM.getBoundingClientRect();
-                        const colspan = parseInt((cellDOM as HTMLElement).getAttribute("colspan") || "1", 10);
-                        startWidth = rect.width / colspan;
+                        const w = parseInt(colEl.style.width || colEl.getAttribute("width") || "0", 10);
+                        if (w > 0) startWidth = w;
                       }
                     }
+                    if (!startWidth || startWidth <= 0) {
+                      const rect = cellDOM.getBoundingClientRect();
+                      const cs = parseInt(cellDOM.getAttribute("colspan") || "1", 10);
+                      startWidth = rect.width / cs;
+                    }
 
-                    
+                    // Safety check — if we still can't find the column, abort
                     if (this.storage.resizingCol === -1) {
                       this.storage.resizing = false;
                       this.editor.runCommand("unlockUI", "table-resizing");
                       return true;
                     }
 
+                    // ── Step 7: Set up the visual guide line ──────────────────
                     const tableWrapper = tableDOM.parentElement;
                     if (tableWrapper) tableWrapper.classList.add("resizing");
 
-                    // Create the visual guide line
                     const guideLine = document.createElement("div");
                     guideLine.className = "ark-table-resize-guide";
-                    
-                    // Position it relative to the tableWrapper, accounting for horizontal scroll
+
+                    // Position the guide at the RIGHT edge of the handle.
+                    // All coordinates must be relative to the wrapper's left edge,
+                    // taking the wrapper's own horizontal scroll into account.
                     const wrapperRect = tableWrapper?.getBoundingClientRect();
                     const handleRect = target.getBoundingClientRect();
-                    const scrollLeft = tableWrapper ? tableWrapper.scrollLeft : 0;
-                    const initialLeft = wrapperRect ? handleRect.right - wrapperRect.left + scrollLeft : 0;
-                    
-                    console.log("[Resize Start]", {
-                      colIndex: this.storage.resizingCol,
-                      startWidth,
-                      wrapperRect: wrapperRect ? { left: wrapperRect.left, right: wrapperRect.right } : null,
-                      handleRect: { left: handleRect.left, right: handleRect.right },
-                      scrollLeft,
-                      initialLeft,
-                      tablePos
-                    });
+                    const scrollLeft = tableWrapper?.scrollLeft ?? 0;
+                    const wrapperLeft = wrapperRect?.left ?? 0;
+
+                    // handleRect.right is viewport-relative; subtract wrapperLeft and
+                    // add scrollLeft to convert to wrapper-relative coordinates.
+                    const initialLeft = handleRect.right - wrapperLeft + scrollLeft;
 
                     guideLine.style.left = `${initialLeft}px`;
                     if (tableWrapper) tableWrapper.appendChild(guideLine);
 
+                    // ── Step 8: Mouse move — move guide line only ─────────────
                     const onMouseMove = (moveEvent: MouseEvent) => {
-                      const currentX = moveEvent.clientX;
-                      const diff = currentX - startX;
-                      
-                      // Enforce minimum width visually
-                      const minDiff = this.options.cellMinWidth - startWidth;
-                      const actualDiff = Math.max(minDiff, diff);
-                      
-                      const newLeft = initialLeft + actualDiff;
-                      console.log("[Resize Drag]", { currentX, diff, actualDiff, newLeft });
-                      
-                      // Move the guide line
-                      guideLine.style.left = `${newLeft}px`;
+                      const diff = moveEvent.clientX - startX;
+                      // Clamp so we can't drag smaller than cellMinWidth
+                      const clampedDiff = Math.max(this.options.cellMinWidth - startWidth, diff);
+                      guideLine.style.left = `${initialLeft + clampedDiff}px`;
                     };
 
-                    const onMouseUp = (moveEvent: MouseEvent) => {
+                    // ── Step 9: Mouse up — commit to ProseMirror ──────────────
+                    const onMouseUp = (upEvent: MouseEvent) => {
                       this.editor.runCommand("unlockUI", "table-resizing");
+
                       if (tableWrapper) {
                         tableWrapper.classList.remove("resizing");
                         if (guideLine.parentNode === tableWrapper) {
@@ -307,19 +301,15 @@ export const Table = Extension.create<TableOptions>({
                         }
                       }
 
-                      // Calculate final width and apply it
-                      const currentX = moveEvent.clientX;
-                      const diff = currentX - startX;
+                      const diff = upEvent.clientX - startX;
                       const newWidth = Math.max(this.options.cellMinWidth, startWidth + diff);
 
-                      console.log("[Resize End]", { 
-                        colIndex: this.storage.resizingCol, 
-                        diff, 
+                      this.editor.runCommand(
+                        "resizeColumn",
+                        this.storage.resizingCol,
                         newWidth,
-                        tablePos 
-                      });
-
-                      this.editor.runCommand("resizeColumn", this.storage.resizingCol, newWidth, tablePos);
+                        tablePos
+                      );
 
                       this.storage.resizing = false;
                       this.storage.resizingCol = -1;
@@ -335,7 +325,7 @@ export const Table = Extension.create<TableOptions>({
                 return true;
               }
 
-              // 2. Handle Custom Cell Selection (Cmd/Ctrl + Click)
+              // ── 2. CUSTOM CELL SELECTION (Cmd/Ctrl + Click) ───────────────────
               if (event.ctrlKey || event.metaKey) {
                 const pos = view.posAtCoords({ left: event.clientX, top: event.clientY });
                 if (!pos) return false;
@@ -353,20 +343,25 @@ export const Table = Extension.create<TableOptions>({
                         selection.$anchorCell.pos === cellPos &&
                         selection.$headCell.pos === cellPos;
                       if (isSameCell) {
-                        const tr = view.state.tr.setSelection(
-                          Selection.near(view.state.doc.resolve(pos.pos))
+                        view.dispatch(
+                          view.state.tr.setSelection(
+                            Selection.near(view.state.doc.resolve(pos.pos))
+                          )
                         );
-                        view.dispatch(tr);
                       } else {
-                        const newSelection = new CellSelection(
-                          selection.$anchorCell,
-                          view.state.doc.resolve(cellPos)
+                        view.dispatch(
+                          view.state.tr.setSelection(
+                            new CellSelection(
+                              selection.$anchorCell,
+                              view.state.doc.resolve(cellPos)
+                            )
+                          )
                         );
-                        view.dispatch(view.state.tr.setSelection(newSelection));
                       }
                     } else {
-                      const newSelection = CellSelection.create(view.state.doc, cellPos);
-                      view.dispatch(view.state.tr.setSelection(newSelection));
+                      view.dispatch(
+                        view.state.tr.setSelection(CellSelection.create(view.state.doc, cellPos))
+                      );
                     }
                     event.preventDefault();
                     return true;
@@ -374,16 +369,15 @@ export const Table = Extension.create<TableOptions>({
                 }
               }
 
-              // 3. Allow Standard Text Selection (return false)
+              // ── 3. ALLOW STANDARD TEXT SELECTION ─────────────────────────────
               return false;
             },
+
             mouseover: (view) => {
-              if (isInTable(view.state)) {
-                // Block prosemirror-tables drag-selection behavior
-                return true;
-              }
+              if (isInTable(view.state)) return true;
               return false;
             },
+
             dragstart: (view, event) => {
               if (view.state.selection instanceof CellSelection) {
                 event.preventDefault();
@@ -391,6 +385,7 @@ export const Table = Extension.create<TableOptions>({
               }
               return false;
             },
+
             drop: (view, event) => {
               if (view.state.selection instanceof CellSelection) {
                 event.preventDefault();
@@ -398,6 +393,7 @@ export const Table = Extension.create<TableOptions>({
               }
               return false;
             },
+
             handlePaste: (view, event: ClipboardEvent) => {
               if (isInTable(view.state)) return false;
 
@@ -426,11 +422,12 @@ export const Table = Extension.create<TableOptions>({
               }
               return false;
             },
-            handleKeyDown: (view, event) => {
+
+            handleKeyDown: (_view, event) => {
               if ((event.ctrlKey || event.metaKey) && event.key === "c") {
-                const { selection } = view.state;
+                const { selection } = _view.state;
                 if (selection.empty) return false;
-                if (isInTable(view.state) && selection.$from.parent === selection.$to.parent) {
+                if (isInTable(_view.state) && selection.$from.parent === selection.$to.parent) {
                   return false;
                 }
               }
