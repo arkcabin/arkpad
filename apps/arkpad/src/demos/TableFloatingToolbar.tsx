@@ -10,7 +10,16 @@ import {
   ArrowLeft,
   ArrowRight,
   Minimize2,
+  Palette,
 } from "lucide-react";
+
+const COLORS = [
+  { name: "Blue", value: "rgba(59, 130, 246, 0.15)" },
+  { name: "Green", value: "rgba(34, 197, 94, 0.15)" },
+  { name: "Red", value: "rgba(239, 68, 68, 0.15)" },
+  { name: "Yellow", value: "rgba(234, 179, 8, 0.15)" },
+  { name: "White", value: "transparent" },
+];
 
 export interface TableFloatingToolbarProps {
   editor: ArkpadEditorAPI | null;
@@ -85,7 +94,7 @@ export function TableFloatingToolbar({ editor }: TableFloatingToolbarProps) {
         </EditorButton>
       </div>
 
-      <div className="flex items-center">
+      <div className="flex items-center border-r border-[var(--border)] pr-1 mr-1">
         <EditorButton
           command="mergeCells"
           className="p-1.5 hover:bg-[var(--selection)] rounded text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors"
@@ -100,9 +109,26 @@ export function TableFloatingToolbar({ editor }: TableFloatingToolbarProps) {
         >
           <Split className="w-3.5 h-3.5" />
         </EditorButton>
+      </div>
+
+      <div className="flex items-center gap-1 px-1">
+        <Palette className="w-3.5 h-3.5 text-[var(--text-muted)] mr-0.5" />
+        {COLORS.map((color) => (
+          <EditorButton
+            key={color.value}
+            command="setCellBackground"
+            args={[color.value]}
+            className="w-4 h-4 rounded-sm border border-[var(--border)] shadow-sm hover:scale-110 transition-transform"
+            style={{ backgroundColor: color.value }}
+            title={color.name}
+          />
+        ))}
+      </div>
+
+      <div className="flex items-center ml-1 pl-1 border-l border-[var(--border)]">
         <EditorButton
           command="deleteTable"
-          className="p-1.5 ml-1 hover:bg-red-600 hover:text-white rounded transition-colors"
+          className="p-1.5 hover:bg-red-600 hover:text-white rounded transition-colors"
           title="Delete Table"
         >
           <Trash2 className="w-3.5 h-3.5" />

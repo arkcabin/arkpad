@@ -176,6 +176,20 @@ export const Table = Extension.create<TableOptions>({
               }
               return false;
             },
+            dragstart: (view, event) => {
+              if (view.state.selection instanceof CellSelection) {
+                event.preventDefault();
+                return true;
+              }
+              return false;
+            },
+            drop: (view, event) => {
+              if (view.state.selection instanceof CellSelection) {
+                event.preventDefault();
+                return true;
+              }
+              return false;
+            },
             handlePaste: (view, event: ClipboardEvent) => {
               if (isInTable(view.state)) return false;
 
