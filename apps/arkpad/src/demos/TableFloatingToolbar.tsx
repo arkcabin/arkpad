@@ -34,6 +34,7 @@ export function TableFloatingToolbar({ editor }: TableFloatingToolbarProps) {
     <div
       ref={ref}
       style={style}
+      data-arkpad-menu="true"
       className="flex items-center gap-0.5 p-1 bg-[var(--bg-main)]/80 backdrop-blur-md border border-[var(--border)] rounded-lg shadow-xl ring-1 ring-black/5 z-[1000]"
     >
       <div className="flex items-center border-r border-[var(--border)] pr-1 mr-1">

@@ -74,14 +74,14 @@ export class MenuEngine {
 
   private updateCounter = 0;
 
-  update(view: EditorView, prevState?: EditorState, force = false) {
+  update(view: EditorView, prevState?: EditorState, force = false, forceHide = false) {
     const callId = ++this.updateCounter;
-    console.log(`[MenuEngine] update() #${callId} called. Caller:`, new Error().stack?.split("\n")[2]?.trim());
+    console.log(
+      `[MenuEngine] update() #${callId} called. force=${force}, forceHide=${forceHide}. Caller:`,
+      new Error().stack?.split("\n")[2]?.trim()
+    );
 
     if (view.isDestroyed || this.isUpdating) {
-      console.log(
-        `[MenuEngine] update() #${callId} early exit: destroyed=${view.isDestroyed}, isUpdating=${this.isUpdating}`
-      );
       return;
     }
 
@@ -89,13 +89,22 @@ export class MenuEngine {
     try {
       const { state } = view;
       const storage = this.editor.storage.menuEngine as GlobalMenuStorage;
-      if (!storage) {
-        console.log(`[MenuEngine] update() #${callId} early exit: no storage`);
+      if (!storage) return;
+
+      // Handle explicit force hide (e.g. from outside click)
+      if (forceHide) {
+        storage.menus = {};
+        this.prevMenuKeys.clear();
         return;
       }
 
       // Handle force update or selection/doc change
-      if (!force && prevState && prevState.selection.eq(state.selection) && prevState.doc.eq(state.doc)) {
+      if (
+        !force &&
+        prevState &&
+        prevState.selection.eq(state.selection) &&
+        prevState.doc.eq(state.doc)
+      ) {
         return;
       }
 
@@ -107,6 +116,13 @@ export class MenuEngine {
         return;
       }
 
+      // If the editor is not focused and this is not a force update, hide menus
+      // This helps with race conditions where focus is lost but PM view hasn't updated yet.
+      if (!this.editor.isFocused() && !force) {
+        storage.menus = {};
+        this.prevMenuKeys.clear();
+        return;
+      }
 
       const newMenus: Record<string, MenuState> = {};
       const currentMenuKeys = new Set<string>();

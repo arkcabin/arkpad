@@ -49,7 +49,7 @@ export const FloatingMenu: React.FC<FloatingMenuProps> = ({
   if (typeof document === "undefined" || !active) return null;
 
   return createPortal(
-    <div ref={ref} style={style} className={className}>
+    <div ref={ref} style={style} className={className} data-arkpad-menu="true">
       {children}
     </div>,
     document.body

@@ -59,14 +59,40 @@ export class ExtensionManager {
     // High-Performance Event Tracking
     this.proseMirrorPlugins.push(
       new Plugin({
-        view: () => ({
-          update: (view, prevState) => {
-            // Only trigger if selection changed WITHOUT a doc change (handled by editor.ts)
-            if (!prevState.selection.eq(view.state.selection)) {
-              this.menuEngine?.update(view, prevState);
+        view: (view) => {
+          const handleOutsideClick = (event: MouseEvent) => {
+            if (view.isDestroyed) return;
+
+            const target = event.target as HTMLElement;
+            const isInsideEditor = view.dom.contains(target);
+            const isInsideMenu = target.closest('[data-arkpad-menu="true"]');
+
+            if (!isInsideEditor && !isInsideMenu) {
+              // If we are clicked outside, we must ensure the editor loses focus 
+              // so that isFocused() returns false and menus hide.
+              if (view.hasFocus()) {
+                view.dom.blur();
+              }
+              
+              // Force the menu engine to recalculate immediately with forceHide=true
+              this.menuEngine?.update(view, undefined, true, true);
             }
-          },
-        }),
+          };
+
+          window.addEventListener("mousedown", handleOutsideClick, true);
+
+          return {
+            update: (view, prevState) => {
+              // Only trigger if selection changed WITHOUT a doc change (handled by editor.ts)
+              if (!prevState.selection.eq(view.state.selection)) {
+                this.menuEngine?.update(view, prevState);
+              }
+            },
+            destroy: () => {
+              window.removeEventListener("mousedown", handleOutsideClick, true);
+            },
+          };
+        },
         props: {
           handleDOMEvents: {
             focus: (view) => {
