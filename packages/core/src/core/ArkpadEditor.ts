@@ -421,6 +421,19 @@ export class ArkpadEditor implements IArkpadEditor {
   public isEditable() {
     return this.editable;
   }
+
+  public isFocused() {
+    if (!this.view) return false;
+    if (this.view.hasFocus()) return true;
+    
+    // Fallback for some browser environments or during event transitions
+    if (typeof document !== "undefined") {
+      return this.view.dom.contains(document.activeElement) || document.activeElement === this.view.dom;
+    }
+    
+    return false;
+  }
+
   public saveSnapshot(name: string) {
     this.stateManager.saveSnapshot(name, this.view.state);
   }

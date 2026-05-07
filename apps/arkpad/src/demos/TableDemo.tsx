@@ -69,7 +69,7 @@ export function TableDemo() {
       Heading,
       Table,
       BubbleMenu.configure({
-        shouldShow: ({ editor }) => editor.isActive("table") && editor.isEditable(),
+        shouldShow: ({ editor }) => editor.isActive("table") && editor.isEditable() && editor.isFocused(),
       }),
     ],
     content: complexTableContent,

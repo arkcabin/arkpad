@@ -67,6 +67,23 @@ export class ExtensionManager {
             }
           },
         }),
+        props: {
+          handleDOMEvents: {
+            focus: (view) => {
+              this.menuEngine?.update(view, undefined, true);
+              return false;
+            },
+            blur: (view) => {
+              // Delay update to let document.activeElement update
+              setTimeout(() => {
+                if (!view.isDestroyed) {
+                  this.menuEngine?.update(view, undefined, true);
+                }
+              }, 10);
+              return false;
+            },
+          },
+        },
       })
     );
   }

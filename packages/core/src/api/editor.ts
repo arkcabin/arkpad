@@ -54,6 +54,7 @@ export interface IArkpadEditor {
   blur(): void;
   setEditable(editable: boolean): void;
   isEditable(): boolean;
+  isFocused(): boolean;
 
   saveSnapshot(name: string): void;
   restoreSnapshot(name: string): boolean;

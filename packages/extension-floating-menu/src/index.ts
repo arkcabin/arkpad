@@ -23,11 +23,11 @@ export const FloatingMenu = Extension.create<FloatingMenuOptions>({
       type: "floating",
       shouldShow:
         this.options.shouldShow ||
-        (({ state }) => {
+        (({ editor, state }: any) => {
           const { $from, empty } = state.selection;
           const isParagraph = $from.parent.type.name === "paragraph";
           const isEmpty = $from.parent.content.size === 0;
-          return empty && isParagraph && isEmpty;
+          return empty && isParagraph && isEmpty && editor.isFocused();
         }),
       priority: 100,
     };

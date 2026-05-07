@@ -21,7 +21,7 @@ export const BubbleMenu = Extension.create<BubbleMenuOptions>({
   addMenu() {
     return {
       type: "bubble",
-      shouldShow: this.options.shouldShow || (({ empty }: { empty: boolean }) => !empty),
+      shouldShow: this.options.shouldShow || (({ editor, empty }: any) => !empty && editor.isFocused()),
       priority: 100,
     };
   },
