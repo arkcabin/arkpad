@@ -184,7 +184,17 @@ export class TableView implements NodeView {
     this.savedColWidths[colIndex] = effectiveWidth;
 
     // 2. Recalculate and update the total table width using the internal cache
-    const totalWidth = this.savedColWidths.reduce((sum, w) => sum + (w || 100), 0);
+    let totalWidth = 0;
+    for (let i = 0; i < this.colgroup.children.length; i++) {
+      const w = this.savedColWidths[i];
+      if (typeof w === "number") {
+        totalWidth += w;
+      } else {
+        const existingCol = this.colgroup.children[i] as HTMLElement;
+        const measured = existingCol ? existingCol.getBoundingClientRect().width : 100;
+        totalWidth += measured > 0 ? measured : 100;
+      }
+    }
 
     this.table.style.width = `${totalWidth}px`;
     this.table.style.minWidth = "";

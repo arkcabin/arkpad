@@ -93,16 +93,19 @@ export const fixTables: CommandFactory =
   };
 
 export const fixTableColumnWidths: CommandFactory =
-  (widths?: number[]) =>
+  (widths?: number[], explicitTablePos?: number) =>
   ({ state, tr, dispatch }: ArkpadCommandProps) => {
-    const { selection } = state;
-    const { $from } = selection;
-    let tablePos = -1;
+    let tablePos = explicitTablePos ?? -1;
 
-    for (let d = $from.depth; d > 0; d--) {
-      if ($from.node(d).type.spec.tableRole === "table") {
-        tablePos = $from.before(d);
-        break;
+    if (tablePos === -1) {
+      const { selection } = state;
+      const { $from } = selection;
+
+      for (let d = $from.depth; d > 0; d--) {
+        if ($from.node(d).type.spec.tableRole === "table") {
+          tablePos = $from.before(d);
+          break;
+        }
       }
     }
 
@@ -156,16 +159,19 @@ export const fixTableColumnWidths: CommandFactory =
   };
 
 export const resizeColumn: CommandFactory =
-  (colIndex: number, width: number) =>
+  (colIndex: number, width: number, explicitTablePos?: number) =>
   ({ state, tr, dispatch }: ArkpadCommandProps) => {
-    const { selection } = state;
-    const { $from } = selection;
-    let tablePos = -1;
+    let tablePos = explicitTablePos ?? -1;
 
-    for (let d = $from.depth; d > 0; d--) {
-      if ($from.node(d).type.spec.tableRole === "table") {
-        tablePos = $from.before(d);
-        break;
+    if (tablePos === -1) {
+      const { selection } = state;
+      const { $from } = selection;
+
+      for (let d = $from.depth; d > 0; d--) {
+        if ($from.node(d).type.spec.tableRole === "table") {
+          tablePos = $from.before(d);
+          break;
+        }
       }
     }
 

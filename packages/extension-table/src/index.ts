@@ -1,5 +1,5 @@
 import { Extension } from "@arkpad/core";
-import { tableEditing, columnResizing, isInTable, CellSelection } from "prosemirror-tables";
+import { tableEditing, columnResizing, isInTable, CellSelection, TableMap } from "prosemirror-tables";
 import { Plugin, Selection } from "prosemirror-state";
 import { Slice, Fragment } from "prosemirror-model";
 
@@ -121,13 +121,11 @@ export const Table = Extension.create<TableOptions>({
       );
     }
 
-    plugins.push(
+    plugins.unshift(
       new Plugin({
         props: {
           handleDOMEvents: {
             mousedown: (view, event) => {
-              if (!isInTable(view.state)) return false;
-
               // 1. Handle Resize Handle Click
               const target = event.target as HTMLElement;
               const isResizeHandle = target.classList.contains("column-resize-handle");
@@ -148,7 +146,30 @@ export const Table = Extension.create<TableOptions>({
                 if (cellDOM && tableDOM) {
                   // Find actual TableView instance reliably from ProseMirror
                   let actualTableView: any = null;
+                  let tablePos = -1;
+                  let actualCellPos = -1;
+                  
                   try {
+                    // 1. Reliable way to find the exact ProseMirror node position of the table and cell
+                    const rawCellPos = view.posAtDOM(cellDOM as HTMLElement, 0);
+                    const $cellPos = view.state.doc.resolve(rawCellPos);
+                    
+                    for (let d = $cellPos.depth; d > 0; d--) {
+                      const role = $cellPos.node(d).type.spec.tableRole;
+                      if (role === "cell" || role === "header_cell") {
+                        actualCellPos = $cellPos.before(d);
+                      }
+                      if (role === "table") {
+                        tablePos = $cellPos.before(d);
+                        break;
+                      }
+                    }
+                  } catch (e) {
+                    console.warn("[Table Resize] Failed to calculate tablePos:", e);
+                  }
+
+                  try {
+                    // 2. Find actual TableView instance reliably from ProseMirror
                     const pos = view.posAtDOM(tableDOM, 0);
                     const desc = (view as any).docView.descendantAndContextAt(pos);
                     if (desc && desc.nodeView) actualTableView = desc.nodeView;
@@ -171,57 +192,134 @@ export const Table = Extension.create<TableOptions>({
                       }
                     });
 
-                    this.editor.runCommand("fixTableColumnWidths", columnWidths);
+                    this.editor.runCommand("fixTableColumnWidths", columnWidths, tablePos);
 
-                    const cellIndex = cells.indexOf(cellDOM as HTMLElement);
-                    let colIndex = 0;
-                    for (let i = 0; i < cellIndex; i++) {
-                      colIndex += parseInt(cells[i]?.getAttribute("colspan") || "1", 10);
+                    // Sync the internal cache of the TableView immediately 
+                    if (actualTableView) {
+                      actualTableView.savedColWidths = [...columnWidths];
                     }
-                    this.storage.resizingCol =
-                      colIndex +
-                      (parseInt((cellDOM as HTMLElement).getAttribute("colspan") || "1", 10) - 1);
 
-                    const rect = cellDOM.getBoundingClientRect();
-                    const colspan = parseInt(
-                      (cellDOM as HTMLElement).getAttribute("colspan") || "1",
-                      10
-                    );
-                    startWidth = rect.width / colspan;
+                    // Calculate the exact mathematical column index using TableMap
+                    if (tablePos !== -1 && actualCellPos !== -1) {
+                      try {
+                        // Offset must be relative to the start of the table node
+                        const cellPosInsideTable = actualCellPos - tablePos;
+                        const tableNode = view.state.doc.nodeAt(tablePos);
+                        if (tableNode) {
+                          const map = TableMap.get(tableNode);
+                          const cellRect = map.findCell(cellPosInsideTable);
+                          this.storage.resizingCol = cellRect.right - 1;
+                          
+                          // Safely get the startWidth directly from ProseMirror attributes to avoid CSS interference
+                          const cellNode = view.state.doc.nodeAt(actualCellPos);
+                          if (cellNode && cellNode.attrs.colwidth) {
+                            const widths = cellNode.attrs.colwidth;
+                            startWidth = widths[widths.length - 1];
+                          }
+                        }
+                      } catch(e) {
+                        console.warn("[Table Resize] Failed to calculate colIndex using TableMap", e);
+                      }
+                    }
 
+                    // Fallback DOM calculation if TableMap failed
+                    if (this.storage.resizingCol === -1) {
+                      let prev = cellDOM.previousElementSibling;
+                      let idx = 0;
+                      while (prev) {
+                        idx += parseInt(prev.getAttribute("colspan") || "1", 10);
+                        prev = prev.previousElementSibling;
+                      }
+                      const colspan = parseInt(cellDOM.getAttribute("colspan") || "1", 10);
+                      this.storage.resizingCol = idx + colspan - 1;
+                    }
+
+                    // Fallback startWidth calculation
+                    if (!startWidth || startWidth === 0) {
+                      const colElements = tableDOM.querySelectorAll("col");
+                      const colEl = colElements.item(this.storage.resizingCol);
+                      if (colEl) {
+                        startWidth = parseInt(colEl.getAttribute("width") || "0", 10);
+                      }
+                      
+                      // Absolute last resort
+                      if (!startWidth || startWidth === 0) {
+                        const rect = cellDOM.getBoundingClientRect();
+                        const colspan = parseInt((cellDOM as HTMLElement).getAttribute("colspan") || "1", 10);
+                        startWidth = rect.width / colspan;
+                      }
+                    }
+
+                    
                     if (this.storage.resizingCol === -1) {
                       this.storage.resizing = false;
                       this.editor.runCommand("unlockUI", "table-resizing");
                       return true;
                     }
 
-                    // Add 'resizing' class to table wrapper to disable state-driven updates
                     const tableWrapper = tableDOM.parentElement;
                     if (tableWrapper) tableWrapper.classList.add("resizing");
+
+                    // Create the visual guide line
+                    const guideLine = document.createElement("div");
+                    guideLine.className = "ark-table-resize-guide";
+                    
+                    // Position it relative to the tableWrapper, accounting for horizontal scroll
+                    const wrapperRect = tableWrapper?.getBoundingClientRect();
+                    const handleRect = target.getBoundingClientRect();
+                    const scrollLeft = tableWrapper ? tableWrapper.scrollLeft : 0;
+                    const initialLeft = wrapperRect ? handleRect.right - wrapperRect.left + scrollLeft : 0;
+                    
+                    console.log("[Resize Start]", {
+                      colIndex: this.storage.resizingCol,
+                      startWidth,
+                      wrapperRect: wrapperRect ? { left: wrapperRect.left, right: wrapperRect.right } : null,
+                      handleRect: { left: handleRect.left, right: handleRect.right },
+                      scrollLeft,
+                      initialLeft,
+                      tablePos
+                    });
+
+                    guideLine.style.left = `${initialLeft}px`;
+                    if (tableWrapper) tableWrapper.appendChild(guideLine);
 
                     const onMouseMove = (moveEvent: MouseEvent) => {
                       const currentX = moveEvent.clientX;
                       const diff = currentX - startX;
-                      const newWidth = Math.max(this.options.cellMinWidth, startWidth + diff);
-
-                      // HIGH PERFORMANCE: Update the DOM directly via the TableView
-                      if (actualTableView && typeof actualTableView.setColumnWidth === "function") {
-                        actualTableView.setColumnWidth(this.storage.resizingCol, newWidth);
-                      } else {
-                        // Fallback to command if TableView not found
-                        this.editor.runCommand("resizeColumn", this.storage.resizingCol, newWidth);
-                      }
+                      
+                      // Enforce minimum width visually
+                      const minDiff = this.options.cellMinWidth - startWidth;
+                      const actualDiff = Math.max(minDiff, diff);
+                      
+                      const newLeft = initialLeft + actualDiff;
+                      console.log("[Resize Drag]", { currentX, diff, actualDiff, newLeft });
+                      
+                      // Move the guide line
+                      guideLine.style.left = `${newLeft}px`;
                     };
 
-                    const onMouseUp = () => {
+                    const onMouseUp = (moveEvent: MouseEvent) => {
                       this.editor.runCommand("unlockUI", "table-resizing");
-                      if (tableWrapper) tableWrapper.classList.remove("resizing");
-
-                      // Final Sync: Capture the final state from the DOM and save to document
-                      if (actualTableView) {
-                        const finalWidths = [...actualTableView.savedColWidths];
-                        this.editor.runCommand("fixTableColumnWidths", finalWidths);
+                      if (tableWrapper) {
+                        tableWrapper.classList.remove("resizing");
+                        if (guideLine.parentNode === tableWrapper) {
+                          tableWrapper.removeChild(guideLine);
+                        }
                       }
+
+                      // Calculate final width and apply it
+                      const currentX = moveEvent.clientX;
+                      const diff = currentX - startX;
+                      const newWidth = Math.max(this.options.cellMinWidth, startWidth + diff);
+
+                      console.log("[Resize End]", { 
+                        colIndex: this.storage.resizingCol, 
+                        diff, 
+                        newWidth,
+                        tablePos 
+                      });
+
+                      this.editor.runCommand("resizeColumn", this.storage.resizingCol, newWidth, tablePos);
 
                       this.storage.resizing = false;
                       this.storage.resizingCol = -1;

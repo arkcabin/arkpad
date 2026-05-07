@@ -42,3 +42,14 @@
   overflow-x: auto;
   margin-bottom: var(--ark-table-margin-bottom);
 }
+
+.ark-table-resize-guide {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background-color: var(--ark-table-resize-handle, #3b82f6);
+  z-index: 50;
+  pointer-events: none;
+  opacity: 0.8;
+}
