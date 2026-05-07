@@ -8,12 +8,15 @@ export function updateColumns(
   table: HTMLTableElement,
   cellMinWidth: number,
   overrideCol?: number,
-  overrideValue?: number
+  overrideValue?: number,
+  savedColWidths?: number[]
 ) {
   let totalWidth = 0;
   let fixedWidth = true;
   let nextDOM = colgroup.firstChild as HTMLElement;
   const row = node.firstChild;
+  
+  const isResizing = overrideCol !== undefined;
 
   if (row !== null) {
     for (let i = 0, col = 0; i < row.childCount; i += 1) {
@@ -21,25 +24,64 @@ export function updateColumns(
 
       for (let j = 0; j < colspan; j += 1, col += 1) {
         const hasWidth = overrideCol === col ? overrideValue : (colwidth && (colwidth[j] as number | undefined));
-        const cssWidth = hasWidth ? `${hasWidth}px` : "";
-
-        totalWidth += hasWidth || cellMinWidth;
+        let effectiveWidth = hasWidth;
 
         if (!hasWidth) {
           fixedWidth = false;
+
+          if (savedColWidths && savedColWidths[col]) {
+            effectiveWidth = savedColWidths[col];
+          } else if (isResizing && savedColWidths) {
+            let measured = 0;
+            if (table.rows && table.rows.length > 0) {
+              for (let r = table.rows.length - 1; r >= 0; r--) {
+                const domRow = table.rows[r];
+                if (!domRow || !domRow.cells) continue;
+                let hasColspan = false;
+                for (let c = 0; c < domRow.cells.length; c++) {
+                  const domCell = domRow.cells[c];
+                  if (domCell && domCell.colSpan > 1) hasColspan = true;
+                }
+                const targetCell = domRow.cells[col];
+                if (!hasColspan && targetCell) {
+                  measured = targetCell.getBoundingClientRect().width;
+                  break;
+                }
+              }
+            }
+            if (measured === 0 && colgroup && colgroup.children) {
+              const targetCol = colgroup.children[col];
+              if (targetCol) {
+                measured = targetCol.getBoundingClientRect().width;
+              }
+            }
+            if (measured > 0) {
+              savedColWidths[col] = measured;
+              effectiveWidth = measured;
+            } else {
+              effectiveWidth = Math.max(cellMinWidth, 100);
+              savedColWidths[col] = effectiveWidth;
+            }
+          } else {
+            effectiveWidth = Math.max(cellMinWidth, 100);
+          }
         }
+
+        totalWidth += effectiveWidth || Math.max(cellMinWidth, 100);
+
+        const cssWidth = effectiveWidth ? `${effectiveWidth}px` : "";
 
         if (!nextDOM) {
           const colElement = document.createElement("col");
 
-          const [propertyKey, propertyValue] = getColStyleDeclaration(cellMinWidth, hasWidth);
+          const [propertyKey, propertyValue] = getColStyleDeclaration(cellMinWidth, effectiveWidth);
 
           colElement.style.setProperty(propertyKey, propertyValue);
 
           colgroup.appendChild(colElement);
         } else {
           if ((nextDOM as HTMLTableColElement).style.width !== cssWidth) {
-            const [propertyKey, propertyValue] = getColStyleDeclaration(cellMinWidth, hasWidth);
+            const [propertyKey, propertyValue] = getColStyleDeclaration(cellMinWidth, effectiveWidth);
 
             (nextDOM as HTMLTableColElement).style.setProperty(propertyKey, propertyValue);
           }
@@ -75,6 +117,7 @@ export class TableView implements NodeView {
   table: HTMLTableElement;
   colgroup: HTMLTableColElement;
   contentDOM: HTMLTableSectionElement;
+  savedColWidths: number[] = [];
 
   constructor(node: ProseMirrorNode, cellMinWidth: number) {
     this.node = node;
@@ -89,7 +132,7 @@ export class TableView implements NodeView {
     }
 
     this.colgroup = this.table.appendChild(document.createElement("colgroup")) as any;
-    updateColumns(node, this.colgroup, this.table, cellMinWidth);
+    updateColumns(node, this.colgroup, this.table, cellMinWidth, undefined, undefined, this.savedColWidths);
     this.contentDOM = this.table.appendChild(document.createElement("tbody")) as any;
   }
 
@@ -99,7 +142,7 @@ export class TableView implements NodeView {
     }
 
     this.node = node;
-    updateColumns(node, this.colgroup, this.table, this.cellMinWidth);
+    updateColumns(node, this.colgroup, this.table, this.cellMinWidth, undefined, undefined, this.savedColWidths);
 
     return true;
   }
