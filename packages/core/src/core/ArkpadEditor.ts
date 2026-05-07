@@ -245,7 +245,7 @@ export class ArkpadEditor implements IArkpadEditor {
   public chain(): ChainedCommands {
     return new CommandManager({
       state: this.view.state,
-      commands: this.commands,
+      commands: this.extensionManager.commands,
       view: this.view,
       editor: this,
       dispatch: (tr: Transaction) => {
@@ -258,7 +258,7 @@ export class ArkpadEditor implements IArkpadEditor {
   public can(): ChainedCommands {
     return new CommandManager({
       state: this.view.state,
-      commands: this.commands,
+      commands: this.extensionManager.commands,
       view: this.view,
       editor: this,
       shouldDispatch: false,
