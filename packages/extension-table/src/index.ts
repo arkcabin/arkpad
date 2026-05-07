@@ -11,7 +11,14 @@ import { tableHeaderNode } from "./nodes/table-header";
 import { TableView } from "./nodes/TableView";
 
 // Commands
-import { insertTable, deleteTable, exitTable, fixTables } from "./commands/table";
+import {
+  insertTable,
+  deleteTable,
+  exitTable,
+  fixTables,
+  fixTableColumnWidths,
+  resizeColumn,
+} from "./commands/table";
 import { addRowBefore, addRowAfter, deleteRow } from "./commands/row";
 import { addColumnBefore, addColumnAfter, deleteColumn } from "./commands/column";
 import {
@@ -52,6 +59,13 @@ export const Table = Extension.create<TableOptions>({
     };
   },
 
+  addStorage() {
+    return {
+      resizing: false,
+      resizingCol: -1,
+    };
+  },
+
   addNodes() {
     return {
       table: tableNode,
@@ -81,6 +95,8 @@ export const Table = Extension.create<TableOptions>({
       setCellAttr,
       setCellBackground,
       goToNextCell,
+      fixTableColumnWidths,
+      resizeColumn,
     };
   },
 
@@ -117,14 +133,108 @@ export const Table = Extension.create<TableOptions>({
               const isResizeHandle = target.classList.contains("column-resize-handle");
 
               if (isResizeHandle) {
-                this.editor.runCommand("lockUI", "table-resizing");
-                const onMouseUp = () => {
-                  this.editor.runCommand("unlockUI", "table-resizing");
-                  window.removeEventListener("mouseup", onMouseUp);
-                };
-                window.addEventListener("mouseup", onMouseUp);
+                event.preventDefault();
                 event.stopPropagation();
-                return false;
+
+                this.editor.runCommand("lockUI", "table-resizing");
+                this.storage.resizing = true;
+
+                let startX = event.clientX;
+                let startWidth = 0;
+
+                const tableDOM = target.closest("table");
+                const cellDOM = target.closest("td, th");
+
+                if (cellDOM && tableDOM) {
+                  // Find actual TableView instance reliably from ProseMirror
+                  let actualTableView: any = null;
+                  try {
+                    const pos = view.posAtDOM(tableDOM, 0);
+                    const desc = (view as any).docView.descendantAndContextAt(pos);
+                    if (desc && desc.nodeView) actualTableView = desc.nodeView;
+                  } catch (e) {
+                    // Fallback mechanism if ProseMirror internals change
+                  }
+
+                  const firstRow = tableDOM.querySelector("tr");
+                  if (firstRow) {
+                    // Lock all columns first to prevent auto-shifts
+                    const columnWidths: number[] = [];
+                    const cells = Array.from(firstRow.children) as HTMLElement[];
+
+                    cells.forEach((cell) => {
+                      const rect = cell.getBoundingClientRect();
+                      const colspan = parseInt(cell.getAttribute("colspan") || "1", 10);
+                      const widthPerColumn = rect.width / colspan;
+                      for (let i = 0; i < colspan; i++) {
+                        columnWidths.push(widthPerColumn);
+                      }
+                    });
+
+                    this.editor.runCommand("fixTableColumnWidths", columnWidths);
+
+                    const cellIndex = cells.indexOf(cellDOM as HTMLElement);
+                    let colIndex = 0;
+                    for (let i = 0; i < cellIndex; i++) {
+                      colIndex += parseInt(cells[i]?.getAttribute("colspan") || "1", 10);
+                    }
+                    this.storage.resizingCol =
+                      colIndex +
+                      (parseInt((cellDOM as HTMLElement).getAttribute("colspan") || "1", 10) - 1);
+
+                    const rect = cellDOM.getBoundingClientRect();
+                    const colspan = parseInt(
+                      (cellDOM as HTMLElement).getAttribute("colspan") || "1",
+                      10
+                    );
+                    startWidth = rect.width / colspan;
+
+                    if (this.storage.resizingCol === -1) {
+                      this.storage.resizing = false;
+                      this.editor.runCommand("unlockUI", "table-resizing");
+                      return true;
+                    }
+
+                    // Add 'resizing' class to table wrapper to disable state-driven updates
+                    const tableWrapper = tableDOM.parentElement;
+                    if (tableWrapper) tableWrapper.classList.add("resizing");
+
+                    const onMouseMove = (moveEvent: MouseEvent) => {
+                      const currentX = moveEvent.clientX;
+                      const diff = currentX - startX;
+                      const newWidth = Math.max(this.options.cellMinWidth, startWidth + diff);
+
+                      // HIGH PERFORMANCE: Update the DOM directly via the TableView
+                      if (actualTableView && typeof actualTableView.setColumnWidth === "function") {
+                        actualTableView.setColumnWidth(this.storage.resizingCol, newWidth);
+                      } else {
+                        // Fallback to command if TableView not found
+                        this.editor.runCommand("resizeColumn", this.storage.resizingCol, newWidth);
+                      }
+                    };
+
+                    const onMouseUp = () => {
+                      this.editor.runCommand("unlockUI", "table-resizing");
+                      if (tableWrapper) tableWrapper.classList.remove("resizing");
+
+                      // Final Sync: Capture the final state from the DOM and save to document
+                      if (actualTableView) {
+                        const finalWidths = [...actualTableView.savedColWidths];
+                        this.editor.runCommand("fixTableColumnWidths", finalWidths);
+                      }
+
+                      this.storage.resizing = false;
+                      this.storage.resizingCol = -1;
+                      window.removeEventListener("mousemove", onMouseMove);
+                      window.removeEventListener("mouseup", onMouseUp);
+                    };
+
+                    window.addEventListener("mousemove", onMouseMove);
+                    window.addEventListener("mouseup", onMouseUp);
+                  }
+                }
+
+                return true;
               }
 
               // 2. Handle Custom Cell Selection (Cmd/Ctrl + Click)
@@ -234,7 +344,6 @@ export const Table = Extension.create<TableOptions>({
     );
 
     plugins.push(tableEditing());
-
     return plugins;
   },
 });

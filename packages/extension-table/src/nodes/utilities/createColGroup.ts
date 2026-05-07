@@ -24,13 +24,14 @@ export function createColGroup(node: any, cellMinWidth: number): ColGroup {
     for (let j = 0; j < colspan; j += 1, col += 1) {
       const hasWidth = colwidth && (colwidth[j] as number | undefined);
 
-      totalWidth += hasWidth || cellMinWidth;
+      const width = hasWidth || Math.max(cellMinWidth, 100);
+      totalWidth += width;
 
       if (!hasWidth) {
         fixedWidth = false;
       }
 
-      const [property, value] = getColStyleDeclaration(cellMinWidth, hasWidth);
+      const [property, value] = getColStyleDeclaration(cellMinWidth, width);
 
       cols.push(["col", { style: `${property}: ${value}` }]);
     }

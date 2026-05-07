@@ -91,3 +91,116 @@ export const fixTables: CommandFactory =
       }, "fixTables")
       .run();
   };
+
+export const fixTableColumnWidths: CommandFactory =
+  (widths?: number[]) =>
+  ({ state, tr, dispatch }: ArkpadCommandProps) => {
+    const { selection } = state;
+    const { $from } = selection;
+    let tablePos = -1;
+
+    for (let d = $from.depth; d > 0; d--) {
+      if ($from.node(d).type.spec.tableRole === "table") {
+        tablePos = $from.before(d);
+        break;
+      }
+    }
+
+    if (tablePos === -1) return false;
+
+    const table = tr.doc.nodeAt(tablePos);
+    if (!table) return false;
+
+    const firstRow = table.firstChild;
+    if (!firstRow) return false;
+
+    let currentCol = 0;
+    let currentCellPos = tablePos + 2; // table start (1) + first row start (1) = 2
+
+    firstRow.forEach((cell) => {
+      const colspan = cell.attrs.colspan || 1;
+      const oldColwidth = cell.attrs.colwidth;
+      const colwidth = oldColwidth ? [...oldColwidth] : new Array(colspan).fill(0);
+      let changed = false;
+
+      for (let j = 0; j < colspan; j++) {
+        const width = widths?.[currentCol];
+        if (typeof width === "number") {
+          const roundedWidth = Math.round(width);
+          if (colwidth[j] !== roundedWidth) {
+            colwidth[j] = roundedWidth;
+            changed = true;
+          }
+        } else if (!colwidth[j]) {
+          colwidth[j] = 100;
+          changed = true;
+        }
+        currentCol++;
+      }
+
+      if (changed) {
+        tr.setNodeMarkup(currentCellPos, undefined, {
+          ...cell.attrs,
+          colwidth,
+        });
+      }
+
+      currentCellPos += cell.nodeSize;
+    });
+
+    if (tr.docChanged && dispatch) {
+      tr.setMeta("addToHistory", false); // Don't bloat undo history with "lock" transactions
+      dispatch(tr);
+    }
+    return true;
+  };
+
+export const resizeColumn: CommandFactory =
+  (colIndex: number, width: number) =>
+  ({ state, tr, dispatch }: ArkpadCommandProps) => {
+    const { selection } = state;
+    const { $from } = selection;
+    let tablePos = -1;
+
+    for (let d = $from.depth; d > 0; d--) {
+      if ($from.node(d).type.spec.tableRole === "table") {
+        tablePos = $from.before(d);
+        break;
+      }
+    }
+
+    if (tablePos === -1) return false;
+
+    const table = tr.doc.nodeAt(tablePos);
+    if (!table || !table.firstChild) return false;
+
+    const firstRow = table.firstChild;
+    let currentCol = 0;
+    let currentCellPos = tablePos + 2;
+    let found = false;
+
+    firstRow.forEach((cell) => {
+      if (found) return;
+      const colspan = cell.attrs.colspan || 1;
+      if (colIndex >= currentCol && colIndex < currentCol + colspan) {
+        const colwidth = cell.attrs.colwidth ? [...cell.attrs.colwidth] : new Array(colspan).fill(0);
+        colwidth[colIndex - currentCol] = Math.round(width);
+
+        tr.setNodeMarkup(currentCellPos, undefined, {
+          ...cell.attrs,
+          colwidth,
+        });
+        found = true;
+      }
+      currentCol += colspan;
+      currentCellPos += cell.nodeSize;
+    });
+
+    if (found && dispatch) {
+      tr.setMeta("addToHistory", false);
+      dispatch(tr);
+      return true;
+    }
+
+    return false;
+  };
