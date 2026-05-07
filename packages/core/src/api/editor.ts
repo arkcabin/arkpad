@@ -22,6 +22,7 @@ export interface IArkpadEditor {
   readonly shortcuts: ShortcutRegistry;
   readonly events: EventEmitter;
   readonly extensionManager: any;
+  readonly stateManager: any;
 
   getState(): EditorState;
   getView(): EditorView;

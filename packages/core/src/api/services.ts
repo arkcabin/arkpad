@@ -25,8 +25,8 @@ export type ArkpadCommand =
   | Command
   | ((...args: any[]) => Command)
   | ((
-    ...args: any[]
-  ) => (props: ArkpadCommandProps) => boolean | Promise<boolean> | ChainedCommands);
+      ...args: any[]
+    ) => (props: ArkpadCommandProps) => boolean | Promise<boolean> | ChainedCommands);
 
 export type ArkpadCommandRegistry = Record<string, ArkpadCommand>;
 
@@ -69,8 +69,8 @@ export interface ICommandRegistry {
 }
 
 export interface ISelectionService {
-  getSelection(state: EditorState): { from: number; to: number; empty: boolean };
-  getCoords(view: EditorView, pos?: number): { top: number; left: number; bottom: number; right: number } | null;
+  getSelection(): { from: number; to: number; empty: boolean; isCellSelection?: boolean };
+  getCoords(pos?: number): { top: number; left: number; bottom: number; right: number } | null;
 }
 
 export interface ISchemaService {
@@ -106,10 +106,15 @@ export interface InterceptorConfig {
   handler: (props: { editor: any; transaction: Transaction }) => any;
 }
 
-export type AsyncInterceptor = (props: { editor: any; transaction: Transaction }) => Promise<Transaction | boolean | null>;
+export type AsyncInterceptor = (props: {
+  editor: any;
+  transaction: Transaction;
+}) => Promise<Transaction | boolean | null>;
 
-export interface ResolvedArkpadEditorOptions
-  extends Omit<ArkpadEditorOptions, "content" | "extensions" | "nodeViews"> {
+export interface ResolvedArkpadEditorOptions extends Omit<
+  ArkpadEditorOptions,
+  "content" | "extensions" | "nodeViews"
+> {
   content: ArkpadContent;
   extensions: ArkpadExtension[];
   nodeViews: Record<string, any>;

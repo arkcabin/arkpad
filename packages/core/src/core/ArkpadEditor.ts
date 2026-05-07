@@ -1,5 +1,4 @@
-import { DOMSerializer } from "prosemirror-model";
-import { EditorState, TextSelection, Transaction } from "prosemirror-state";
+import { EditorState, Transaction } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
 import { EventEmitter } from "./EventEmitter";
 import { Storage } from "./Storage";
@@ -9,6 +8,9 @@ import { ExtensionManager } from "./ExtensionManager";
 import { HookManager } from "./HookManager";
 import { DispatchEngine } from "./DispatchEngine";
 import { StateManager } from "./StateManager";
+import { SelectionService } from "../services/editor/SelectionService";
+import { ContentService } from "../services/editor/ContentService";
+import { SearchService } from "../services/editor/SearchService";
 
 import { createCoreEssentials } from "../extensions";
 import { isMarkActive, isNodeActive, getMarkAttributes, getNodeAttributes } from "../sdk/utils";
@@ -50,9 +52,6 @@ export class ArkpadEditor implements IArkpadEditor {
 
   private interceptors: InterceptorConfig[] = [];
   private asyncInterceptors: AsyncInterceptor[] = [];
-  private virtualSelections: Map<string, any> = new Map();
-  private serializer: DOMSerializer;
-
   private editable: boolean;
   private view: EditorView;
   private destroyed = false;
@@ -62,9 +61,12 @@ export class ArkpadEditor implements IArkpadEditor {
   private isBatching = false;
 
   // Sub-Managers (The modular core)
-  private hookManager: HookManager;
-  private dispatchEngine: DispatchEngine;
-  private stateManager: StateManager;
+  private readonly hookManager: HookManager;
+  private readonly dispatchEngine: DispatchEngine;
+  public readonly stateManager: StateManager;
+  public readonly selectionService: SelectionService;
+  public readonly contentService: ContentService;
+  public readonly searchService: SearchService;
 
   constructor(options: ArkpadEditorOptions) {
     const resolved = resolveEditorOptions(options);
@@ -98,9 +100,12 @@ export class ArkpadEditor implements IArkpadEditor {
     const extensions = [...createCoreEssentials(), ...(resolved.extensions || [])];
     const schemaBuilder = new SchemaBuilder(extensions);
     const schema = schemaBuilder.build();
-    this.serializer = DOMSerializer.fromSchema(schema);
+    // ContentService will initialize its own serializer from the schema
 
     this.extensionManager = new ExtensionManager(schema, extensions);
+    this.selectionService = new SelectionService(this);
+    this.contentService = new ContentService(this);
+    this.searchService = new SearchService(this);
     this.storage = {};
 
     // 3. Register Extensions & Index Hooks
@@ -123,7 +128,7 @@ export class ArkpadEditor implements IArkpadEditor {
       resolved.content,
       schema,
       this.extensionManager.getPlugins(),
-      this.virtualSelections
+      this.selectionService.getVirtualSelections()
     );
 
     this.view = new EditorView(this.element, {
@@ -153,24 +158,18 @@ export class ArkpadEditor implements IArkpadEditor {
   }
 
   public getHTML(): string {
-    const fragment = this.serializer.serializeFragment(this.view.state.doc.content);
-    const container = document.createElement("div");
-    container.appendChild(fragment);
-    return container.innerHTML;
+    return this.contentService.getHTML();
   }
 
   public getJSON(): ArkpadDocJSON {
-    return this.view.state.doc.toJSON();
+    return this.contentService.getJSON();
   }
   public getText(): string {
-    return this.view.state.doc.textBetween(0, this.view.state.doc.content.size, "\n\n");
+    return this.contentService.getText();
   }
 
   public getMarkdown(): string {
-    const markdownExtension = this.extensionManager.extensions.find((e) => e.name === "markdown");
-    if (markdownExtension && (markdownExtension as any).serializer)
-      return (markdownExtension as any).serializer.serialize(this.view.state.doc);
-    return this.getText();
+    return this.contentService.getMarkdown();
   }
 
   public runCommand(name: string, ...args: any[]): any {
@@ -267,100 +266,27 @@ export class ArkpadEditor implements IArkpadEditor {
   }
 
   public getSelection() {
-    const { selection } = this.view.state;
-    const { from, to, empty } = selection;
-    const cellSelection = selection as any;
-    if (cellSelection.anchorCell && cellSelection.headCell)
-      return {
-        from,
-        to,
-        empty: false,
-        isCellSelection: true,
-        anchorCell: cellSelection.anchorCell,
-        headCell: cellSelection.headCell,
-        ranges: cellSelection.ranges,
-      };
-    return { from, to, empty, isCellSelection: false };
+    return this.selectionService.getSelection();
   }
 
   public setSelection(range: { from: number; to: number } | number) {
-    const { tr } = this.view.state;
-    const from = typeof range === "number" ? range : range.from;
-    const to = typeof range === "number" ? range : range.to;
-    this.view.dispatch(tr.setSelection(TextSelection.create(tr.doc, from, to)));
+    this.selectionService.setSelection(range);
   }
 
   public selectAll() {
-    this.setSelection({ from: 0, to: this.view.state.doc.content.size });
+    this.selectionService.selectAll();
   }
 
   public getCoords(pos?: number) {
-    const { state } = this.view;
-    const { selection } = state;
-    if (!pos && (selection as any).anchorCell) {
-      try {
-        const cellSelection = selection as any;
-        const anchorPos =
-          cellSelection.anchorCell ||
-          (cellSelection.$anchorCell ? cellSelection.$anchorCell.pos : 0);
-        const headPos =
-          cellSelection.headCell || (cellSelection.$headCell ? cellSelection.$headCell.pos : 0);
-        if (anchorPos && headPos) {
-          const anchorCoords = this.view.coordsAtPos(anchorPos + 1);
-          const headCoords = this.view.coordsAtPos(headPos + 1);
-          return {
-            top: Math.min(anchorCoords.top, headCoords.top),
-            bottom: Math.max(anchorCoords.bottom, headCoords.bottom),
-            left: Math.min(anchorCoords.left, headCoords.left),
-            right: Math.max(anchorCoords.right, headCoords.right),
-          };
-        }
-      } catch {
-        // Coords resolution failed for cell selection
-      }
-    }
-    const safePos = Math.max(0, Math.min(pos ?? selection.from, state.doc.content.size));
-    try {
-      return this.view.coordsAtPos(safePos);
-    } catch {
-      return null;
-    }
+    return this.selectionService.getCoords(pos);
   }
 
   public search(query: string | RegExp): SearchResult[] {
-    const results: SearchResult[] = [];
-    const regex =
-      typeof query === "string"
-        ? new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi")
-        : query;
-    this.view.state.doc.descendants((node, pos) => {
-      if (node.isText && node.text) {
-        const matches = node.text.matchAll(regex);
-        for (const match of matches) {
-          if (match.index !== undefined)
-            results.push({
-              from: pos + match.index,
-              to: pos + match.index + match[0].length,
-              text: match[0],
-            });
-        }
-      }
-      return true;
-    });
-    return results;
+    return this.searchService.search(query);
   }
 
   public replace(query: string | RegExp, replacement: string): boolean {
-    const matches = this.search(query);
-    if (matches.length === 0) return false;
-    const { tr } = this.view.state;
-    for (let i = matches.length - 1; i >= 0; i--) {
-      const match = matches[i];
-      if (match)
-        tr.replaceWith(match.from, match.to, this.extensionManager.schema.text(replacement));
-    }
-    this.view.dispatch(tr);
-    return true;
+    return this.searchService.replace(query, replacement);
   }
 
   public isActive(name: string, attrs: Record<string, any> = {}): boolean {
@@ -391,12 +317,11 @@ export class ArkpadEditor implements IArkpadEditor {
   }
 
   public setContent(content: ArkpadContent, emitUpdate = true) {
-    this.stateManager.refreshState(content, this.extensionManager.schema, this.view.state.plugins);
-    if (emitUpdate) this.emitUpdate(this.view.state);
+    this.contentService.setContent(content, emitUpdate);
   }
 
   public clearContent(emitUpdate = true) {
-    this.setContent("<p></p>", emitUpdate);
+    this.contentService.clearContent(emitUpdate);
   }
 
   public focus(pos?: "start" | "end" | number) {
@@ -425,12 +350,14 @@ export class ArkpadEditor implements IArkpadEditor {
   public isFocused() {
     if (!this.view) return false;
     if (this.view.hasFocus()) return true;
-    
+
     // Fallback for some browser environments or during event transitions
     if (typeof document !== "undefined") {
-      return this.view.dom.contains(document.activeElement) || document.activeElement === this.view.dom;
+      return (
+        this.view.dom.contains(document.activeElement) || document.activeElement === this.view.dom
+      );
     }
-    
+
     return false;
   }
 
@@ -459,17 +386,11 @@ export class ArkpadEditor implements IArkpadEditor {
     id: string,
     options: { from: number; to: number; color: string; label?: string }
   ) {
-    this.virtualSelections.set(id, options);
-    const tr = this.view.state.tr;
-    tr.setMeta("virtual-selection-update", id);
-    this.view.dispatch(tr);
+    this.selectionService.setVirtualSelection(id, options);
   }
 
   public removeVirtualSelection(id: string) {
-    this.virtualSelections.delete(id);
-    const tr = this.view.state.tr;
-    tr.setMeta("virtual-selection-update", id);
-    this.view.dispatch(tr);
+    this.selectionService.removeVirtualSelection(id);
   }
 
   public addAsyncInterceptor(interceptor: AsyncInterceptor) {
@@ -482,7 +403,7 @@ export class ArkpadEditor implements IArkpadEditor {
     if (extension.storage) this.storage[extension.name] = extension.storage;
     if (extension.onInterceptor) this.addInterceptor((p: any) => extension.onInterceptor!(p));
     this.extensionManager.rebuild();
-    this.serializer = DOMSerializer.fromSchema(this.extensionManager.schema);
+    this.contentService.refreshSerializer();
     this.hookManager.indexHooks(this.extensionManager.extensions);
     this.stateManager.refreshState(
       this.view.state.doc.toJSON(),
@@ -499,7 +420,7 @@ export class ArkpadEditor implements IArkpadEditor {
       if (ext.onInterceptor) this.addInterceptor((p: any) => ext.onInterceptor!(p));
     });
     this.extensionManager.rebuild();
-    this.serializer = DOMSerializer.fromSchema(this.extensionManager.schema);
+    this.contentService.refreshSerializer();
     this.hookManager.indexHooks(this.extensionManager.extensions);
     this.stateManager.refreshState(
       this.view.state.doc.toJSON(),
@@ -511,7 +432,7 @@ export class ArkpadEditor implements IArkpadEditor {
   public unregisterExtension(nameOrId: string) {
     this.extensionManager.unregisterExtension(nameOrId);
     this.extensionManager.rebuild();
-    this.serializer = DOMSerializer.fromSchema(this.extensionManager.schema);
+    this.contentService.refreshSerializer();
     this.hookManager.indexHooks(this.extensionManager.extensions);
     this.stateManager.refreshState(
       this.view.state.doc.toJSON(),
