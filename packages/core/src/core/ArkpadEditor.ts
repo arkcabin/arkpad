@@ -59,6 +59,7 @@ export class ArkpadEditor implements IArkpadEditor {
   private debug: EditorDebugOptions;
   private listeners = new Map<(editor: IArkpadEditor) => void, EditorSubscriptionScope>();
   private isBatching = false;
+  private lastCommandLog: any[] = [];
 
   // Sub-Managers (The modular core)
   private readonly hookManager: HookManager;
@@ -175,24 +176,19 @@ export class ArkpadEditor implements IArkpadEditor {
   public runCommand(name: string, ...args: any[]): any {
     if (this.destroyed) return false;
     if (!this.isCommandAllowed(name)) return false;
-    const command = this.extensionManager.commands[name];
-    if (!command) return false;
-    const result = (command as any)(...args);
-    if (typeof result === "function") {
-      const lastArg = args[args.length - 1];
-      if (lastArg && typeof lastArg === "object" && "state" in lastArg) return result(lastArg);
-      const state = this.view.state;
-      return result({
-        state,
-        dispatch: this.view.dispatch,
-        view: this.view,
-        tr: state.tr,
-        editor: this,
-        chain: () => this.chain(),
-        can: () => this.can(),
-      });
+    
+    // Using chain() ensures we use the Shadow Engine and collect Telemetry
+    const chain = this.chain();
+    const command = (chain as any)[name];
+    
+    if (typeof command !== 'function') {
+      // Fallback for non-standard commands if any
+      const rawCommand = this.extensionManager.commands[name];
+      if (!rawCommand) return false;
+      return (rawCommand as any)(...args);
     }
-    return result;
+
+    return command(...args).run();
   }
 
   public canRunCommand(name: string, ...args: any[]): boolean {
@@ -380,6 +376,18 @@ export class ArkpadEditor implements IArkpadEditor {
 
   public shouldLogCommandRuns(): boolean {
     return !!this.debug.commandLogs;
+  }
+
+  public getCommandLog(): any[] {
+    return this.lastCommandLog;
+  }
+
+  /**
+   * Internal method to update the last command log.
+   * @internal
+   */
+  public _setLastCommandLog(log: any[]) {
+    this.lastCommandLog = log;
   }
 
   public setVirtualSelection(

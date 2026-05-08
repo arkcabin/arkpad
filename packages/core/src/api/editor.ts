@@ -81,5 +81,6 @@ export interface IArkpadEditor {
   emitUiUpdate(): void;
   getUpdateVersion(scope: Exclude<EditorSubscriptionScope, "all">): number;
   shouldLogCommandRuns(): boolean;
+  getCommandLog(): any[];
   destroy(): void;
 }

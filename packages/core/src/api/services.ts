@@ -44,6 +44,11 @@ export interface ChainedCommands {
   scrollIntoView(): ChainedCommands;
   setMeta(key: any, value: any): ChainedCommands;
   updateAttributes(typeOrName: string, attributes: Record<string, any>): ChainedCommands;
+  toggleMark(typeOrName: string, attributes?: Record<string, any>): ChainedCommands;
+  setMark(typeOrName: string, attributes?: Record<string, any>): ChainedCommands;
+  unsetMark(typeOrName: string): ChainedCommands;
+  setNodeMarkup(typeOrName: string, attributes?: Record<string, any>): ChainedCommands;
+  deleteRange(from: number, to: number): ChainedCommands;
   command(fn: (props: ArkpadCommandProps) => boolean, label?: string): ChainedCommands;
   run(): boolean;
   [key: string]: any;

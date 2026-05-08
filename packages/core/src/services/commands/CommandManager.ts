@@ -174,6 +174,142 @@ class CommandManagerInstance {
   }
 
   /**
+   * Returns the execution log for telemetry.
+   */
+  public getLog() {
+    return [...this.executionLog];
+  }
+
+  /**
+   * Internal helper to run a command by name within the chain.
+   */
+  private runCommandByName(name: string, ...args: any[]): ChainedCommands {
+    const command = this.commands[name];
+    if (!command) {
+      this.allSuccessful = false;
+      return this as unknown as ChainedCommands;
+    }
+
+    if (!this.allSuccessful) return this as unknown as ChainedCommands;
+
+    const startTime = performance.now();
+    const result = (command as any)(...args);
+
+    if (typeof result === "function") {
+      const localTr = this.virtualState.tr;
+      const props: ArkpadCommandProps = {
+        state: this.virtualState,
+        dispatch: (tr2: Transaction) => {
+          const stepCountBefore = localTr.steps.length;
+          tr2.steps.forEach((step) => {
+            try {
+              localTr.step(step);
+            } catch (e) {
+              console.error(`[Arkpad] Step apply failed inside "${name}" shadow chain:`, e);
+            }
+          });
+          if (tr2.selectionSet) {
+            const mappedSelection = tr2.selection.map(
+              localTr.doc,
+              localTr.mapping.slice(stepCountBefore)
+            );
+            localTr.setSelection(mappedSelection);
+          }
+        },
+        view: this.view,
+        tr: localTr,
+        editor: this.editor,
+        chain: () => this as unknown as ChainedCommands,
+        can: () => undefined as any,
+      };
+
+      try {
+        const success =
+          result.length >= 2
+            ? (result as any)(this.virtualState, props.dispatch, this.view)
+            : (result as any)(props);
+
+        if (success) {
+          const merged = this.merge(localTr);
+          if (this.shouldDispatch) {
+            this.executionLog.push({
+              command: name,
+              status: merged ? "✅ Success" : "💥 Merge Failed",
+              duration: `${(performance.now() - startTime).toFixed(2)}ms`,
+            });
+          }
+        } else {
+          this.allSuccessful = false;
+          if (this.shouldDispatch) {
+            this.executionLog.push({
+              command: name,
+              status: "❌ Rejected",
+              duration: "0ms",
+            });
+          }
+        }
+      } catch (e) {
+        console.error(`[Arkpad] Shadow command "${name}" execution crashed:`, e);
+        this.allSuccessful = false;
+        this.executionLog.push({
+          command: name,
+          status: "💥 Crash",
+          duration: "0ms",
+        });
+      }
+    } else if (!result) {
+      this.allSuccessful = false;
+      this.executionLog.push({
+        command: name,
+        status: "❌ Rejected (Bool)",
+        duration: "0ms",
+      });
+    } else {
+      this.executionLog.push({
+        command: name,
+        status: "✅ Success (Static)",
+        duration: `${(performance.now() - startTime).toFixed(2)}ms`,
+      });
+    }
+
+    return this as unknown as ChainedCommands;
+  }
+
+  public updateAttributes(typeOrName: string, attributes: Record<string, any>): ChainedCommands {
+    return this.runCommandByName("updateAttributes", typeOrName, attributes);
+  }
+
+  public toggleMark(typeOrName: string, attributes?: Record<string, any>): ChainedCommands {
+    return this.runCommandByName("toggleMark", typeOrName, attributes);
+  }
+
+  public setMark(typeOrName: string, attributes?: Record<string, any>): ChainedCommands {
+    return this.runCommandByName("setMark", typeOrName, attributes);
+  }
+
+  public unsetMark(typeOrName: string): ChainedCommands {
+    return this.runCommandByName("unsetMark", typeOrName);
+  }
+
+  public setNodeMarkup(typeOrName: string, attributes?: Record<string, any>): ChainedCommands {
+    return this.runCommandByName("setNodeMarkup", typeOrName, attributes);
+  }
+
+  public deleteRange(from: number, to: number): ChainedCommands {
+    if (!this.allSuccessful) return this as unknown as ChainedCommands;
+    const localTr = this.virtualState.tr.delete(from, to);
+    this.merge(localTr);
+    if (this.shouldDispatch) {
+      this.executionLog.push({
+        command: "deleteRange",
+        status: "✅ Success",
+        duration: "0ms",
+      });
+    }
+    return this as unknown as ChainedCommands;
+  }
+
+  /**
    * Refined Merge Strategy:
    * 1. Updates master transaction steps.
    * 2. Updates virtual state.
@@ -375,9 +511,15 @@ class CommandManagerInstance {
 
   public run(): boolean {
     if (this.shouldDispatch && this.executionLog.length > 0) {
-      console.group("🚀 Arkpad Shadow Engine Refinement Log");
-      console.table(this.executionLog);
-      console.groupEnd();
+      if (this.editor.shouldLogCommandRuns()) {
+        console.group("🚀 Arkpad Shadow Engine Refinement Log");
+        console.table(this.executionLog);
+        console.groupEnd();
+      }
+      // Report to editor for telemetry API
+      if ((this.editor as any)._setLastCommandLog) {
+        (this.editor as any)._setLastCommandLog(this.executionLog);
+      }
     }
 
     if (!this.allSuccessful) {
