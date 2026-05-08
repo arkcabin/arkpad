@@ -35,8 +35,12 @@ const BLOCKS: { type: BlockType; label: string; icon: React.ReactNode }[] = [
 
 /* ── Main Component ─────────────────────────────────────────── */
 
-export function BuilderDemo() {
-  const { navOpen } = useBuilderNav();
+interface BuilderDemoProps {
+  maxWidth?: string;
+}
+
+export function BuilderDemo({ maxWidth = "100%" }: BuilderDemoProps) {
+  const { navOpen, previewMode } = useBuilderNav();
   const [activeTab, setActiveTab] = useState<SidebarTab>("blocks");
 
   const editor = useArkpadEditor({
@@ -109,13 +113,48 @@ export function BuilderDemo() {
     e.target.addEventListener("dragend", cleanup);
   }, []);
 
+  // Update editor editable state when mode changes
+  React.useEffect(() => {
+    if (!editor) {
+      console.warn("[BuilderDemo] Editor not initialized yet");
+      return;
+    }
+    try {
+      editor.setEditable(!previewMode);
+    } catch (err) {
+      console.error("[BuilderDemo] Failed to set editable state:", err);
+    }
+  }, [editor, previewMode]);
+
   return (
-    <div className="flex flex-1 h-full bg-white overflow-hidden font-sans">
-      {/* Main Canvas Area */}
-      <div className="flex-1 overflow-y-auto flex flex-col bg-white scrollbar-hide">
-        <div className="w-full flex-1 bg-white">
+    <div
+      className={`flex flex-1 h-full overflow-hidden font-sans transition-all duration-700 ${previewMode ? "bg-white" : "bg-[#f8f9fb]"}`}
+    >
+      {/* Main Canvas Area - The "Stage" */}
+      <div
+        className={`flex-1 overflow-y-auto flex flex-col scrollbar-hide relative transition-all duration-700 ${previewMode ? "p-0" : "p-8 lg:p-12"}`}
+      >
+        {/* The Paper / Canvas */}
+        <div
+          className="mx-auto bg-white transition-all duration-700"
+          style={{
+            maxWidth,
+            width: "100%",
+            minHeight: "100%",
+            ...(previewMode
+              ? {}
+              : {
+                  boxShadow: "0 8px 30px rgb(0,0,0,0.04)",
+                  border: "1px solid #f3f4f6",
+                  borderRadius: "0.5rem",
+                  overflow: "hidden",
+                }),
+          }}
+        >
           <ArkpadProvider editor={editor}>
-            <div className="w-full min-h-full py-20 px-10">
+            <div
+              className={`w-full min-h-full transition-all duration-700 ${!previewMode ? "p-12 lg:p-20" : "p-8 lg:p-16"}`}
+            >
               <ArkpadEditorContent editor={editor} className="min-h-full" />
             </div>
           </ArkpadProvider>
@@ -123,7 +162,7 @@ export function BuilderDemo() {
       </div>
 
       {/* Right Sidebar - Figma Style */}
-      {navOpen && (
+      {navOpen && !previewMode && (
         <aside className="w-[280px] border-l border-gray-100 flex flex-col bg-white shrink-0 z-10 shadow-[-4px_0_12px_rgba(0,0,0,0.02)] animate-in slide-in-from-right duration-300">
           {/* Tab Navigation */}
           <div className="flex border-b border-gray-100 px-2 gap-1 mt-2">
