@@ -23,6 +23,7 @@ export const Section = Node.create<SectionOptions>({
   group: "block",
   isLayout: true,
   defining: true,
+  draggable: true,
 
   addAttributes() {
     return {

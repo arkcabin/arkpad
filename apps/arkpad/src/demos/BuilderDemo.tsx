@@ -89,6 +89,24 @@ export function BuilderDemo() {
   const handleDragStart = useCallback((e: React.DragEvent, type: BlockType) => {
     e.dataTransfer.setData("application/x-arkpad-block", type);
     e.dataTransfer.effectAllowed = "move";
+
+    // Create a custom drag image (ghost preview)
+    const dragImg = document.createElement("div");
+    dragImg.className =
+      "fixed top-[-1000px] left-[-1000px] bg-black text-white px-3 py-1.5 rounded-lg text-[10px] font-bold shadow-xl flex items-center gap-2 z-[9999]";
+    dragImg.innerHTML = `<span>Drag to Add ${type.charAt(0).toUpperCase() + type.slice(1)}</span>`;
+    document.body.appendChild(dragImg);
+
+    e.dataTransfer.setDragImage(dragImg, -10, -10);
+
+    // Clean up after drag ends - use dragend event on the source element
+    const cleanup = () => {
+      if (dragImg.parentNode) {
+        document.body.removeChild(dragImg);
+      }
+      e.target.removeEventListener("dragend", cleanup);
+    };
+    e.target.addEventListener("dragend", cleanup);
   }, []);
 
   return (

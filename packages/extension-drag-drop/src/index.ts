@@ -1,9 +1,9 @@
-import { Selection, Extension } from "@arkpad/core";
+import { Selection, Plugin, Extension } from "@arkpad/core";
 
 export const DragDrop = Extension.create({
   name: "dragDrop",
 
-  onDrop(event) {
+  onDrop(event: DragEvent) {
     if (!event.dataTransfer) {
       return false;
     }
@@ -26,11 +26,14 @@ export const DragDrop = Extension.create({
 
     event.preventDefault();
 
-    // Build the chain with all operations
+    // Clean up drag-active class
+    view.dom.classList.remove("drag-active");
+
+    // Build chain - each method returns a NEW chain, so we must reassign
     let chain = editor.chain();
 
-    // Set text selection at the drop point using command
-    chain = chain.command(({ tr }: any) => {
+    // Set text selection at the drop point
+    chain = chain.command(({ tr }: { tr: any }) => {
       const $pos = tr.doc.resolve(pos.pos);
       const selection = Selection.near($pos);
       tr.setSelection(selection);
@@ -77,6 +80,28 @@ export const DragDrop = Extension.create({
     }
 
     return chain.run();
+  },
+
+  addProseMirrorPlugins() {
+    return [
+      new Plugin({
+        props: {
+          handleDOMEvents: {
+            dragover: (view: any, event: any) => {
+              const blockType = event.dataTransfer?.getData("application/x-arkpad-block");
+              if (blockType) {
+                view.dom.classList.add("drag-active");
+              }
+              return false;
+            },
+            dragleave: (view: any) => {
+              view.dom.classList.remove("drag-active");
+              return false;
+            },
+          },
+        },
+      }),
+    ];
   },
 });
 

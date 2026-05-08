@@ -15,11 +15,12 @@ export const Dropcursor = Extension.create<DropcursorOptions>({
   
   addOptions() {
     return {
-      width: 1,
-      color: "currentColor",
+      width: 2,
+      color: "#000",
       class: undefined,
     };
   },
+
   
   addProseMirrorPlugins() {
     return [
