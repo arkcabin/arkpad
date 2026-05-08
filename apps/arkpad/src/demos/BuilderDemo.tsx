@@ -153,7 +153,9 @@ export function BuilderDemo({ maxWidth = "100%" }: BuilderDemoProps) {
         >
           <ArkpadProvider editor={editor}>
             <div
-              className={`w-full min-h-full transition-all duration-700 ${!previewMode ? "p-12 lg:p-20" : "p-8 lg:p-16"}`}
+              className={`w-full min-h-full transition-all duration-700 arkpad-editor-container p-0 ${
+                previewMode ? "preview-mode" : ""
+              }`}
             >
               <ArkpadEditorContent editor={editor} className="min-h-full" />
             </div>

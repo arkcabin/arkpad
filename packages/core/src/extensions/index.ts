@@ -1,5 +1,11 @@
 import { Extension } from "../sdk/Extension";
-import { createHardBreak, createHistory } from "./essentials/base";
+import {
+  createDocument,
+  createParagraph,
+  createText,
+  createHardBreak,
+  createHistory,
+} from "./essentials/base";
 import { createUniqueId } from "./infrastructure/unique-id";
 import { FocusEvents } from "./infrastructure/focusEvents";
 import { ClipboardTextSerializer } from "./infrastructure/clipboardTextSerializer";
@@ -8,7 +14,8 @@ import { ListKeymap } from "./infrastructure/listKeymap";
 import { Dropcursor } from "./ux/dropcursor";
 import { Gapcursor } from "./ux/gapcursor";
 import { GhostText } from "./ux/GhostText";
-import { BlockHandle } from "./ux/BlockHandle";
+import { FocusDecorator } from "./ux/focusDecorator";
+
 import { ArkpadExtension } from "../api/extensions";
 import {
   toggleMark,
@@ -28,33 +35,27 @@ export const BaseCommands = Extension.create({
   name: "baseCommands",
 
   addCommands: () => ({
-    toggleMark:
-      (type: string | MarkType, attrs?: Record<string, any>) => (props: any) => {
-        return toggleMark(type, attrs)(props);
-      },
-    toggleBlock:
-      (type: string | NodeType, attrs?: Record<string, any>) => (props: any) => {
-        return toggleBlock(type, attrs)(props);
-      },
-    toggleList:
-      (listType: string | NodeType) => (props: any) => {
-        return toggleList(listType)(props);
-      },
+    toggleMark: (type: string | MarkType, attrs?: Record<string, any>) => (props: any) => {
+      return toggleMark(type, attrs)(props);
+    },
+    toggleBlock: (type: string | NodeType, attrs?: Record<string, any>) => (props: any) => {
+      return toggleBlock(type, attrs)(props);
+    },
+    toggleList: (listType: string | NodeType) => (props: any) => {
+      return toggleList(listType)(props);
+    },
     setTextAlign: (align: string) => (props: any) => {
       return setTextAlign(align)(props);
     },
-    insertNode:
-      (type: string | NodeType, attrs?: Record<string, any>) => (props: any) => {
-        return insertNode(type, attrs)(props);
-      },
-    updateAttributes:
-      (typeOrName: string, attributes: Record<string, any>) => (props: any) => {
-        return updateAttributes(typeOrName, attributes)(props);
-      },
-    setNode:
-      (type: string | NodeType, attrs?: Record<string, any>) => (props: any) => {
-        return setNode(type, attrs)(props);
-      },
+    insertNode: (type: string | NodeType, attrs?: Record<string, any>) => (props: any) => {
+      return insertNode(type, attrs)(props);
+    },
+    updateAttributes: (typeOrName: string, attributes: Record<string, any>) => (props: any) => {
+      return updateAttributes(typeOrName, attributes)(props);
+    },
+    setNode: (type: string | NodeType, attrs?: Record<string, any>) => (props: any) => {
+      return setNode(type, attrs)(props);
+    },
     first: (commands: any[]) => (props: any) => {
       for (const command of commands) {
         let result = typeof command === "function" ? command(props) : command;
@@ -83,6 +84,9 @@ export const Engine = Extension.create({
   name: "engine",
   addExtensions() {
     return [
+      createDocument(),
+      createParagraph(),
+      createText(),
       createHardBreak(),
       createUniqueId(),
       createHistory(),
@@ -103,7 +107,7 @@ export const CoreEssentials: ArkpadExtension[] = [
   Dropcursor,
   Gapcursor,
   GhostText,
-  BlockHandle,
+  FocusDecorator,
 ];
 
 /**

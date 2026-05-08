@@ -5,35 +5,41 @@ import { Selection, TextSelection, Plugin } from "prosemirror-state";
 import { Extension } from "../../sdk/Extension";
 
 /**
- * Ensures there is always a trailing paragraph at the end of the document.
+ * Ensures there is always a trailing section with content at the end of the document.
  */
 function trailingNodePlugin() {
   return new Plugin({
     appendTransaction: (transactions, oldState, newState) => {
       const { doc, schema } = newState;
       const lastNode = doc.lastChild;
-      const paragraph = schema.nodes.paragraph;
-      if (!paragraph) return null;
 
-      // Don't act if the last node is already a paragraph or if doc is empty
-      if (!lastNode || lastNode.type === paragraph) {
-        return null;
-      }
+      // Try to use section if available, otherwise fallback to paragraph
+      const section = schema.nodes.section;
+      const fallbackNode = section || schema.nodes.paragraph;
+      if (!fallbackNode) return null;
 
-      // We only want to append a paragraph if the last node is a structural block
-      // that users might get "stuck" in (like codeBlock, heading, list).
-      // Performance: Cache structural types on schema to avoid re-filtering every transaction.
-      let structuralTypes = (schema as any)._structuralTypes;
-      if (!structuralTypes) {
-        structuralTypes = Object.values(schema.nodes).filter(
-          (nodeType) => (nodeType.spec as any).trailingNode
-        );
-        (schema as any)._structuralTypes = structuralTypes;
-      }
+      // Ensure there is always at least one content node at the end
+      if (!lastNode || lastNode.type === schema.nodes.doc) {
+        const paragraph = schema.nodes.paragraph;
+        if (!paragraph) return null;
 
-      if (structuralTypes.includes(lastNode.type)) {
         const tr = newState.tr;
-        return tr.insert(doc.content.size, paragraph.create()).scrollIntoView();
+        const contentNode = section
+          ? section.create(null, [paragraph.create()])
+          : paragraph.create();
+        return tr.insert(doc.content.size, contentNode).scrollIntoView();
+      }
+
+      // If using sections, ensure last section has content
+      if (section && lastNode.type === section && lastNode.childCount === 0) {
+        const paragraph = schema.nodes.paragraph;
+        if (!paragraph) return null;
+
+        const tr = newState.tr;
+        const newSection = lastNode.type.create(lastNode.attrs, [paragraph.create()]);
+        // Calculate position of last node: doc size minus last node size
+        const start = doc.content.size - lastNode.nodeSize;
+        return tr.replaceWith(start, doc.content.size, newSection).scrollIntoView();
       }
 
       return null;
@@ -47,8 +53,16 @@ export function createDocument(): Extension {
     addNodes() {
       return {
         doc: {
-          content: "block+",
+          content: "section+",
           marks: "_",
+          parseDOM: [
+            {
+              tag: "main#ark-page-root",
+            },
+          ],
+          toDOM() {
+            return ["main", { id: "ark-page-root" }, 0];
+          },
         },
       };
     },

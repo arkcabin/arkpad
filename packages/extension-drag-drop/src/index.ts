@@ -102,7 +102,7 @@ export const DragDrop = Extension.create({
         },
         destroy() {
           if (scrollInterval) {
-            if (scrollInterval) clearInterval(scrollInterval);
+            clearInterval(scrollInterval);
           }
         },
         props: {
@@ -112,6 +112,8 @@ export const DragDrop = Extension.create({
             const gap = Decoration.widget(currentDragPos, () => {
               const el = document.createElement("div");
               el.className = "ark-drop-gap";
+              // Add internal premium styling
+              el.innerHTML = `<div class="ark-drop-gap-line"></div>`;
               return el;
             });
 
@@ -122,7 +124,7 @@ export const DragDrop = Extension.create({
               const blockType = event.dataTransfer?.getData("application/x-arkpad-block");
               if (!blockType) return false;
 
-              view.dom.classList.add("drag-active");
+              view.dom.closest(".arkpad-editor-container")?.classList.add("drag-active");
 
               // 1. Auto-scroll logic
               const threshold = 100;
@@ -146,13 +148,13 @@ export const DragDrop = Extension.create({
             },
             dragleave: (view: any) => {
               if (scrollInterval) clearInterval(scrollInterval);
-              view.dom.classList.remove("drag-active");
+              view.dom.closest(".arkpad-editor-container")?.classList.remove("drag-active");
               view.dispatch(view.state.tr.setMeta("dragPosUpdate", { pos: -1 }));
               return false;
             },
             drop: (view: any) => {
               if (scrollInterval) clearInterval(scrollInterval);
-              view.dom.classList.remove("drag-active");
+              view.dom.closest(".arkpad-editor-container")?.classList.remove("drag-active");
               view.dispatch(view.state.tr.setMeta("dragPosUpdate", { pos: -1 }));
               return false;
             },
