@@ -38,10 +38,7 @@
    Actually, prosemirror-tables handles visibility.
 */
 
-.tableWrapper {
-  overflow-x: auto;
-  margin-bottom: var(--ark-table-margin-bottom);
-}
+/* .tableWrapper rules are defined in table.css — no duplicate here */
 
 .ark-table-resize-guide {
   position: absolute;

@@ -1,6 +1,10 @@
 import type { ArkpadCommandProps } from "@arkpad/core";
 import { TextSelection } from "prosemirror-state";
-import { fixTables as pmFixTables, deleteTable as pmDeleteTable, TableMap } from "prosemirror-tables";
+import {
+  fixTables as pmFixTables,
+  deleteTable as pmDeleteTable,
+  TableMap,
+} from "prosemirror-tables";
 import type { InsertTableOptions, CommandFactory } from "../types";
 import { createTable } from "../nodes/utilities/createTable";
 
@@ -118,57 +122,48 @@ export const fixTableColumnWidths: CommandFactory =
     if (!tableNode) return false;
 
     const map = TableMap.get(tableNode);
+    const seen = new Set<number>();
 
     // Walk every cell in the table and update its colwidth attr
-    tableNode.forEach((rowNode, rowOffset) => {
-      if (rowNode.type.spec.tableRole !== "row") return;
+    for (let i = 0; i < map.map.length; i++) {
+      const pos = map.map[i];
+      if (pos === undefined || seen.has(pos)) continue;
+      seen.add(pos);
 
-      rowNode.forEach((cellNode, cellOffset) => {
-        const cellRole = cellNode.type.spec.tableRole;
-        if (cellRole !== "cell" && cellRole !== "header_cell") return;
+      const cellDocPos = tablePos + 1 + pos;
+      const cellNode = tr.doc.nodeAt(cellDocPos);
 
-        // Absolute position of this cell in the document
-        const cellDocPos = tablePos + 1 + rowOffset + 1 + cellOffset;
+      if (!cellNode) continue;
 
-        // Position relative to start of table node content (offset inside TableMap)
-        const cellMapOffset = cellDocPos - tablePos;
+      const cellRect = map.findCell(pos);
+      const colspan = cellNode.attrs.colspan || 1;
+      const oldColwidth: number[] = cellNode.attrs.colwidth
+        ? [...cellNode.attrs.colwidth]
+        : new Array(colspan).fill(0);
 
-        let cellRect: { left: number; right: number; top: number; bottom: number };
-        try {
-          cellRect = map.findCell(cellMapOffset);
-        } catch {
-          return; // Skip cells that can't be resolved
-        }
-
-        const colspan = cellNode.attrs.colspan || 1;
-        const oldColwidth: number[] = cellNode.attrs.colwidth
-          ? [...cellNode.attrs.colwidth]
-          : new Array(colspan).fill(0);
-
-        let changed = false;
-        for (let j = 0; j < colspan; j++) {
-          const col = cellRect.left + j;
-          const width = widths?.[col];
-          if (typeof width === "number") {
-            const rounded = Math.round(width);
-            if (oldColwidth[j] !== rounded) {
-              oldColwidth[j] = rounded;
-              changed = true;
-            }
-          } else if (!oldColwidth[j]) {
-            oldColwidth[j] = 100;
+      let changed = false;
+      for (let j = 0; j < colspan; j++) {
+        const col = cellRect.left + j;
+        const width = widths?.[col];
+        if (typeof width === "number") {
+          const rounded = Math.round(width);
+          if (oldColwidth[j] !== rounded) {
+            oldColwidth[j] = rounded;
             changed = true;
           }
+        } else if (!oldColwidth[j]) {
+          oldColwidth[j] = 100;
+          changed = true;
         }
+      }
 
-        if (changed) {
-          tr.setNodeMarkup(cellDocPos, undefined, {
-            ...cellNode.attrs,
-            colwidth: oldColwidth,
-          });
-        }
-      });
-    });
+      if (changed) {
+        tr.setNodeMarkup(cellDocPos, undefined, {
+          ...cellNode.attrs,
+          colwidth: oldColwidth,
+        });
+      }
+    }
 
     if (tr.docChanged && dispatch) {
       tr.setMeta("addToHistory", false);
@@ -204,44 +199,39 @@ export const resizeColumn: CommandFactory =
 
     const map = TableMap.get(tableNode);
     const roundedWidth = Math.round(width);
+    const seen = new Set<number>();
     let found = false;
 
     // Walk every cell in the table
-    tableNode.forEach((rowNode, rowOffset) => {
-      if (rowNode.type.spec.tableRole !== "row") return;
+    for (let i = 0; i < map.map.length; i++) {
+      const pos = map.map[i];
+      if (pos === undefined || seen.has(pos)) continue;
+      seen.add(pos);
 
-      rowNode.forEach((cellNode, cellOffset) => {
-        const cellRole = cellNode.type.spec.tableRole;
-        if (cellRole !== "cell" && cellRole !== "header_cell") return;
+      const cellDocPos = tablePos + 1 + pos;
+      const cellNode = tr.doc.nodeAt(cellDocPos);
 
-        const cellDocPos = tablePos + 1 + rowOffset + 1 + cellOffset;
-        const cellMapOffset = cellDocPos - tablePos;
+      if (!cellNode) continue;
 
-        let cellRect: { left: number; right: number; top: number; bottom: number };
-        try {
-          cellRect = map.findCell(cellMapOffset);
-        } catch {
-          return;
-        }
+      const cellRect = map.findCell(pos);
 
-        // Does this cell span across the target column?
-        if (colIndex < cellRect.left || colIndex >= cellRect.right) return;
+      // Does this cell span across the target column?
+      if (colIndex < cellRect.left || colIndex >= cellRect.right) continue;
 
-        const colspan = cellNode.attrs.colspan || 1;
-        const colwidth: number[] = cellNode.attrs.colwidth
-          ? [...cellNode.attrs.colwidth]
-          : new Array(colspan).fill(0);
+      const colspan = cellNode.attrs.colspan || 1;
+      const colwidth: number[] = cellNode.attrs.colwidth
+        ? [...cellNode.attrs.colwidth]
+        : new Array(colspan).fill(0);
 
-        const subIndex = colIndex - cellRect.left;
-        colwidth[subIndex] = roundedWidth;
+      const subIndex = colIndex - cellRect.left;
+      colwidth[subIndex] = roundedWidth;
 
-        tr.setNodeMarkup(cellDocPos, undefined, {
-          ...cellNode.attrs,
-          colwidth,
-        });
-        found = true;
+      tr.setNodeMarkup(cellDocPos, undefined, {
+        ...cellNode.attrs,
+        colwidth,
       });
-    });
+      found = true;
+    }
 
     if (found && dispatch) {
       tr.setMeta("addToHistory", false);
