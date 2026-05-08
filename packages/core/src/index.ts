@@ -79,7 +79,7 @@ export {
   NodeSelection,
   Plugin,
 } from "prosemirror-state";
-export { EditorView } from "prosemirror-view";
+export { EditorView, Decoration, DecorationSet } from "prosemirror-view";
 
 // UI & Interaction Plugins
 export { dropCursor } from "prosemirror-dropcursor";

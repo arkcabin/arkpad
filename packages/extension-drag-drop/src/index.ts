@@ -1,4 +1,4 @@
-import { Selection, Plugin, Extension } from "@arkpad/core";
+import { Selection, Plugin, Extension, Decoration, DecorationSet } from "@arkpad/core";
 
 export const DragDrop = Extension.create({
   name: "dragDrop",
@@ -26,10 +26,11 @@ export const DragDrop = Extension.create({
 
     event.preventDefault();
 
-    // Clean up drag-active class
+    // Clean up visual state
     view.dom.classList.remove("drag-active");
+    view.dispatch(view.state.tr.setMeta("dragPosUpdate", { pos: -1 }));
 
-    // Build chain - each method returns a NEW chain, so we must reassign
+    // Build chain
     let chain = editor.chain();
 
     // Set text selection at the drop point
@@ -83,19 +84,76 @@ export const DragDrop = Extension.create({
   },
 
   addProseMirrorPlugins() {
+    let scrollInterval: ReturnType<typeof setInterval> | null = null;
+    let currentDragPos = -1;
+
     return [
       new Plugin({
+        state: {
+          init: () => ({ pos: -1 }),
+          apply: (tr, value) => {
+            const meta = tr.getMeta("dragPosUpdate");
+            if (meta) {
+              currentDragPos = meta.pos;
+              return meta;
+            }
+            return value;
+          },
+        },
+        destroy() {
+          if (scrollInterval) {
+            if (scrollInterval) clearInterval(scrollInterval);
+          }
+        },
         props: {
+          decorations: (state) => {
+            if (currentDragPos === -1) return DecorationSet.empty;
+
+            const gap = Decoration.widget(currentDragPos, () => {
+              const el = document.createElement("div");
+              el.className = "ark-drop-gap";
+              return el;
+            });
+
+            return DecorationSet.create(state.doc, [gap]);
+          },
           handleDOMEvents: {
             dragover: (view: any, event: any) => {
               const blockType = event.dataTransfer?.getData("application/x-arkpad-block");
-              if (blockType) {
-                view.dom.classList.add("drag-active");
+              if (!blockType) return false;
+
+              view.dom.classList.add("drag-active");
+
+              // 1. Auto-scroll logic
+              const threshold = 100;
+              const { top, bottom } = view.dom.getBoundingClientRect();
+              const { clientY } = event;
+
+              if (scrollInterval) clearInterval(scrollInterval);
+              if (clientY < top + threshold) {
+                scrollInterval = setInterval(() => window.scrollBy(0, -15), 20);
+              } else if (clientY > bottom - threshold) {
+                scrollInterval = setInterval(() => window.scrollBy(0, 15), 20);
               }
+
+              // 2. Gap Indicator logic
+              const pos = view.posAtCoords({ left: event.clientX, top: event.clientY });
+              if (pos && pos.pos !== currentDragPos) {
+                view.dispatch(view.state.tr.setMeta("dragPosUpdate", { pos: pos.pos }));
+              }
+
               return false;
             },
             dragleave: (view: any) => {
+              if (scrollInterval) clearInterval(scrollInterval);
               view.dom.classList.remove("drag-active");
+              view.dispatch(view.state.tr.setMeta("dragPosUpdate", { pos: -1 }));
+              return false;
+            },
+            drop: (view: any) => {
+              if (scrollInterval) clearInterval(scrollInterval);
+              view.dom.classList.remove("drag-active");
+              view.dispatch(view.state.tr.setMeta("dragPosUpdate", { pos: -1 }));
               return false;
             },
           },
