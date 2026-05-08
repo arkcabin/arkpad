@@ -85,6 +85,14 @@ export interface ExtensionConfig<Options = any, Storage = any> {
     this: ExtensionContext<Options, Storage>,
     props: { editor: any; transaction: Transaction; node: PMNode | null; pos: number }
   ) => void;
+  onEnterNode?: (
+    this: ExtensionContext<Options, Storage>,
+    props: { editor: any; nodeName: string; transaction: Transaction }
+  ) => void;
+  onExitNode?: (
+    this: ExtensionContext<Options, Storage>,
+    props: { editor: any; nodeName: string; transaction: Transaction }
+  ) => void;
   onInit?: (this: ExtensionContext<Options, Storage>) => void;
   addMenu?: (this: ExtensionContext<Options, Storage>) => any;
   onDestroy?: (this: ExtensionContext<Options, Storage>) => void;
@@ -178,6 +186,8 @@ export interface ArkpadExtension {
     node: PMNode | null;
     pos: number;
   }) => void;
+  onEnterNode?: (props: { editor: any; nodeName: string; transaction: Transaction }) => void;
+  onExitNode?: (props: { editor: any; nodeName: string; transaction: Transaction }) => void;
   onInit?: () => void;
   addMenu?: () => MenuConfig | MenuConfig[];
   onDestroy?: () => void;

@@ -2,13 +2,62 @@ import { TextSelection } from "prosemirror-state";
 import { IArkpadEditor } from "../../api";
 
 /**
- * SelectionService handles all selection-related operations, including 
+ * SelectionService handles all selection-related operations, including
  * cell selections, coordinate resolution, and virtual selections (ghost cursors).
  */
 export class SelectionService {
   private virtualSelections: Map<string, any> = new Map();
+  private lastPath: string[] = [];
 
   constructor(private editor: IArkpadEditor) {}
+
+  /**
+   * Tracks changes in the selection path and triggers enter/exit hooks.
+   */
+  public updateContext(tr: any) {
+    const { $from } = tr.selection;
+    const currentPath: string[] = [];
+
+    // Calculate selection path (breadcrumbs)
+    for (let i = 0; i <= $from.depth; i++) {
+      currentPath.push($from.node(i).type.name);
+    }
+
+    // Identify EXITED and ENTERED nodes by comparing paths index-by-index
+    const maxDepth = Math.max(this.lastPath.length, currentPath.length);
+    const exited: string[] = [];
+    const entered: string[] = [];
+
+    // Find the first index where paths diverge
+    let divergenceIndex = 0;
+    while (
+      divergenceIndex < maxDepth &&
+      this.lastPath[divergenceIndex] === currentPath[divergenceIndex]
+    ) {
+      divergenceIndex++;
+    }
+
+    // Everything from divergenceIndex onwards in lastPath was EXITED
+    for (let i = this.lastPath.length - 1; i >= divergenceIndex; i--) {
+      exited.push(this.lastPath[i]!);
+    }
+
+    // Everything from divergenceIndex onwards in currentPath was ENTERED
+    for (let i = divergenceIndex; i < currentPath.length; i++) {
+      entered.push(currentPath[i]!);
+    }
+
+    const hookManager = this.editor.hookManager;
+
+    // IMPORTANT: Update state BEFORE triggering hooks to prevent infinite recursion
+    // if a hook triggers a command that updates selection.
+    this.lastPath = currentPath;
+
+    if (hookManager) {
+      exited.forEach((name) => hookManager.triggerNodeExit(name, tr));
+      entered.forEach((name) => hookManager.triggerNodeEnter(name, tr));
+    }
+  }
 
   public getSelection() {
     const { selection } = this.editor.getState();

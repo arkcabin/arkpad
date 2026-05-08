@@ -9,6 +9,8 @@ export class HookManager {
   public selectionHooks: ArkpadExtension[] = [];
   public updateHooks: ArkpadExtension[] = [];
   public destroyHooks: ArkpadExtension[] = [];
+  public enterNodeHooks: ArkpadExtension[] = [];
+  public exitNodeHooks: ArkpadExtension[] = [];
 
   public eventHooks = {
     onClick: [] as ArkpadExtension[],
@@ -30,6 +32,8 @@ export class HookManager {
     this.selectionHooks = [];
     this.updateHooks = [];
     this.destroyHooks = [];
+    this.enterNodeHooks = [];
+    this.exitNodeHooks = [];
     this.resetEventHooks();
 
     extensions.forEach((ext) => {
@@ -37,6 +41,8 @@ export class HookManager {
       if (ext.onSelection) this.selectionHooks.push(ext);
       if (ext.onUpdate) this.updateHooks.push(ext);
       if (ext.onDestroy) this.destroyHooks.push(ext);
+      if (ext.onEnterNode) this.enterNodeHooks.push(ext);
+      if (ext.onExitNode) this.exitNodeHooks.push(ext);
 
       if (ext.onClick) this.eventHooks.onClick.push(ext);
       if (ext.onDoubleClick) this.eventHooks.onDoubleClick.push(ext);
@@ -69,6 +75,18 @@ export class HookManager {
   public triggerSelection(tr: Transaction, node: any, pos: number) {
     for (const ext of this.selectionHooks) {
       ext.onSelection!({ editor: this.editor, transaction: tr, node, pos });
+    }
+  }
+
+  public triggerNodeEnter(nodeName: string, tr: Transaction) {
+    for (const ext of this.enterNodeHooks) {
+      ext.onEnterNode!({ editor: this.editor, nodeName, transaction: tr });
+    }
+  }
+
+  public triggerNodeExit(nodeName: string, tr: Transaction) {
+    for (const ext of this.exitNodeHooks) {
+      ext.onExitNode!({ editor: this.editor, nodeName, transaction: tr });
     }
   }
 

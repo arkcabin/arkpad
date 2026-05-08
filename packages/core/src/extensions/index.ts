@@ -7,6 +7,7 @@ import { Keymap } from "./infrastructure/keymap";
 import { ListKeymap } from "./infrastructure/listKeymap";
 import { Dropcursor } from "./ux/dropcursor";
 import { Gapcursor } from "./ux/gapcursor";
+import { GhostText } from "./ux/GhostText";
 import { ArkpadExtension } from "../api/extensions";
 import {
   toggleMark,
@@ -95,6 +96,7 @@ export const CoreEssentials: ArkpadExtension[] = [
   Engine,
   Dropcursor,
   Gapcursor,
+  GhostText,
 ];
 
 /**

@@ -130,6 +130,11 @@ export class DispatchEngine {
         coords: this.editor.getCoords(from),
       });
       this.hooks.triggerSelection(tr, node, from);
+
+      // Selection Context (Breadcrumbs) Tracking
+      if (this.editor.selectionService?.updateContext) {
+        this.editor.selectionService.updateContext(tr);
+      }
     }
 
     const nextState = view.state.apply(tr);

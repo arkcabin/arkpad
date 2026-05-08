@@ -12,14 +12,18 @@
 - [x] Reactive state management (Pulse system)
 - [x] Bubble/Floating menu support
 
-## Phase 3: The Headless Refactor (Current)
+## Phase 3: The Headless Refactor (Complete)
 - [x] Rebranding documentation and concept to "AgentEdit"
 - [x] Extracting utilities and improving type safety
 - [x] Introducing the `Essentials` kit
-- [ ] **Next**: Enhancing the Command API for better chaining
-- [ ] **Next**: Selection-aware hooks and events
+- [x] **Enhanced Command API**: Chainable methods with high-performance Shadow Engine
+- [x] **Command Telemetry**: Integrated logging and performance tracking
 
-## Phase 4: Pre-built UI Kit (Future)
+## Phase 4: Intelligence & Context (Current)
+- [x] **Selection-aware context hooks**: Automatic `onEnterNode` / `onExitNode` transitions
+- [x] **Ghost Text API**: Virtual AI suggestions with non-intrusive materialization
+- [ ] **Next**: Headless UI positioning engine improvements
+- [ ] **Next**: Contextual floating toolbars for Tables
 - [ ] `StandardToolbar` component (Tailwind + Shadcn)
 - [ ] `FloatingActionMenu` component
 - [ ] `DefaultBubbleMenu` component

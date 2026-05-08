@@ -62,7 +62,7 @@ export class ArkpadEditor implements IArkpadEditor {
   private lastCommandLog: any[] = [];
 
   // Sub-Managers (The modular core)
-  private readonly hookManager: HookManager;
+  public readonly hookManager: HookManager;
   private readonly dispatchEngine: DispatchEngine;
   public readonly stateManager: StateManager;
   public readonly selectionService: SelectionService;
@@ -176,12 +176,12 @@ export class ArkpadEditor implements IArkpadEditor {
   public runCommand(name: string, ...args: any[]): any {
     if (this.destroyed) return false;
     if (!this.isCommandAllowed(name)) return false;
-    
+
     // Using chain() ensures we use the Shadow Engine and collect Telemetry
     const chain = this.chain();
     const command = (chain as any)[name];
-    
-    if (typeof command !== 'function') {
+
+    if (typeof command !== "function") {
       // Fallback for non-standard commands if any
       const rawCommand = this.extensionManager.commands[name];
       if (!rawCommand) return false;
@@ -380,6 +380,29 @@ export class ArkpadEditor implements IArkpadEditor {
 
   public getCommandLog(): any[] {
     return this.lastCommandLog;
+  }
+
+  // ── Ghost Text API (AI Autocomplete) ───────────────────────────────────────
+
+  /**
+   * Sets a virtual ghost text suggestion at the current cursor position.
+   */
+  public setGhostText(text: string, pos?: number): boolean {
+    return this.runCommand("setGhostText", text, pos);
+  }
+
+  /**
+   * Accepts and materializes the current ghost text suggestion.
+   */
+  public acceptGhostText(): boolean {
+    return this.runCommand("acceptGhostText");
+  }
+
+  /**
+   * Clears the current ghost text suggestion.
+   */
+  public clearGhostText(): boolean {
+    return this.runCommand("clearGhostText");
   }
 
   /**

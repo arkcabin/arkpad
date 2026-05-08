@@ -1,10 +1,5 @@
 import { Extension } from "@arkpad/core";
-import {
-  tableEditing,
-  columnResizing,
-  isInTable,
-  CellSelection,
-} from "prosemirror-tables";
+import { tableEditing, columnResizing, isInTable, CellSelection } from "prosemirror-tables";
 import { Plugin, Selection } from "prosemirror-state";
 import { Slice, Fragment } from "prosemirror-model";
 
@@ -16,12 +11,7 @@ import { tableHeaderNode } from "./nodes/table-header";
 import { TableView } from "./nodes/TableView";
 
 // Commands
-import {
-  insertTable,
-  deleteTable,
-  exitTable,
-  fixTables,
-} from "./commands/table";
+import { insertTable, deleteTable, exitTable, fixTables } from "./commands/table";
 import { addRowBefore, addRowAfter, deleteRow } from "./commands/row";
 import { addColumnBefore, addColumnAfter, deleteColumn } from "./commands/column";
 import {
@@ -34,6 +24,7 @@ import {
   setCellBackground,
   goToNextCell,
 } from "./commands/cell";
+import { selectColumn, selectRow, selectTable } from "./commands/selection";
 
 // Keyboard
 import { keyboardShortcuts } from "./keyboard";
@@ -91,6 +82,9 @@ export const Table = Extension.create<TableOptions>({
       setCellAttr,
       setCellBackground,
       goToNextCell,
+      selectColumn,
+      selectRow,
+      selectTable,
     };
   },
 

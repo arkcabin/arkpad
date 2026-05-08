@@ -50,12 +50,12 @@ Simplifying the barrier to entry.
 
 ## 3. Enhancement Roadmap
 
-### Phase 1: DX & Flexibility (The "Easy Wins")
-
-1.  **Refactor `ArkpadExtension`:** Add native event hooks to bypass ProseMirror plugin boilerplate.
-2.  **Snapshot API:** Implement memory-based state snapshotting.
-3.  **Command Telemetry:** Add a logging system to track command execution and failure reasons.
-4.  **Contextual Table Selection:** Modern, non-intrusive selection system integrated into the Floating Toolbar (Select Column, Select Row, Select All).
+### Phase 1: DX & Flexibility (COMPLETED)
+1.  **Refactor `ArkpadExtension`:** Added `onEnterNode` / `onExitNode` context hooks.
+2.  **Snapshot API:** Implemented in `StateManager`.
+3.  **Command Telemetry:** Integrated into `CommandManager` and `ArkpadEditor`.
+4.  **Table Enhancements:** Stable resize engine + new `selectRow`/`selectColumn` commands.
+5.  **Ghost Text API:** Dedicated system for AI autocompletion.
 
 ### Phase 2: Performance & Scalability
 

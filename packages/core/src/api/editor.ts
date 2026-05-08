@@ -23,6 +23,8 @@ export interface IArkpadEditor {
   readonly events: EventEmitter;
   readonly extensionManager: any;
   readonly stateManager: any;
+  readonly selectionService: any;
+  readonly hookManager: any;
 
   getState(): EditorState;
   getView(): EditorView;
@@ -82,5 +84,8 @@ export interface IArkpadEditor {
   getUpdateVersion(scope: Exclude<EditorSubscriptionScope, "all">): number;
   shouldLogCommandRuns(): boolean;
   getCommandLog(): any[];
+  setGhostText(text: string, pos?: number): boolean;
+  acceptGhostText(): boolean;
+  clearGhostText(): boolean;
   destroy(): void;
 }
