@@ -65,3 +65,29 @@ export const setNode = (type: string | NodeType, attrs?: Record<string, any>) =>
   return setBlockType(nodeType, attrs)(props.state, props.dispatch);
 };
 
+export const insertContent = (content: any) => (props: any) => {
+  const { tr, state } = props;
+  const node = state.schema.nodeFromJSON(content);
+  tr.replaceSelectionWith(node);
+  return true;
+};
+
+export const deleteNode = (pos?: number) => (props: any) => {
+  const { tr, state } = props;
+  const position = pos ?? state.selection.from;
+  const node = state.doc.nodeAt(position);
+  if (!node) return false;
+  tr.delete(position, position + node.nodeSize);
+  return true;
+};
+
+export const duplicateNode = (pos?: number) => (props: any) => {
+  const { tr, state } = props;
+  const position = pos ?? state.selection.from;
+  const node = state.doc.nodeAt(position);
+  if (!node) return false;
+  const newNode = node.copy(node.content);
+  tr.insert(position + node.nodeSize, newNode);
+  return true;
+};
+

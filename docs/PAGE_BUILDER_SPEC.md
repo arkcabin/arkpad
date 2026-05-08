@@ -290,11 +290,12 @@ packages/
 
 ### Phase 1: Core Infrastructure (Week 1)
 
-| Task                  | Files                              | Est. Lines |
-| --------------------- | ---------------------------------- | ---------- |
-| BlockRegistry service | core/src/services/BlockRegistry.ts | ~80        |
-| Column nodes          | extension-columns/                 | ~150       |
-| AddColumn command     | extension-columns/commands/        | ~40        |
+| Task                  | Files                              | Est. Lines | Status |
+| --------------------- | ---------------------------------- | ---------- | ------ |
+| BlockRegistry service | core/src/services/BlockRegistry.ts | ~80        | 🏗️      |
+| Column nodes          | extension-columns/                 | ~150       | 🏗️      |
+| AddColumn command     | extension-columns/commands/        | ~40        | 🏗️      |
+| Section node          | extension-section/                 | ~100       | ✅      |
 
 **Deliverables:**
 
@@ -304,11 +305,11 @@ packages/
 
 ### Phase 2: UI Components (Week 2)
 
-| Task                 | Files                  | Est. Lines |
-| -------------------- | ---------------------- | ---------- |
-| BlockPalette sidebar | react/BlockPalette.tsx | ~120       |
-| Drag with indicators | DragDrop update        | ~80        |
-| Column add/remove UI | ColumnControls.tsx     | ~100       |
+| Task                 | Files                  | Est. Lines | Status |
+| -------------------- | ---------------------- | ---------- | ------ |
+| BlockPalette sidebar | react/BlockPalette.tsx | ~120       | ✅      |
+| Drag with indicators | DragDrop update        | ~80        | ✅      |
+| Column add/remove UI | ColumnControls.tsx     | ~100       | 🏗️      |
 
 **Deliverables:**
 

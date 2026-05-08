@@ -11,6 +11,7 @@ import { StateManager } from "./StateManager";
 import { SelectionService } from "../services/editor/SelectionService";
 import { ContentService } from "../services/editor/ContentService";
 import { SearchService } from "../services/editor/SearchService";
+import { BlockRegistry } from "../services/BlockRegistry";
 
 import { createCoreEssentials } from "../extensions";
 import { isMarkActive, isNodeActive, getMarkAttributes, getNodeAttributes } from "../sdk/utils";
@@ -68,6 +69,7 @@ export class ArkpadEditor implements IArkpadEditor {
   public readonly selectionService: SelectionService;
   public readonly contentService: ContentService;
   public readonly searchService: SearchService;
+  public readonly blockRegistry: BlockRegistry;
 
   constructor(options: ArkpadEditorOptions) {
     const resolved = resolveEditorOptions(options);
@@ -107,6 +109,7 @@ export class ArkpadEditor implements IArkpadEditor {
     this.selectionService = new SelectionService(this);
     this.contentService = new ContentService(this);
     this.searchService = new SearchService(this);
+    this.blockRegistry = new BlockRegistry();
     this.storage = {};
 
     // 3. Register Extensions & Index Hooks

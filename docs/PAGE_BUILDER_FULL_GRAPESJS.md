@@ -450,15 +450,16 @@ packages/
 
 ### Phase 1: Core Infrastructure
 
-- BlockRegistry service
-- Column nodes
-- DragDrop with indicators
+- BlockRegistry service (🏗️)
+- Column nodes (🏗️)
+- DragDrop with indicators (✅)
+- Section node (✅)
 
 ### Phase 2: UI Components
 
-- BlockPanel sidebar
-- LayersPanel
-- Drag-drop integration
+- BlockPanel sidebar (✅)
+- LayersPanel (🏗️)
+- Drag-drop integration (✅)
 
 ### Phase 3: Style System
 

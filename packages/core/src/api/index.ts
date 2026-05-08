@@ -17,6 +17,11 @@ export type {
   AsyncInterceptor,
   EditorSubscriptionScope,
   EditorDebugOptions,
+  BlockDefinition,
+  BlockCategory,
+  BlockOptions,
+  BlockStyleConfig,
+  IBlockRegistry,
 } from "./services";
 export type {
   ArkpadExtension,

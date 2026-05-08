@@ -15,6 +15,7 @@ import { Dropcursor } from "./ux/dropcursor";
 import { Gapcursor } from "./ux/gapcursor";
 import { GhostText } from "./ux/GhostText";
 import { FocusDecorator } from "./ux/focusDecorator";
+import { BaseBlocks } from "./BaseBlocks";
 
 import { ArkpadExtension } from "../api/extensions";
 import {
@@ -25,6 +26,9 @@ import {
   insertNode,
   updateAttributes,
   setNode,
+  insertContent,
+  deleteNode,
+  duplicateNode,
 } from "../services/commands";
 import { type MarkType, type NodeType } from "prosemirror-model";
 
@@ -55,6 +59,15 @@ export const BaseCommands = Extension.create({
     },
     setNode: (type: string | NodeType, attrs?: Record<string, any>) => (props: any) => {
       return setNode(type, attrs)(props);
+    },
+    insertContent: (content: any) => (props: any) => {
+      return insertContent(content)(props);
+    },
+    deleteNode: (pos?: number) => (props: any) => {
+      return deleteNode(pos)(props);
+    },
+    duplicateNode: (pos?: number) => (props: any) => {
+      return duplicateNode(pos)(props);
     },
     first: (commands: any[]) => (props: any) => {
       for (const command of commands) {
@@ -108,6 +121,7 @@ export const CoreEssentials: ArkpadExtension[] = [
   Gapcursor,
   GhostText,
   FocusDecorator,
+  BaseBlocks,
 ];
 
 /**

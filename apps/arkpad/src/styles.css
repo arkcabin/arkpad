@@ -189,24 +189,93 @@
 
 /* ── Selection Outlines & Labels ─────────────────────────────── */
 
-.has-focus {
-  @apply relative outline-none;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Only show in Edit Mode */
-.arkpad-editor-container:not(.preview-mode) .has-focus {
-  outline: 2px solid #2563eb !important;
+.arkpad-editor-container .ark-selected-node {
+  outline: 2px solid #3b82f6 !important;
   outline-offset: -2px;
-  z-index: 10;
+  position: relative;
+  z-index: 1;
 }
 
-/* Floating Structural Labels */
-.arkpad-editor-container:not(.preview-mode) .has-focus::before {
-  content: attr(data-type);
-  @apply absolute -top-[18px] left-0 px-2 py-0.5 bg-[#2563eb] text-white text-[9px] font-bold uppercase tracking-wider leading-none rounded-t-sm pointer-events-none;
-  animation: labelIn 0.2s cubic-bezier(0, 0, 0.2, 1) forwards;
-  z-index: 30;
+/* Floating Toolbar */
+.ark-builder-toolbar {
+  position: absolute;
+  top: -30px; /* Moved up more */
+  left: -2px; /* Align with outline */
+  height: 28px;
+  background: #3b82f6;
+  display: flex;
+  align-items: center;
+  padding: 0 4px;
+  border-radius: 4px 4px 0 0;
+  color: white;
+  z-index: 100;
+  font-family: sans-serif;
+  gap: 8px;
+  box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
+  pointer-events: auto;
+  white-space: nowrap;
+}
+
+.ark-builder-toolbar-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0 4px;
+  border-right: 1px solid rgba(255,255,255,0.2);
+  margin-right: 2px;
+}
+
+.ark-builder-toolbar-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.ark-builder-toolbar-actions button {
+  background: transparent;
+  border: none;
+  color: white;
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
+  transition: background 0.2s;
+}
+
+.ark-builder-toolbar-actions button:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+.ark-builder-toolbar-actions button.delete:hover {
+  background: #ef4444;
+}
+
+/* Hover State */
+.arkpad-editor-container .ark-hovered-node {
+  outline: 1px dashed #3b82f6 !important;
+  outline-offset: -1px;
+  position: relative;
+  z-index: 0;
+  transition: outline 0.1s;
+}
+
+.arkpad-editor-container .ark-hovered-node::after {
+  content: attr(data-hover-label);
+  position: absolute;
+  top: -18px;
+  left: 0;
+  background: #3b82f6;
+  color: white;
+  font-size: 8px;
+  font-weight: 700;
+  padding: 1px 4px;
+  border-radius: 2px 2px 0 0;
+  text-transform: uppercase;
+  pointer-events: none;
+  opacity: 0.8;
+  z-index: 10;
 }
 
 @keyframes labelIn {

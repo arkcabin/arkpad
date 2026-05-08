@@ -13,7 +13,6 @@ import {
   Layers,
   Settings,
   Square,
-  ChevronRight,
 } from "lucide-react";
 import { useBuilderNav } from "../lib/BuilderNavContext";
 
@@ -22,21 +21,49 @@ import { useBuilderNav } from "../lib/BuilderNavContext";
 type BlockType = "text" | "heading" | "divider" | "quote" | "list" | "code" | "columns" | "section";
 type SidebarTab = "blocks" | "structure" | "settings";
 
-const BLOCKS: { type: BlockType; label: string; icon: React.ReactNode }[] = [
-  { type: "section", label: "Section", icon: <Square className="w-4 h-4" /> },
-  { type: "heading", label: "Heading", icon: <Heading1 className="w-4 h-4" /> },
-  { type: "text", label: "Text", icon: <Type className="w-4 h-4" /> },
-  { type: "quote", label: "Quote", icon: <Quote className="w-4 h-4" /> },
-  { type: "list", label: "List", icon: <List className="w-4 h-4" /> },
-  { type: "code", label: "Code", icon: <Code2 className="w-4 h-4" /> },
-  { type: "divider", label: "Divider", icon: <Minus className="w-4 h-4" /> },
-  { type: "columns", label: "2 Columns", icon: <Columns2 className="w-4 h-4" /> },
-];
+// Blocks are now fetched dynamically from editor.blockRegistry
 
 /* ── Main Component ─────────────────────────────────────────── */
 
 interface BuilderDemoProps {
   maxWidth?: string;
+}
+
+/* ── Layer Tree Component ───────────────────────────────────── */
+
+function LayerTree({ node, pos, editor, depth = 0 }: { node: any; pos: number; editor: any; depth?: number }) {
+  const isSelected = editor.getState().selection.from === pos || 
+                     (editor.getState().selection.$from && editor.getState().selection.$from.before(depth) === pos);
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    editor.commands.setNodeSelection(pos);
+  };
+
+  const children: any[] = [];
+  node.forEach((child: any, offset: number) => {
+    if (child.isBlock) {
+      children.push(<LayerTree key={pos + offset + 1} node={child} pos={pos + offset + 1} editor={editor} depth={depth + 1} />);
+    }
+  });
+
+  return (
+    <div className="flex flex-col">
+      <div 
+        onClick={handleClick}
+        className={`flex items-center gap-2 px-3 py-1.5 text-[11px] cursor-pointer transition-colors ${
+          isSelected ? "bg-[#3b82f6] text-white" : "hover:bg-[#f3f4f6] text-gray-600"
+        }`}
+        style={{ paddingLeft: `${(depth * 12) + 12}px` }}
+      >
+        <span className="opacity-50 text-[9px]">
+          {children.length > 0 ? "▼" : "•"}
+        </span>
+        <span className="font-medium capitalize">{node.type.name}</span>
+      </div>
+      {children.length > 0 && <div className="flex flex-col">{children}</div>}
+    </div>
+  );
 }
 
 export function BuilderDemo({ maxWidth = "100%" }: BuilderDemoProps) {
@@ -58,33 +85,11 @@ export function BuilderDemo({ maxWidth = "100%" }: BuilderDemoProps) {
   });
 
   const handleAddBlock = useCallback(
-    (type: BlockType) => {
+    (type: string) => {
       if (!editor) return;
-
-      switch (type) {
-        case "section":
-          editor.runCommand("setSection");
-          break;
-        case "heading":
-          editor.runCommand("toggleHeading", { level: 2 });
-          break;
-        case "text":
-          editor.runCommand("setParagraph");
-          break;
-        case "divider":
-          editor.runCommand("setHorizontalRule");
-          break;
-        case "quote":
-          editor.runCommand("toggleBlockquote");
-          break;
-        case "list":
-          editor.runCommand("toggleBulletList");
-          break;
-        case "code":
-          editor.runCommand("toggleCodeBlock");
-          break;
-        default:
-          console.warn("Command not implemented for type:", type);
+      const block = editor.blockRegistry.getBlock(type);
+      if (block) {
+        editor.commands.insertContent(block.create());
       }
     },
     [editor]
@@ -132,35 +137,37 @@ export function BuilderDemo({ maxWidth = "100%" }: BuilderDemoProps) {
     >
       {/* Main Canvas Area - The "Stage" */}
       <div
-        className={`flex-1 overflow-y-auto flex flex-col scrollbar-hide relative transition-all duration-700 ${previewMode ? "p-0" : "p-8 lg:p-12"}`}
+        className={`flex-1 overflow-y-auto flex flex-col scrollbar-hide relative transition-all duration-700 ${previewMode ? "bg-white p-0" : "bg-[#f0f1f3] p-6 lg:p-10"}`}
       >
-        {/* The Paper / Canvas */}
-        <div
-          className="mx-auto bg-white transition-all duration-700"
+        <main
+          id="arkpad-builder-canvas"
+          className="mx-auto bg-white transition-all duration-700 relative"
           style={{
             maxWidth,
             width: "100%",
             minHeight: "100%",
+            display: "flex",
+            flexDirection: "column",
             ...(previewMode
               ? {}
               : {
-                  boxShadow: "0 8px 30px rgb(0,0,0,0.04)",
-                  border: "1px solid #f3f4f6",
-                  borderRadius: "0.5rem",
-                  overflow: "hidden",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.1), 0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.05)",
+                  border: "1px solid #e5e7eb",
+                  borderRadius: "2px", // GrapesJS usually has sharp but clean edges
+                  overflow: "visible", // Allow handles to overflow
                 }),
           }}
         >
           <ArkpadProvider editor={editor}>
             <div
-              className={`w-full min-h-full transition-all duration-700 arkpad-editor-container p-0 ${
+              className={`w-full flex-1 transition-all duration-700 arkpad-editor-container p-0 ${
                 previewMode ? "preview-mode" : ""
               }`}
             >
-              <ArkpadEditorContent editor={editor} className="min-h-full" />
+              <ArkpadEditorContent editor={editor} className="min-h-full flex-1" />
             </div>
           </ArkpadProvider>
-        </div>
+        </main>
       </div>
 
       {/* Right Sidebar - Figma Style */}
@@ -195,61 +202,87 @@ export function BuilderDemo({ maxWidth = "100%" }: BuilderDemoProps) {
             {/* BLOCKS TAB */}
             {activeTab === "blocks" && (
               <div className="space-y-6">
-                <div>
-                  <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3 px-1">
-                    Layout
-                  </h3>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      onClick={() => handleAddBlock("section")}
-                      draggable
-                      onDragStart={(e) => handleDragStart(e, "section")}
-                      className="flex flex-col items-center justify-center p-3 rounded-xl border border-gray-100 bg-gray-50/50 hover:bg-white hover:border-black hover:shadow-sm transition-all group cursor-grab active:cursor-grabbing"
-                    >
-                      <Square className="w-5 h-5 mb-2 text-gray-400 group-hover:text-black transition-colors" />
-                      <span className="text-[10px] font-medium text-gray-600 group-hover:text-black">
-                        Section
-                      </span>
-                    </button>
-                    <button
-                      onClick={() => handleAddBlock("columns")}
-                      draggable
-                      onDragStart={(e) => handleDragStart(e, "columns")}
-                      className="flex flex-col items-center justify-center p-3 rounded-xl border border-gray-100 bg-gray-50/50 hover:bg-white hover:border-black hover:shadow-sm transition-all group cursor-grab active:cursor-grabbing"
-                    >
-                      <Columns2 className="w-5 h-5 mb-2 text-gray-400 group-hover:text-black transition-colors" />
-                      <span className="text-[10px] font-medium text-gray-600 group-hover:text-black">
-                        2 Columns
-                      </span>
-                    </button>
-                  </div>
-                </div>
+                {editor && (
+                  <>
+                    <div>
+                      <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3 px-1">
+                        Layout
+                      </h3>
+                      <div className="grid grid-cols-2 gap-2">
+                        {editor.blockRegistry.getBlocksByCategory("layout").map((block: any) => (
+                          <button
+                            key={block.type}
+                            onClick={() => handleAddBlock(block.type)}
+                            draggable
+                            onDragStart={(e) => handleDragStart(e, block.type)}
+                            className="flex flex-col items-center justify-center p-3 rounded-xl border border-gray-100 bg-gray-50/50 hover:bg-white hover:border-black hover:shadow-sm transition-all group cursor-grab active:cursor-grabbing"
+                          >
+                            {block.type === "section" ? (
+                              <Square className="w-5 h-5 mb-2 text-gray-400 group-hover:text-black transition-colors" />
+                            ) : (
+                              <Columns2 className="w-5 h-5 mb-2 text-gray-400 group-hover:text-black transition-colors" />
+                            )}
+                            <span className="text-[10px] font-medium text-gray-600 group-hover:text-black">
+                              {block.label}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
 
-                <div>
-                  <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3 px-1">
-                    Elements
-                  </h3>
-                  <div className="grid grid-cols-2 gap-2">
-                    {BLOCKS.filter(
-                      (b) => b.type !== "columns" && b.type !== "section" && b.type !== "divider"
-                    ).map((block) => (
-                      <button
-                        key={block.type}
-                        onClick={() => handleAddBlock(block.type)}
-                        draggable
-                        onDragStart={(e) => handleDragStart(e, block.type)}
-                        className="flex flex-col items-center justify-center p-3 rounded-xl border border-gray-100 bg-gray-50/50 hover:bg-white hover:border-black hover:shadow-sm transition-all group cursor-grab active:cursor-grabbing"
-                      >
-                        <div className="w-5 h-5 mb-2 text-gray-400 group-hover:text-black transition-colors">
-                          {block.icon}
-                        </div>
-                        <span className="text-[10px] font-medium text-gray-600 group-hover:text-black">
-                          {block.label}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                    <div>
+                      <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3 px-1">
+                        Typography
+                      </h3>
+                      <div className="grid grid-cols-2 gap-2">
+                        {editor.blockRegistry.getBlocksByCategory("typography").map((block: any) => {
+                          let Icon = Type;
+                          if (block.type === "heading") Icon = Heading1;
+                          if (block.type === "blockquote") Icon = Quote;
+                          if (block.type === "bulletList") Icon = List;
+                          if (block.type === "codeBlock") Icon = Code2;
+
+                          return (
+                            <button
+                              key={block.type}
+                              onClick={() => handleAddBlock(block.type)}
+                              draggable
+                              onDragStart={(e) => handleDragStart(e, block.type)}
+                              className="flex flex-col items-center justify-center p-3 rounded-xl border border-gray-100 bg-gray-50/50 hover:bg-white hover:border-black hover:shadow-sm transition-all group cursor-grab active:cursor-grabbing"
+                            >
+                              <Icon className="w-5 h-5 mb-2 text-gray-400 group-hover:text-black transition-colors" />
+                              <span className="text-[10px] font-medium text-gray-600 group-hover:text-black">
+                                {block.label}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3 px-1">
+                        Media
+                      </h3>
+                      <div className="grid grid-cols-2 gap-2">
+                        {editor.blockRegistry.getBlocksByCategory("media").map((block: any) => (
+                          <button
+                            key={block.type}
+                            onClick={() => handleAddBlock(block.type)}
+                            draggable
+                            onDragStart={(e) => handleDragStart(e, block.type)}
+                            className="flex flex-col items-center justify-center p-3 rounded-xl border border-gray-100 bg-gray-50/50 hover:bg-white hover:border-black hover:shadow-sm transition-all group cursor-grab active:cursor-grabbing"
+                          >
+                            <Minus className="w-5 h-5 mb-2 text-gray-400 group-hover:text-black transition-colors" />
+                            <span className="text-[10px] font-medium text-gray-600 group-hover:text-black">
+                              {block.label}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             )}
 
@@ -261,28 +294,14 @@ export function BuilderDemo({ maxWidth = "100%" }: BuilderDemoProps) {
                     Document Hierarchy
                   </h3>
                 </div>
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2 p-2 rounded-lg bg-gray-50 border border-gray-100 group cursor-default">
-                    <ChevronRight size={12} className="text-gray-400" />
-                    <Square size={12} className="text-emerald-500 fill-emerald-500/10" />
-                    <span className="text-[11px] font-medium text-gray-700">Root Section</span>
-                  </div>
-                  <div className="ml-4 space-y-1">
-                    <div className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 transition-colors group cursor-default">
-                      <div className="w-3 h-3 flex items-center justify-center">
-                        <div className="w-1 h-1 bg-gray-300 rounded-full" />
-                      </div>
-                      <Type size={12} className="text-gray-400" />
-                      <span className="text-[11px] text-gray-600">Heading 1</span>
+                <div className="space-y-0.5 border border-gray-100 rounded-lg overflow-hidden">
+                  {editor ? (
+                    <LayerTree node={editor.getState().doc} pos={0} editor={editor} />
+                  ) : (
+                    <div className="p-4 text-[11px] text-gray-400 text-center italic">
+                      Initialize editor to see structure
                     </div>
-                    <div className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 transition-colors group cursor-default">
-                      <div className="w-3 h-3 flex items-center justify-center">
-                        <div className="w-1 h-1 bg-gray-300 rounded-full" />
-                      </div>
-                      <Type size={12} className="text-gray-400" />
-                      <span className="text-[11px] text-gray-600">Paragraph</span>
-                    </div>
-                  </div>
+                  )}
                 </div>
               </div>
             )}

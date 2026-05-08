@@ -61,6 +61,23 @@ export const Section = Node.create<SectionOptions>({
   renderHTML({ HTMLAttributes }: { HTMLAttributes: Record<string, any> }) {
     return ["section", { "data-type": "section", ...this.options.HTMLAttributes, ...HTMLAttributes }, 0];
   },
+  
+  onInit() {
+    this.editor.blockRegistry.registerBlock({
+      type: "section",
+      label: "Section",
+      category: "layout",
+      create: (options: any) => ({
+        type: "section",
+        attrs: options,
+        content: [{ type: "paragraph" }],
+      }),
+      styleConfig: {
+        backgroundColor: true,
+        padding: true,
+      },
+    });
+  },
 
   addCommands() {
     return {

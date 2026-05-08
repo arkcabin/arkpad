@@ -41,43 +41,18 @@ export const DragDrop = Extension.create({
       return true;
     });
 
-    // Insert the block based on type
-    switch (blockType) {
-      case "section":
-        chain = chain.insertContent({
-          type: "section",
-          content: [{ type: "paragraph" }],
-        });
-        break;
-      case "columns":
-        chain = chain.insertContent({
-          type: "paragraph",
-          content: [{ type: "text", text: "2 Columns Placeholder" }],
-        });
-        break;
-      case "heading":
-        chain = chain.toggleHeading({ level: 2 });
-        break;
-      case "text":
-        chain = chain.setParagraph();
-        break;
-      case "divider":
-        chain = chain.setHorizontalRule();
-        break;
-      case "quote":
-        chain = chain.toggleBlockquote();
-        break;
-      case "list":
-        chain = chain.toggleBulletList();
-        break;
-      case "code":
-        chain = chain.toggleCodeBlock();
-        break;
-      default:
-        chain = chain.insertContent({
-          type: "paragraph",
-          content: [{ type: "text", text: `New ${blockType}` }],
-        });
+    // Insert the block based on the registry
+    const block = editor.blockRegistry.getBlock(blockType);
+
+    if (block) {
+      const content = block.create();
+      chain = chain.insertContent(content);
+    } else {
+      // Fallback for unregistered blocks
+      chain = chain.insertContent({
+        type: "paragraph",
+        content: [{ type: "text", text: `New ${blockType}` }],
+      });
     }
 
     return chain.run();

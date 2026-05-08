@@ -25,6 +25,7 @@ export interface IArkpadEditor {
   readonly stateManager: any;
   readonly selectionService: any;
   readonly hookManager: any;
+  readonly blockRegistry: any;
 
   getState(): EditorState;
   getView(): EditorView;

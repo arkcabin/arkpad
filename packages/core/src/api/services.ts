@@ -35,6 +35,8 @@ export type ArkpadCommandRegistry = Record<string, ArkpadCommand>;
  * Extensions should augment this interface to provide autocompletion.
  */
 export interface ArkpadCommands {
+  deleteNode: (pos?: number) => void;
+  duplicateNode: (pos?: number) => void;
   [key: string]: any;
 }
 
@@ -126,4 +128,44 @@ export interface ResolvedArkpadEditorOptions extends Omit<
   editable: boolean;
   autofocus: boolean;
   debug: EditorDebugOptions;
+}
+
+/* ── Block Registry ─────────────────────────────────────────── */
+
+export type BlockCategory = "layout" | "typography" | "media" | "components" | "custom";
+
+export interface BlockStyleConfig {
+  backgroundColor?: boolean;
+  padding?: boolean;
+  margin?: boolean;
+  borderRadius?: boolean;
+  textAlign?: boolean;
+  minHeight?: boolean;
+  border?: boolean;
+}
+
+export interface BlockOptions {
+  backgroundColor?: string;
+  padding?: string;
+  textAlign?: "left" | "center" | "right";
+  [key: string]: any;
+}
+
+export interface BlockDefinition {
+  type: string;
+  label: string;
+  icon?: any;
+  category: BlockCategory;
+  create: (options?: BlockOptions) => any;
+  styleConfig?: BlockStyleConfig;
+  defaultAttrs?: Record<string, any>;
+}
+
+export interface IBlockRegistry {
+  registerBlock(definition: BlockDefinition): void;
+  unregisterBlock(type: string): void;
+  getBlock(type: string): BlockDefinition | undefined;
+  getBlocksByCategory(category: BlockCategory): BlockDefinition[];
+  getAllBlocks(): BlockDefinition[];
+  searchBlocks(query: string): BlockDefinition[];
 }
