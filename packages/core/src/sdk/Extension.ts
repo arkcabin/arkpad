@@ -240,6 +240,42 @@ export class Extension<Options = any, Storage = any> implements ArkpadExtension 
     this.config.onSelection?.call(this.createContext(), props);
   }
 
+  onEnterNode(props: { editor: IArkpadEditor; nodeName: string; transaction: Transaction }) {
+    this.config.onEnterNode?.call(this.createContext(), props);
+  }
+
+  onExitNode(props: { editor: IArkpadEditor; nodeName: string; transaction: Transaction }) {
+    this.config.onExitNode?.call(this.createContext(), props);
+  }
+
+  onClick(event: MouseEvent, pos: number) {
+    return this.config.onClick?.call(this.createContext(), event, pos);
+  }
+
+  onDoubleClick(event: MouseEvent, pos: number) {
+    return this.config.onDoubleClick?.call(this.createContext(), event, pos);
+  }
+
+  onKeyDown(event: KeyboardEvent) {
+    return this.config.onKeyDown?.call(this.createContext(), event);
+  }
+
+  onDrop(event: DragEvent, slice: any, moved: boolean) {
+    return this.config.onDrop?.call(this.createContext(), event, slice, moved);
+  }
+
+  onPaste(event: ClipboardEvent, slice: any) {
+    return this.config.onPaste?.call(this.createContext(), event, slice);
+  }
+
+  onFocus() {
+    return this.config.onFocus?.call(this.createContext());
+  }
+
+  onBlur() {
+    return this.config.onBlur?.call(this.createContext());
+  }
+
   addInterceptors(): InterceptorConfig[] {
     return this.config.addInterceptors?.call(this.createContext()) || [];
   }

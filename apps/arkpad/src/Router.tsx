@@ -1,6 +1,7 @@
 import React, { Suspense, lazy } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { Sidebar } from "./components/Sidebar";
+import { BuilderNavProvider, useBuilderNav } from "./lib/BuilderNavContext";
 
 // Lazy load components for route-based loading states
 const App = lazy(() => import("./App").then((m) => ({ default: m.App })));
@@ -25,6 +26,9 @@ const TableDemo = lazy(() => import("./demos/TableDemo").then((m) => ({ default:
 const HighlightDemo = lazy(() =>
   import("./demos/HighlightDemo").then((m) => ({ default: m.HighlightDemo }))
 );
+const BuilderDemo = lazy(() =>
+  import("./demos/BuilderDemo").then((m) => ({ default: m.BuilderDemo }))
+);
 
 /**
  * A simple, clean loader component.
@@ -37,13 +41,74 @@ function Loader() {
   );
 }
 
+const ROUTE_NAMES: Record<string, string> = {
+  "/": "Full Editor",
+  "/builder": "Page Builder",
+  "/extensions/bold": "Bold",
+  "/extensions/italic": "Italic",
+  "/extensions/underline": "Underline",
+  "/extensions/strike": "Strike",
+  "/extensions/code": "Code",
+  "/extensions/superscript": "Superscript",
+  "/extensions/subscript": "Subscript",
+  "/extensions/table": "Table",
+  "/extensions/highlight": "Highlight",
+};
+
+function TopBar({ sidebarOpen, onToggle }: { sidebarOpen: boolean; onToggle: () => void }) {
+  const location = useLocation();
+  const pageName = ROUTE_NAMES[location.pathname] || "Arkpad";
+  const { navOpen, setNavOpen } = useBuilderNav();
+  const isBuilder = location.pathname === "/builder";
+
+  return (
+    <div className="h-10 px-4 border-b border-[var(--border)] flex items-center justify-between shrink-0">
+      <div className="flex items-center gap-3">
+        <button
+          onClick={onToggle}
+          className="p-1 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors"
+          title={sidebarOpen ? "Hide sidebar" : "Show sidebar"}
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+            <line x1="2" y1="4" x2="14" y2="4" />
+            <line x1="2" y1="8" x2="14" y2="8" />
+            <line x1="2" y1="12" x2="14" y2="12" />
+          </svg>
+        </button>
+        <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
+          {pageName}
+        </span>
+      </div>
+
+      {isBuilder && (
+        <button
+          onClick={() => setNavOpen(!navOpen)}
+          className="p-1 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors"
+          title={navOpen ? "Hide blocks panel" : "Show blocks panel"}
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="2" y="2" width="12" height="12" rx="1" />
+            <line x1="10" y1="2" x2="10" y2="14" />
+          </svg>
+        </button>
+      )}
+    </div>
+  );
+}
+
 export function Router() {
+  const [sidebarOpen, setSidebarOpen] = React.useState(true);
+
   return (
     <BrowserRouter>
-      <div className="flex h-screen bg-[var(--bg-main)] overflow-hidden">
-        <Sidebar isCollapsed={false} />
+      <BuilderNavProvider>
+        <div className="flex h-screen bg-[var(--bg-main)] overflow-hidden">
+        {sidebarOpen && <Sidebar isCollapsed={false} />}
 
-        <main className="flex-1 h-full overflow-hidden relative flex flex-col">
+        <div className="flex-1 flex flex-col h-full overflow-hidden">
+          <TopBar sidebarOpen={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
+
+          <main className="flex-1 h-full overflow-hidden relative flex flex-col">
           <Suspense fallback={<Loader />}>
             <Routes>
               <Route
@@ -126,11 +191,21 @@ export function Router() {
                   </div>
                 }
               />
+              <Route
+                path="/builder"
+                element={
+                  <div className="flex-1 overflow-hidden">
+                    <BuilderDemo />
+                  </div>
+                }
+              />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Suspense>
         </main>
-      </div>
+          </div>
+        </div>
+      </BuilderNavProvider>
     </BrowserRouter>
   );
 }

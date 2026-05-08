@@ -81,3 +81,109 @@
 .animate-page-in {
   animation: fadeIn 0.3s ease-out forwards;
 }
+
+/* ── Page Builder ─────────────────────────────────────────────── */
+
+.bld-header {
+  @apply h-12 px-6 border-b border-[var(--border)] flex items-center justify-between shrink-0;
+}
+.bld-header-title {
+  @apply text-[11px] font-bold uppercase tracking-widest text-[var(--text-muted)];
+}
+.bld-header-meta {
+  @apply text-[10px] font-mono text-[var(--text-muted)];
+}
+
+.bld-canvas {
+  @apply max-w-3xl mx-auto px-16 py-16;
+}
+
+/* Block */
+.bld-block {
+  @apply relative;
+}
+.bld-body {
+  @apply px-1 py-1;
+}
+.bld-body .ProseMirror {
+  @apply outline-none min-h-[1.5em];
+}
+
+/* Side handle */
+.bld-handle {
+  @apply absolute -left-10 top-0 flex flex-col items-center gap-0.5 pt-1 opacity-0 transition-opacity duration-150;
+}
+.bld-handle--visible {
+  @apply opacity-100;
+}
+.bld-handle-grip {
+  @apply p-0.5 text-[var(--text-muted)] hover:text-[var(--text-main)] cursor-grab active:cursor-grabbing;
+}
+.bld-handle-delete {
+  @apply p-0.5 text-[var(--text-muted)] hover:text-red-500 transition-colors;
+}
+
+/* Divider */
+.bld-hr {
+  @apply border-t border-[var(--border)] my-2;
+}
+
+/* Columns */
+.bld-cols {
+  @apply grid grid-cols-2 gap-4;
+}
+.bld-col {
+  @apply border border-[var(--border)] p-3 min-h-[40px];
+}
+.bld-col .ProseMirror {
+  @apply outline-none min-h-[1.5em];
+}
+
+/* Inline add button */
+.bld-add-row {
+  @apply relative flex items-center h-8 opacity-40 hover:opacity-100 transition-opacity duration-200;
+}
+.bld-add-line {
+  @apply flex-1 border-t border-dashed border-[var(--border)];
+}
+.bld-add-btn {
+  @apply mx-2 w-5 h-5 flex items-center justify-center rounded-full border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:border-[var(--text-muted)] transition-colors bg-[var(--bg-main)];
+}
+
+/* Block palette */
+.bld-palette {
+  @apply absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-[var(--bg-main)] border border-[var(--border)] shadow-lg z-50 flex gap-0 p-1;
+  animation: fadeIn 0.1s ease-out;
+}
+.bld-palette-item {
+  @apply flex flex-col items-center gap-1 px-3 py-2 text-[9px] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--selection)] transition-colors whitespace-nowrap;
+}
+
+/* Right sidebar — Block Navigator */
+.bld-nav {
+  @apply w-48 border-l border-[var(--border)] flex flex-col shrink-0 overflow-hidden;
+}
+.bld-nav-header {
+  @apply h-10 px-3 border-b border-[var(--border)] flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)];
+}
+.bld-nav-count {
+  @apply text-[9px] font-mono text-[var(--text-muted)] bg-[var(--selection)] px-1.5 py-0.5;
+}
+.bld-nav-list {
+  @apply flex-1 overflow-y-auto py-1;
+}
+.bld-nav-item {
+  @apply flex items-center gap-2 px-3 py-1.5 text-xs text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--selection)] transition-colors cursor-default;
+}
+.bld-nav-icon {
+  @apply text-[var(--text-muted)] shrink-0;
+}
+.bld-nav-label {
+  @apply flex-1 capitalize text-[11px];
+}
+.bld-nav-delete {
+  @apply opacity-0 p-0.5 text-[var(--text-muted)] hover:text-red-500 transition-all;
+}
+.bld-nav-item:hover .bld-nav-delete {
+  opacity: 1;
+}

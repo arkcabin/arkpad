@@ -16,6 +16,7 @@ import {
   setTextAlign,
   insertNode,
   updateAttributes,
+  setNode,
 } from "../services/commands";
 import { type MarkType, type NodeType } from "prosemirror-model";
 
@@ -48,6 +49,10 @@ export const BaseCommands = Extension.create({
     updateAttributes:
       (typeOrName: string, attributes: Record<string, any>) => (props: any) => {
         return updateAttributes(typeOrName, attributes)(props);
+      },
+    setNode:
+      (type: string | NodeType, attrs?: Record<string, any>) => (props: any) => {
+        return setNode(type, attrs)(props);
       },
     first: (commands: any[]) => (props: any) => {
       for (const command of commands) {

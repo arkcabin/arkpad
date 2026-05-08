@@ -16,6 +16,8 @@ import { Superscript } from "@arkpad/extension-superscript";
 import { Subscript } from "@arkpad/extension-subscript";
 import { CodeBlock } from "@arkpad/extension-code-block";
 import { Image } from "@arkpad/extension-image";
+import { Section } from "@arkpad/extension-section";
+import { DragDrop } from "@arkpad/extension-drag-drop";
 import { CharacterCount } from "@arkpad/core";
 import {
   FocusEvents,
@@ -100,6 +102,8 @@ export const StarterKit = Extension.create({
     extensions.push(Subscript);
     extensions.push(CodeBlock);
     extensions.push(Image);
+    extensions.push(Section);
+    extensions.push(DragDrop);
     extensions.push(HighlighterTool);
     extensions.push(EraserTool);
     extensions.push(createTextAlign());

@@ -40,17 +40,6 @@ export function App() {
   return (
     <ArkpadProvider editor={editor}>
       <div className="flex-1 flex flex-col h-full bg-[var(--bg-main)] overflow-hidden transition-colors duration-300">
-        <header className="h-14 px-6 border-b border-[var(--border)] flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
-              Full Platform
-            </div>
-          </div>
-          <div className="text-[10px] font-mono text-[var(--text-muted)]">
-            v1.6.13
-          </div>
-        </header>
-
         <div className="flex-1 overflow-y-auto">
           <div className="max-w-4xl mx-auto px-6 py-12 space-y-8">
             <div className="space-y-2">

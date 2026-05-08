@@ -11,7 +11,10 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
   const sections = [
     {
       title: "PLATFORM",
-      items: [{ name: "Full Editor", path: "/" }],
+      items: [
+        { name: "Full Editor", path: "/" },
+        { name: "Page Builder", path: "/builder" },
+      ],
     },
     {
       title: "MARKS",

@@ -487,6 +487,7 @@ export class ArkpadEditor implements IArkpadEditor {
   public getGovernanceRules() {
     const rules: Record<string, any> = {};
     const { nodes } = this.view.state.schema;
+
     Object.keys(nodes).forEach((key) => {
       const type = nodes[key]!;
       rules[key] = {
@@ -508,8 +509,10 @@ export class ArkpadEditor implements IArkpadEditor {
     else {
       if (name.toLowerCase().includes("heading")) targetRole = NodeRole.CONTENT;
       if (name.toLowerCase().includes("list")) targetRole = NodeRole.LAYOUT;
+      if (name.toLowerCase().includes("section")) targetRole = NodeRole.LAYOUT;
       if (name.toLowerCase().includes("image") || name.toLowerCase().includes("table"))
         targetRole = NodeRole.WIDGET;
+
     }
     const parent = state.selection.$from.parent;
     return Governance.canAccept(

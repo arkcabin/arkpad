@@ -58,3 +58,10 @@ export const toggleList = (listType: string | NodeType) => (props: any) => {
   if (!lType) return false;
   return wrapInList(lType)(props.state, props.dispatch);
 };
+
+export const setNode = (type: string | NodeType, attrs?: Record<string, any>) => (props: any) => {
+  const nodeType = typeof type === "string" ? props.state.schema.nodes[type] : type;
+  if (!nodeType) return false;
+  return setBlockType(nodeType, attrs)(props.state, props.dispatch);
+};
+
