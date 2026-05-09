@@ -135,7 +135,12 @@ export class ArkpadEditor implements IArkpadEditor {
       this.selectionService.getVirtualSelections()
     );
 
-    this.view = new EditorView(this.element, {
+    // Create the content element with the specified tag (e.g. 'main')
+    const contentElement = document.createElement(resolved.contentTag);
+    contentElement.classList.add("arkpad-content");
+    this.element.appendChild(contentElement);
+
+    this.view = new EditorView(contentElement, {
       state,
       editable: () => this.editable,
       nodeViews: { ...this.extensionManager.nodeViews, ...this.nodeViews },

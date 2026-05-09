@@ -94,6 +94,7 @@ export interface ArkpadEditorOptions {
   nodeViews?: Record<string, any>;
   debug?: EditorDebugOptions;
   autofocus?: boolean;
+  contentTag?: string;
   onCreate?: (editor: any) => void;
   onUpdate?: (payload: ArkpadUpdatePayload) => void;
   onTransaction?: (props: { editor: any; transaction: Transaction }) => void;
@@ -128,6 +129,7 @@ export interface ResolvedArkpadEditorOptions extends Omit<
   editable: boolean;
   autofocus: boolean;
   debug: EditorDebugOptions;
+  contentTag: string;
 }
 
 /* ── Block Registry ─────────────────────────────────────────── */

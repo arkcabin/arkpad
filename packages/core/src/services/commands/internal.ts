@@ -12,7 +12,19 @@ export const toggleMark = (type: string | MarkType, attrs?: Record<string, any>)
 export const toggleBlock = (type: string | NodeType, attrs?: Record<string, any>) => (props: any) => {
   const nodeType = typeof type === "string" ? props.state.schema.nodes[type] : type;
   if (!nodeType) return false;
-  return setBlockType(nodeType, attrs)(props.state, props.dispatch);
+  
+  if (nodeType.isTextblock) {
+    return setBlockType(nodeType, attrs)(props.state, props.dispatch);
+  }
+  
+  // If it's a layout block (not a textblock), we should replace the current node or wrap it
+  if (props.dispatch) {
+    const node = nodeType.createAndFill(attrs);
+    if (node) {
+      props.tr.replaceSelectionWith(node);
+    }
+  }
+  return true;
 };
 
 export const setTextAlign = (align: string) => (props: any) => {
@@ -62,7 +74,18 @@ export const toggleList = (listType: string | NodeType) => (props: any) => {
 export const setNode = (type: string | NodeType, attrs?: Record<string, any>) => (props: any) => {
   const nodeType = typeof type === "string" ? props.state.schema.nodes[type] : type;
   if (!nodeType) return false;
-  return setBlockType(nodeType, attrs)(props.state, props.dispatch);
+  
+  if (nodeType.isTextblock) {
+    return setBlockType(nodeType, attrs)(props.state, props.dispatch);
+  }
+  
+  if (props.dispatch) {
+    const node = nodeType.createAndFill(attrs);
+    if (node) {
+      props.tr.replaceSelectionWith(node);
+    }
+  }
+  return true;
 };
 
 export const insertContent = (content: any) => (props: any) => {

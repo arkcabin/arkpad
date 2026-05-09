@@ -107,7 +107,7 @@ export const StarterKit = Extension.create({
     extensions.push(FloatingMenu.configure({
         shouldShow: ({ state }) => state.selection.empty && state.doc.content.size > 0,
       }));
-    extensions.push(BuilderUI);
+    // extensions.push(BuilderUI);
     extensions.push(Image);
     extensions.push(Section);
     extensions.push(Columns);
