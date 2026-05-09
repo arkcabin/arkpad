@@ -1,6 +1,5 @@
 import { Extension } from "@arkpad/core";
 import { Plugin, PluginKey } from "prosemirror-state";
-import { EditorView } from "prosemirror-view";
 
 const builderUIKey = new PluginKey("builderUI");
 

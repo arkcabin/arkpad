@@ -16,7 +16,7 @@ import { Superscript } from "@arkpad/extension-superscript";
 import { Subscript } from "@arkpad/extension-subscript";
 import { CodeBlock } from "@arkpad/extension-code-block";
 import { FloatingMenu } from "@arkpad/extension-floating-menu";
-import { BuilderUI } from "@arkpad/extension-builder-ui";
+// import { BuilderUI } from "@arkpad/extension-builder-ui";
 import { Image } from "@arkpad/extension-image";
 import { Section } from "@arkpad/extension-section";
 import { DragDrop } from "@arkpad/extension-drag-drop";
