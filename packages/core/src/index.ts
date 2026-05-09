@@ -58,6 +58,9 @@ export { CommandManager } from "./services/commands/CommandManager";
 // Extensions
 export * from "./extensions";
 
+// Templates
+export * from "./services/templates";
+
 // Helper Commands (Previously in src/commands)
 export * from "./services/commands";
 

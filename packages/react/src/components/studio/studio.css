@@ -122,6 +122,21 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+  min-height: 80vh;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px dashed rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+.arkpad-page-root-container:hover {
+  border-color: rgba(59, 130, 246, 0.5);
+}
+
+.arkpad-page-root-container[data-selected-pos="-1"] {
+  border: 2px solid #3b82f6;
+  border-style: solid;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+  background-color: transparent;
 }
 
 .arkpad-page-root-label {
@@ -163,6 +178,19 @@
   padding: 60px 40px;
   outline: none;
   cursor: default;
+  border: 1px dashed #e5e5e5;
+  transition: border-color 0.3s ease;
+  margin: 20px;
+  background-color: #ffffff;
+}
+
+.dark .arkpad-builder-canvas .ProseMirror {
+  border-color: #262626;
+  background-color: #0a0a0a;
+}
+
+.arkpad-builder-canvas .ProseMirror:hover {
+  border-color: #3b82f6;
 }
 /* Section & Block Labels */
 .arkpad-builder-canvas .ProseMirror > .ark-section {

@@ -13,3 +13,6 @@
 @import "./task-list.css";
 @import "./ghost-text.css";
 @import "./block-handle.css";
+
+/* UI Blocks - Page Builder */
+@import "./ui-blocks.css";

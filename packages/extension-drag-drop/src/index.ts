@@ -10,13 +10,15 @@ export const DragDrop = Extension.create({
 
     const studioBlockData = event.dataTransfer.getData("application/arkpad-block");
     const legacyBlockType = event.dataTransfer.getData("application/x-arkpad-block");
+    const internalDragData = event.dataTransfer.getData("application/arkpad-internal-drag");
 
-    if (!studioBlockData && !legacyBlockType) {
+    if (!studioBlockData && !legacyBlockType && !internalDragData) {
       return false;
     }
 
     const { editor } = this;
     const { view } = editor;
+    const { state } = view;
 
     // Get the drop position
     const pos = view.posAtCoords({ left: event.clientX, top: event.clientY });
@@ -31,7 +33,55 @@ export const DragDrop = Extension.create({
     view.dom.closest(".arkpad-builder-canvas")?.classList.remove("drag-active");
     view.dispatch(view.state.tr.setMeta("dragPosUpdate", { pos: -1 }));
 
-    // Build chain
+    // Handle internal reordering (drag within editor)
+    if (internalDragData) {
+      try {
+        const dragInfo = JSON.parse(internalDragData);
+        const { from, to } = dragInfo;
+
+        // Skip if dropping in the same position
+        const $pos = state.doc.resolve(pos.pos);
+        const targetPos = $pos.pos;
+
+        if (targetPos >= from && targetPos <= to) {
+          return false;
+        }
+
+        // Get the node being moved
+        const nodeToMove = state.doc.nodeAt(from);
+        if (!nodeToMove) return false;
+
+        // Calculate new position
+        let targetIndex: number;
+        if (targetPos < from) {
+          targetIndex = $pos.index();
+        } else {
+          targetIndex = $pos.index() - 1;
+        }
+
+        // Perform the move using replaceStep
+        const tr = state.tr;
+        const nodeRange = from;
+        const nodeSize = nodeToMove.nodeSize;
+
+        // Delete from original position
+        tr.delete(from, from + nodeSize);
+
+        // Insert at new position - we need to recalculate because positions shifted
+        const newPos = targetPos < from ? targetPos : targetPos - nodeSize;
+        const $newPos = state.doc.resolve(newPos);
+
+        tr.insert($newPos.pos, nodeToMove);
+
+        view.dispatch(tr);
+        return true;
+      } catch (e) {
+        console.error("Failed to handle internal drag", e);
+        return false;
+      }
+    }
+
+    // Build chain for new blocks from library
     let chain = editor.chain();
 
     // Set text selection at the drop point
@@ -49,7 +99,7 @@ export const DragDrop = Extension.create({
         chain = chain.insertContent({
           type: data.type,
           attrs: data.attrs || {},
-          content: data.content ? [{ type: "text", text: data.content }] : undefined,
+          content: data.content || undefined,
         });
       } catch (e) {
         console.error("Failed to parse studio block data", e);
@@ -70,6 +120,22 @@ export const DragDrop = Extension.create({
     }
 
     return chain.run();
+  },
+
+  addCommands() {
+    return {
+      startDragBlock: (from: number, to: number) => (props: any) => {
+        const { view } = props;
+
+        // Set up drag data for internal reordering
+        const dragData = JSON.stringify({ from, to });
+
+        // We'll handle this in the DOM handler
+        (view.dom as HTMLElement).dataset.draggingBlock = dragData;
+
+        return true;
+      },
+    };
   },
 
   addProseMirrorPlugins() {
@@ -112,7 +178,9 @@ export const DragDrop = Extension.create({
           handleDOMEvents: {
             dragover: (view: any, event: any) => {
               const isStudioBlock = event.dataTransfer?.types.includes("application/arkpad-block");
-              const isLegacyBlock = event.dataTransfer?.types.includes("application/x-arkpad-block");
+              const isLegacyBlock = event.dataTransfer?.types.includes(
+                "application/x-arkpad-block"
+              );
 
               if (!isStudioBlock && !isLegacyBlock) return false;
 

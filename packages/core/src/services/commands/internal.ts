@@ -91,7 +91,17 @@ export const setNode = (type: string | NodeType, attrs?: Record<string, any>) =>
 export const insertContent = (content: any) => (props: any) => {
   const { tr, state } = props;
   const node = state.schema.nodeFromJSON(content);
-  tr.replaceSelectionWith(node);
+  
+  if (!node) return false;
+
+  // If the selection is at the doc root and invalid for text, 
+  // insert at the end of the doc instead of replacing selection.
+  if (state.selection.$from.parent.type.name === 'doc' && !state.selection.$from.parent.type.allowsContent(state.schema.nodes.text!)) {
+    tr.insert(state.doc.content.size, node);
+  } else {
+    tr.replaceSelectionWith(node);
+  }
+  
   return true;
 };
 

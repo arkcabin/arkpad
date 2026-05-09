@@ -1,7 +1,9 @@
+import React from "react";
 import { ArkpadEditorContent } from "../editor/ArkpadEditorContent";
 import { useArkpadContext } from "../editor/context";
 import { cn } from "../../utils/utils";
-import { ArkpadEditorAPI } from "@arkpad/core";
+import { useEditorStore } from "../../stores/editorStore";
+import type { ArkpadEditorAPI } from "@arkpad/core";
 
 export interface ArkpadCanvasProps {
   device?: "desktop" | "tablet" | "mobile";
@@ -16,16 +18,20 @@ export function ArkpadCanvas({
 }: ArkpadCanvasProps) {
   const contextEditor = useArkpadContext();
   const editor = propEditor || contextEditor;
+  const selectedNodePos = useEditorStore((s) => s.selectedNodePos);
+
+  React.useEffect(() => {
+    if (!editor) return;
+    useEditorStore.getState().init(editor);
+    return () => useEditorStore.getState().destroy();
+  }, [editor]);
 
   return (
     <div className={cn("arkpad-canvas-viewport scrollbar-hide", className)}>
       <div className="arkpad-canvas-container" data-device={device}>
         <div className="arkpad-canvas-frame">
-          <div className="arkpad-page-root-container">
-            <ArkpadEditorContent
-              editor={editor}
-              className="arkpad-builder-canvas"
-            />
+          <div className="arkpad-page-root-container" data-selected-pos={selectedNodePos}>
+            <ArkpadEditorContent editor={editor} className="arkpad-builder-canvas" />
           </div>
         </div>
       </div>

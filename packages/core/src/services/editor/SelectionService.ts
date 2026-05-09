@@ -1,4 +1,4 @@
-import { TextSelection } from "prosemirror-state";
+import { TextSelection, NodeSelection, AllSelection } from "prosemirror-state";
 import { IArkpadEditor } from "../../api";
 
 /**
@@ -146,5 +146,34 @@ export class SelectionService {
     const tr = this.editor.getState().tr;
     tr.setMeta("virtual-selection-update", id);
     this.editor.dispatch(tr);
+  }
+
+  /**
+   * Returns the currently selected node if it's a NodeSelection.
+   */
+  public getSelectedNode() {
+    const { selection } = this.editor.getState();
+    return (selection as any).node || null;
+  }
+
+  /**
+   * Clears any specific node selection by selecting the entire document.
+   * This is used when navigating to the Page Root.
+   */
+  public deselectAll() {
+    const { tr, doc } = this.editor.getState();
+    this.editor.dispatch(tr.setSelection(new AllSelection(doc)));
+  }
+
+  /**
+   * Selects a node at the given position.
+   */
+  public selectNodeAt(pos: number) {
+    const { tr, doc } = this.editor.getState();
+    try {
+      this.editor.dispatch(tr.setSelection(NodeSelection.create(doc, pos)));
+    } catch (e) {
+      console.warn("Could not select node at pos", pos, e);
+    }
   }
 }

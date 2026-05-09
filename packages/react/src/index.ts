@@ -4,6 +4,9 @@ export * from "./hooks/useEditorState";
 export * from "./hooks/useSelection";
 export * from "./hooks/useMenuPositioner";
 
+// Stores
+export * from "./stores/editorStore";
+
 // Core Components
 export * from "./components/editor/context";
 export * from "./components/editor/ArkpadEditorContent";

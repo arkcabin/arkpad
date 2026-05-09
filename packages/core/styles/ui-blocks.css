@@ -1,0 +1,223 @@
+/* UI Blocks - Page Builder Elements */
+
+.ark-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #3b82f6;
+  color: white;
+  border: none;
+}
+
+.ark-button:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+.ark-button.ark-button-secondary {
+  background: transparent;
+  color: #3b82f6;
+  border: 2px solid #3b82f6;
+}
+
+.ark-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.ark-card-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #111827;
+}
+
+.ark-spacer {
+  width: 100%;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    #f3f4f6 10px,
+    #f3f4f6 20px
+  );
+  opacity: 0.5;
+}
+
+.ark-divider {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 16px 0;
+}
+
+.ark-container {
+  width: 100%;
+  margin: 0 auto;
+}
+
+.ark-grid {
+  display: grid;
+  width: 100%;
+}
+
+.ark-video {
+  width: 100%;
+  border-radius: 8px;
+  background: #000;
+}
+
+.ark-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ark-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 9999px;
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.ark-badge.ark-badge-success {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.ark-badge.ark-badge-warning {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.ark-badge.ark-badge-error {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.ark-alert {
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid;
+}
+
+.ark-alert-info {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #1e40af;
+}
+
+.ark-alert-success {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+  color: #065f46;
+}
+
+.ark-alert-warning {
+  background: #fffbeb;
+  border-color: #fde68a;
+  color: #92400e;
+}
+
+.ark-alert-error {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+.ark-tabs {
+  width: 100%;
+}
+
+.ark-tabs-header {
+  display: flex;
+  border-bottom: 1px solid #e5e7eb;
+  gap: 8px;
+}
+
+.ark-tab {
+  padding: 12px 24px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.ark-tab:hover {
+  color: #111827;
+}
+
+.ark-tab.ark-tab-active {
+  color: #3b82f6;
+  border-bottom-color: #3b82f6;
+}
+
+.ark-accordion {
+  width: 100%;
+}
+
+.ark-accordion-item {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.ark-accordion-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  cursor: pointer;
+  background: #f9fafb;
+}
+
+.ark-accordion-content {
+  padding: 16px;
+}
+
+/* Block Selection Styles */
+.ark-block-selected {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Block Drag Handle */
+.ark-block-drag-handle {
+  position: absolute;
+  left: -24px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.ark-block:hover .ark-block-drag-handle {
+  opacity: 1;
+}
+
+.ark-block-drag-handle:active {
+  cursor: grabbing;
+}
