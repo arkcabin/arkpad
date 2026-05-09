@@ -45,6 +45,6 @@ export function resolveEditorOptions(options: ArkpadEditorOptions): ResolvedArkp
     onPaste: options.onPaste,
     onInterceptor: options.onInterceptor,
     onDestroy: options.onDestroy,
-    contentTag: options.contentTag ?? "div",
+    contentTag: options.contentTag ?? "main",
   };
 }

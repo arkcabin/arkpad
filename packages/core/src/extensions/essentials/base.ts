@@ -2,7 +2,9 @@ import { history, undo, redo } from "prosemirror-history";
 import { placeholder as createPlaceholderPlugin } from "prosemirror-placeholder";
 import { setBlockType } from "prosemirror-commands";
 import { Selection, TextSelection, Plugin } from "prosemirror-state";
+import { Node } from "../../sdk/Node";
 import { Extension } from "../../sdk/Extension";
+import { Attributes } from "../../api";
 
 /**
  * Ensures there is always a trailing section with content at the end of the document.
@@ -41,26 +43,52 @@ function trailingNodePlugin() {
   });
 }
 
-export function createDocument(): Extension {
-  return Extension.create({
+export interface DocumentOptions {
+  content: string;
+  attributes: Attributes;
+}
+
+export function createDocument(): Node<DocumentOptions> {
+  return Node.create<DocumentOptions>({
     name: "doc",
+
+    addOptions() {
+      return {
+        content: "block+",
+        attributes: {},
+      };
+    },
+
+    addAttributes() {
+      return this.options.attributes;
+    },
+
+    renderHTML() {
+      return ["main", { id: "ark-page-root", "data-ark-studio": "true" }, 0];
+    },
+
     addNodes() {
       return {
         doc: {
-          content: "section*",
-          marks: "_",
-          parseDOM: [
-            {
-              tag: "main#ark-page-root",
-            },
-          ],
-          toDOM() {
-            return ["main", { id: "ark-page-root" }, 0];
-          },
+          content: this.options.content,
         },
       };
     },
+
     addCommands: () => ({
+      /**
+       * Updates attributes of the document node.
+       */
+      setDocAttributes:
+        (attributes: Record<string, any>) =>
+        ({ tr, state }: any) => {
+          tr.setNodeMarkup(0, undefined, {
+            ...state.doc.attrs,
+            ...attributes,
+          });
+          return true;
+        },
+
       /**
        * Focuses the editor.
        */
@@ -96,35 +124,34 @@ export function createDocument(): Extension {
   });
 }
 
-export function createParagraph(): Extension {
-  return Extension.create({
+export function createParagraph(): Node {
+  return Node.create({
     name: "paragraph",
-    addNodes() {
+    group: "block",
+    content: "inline*",
+    marks: "_",
+
+    addAttributes() {
       return {
-        paragraph: {
-          content: "inline*",
-          marks: "_",
-          group: "block",
-          attrs: { align: { default: "left" } },
-          parseDOM: [
-            {
-              tag: "p",
-              getAttrs: (dom: HTMLElement) => ({
-                align: dom.style.textAlign || dom.getAttribute("data-align") || "left",
-              }),
-            },
-          ],
-          toDOM(node) {
-            const { align } = node.attrs;
-            return [
-              "p",
-              { "data-align": align, style: align !== "left" ? `text-align: ${align}` : null },
-              0,
-            ];
+        align: {
+          default: "left",
+          parseHTML: (element: HTMLElement) =>
+            element.style.textAlign || element.getAttribute("data-align") || "left",
+          renderHTML: (attributes) => {
+            if (attributes.align === "left") return {};
+            return {
+              style: `text-align: ${attributes.align}`,
+              "data-align": attributes.align,
+            };
           },
         },
       };
     },
+
+    renderHTML({ HTMLAttributes }) {
+      return ["p", HTMLAttributes, 0];
+    },
+
     addCommands: () => ({
       setParagraph: () => (props: any) => {
         return setBlockType(props.state.schema.nodes.paragraph!, {
@@ -135,35 +162,28 @@ export function createParagraph(): Extension {
   });
 }
 
-export function createText(): Extension {
-  return Extension.create({
+export function createText(): Node {
+  return Node.create({
     name: "text",
-    addNodes() {
-      return {
-        text: {
-          group: "inline",
-        },
-      };
-    },
+    group: "inline",
   });
 }
 
-export function createHardBreak(): Extension {
-  return Extension.create({
+export function createHardBreak(): Node {
+  return Node.create({
     name: "hardBreak",
-    addNodes() {
-      return {
-        hard_break: {
-          inline: true,
-          group: "inline",
-          selectable: false,
-          parseDOM: [{ tag: "br" }],
-          toDOM() {
-            return ["br"];
-          },
-        },
-      };
+    inline: true,
+    group: "inline",
+    selectable: false,
+
+    parseHTML() {
+      return [{ tag: "br" }];
     },
+
+    renderHTML() {
+      return ["br"];
+    },
+
     addCommands: () => ({
       setHardBreak: () => (props: any) => {
         const { state, dispatch } = props;
@@ -172,6 +192,7 @@ export function createHardBreak(): Extension {
         return true;
       },
     }),
+
     addKeyboardShortcuts: () => ({
       "Mod-Enter": (state: any, dispatch: any) => {
         const node = state.schema.nodes.hard_break!.create();

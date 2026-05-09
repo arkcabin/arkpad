@@ -177,7 +177,7 @@ export class PluginFactory {
                 docChanged = true;
                 currentSelection = currentSelection.map(tr.doc, tr.mapping.slice(stepCountBefore));
               }
-            } catch (_e) {
+            } catch {
               // Structural healing failures are logged but don't crash the editor
               // Often happens when selection is in a state of flux during deletion
             }

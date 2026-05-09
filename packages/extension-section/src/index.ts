@@ -88,6 +88,7 @@ export const Section = Node.create<SectionOptions>({
       "section",
       {
         "data-type": "section",
+        class: "ark-section",
         style: styles,
         ...this.options.HTMLAttributes,
         ...HTMLAttributes,

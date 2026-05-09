@@ -90,6 +90,12 @@ export const BaseCommands = Extension.create({
   }),
 });
 
+export const Document = createDocument();
+export const Paragraph = createParagraph();
+export const Text = createText();
+export const HardBreak = createHardBreak();
+export const History = createHistory();
+
 /**
  * Engine - The essential skeleton for the editor.
  */
@@ -97,12 +103,12 @@ export const Engine = Extension.create({
   name: "engine",
   addExtensions() {
     return [
-      createDocument(),
-      createParagraph(),
-      createText(),
-      createHardBreak(),
+      Document,
+      Paragraph,
+      Text,
+      HardBreak,
       createUniqueId(),
-      createHistory(),
+      History,
       FocusEvents,
       ClipboardTextSerializer,
       Keymap,

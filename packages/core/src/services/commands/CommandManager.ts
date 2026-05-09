@@ -84,8 +84,8 @@ class CommandManagerInstance {
                 tr2.steps.forEach((step) => {
                   try {
                     localTr.step(step);
-                  } catch (_e) {
-                    console.error("[Arkpad] Shadow engine step failure:", _e);
+                  } catch {
+                    console.error("[Arkpad] Shadow engine step failure");
                   }
                 });
                 if (tr2.selectionSet) {
@@ -143,7 +143,7 @@ class CommandManagerInstance {
                   });
                 }
               }
-            } catch (_e) {
+            } catch {
               // Gracefully handle shadow execution crashes
               this.allSuccessful = false;
               this.executionLog.push({
@@ -204,8 +204,8 @@ class CommandManagerInstance {
           tr2.steps.forEach((step) => {
             try {
               localTr.step(step);
-            } catch (_e) {
-              console.error(`[Arkpad] Step apply failed inside "${name}" shadow chain:`, _e);
+            } catch {
+              console.error(`[Arkpad] Step apply failed inside "${name}" shadow chain`);
             }
           });
           if (tr2.selectionSet) {
@@ -248,7 +248,7 @@ class CommandManagerInstance {
             });
           }
         }
-      } catch (_e) {
+      } catch {
         // Shadow execution crashes are expected for commands with required attributes
         // (like 'link' needing 'href') when checked for availability without args.
         this.allSuccessful = false;
@@ -356,8 +356,8 @@ class CommandManagerInstance {
         }
       }
       return true;
-    } catch (_e) {
-      console.error("[Arkpad] Shadow merge failed (Refined):", _e);
+    } catch {
+      console.error("[Arkpad] Shadow merge failed (Refined)");
       this.allSuccessful = false;
       return false;
     }
@@ -449,8 +449,8 @@ class CommandManagerInstance {
           duration: "N/A",
         });
       }
-    } catch (_e) {
-      console.warn("[Arkpad] insertContentAt failed:", _e);
+    } catch {
+      console.warn("[Arkpad] insertContentAt failed");
       this.allSuccessful = false;
       this.executionLog.push({
         command: "insertContentAt",
@@ -490,8 +490,8 @@ class CommandManagerInstance {
         tr2.steps.forEach((step) => {
           try {
             localTr.step(step);
-          } catch (__e) {
-            console.error("[Arkpad] Command step failure:", __e);
+          } catch {
+            console.error("[Arkpad] Command step failure");
           }
         });
         if (tr2.selectionSet) {
@@ -560,8 +560,8 @@ class CommandManagerInstance {
       try {
         this.dispatch(this.masterTransaction);
         return true;
-      } catch (_e) {
-        console.error("[Arkpad] Final shadow dispatch failed:", _e);
+      } catch {
+        console.error("[Arkpad] Final shadow dispatch failed");
         return false;
       }
     }

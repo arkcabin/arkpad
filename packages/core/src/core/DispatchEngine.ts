@@ -58,7 +58,7 @@ export class DispatchEngine {
           const currentState = this.editor.getView().state;
           try {
             currentState.apply(tr);
-          } catch (_e) {
+          } catch {
             if (tr.steps.length === 0 && tr.selectionSet) {
               const newTr = currentState.tr;
               newTr.setSelection(tr.selection.map(currentState.doc, tr.mapping));
@@ -77,7 +77,7 @@ export class DispatchEngine {
             try {
               const rebasedStep = step.map(mapping);
               if (rebasedStep) rebasedTr.step(rebasedStep);
-            } catch (_e) {
+            } catch {
               // Ignore mapping failures in queued transactions
             }
           });
@@ -126,7 +126,7 @@ export class DispatchEngine {
           const currentState = this.editor.getView().state;
           try {
             currentState.apply(tr);
-          } catch (_e) {
+          } catch {
             if (tr.steps.length === 0 && tr.selectionSet) {
               const newTr = currentState.tr;
               newTr.setSelection(tr.selection.map(currentState.doc, tr.mapping));
@@ -145,7 +145,7 @@ export class DispatchEngine {
             try {
               const rebasedStep = step.map(mapping);
               if (rebasedStep) rebasedTr.step(rebasedStep);
-            } catch (_e) {
+            } catch {
               // Ignore mapping failures in queued transactions
             }
           });

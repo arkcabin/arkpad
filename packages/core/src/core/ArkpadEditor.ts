@@ -100,7 +100,7 @@ export class ArkpadEditor implements IArkpadEditor {
     this.shortcuts = new ShortcutRegistry(this);
 
     // 2. Schema & Extension Management
-    const extensions = [...createCoreEssentials(), ...(resolved.extensions || [])];
+    const extensions = [...(resolved.extensions || []), ...createCoreEssentials()];
     const schemaBuilder = new SchemaBuilder(extensions);
     const schema = schemaBuilder.build();
     // ContentService will initialize its own serializer from the schema
