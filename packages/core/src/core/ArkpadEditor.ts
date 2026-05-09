@@ -137,7 +137,8 @@ export class ArkpadEditor implements IArkpadEditor {
 
     // Create the content element with the specified tag (e.g. 'main')
     const contentElement = document.createElement(resolved.contentTag);
-    contentElement.classList.add("arkpad-content");
+    contentElement.classList.add("arkpad-editor");
+    contentElement.classList.add("arkpad-content"); // Backward compatibility
     this.element.appendChild(contentElement);
 
     this.view = new EditorView(contentElement, {
@@ -520,7 +521,6 @@ export class ArkpadEditor implements IArkpadEditor {
       if (name.toLowerCase().includes("section")) targetRole = NodeRole.LAYOUT;
       if (name.toLowerCase().includes("image") || name.toLowerCase().includes("table"))
         targetRole = NodeRole.WIDGET;
-
     }
     const parent = state.selection.$from.parent;
     return Governance.canAccept(

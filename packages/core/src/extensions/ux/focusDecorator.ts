@@ -29,7 +29,7 @@ export const FocusDecorator = Extension.create({
               node = $from.node(depth);
             }
 
-            if (node && node.type.isBlock) {
+            if (depth > 0 && node && node.type.isBlock) {
               const pos = $from.before(depth);
               decorations.push(
                 Decoration.node(pos, pos + node.nodeSize, {

@@ -20,17 +20,20 @@ export class DispatchEngine {
   ) {}
 
   public dispatch(transaction: Transaction): void {
-    if (transaction.steps.length > 0) {
-      console.log("[Arkpad] Transaction with steps dispatched:", transaction.steps);
-    }
     if (this.isDispatching) {
       this.transactionQueue.push(transaction);
       return;
     }
-    this.processQueue(transaction);
+
+    // High-Performance Path: If no async interceptors, process synchronously to eliminate typing delay.
+    if (this.asyncInterceptors.length === 0) {
+      this.processQueueSync(transaction);
+    } else {
+      this.processQueueAsync(transaction);
+    }
   }
 
-  private async processQueue(initialTr: Transaction) {
+  private processQueueSync(initialTr: Transaction) {
     this.isDispatching = true;
     let nextTr: Transaction | undefined = initialTr;
 
@@ -38,11 +41,6 @@ export class DispatchEngine {
       while (nextTr) {
         let tr = nextTr;
         this.editor.events.emit("transaction:pre", { editor: this.editor, transaction: tr });
-
-        // 3. Async Middleware (Agentic Approval) - Fire and forget for performance
-        if (this.asyncInterceptors.length > 0) {
-          this.runMiddleware(tr);
-        }
 
         let blocked = false;
         for (const config of this.interceptors) {
@@ -56,15 +54,100 @@ export class DispatchEngine {
           if (intercepted instanceof Transaction) tr = intercepted;
         }
 
-        if (!blocked) this.commit(tr);
+        if (!blocked) {
+          const currentState = this.editor.getView().state;
+          try {
+            currentState.apply(tr);
+          } catch (_e) {
+            if (tr.steps.length === 0 && tr.selectionSet) {
+              const newTr = currentState.tr;
+              newTr.setSelection(tr.selection.map(currentState.doc, tr.mapping));
+              tr = newTr;
+            }
+          }
+          this.commit(tr);
+        }
 
         const queuedTr = this.transactionQueue.shift();
         if (queuedTr) {
-          const rebasedTr = this.editor.getView().state.tr;
+          const view = this.editor.getView();
+          const rebasedTr = view.state.tr;
           const mapping = tr.mapping;
           queuedTr.steps.forEach((step) => {
-            const rebasedStep = step.map(mapping);
-            if (rebasedStep) rebasedTr.step(rebasedStep);
+            try {
+              const rebasedStep = step.map(mapping);
+              if (rebasedStep) rebasedTr.step(rebasedStep);
+            } catch (_e) {
+              // Ignore mapping failures in queued transactions
+            }
+          });
+          if (queuedTr.selectionSet) {
+            rebasedTr.setSelection(queuedTr.selection.map(rebasedTr.doc, mapping));
+          }
+          nextTr = rebasedTr;
+        } else {
+          nextTr = undefined;
+        }
+      }
+    } finally {
+      this.isDispatching = false;
+    }
+  }
+
+  private async processQueueAsync(initialTr: Transaction) {
+    this.isDispatching = true;
+    let nextTr: Transaction | undefined = initialTr;
+
+    try {
+      while (nextTr) {
+        let tr = nextTr;
+        this.editor.events.emit("transaction:pre", { editor: this.editor, transaction: tr });
+
+        const intercepted = await this.runMiddleware(tr);
+        if (intercepted === false || intercepted === null) {
+          nextTr = this.transactionQueue.shift();
+          continue;
+        }
+        if (intercepted instanceof Transaction) tr = intercepted;
+
+        let blocked = false;
+        for (const config of this.interceptors) {
+          if (config.on === "docChanged" && !tr.docChanged) continue;
+          if (config.on === "selectionChanged" && !tr.selectionSet) continue;
+          const intercepted = config.handler({ editor: this.editor, transaction: tr });
+          if (intercepted === false || intercepted === null) {
+            blocked = true;
+            break;
+          }
+          if (intercepted instanceof Transaction) tr = intercepted;
+        }
+
+        if (!blocked) {
+          const currentState = this.editor.getView().state;
+          try {
+            currentState.apply(tr);
+          } catch (_e) {
+            if (tr.steps.length === 0 && tr.selectionSet) {
+              const newTr = currentState.tr;
+              newTr.setSelection(tr.selection.map(currentState.doc, tr.mapping));
+              tr = newTr;
+            }
+          }
+          this.commit(tr);
+        }
+
+        const queuedTr = this.transactionQueue.shift();
+        if (queuedTr) {
+          const view = this.editor.getView();
+          const rebasedTr = view.state.tr;
+          const mapping = tr.mapping;
+          queuedTr.steps.forEach((step) => {
+            try {
+              const rebasedStep = step.map(mapping);
+              if (rebasedStep) rebasedTr.step(rebasedStep);
+            } catch (_e) {
+              // Ignore mapping failures in queued transactions
+            }
           });
           if (queuedTr.selectionSet) {
             rebasedTr.setSelection(queuedTr.selection.map(rebasedTr.doc, mapping));

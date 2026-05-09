@@ -7,7 +7,7 @@ import type { ArkpadContent, ArkpadEditorOptions, ResolvedArkpadEditorOptions } 
 export function parseHtmlContent(content: string, schema: Schema): PMNode {
   const parser = PMDOMParser.fromSchema(schema);
   const element = document.createElement("div");
-  element.innerHTML = content.trim().length > 0 ? content : "<p></p>";
+  element.innerHTML = content.trim();
   return parser.parse(element);
 }
 
@@ -32,7 +32,7 @@ export function parseContent(
 export function resolveEditorOptions(options: ArkpadEditorOptions): ResolvedArkpadEditorOptions {
   return {
     element: options.element,
-    content: options.content ?? "<p></p>",
+    content: options.content ?? "",
     editable: options.editable ?? true,
     extensions: options.extensions ?? [],
     nodeViews: options.nodeViews ?? {},

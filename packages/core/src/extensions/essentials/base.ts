@@ -18,16 +18,10 @@ function trailingNodePlugin() {
       const fallbackNode = section || schema.nodes.paragraph;
       if (!fallbackNode) return null;
 
-      // Ensure there is always at least one content node at the end
+      // Only insert if document is completely empty AND we actually want a default node
+      // For the Studio/Builder, we often want a truly blank canvas.
       if (!lastNode || lastNode.type === schema.nodes.doc) {
-        const paragraph = schema.nodes.paragraph;
-        if (!paragraph) return null;
-
-        const tr = newState.tr;
-        const contentNode = section
-          ? section.create(null, [paragraph.create()])
-          : paragraph.create();
-        return tr.insert(doc.content.size, contentNode).scrollIntoView();
+        return null;
       }
 
       // If using sections, ensure last section has content
@@ -53,7 +47,7 @@ export function createDocument(): Extension {
     addNodes() {
       return {
         doc: {
-          content: "section+",
+          content: "section*",
           marks: "_",
           parseDOM: [
             {

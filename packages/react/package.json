@@ -48,7 +48,7 @@
     "src"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && node -e \"const fs = require('fs'); const path = require('path'); const src = 'src/components/studio/studio.css'; const dest = 'dist/components/studio/studio.css'; fs.mkdirSync(path.dirname(dest), { recursive: true }); fs.copyFileSync(src, dest);\"",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {

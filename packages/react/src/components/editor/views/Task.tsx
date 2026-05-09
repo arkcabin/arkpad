@@ -1,6 +1,6 @@
 import * as React from "react";
 import { type NodeViewConstructor } from "@arkpad/core";
-import { Checkbox } from "../components/ui/checkbox";
+import { Checkbox } from "../../ui/checkbox";
 import { createReactNodeView, type ReactNodeViewProps } from "../node-view";
 
 /**

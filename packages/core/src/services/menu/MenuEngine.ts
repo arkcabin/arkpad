@@ -75,12 +75,6 @@ export class MenuEngine {
   private updateCounter = 0;
 
   update(view: EditorView, prevState?: EditorState, force = false, forceHide = false) {
-    const callId = ++this.updateCounter;
-    console.log(
-      `[MenuEngine] update() #${callId} called. force=${force}, forceHide=${forceHide}. Caller:`,
-      new Error().stack?.split("\n")[2]?.trim()
-    );
-
     if (view.isDestroyed || this.isUpdating) {
       return;
     }
@@ -195,8 +189,6 @@ export class MenuEngine {
   private generateMetadata(state: EditorState) {
     const { $from } = state.selection;
 
-    console.log(`[MenuEngine] generateMetadata() called, active node: ${$from.parent.type.name}`);
-
     // 1. Resolve Active Node (Smart fallback for Leaf nodes)
     const selection = state.selection as any;
     const node = selection.node || $from.parent;
@@ -209,23 +201,22 @@ export class MenuEngine {
       path.push($from.node(i).type.name);
     }
 
-    // 3. Fast Command Indexing (Only check top-level marks/nodes, skip expensive factories for now)
+    // 3. Fast Command Indexing (Lazy sweep for Performance)
     const availableCommands: string[] = [];
-    const commandNames = Object.keys(this.editor.extensionManager.commands);
-    console.log(`[MenuEngine] generateMetadata() checking ${commandNames.length} commands`);
+    
+    // Only perform expensive command checks if a menu is actually active or requested
+    // This prevents 93 shadow transactions from running on every keystroke.
+    const hasActiveMenu = Array.from(this.menuConfigs.values()).some(configs => configs.length > 0);
+    
+    if (hasActiveMenu) {
+      const commandNames = Object.keys(this.editor.extensionManager.commands);
+      const skipList = ["fixTables", "setCellAttr", "setCellBackground", "insertContent"];
 
-    // Optimized Sweep: Only check commands that are likely to be in a menu
-    // Maintenance commands like 'fixTables' or generic factories like 'setCellAttr'
-    // are skipped during the global sweep.
-    const skipList = ["fixTables", "setCellAttr", "setCellBackground", "insertContent"];
-
-    for (const name of commandNames) {
-      if (skipList.includes(name)) continue;
-      if (this.editor.canRunCommand(name)) {
-        if (name.toLowerCase().includes("bold")) {
-          console.log(`[MenuEngine] Bold command "${name}" is available`);
+      for (const name of commandNames) {
+        if (skipList.includes(name)) continue;
+        if (this.editor.canRunCommand(name)) {
+          availableCommands.push(name);
         }
-        availableCommands.push(name);
       }
     }
 
@@ -246,10 +237,6 @@ export class MenuEngine {
     const { from, to, empty } = state.selection;
     const selection = state.selection as any;
 
-    console.log(
-      `[MenuEngine] calculateCoords() called, selection type: ${selection.constructor.name}, from: ${from}, to: ${to}, empty: ${empty}`
-    );
-
     try {
       const editorRect = view.dom.getBoundingClientRect();
       const containerScrollTop = view.dom.scrollTop;
@@ -260,10 +247,6 @@ export class MenuEngine {
       const anchorCellPos = selection.anchorCell || selection.$anchorCell?.pos;
       const headCellPos = selection.headCell || selection.$headCell?.pos;
       const isCellSelection = Number.isInteger(anchorCellPos) && Number.isInteger(headCellPos);
-
-      console.log(
-        `[MenuEngine] calculateCoords() isCellSelection: ${isCellSelection}, anchorCellPos: ${anchorCellPos}, headCellPos: ${headCellPos}`
-      );
 
       if (isCellSelection) {
         const anchorCellDom = view.nodeDOM(anchorCellPos) as HTMLElement | null;

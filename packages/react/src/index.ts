@@ -1,11 +1,24 @@
-export * from "./useArkpadEditor";
-export * from "./useEditorState";
-export * from "./useSelection";
-export * from "./node-view";
-export * from "./context";
-export * from "./ArkpadEditorContent";
-export * from "./BubbleMenu";
-export * from "./FloatingMenu";
-export * from "./useMenuPositioner";
-export * from "./EditorButton";
-export * from "./SmartBar";
+// Hooks
+export * from "./hooks/useArkpadEditor";
+export * from "./hooks/useEditorState";
+export * from "./hooks/useSelection";
+export * from "./hooks/useMenuPositioner";
+
+// Core Components
+export * from "./components/editor/context";
+export * from "./components/editor/ArkpadEditorContent";
+export * from "./components/editor/node-view";
+
+// Menus
+export * from "./components/menus/BubbleMenu";
+export * from "./components/menus/FloatingMenu";
+export * from "./components/menus/SmartBar";
+
+// Studio / Builder
+export * from "./components/studio";
+
+// UI Components
+export * from "./components/ui/EditorButton";
+
+// Utilities
+export * from "./utils/utils";

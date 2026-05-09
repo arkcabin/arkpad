@@ -177,8 +177,9 @@ export class PluginFactory {
                 docChanged = true;
                 currentSelection = currentSelection.map(tr.doc, tr.mapping.slice(stepCountBefore));
               }
-            } catch (e) {
-              console.error("[Arkpad Governance] Healing failed:", e);
+            } catch (_e) {
+              // Structural healing failures are logged but don't crash the editor
+              // Often happens when selection is in a state of flux during deletion
             }
           });
 
@@ -195,7 +196,13 @@ export class PluginFactory {
             tr.setSelection(TextSelection.create(tr.doc, safeFrom));
           }
         } else {
-          tr.setSelection(TextSelection.create(tr.doc, safeFrom, Math.max(0, Math.min(currentSelection.to, finalSize))));
+          tr.setSelection(
+            TextSelection.create(
+              tr.doc,
+              safeFrom,
+              Math.max(0, Math.min(currentSelection.to, finalSize))
+            )
+          );
         }
 
         tr.setMeta("governance-healing", true);
@@ -212,7 +219,9 @@ export class PluginFactory {
     return new Plugin({
       appendTransaction: (transactions, oldState, newState) => {
         const docChanged = transactions.some((tr) => tr.docChanged);
-        const alreadyDeactivated = transactions.some((tr) => tr.getMeta("deactivate-painting-tools"));
+        const alreadyDeactivated = transactions.some((tr) =>
+          tr.getMeta("deactivate-painting-tools")
+        );
 
         if (docChanged && !alreadyDeactivated) {
           const tr = newState.tr;

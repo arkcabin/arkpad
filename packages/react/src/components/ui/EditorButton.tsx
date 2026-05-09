@@ -1,6 +1,7 @@
 import React from "react";
-import { useArkpadContext } from "./context";
-import { useEditorState } from "./useEditorState";
+import { useArkpadContext } from "../editor/context";
+import { useEditorState } from "../../hooks/useEditorState";
+import { ArkpadEditorAPI } from "@arkpad/core";
 
 export interface EditorButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   /**
@@ -46,19 +47,19 @@ export const EditorButton: React.FC<EditorButtonProps> = ({
   // Reactively track editor state (active and executable)
   const { isActive, canRun } = useEditorState(
     editor,
-    (s) => ({
+    (s: ArkpadEditorAPI) => ({
       isActive: s.isActive(name || command, attrs),
       canRun: s.canRunCommand(command, ...(args as any[])),
     }),
-    (a, b) => a?.isActive === b?.isActive && a?.canRun === b?.canRun
+    (a: any, b: any) => a?.isActive === b?.isActive && a?.canRun === b?.canRun
   ) ?? { isActive: false, canRun: false };
 
   return (
     <button
       type="button"
       onMouseDown={(e) => e.preventDefault()}
-      onClick={() => editor.runCommand(command, ...(args as any[]))}
-      disabled={!canRun || props.disabled}
+      onClick={() => editor?.runCommand(command, ...(args as any[]))}
+      disabled={!canRun || !!props.disabled || !editor}
       className={`${className} ${isActive ? activeClassName : ""}`.trim()}
       data-arkpad-ignore="true"
       {...props}

@@ -17,9 +17,5 @@ export const ArkpadProvider: React.FC<{ editor: ArkpadEditorAPI | null; children
  * Hook to access the editor instance from anywhere inside the ArkpadProvider.
  */
 export const useArkpadContext = () => {
-  const context = useContext(ArkpadContext);
-  if (context === null) {
-    throw new Error("useArkpadContext must be used within an ArkpadProvider");
-  }
-  return context;
+  return useContext(ArkpadContext);
 };

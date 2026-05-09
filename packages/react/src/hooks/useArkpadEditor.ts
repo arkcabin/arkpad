@@ -6,7 +6,7 @@ import {
   type NodeViewConstructor,
   type ArkpadDocJSON,
 } from "@arkpad/core";
-import { TaskView } from "./views/Task";
+import { TaskView } from "../components/editor/views/Task";
 
 export type UseArkpadEditorOptions = {
   /**

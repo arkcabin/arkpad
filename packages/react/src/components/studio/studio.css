@@ -1,0 +1,63 @@
+/* Arkpad Studio - Clean Start */
+:root {
+  --arkpad-canvas-bg: #f5f5f5;
+  --arkpad-surface-bg: #ffffff;
+  --arkpad-border-color: #e5e5e5;
+}
+
+.dark {
+  --arkpad-canvas-bg: #000000;
+  --arkpad-surface-bg: #0a0a0a;
+  --arkpad-border-color: #171717;
+}
+
+.arkpad-builder-canvas {
+  width: 100%;
+  height: 100%;
+  background: var(--arkpad-canvas-bg);
+}
+
+.arkpad-builder-canvas .ProseMirror {
+  min-height: 500px;
+  padding: 40px;
+  outline: none;
+}
+
+/* Page Root UI */
+.arkpad-page-root-container {
+  position: relative;
+  border: 1px solid var(--arkpad-border-color);
+  transition: border-color 0.2s ease;
+}
+
+.arkpad-page-root-container:hover {
+  border-color: #3b82f6; /* Blue-500 */
+}
+
+.arkpad-page-root-label {
+  position: absolute;
+  top: -10px;
+  left: 20px;
+  background: #3b82f6;
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  z-index: 10;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.arkpad-page-root-label::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: white;
+  border-radius: 50%;
+}

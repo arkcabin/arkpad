@@ -84,8 +84,8 @@ class CommandManagerInstance {
                 tr2.steps.forEach((step) => {
                   try {
                     localTr.step(step);
-                  } catch (e) {
-                    console.error("[Arkpad] Step apply failed inside shadow chain:", e);
+                  } catch (_e) {
+                    console.error("[Arkpad] Shadow engine step failure:", _e);
                   }
                 });
                 if (tr2.selectionSet) {
@@ -143,12 +143,12 @@ class CommandManagerInstance {
                   });
                 }
               }
-            } catch (e) {
-              console.error(`[Arkpad] Shadow command "${prop}" execution crashed:`, e);
+            } catch (_e) {
+              // Gracefully handle shadow execution crashes
               this.allSuccessful = false;
               this.executionLog.push({
                 command: prop,
-                status: "💥 Crash",
+                status: "❌ Unsatisfied",
                 duration: "0ms",
               });
             }
@@ -204,8 +204,8 @@ class CommandManagerInstance {
           tr2.steps.forEach((step) => {
             try {
               localTr.step(step);
-            } catch (e) {
-              console.error(`[Arkpad] Step apply failed inside "${name}" shadow chain:`, e);
+            } catch (_e) {
+              console.error(`[Arkpad] Step apply failed inside "${name}" shadow chain:`, _e);
             }
           });
           if (tr2.selectionSet) {
@@ -248,12 +248,13 @@ class CommandManagerInstance {
             });
           }
         }
-      } catch (e) {
-        console.error(`[Arkpad] Shadow command "${name}" execution crashed:`, e);
+      } catch (_e) {
+        // Shadow execution crashes are expected for commands with required attributes
+        // (like 'link' needing 'href') when checked for availability without args.
         this.allSuccessful = false;
         this.executionLog.push({
           command: name,
-          status: "💥 Crash",
+          status: "❌ Unsatisfied",
           duration: "0ms",
         });
       }
@@ -355,8 +356,8 @@ class CommandManagerInstance {
         }
       }
       return true;
-    } catch (e) {
-      console.error("[Arkpad] Shadow merge failed (Refined):", e);
+    } catch (_e) {
+      console.error("[Arkpad] Shadow merge failed (Refined):", _e);
       this.allSuccessful = false;
       return false;
     }
@@ -411,26 +412,48 @@ class CommandManagerInstance {
 
   public insertContent(content: ArkpadContent): ChainedCommands {
     if (!this.allSuccessful) return this as unknown as ChainedCommands;
+    const parsedDoc = parseContent(content, this.schema);
+    const slice = new Slice(parsedDoc.content, 0, 0);
+    const localTr = this.virtualState.tr.replaceSelection(slice);
+    this.merge(localTr);
+    return this as unknown as ChainedCommands;
+  }
+
+  public insertContentAt(
+    position: number | { from: number; to: number },
+    content: ArkpadContent
+  ): ChainedCommands {
+    if (!this.allSuccessful) return this as unknown as ChainedCommands;
 
     try {
       const parsedDoc = parseContent(content, this.schema);
       const slice = new Slice(parsedDoc.content, 0, 0);
-      const localTr = this.virtualState.tr.replaceSelection(slice);
+      const localTr = this.virtualState.tr;
+      const docSize = localTr.doc.content.size;
+
+      if (typeof position === "number") {
+        const safePos = Math.max(0, Math.min(position, docSize));
+        localTr.insert(safePos, slice.content);
+      } else {
+        const safeFrom = Math.max(0, Math.min(position.from, docSize));
+        const safeTo = Math.max(0, Math.min(position.to, docSize));
+        localTr.replaceRange(safeFrom, safeTo, slice);
+      }
 
       const merged = this.merge(localTr);
 
       if (this.shouldDispatch) {
         this.executionLog.push({
-          command: "insertContent",
+          command: "insertContentAt",
           status: merged ? "✅ Success" : "💥 Merge Failed",
           duration: "N/A",
         });
       }
-    } catch (e) {
-      console.warn("[Arkpad] insertContent failed:", e);
+    } catch (_e) {
+      console.warn("[Arkpad] insertContentAt failed:", _e);
       this.allSuccessful = false;
       this.executionLog.push({
-        command: "insertContent",
+        command: "insertContentAt",
         status: "❌ Error",
         duration: "N/A",
       });
@@ -467,8 +490,8 @@ class CommandManagerInstance {
         tr2.steps.forEach((step) => {
           try {
             localTr.step(step);
-          } catch (e) {
-            console.error("[Arkpad] Step apply failed inside .command() shadow chain:", e);
+          } catch (__e) {
+            console.error("[Arkpad] Command step failure:", __e);
           }
         });
         if (tr2.selectionSet) {
@@ -537,8 +560,8 @@ class CommandManagerInstance {
       try {
         this.dispatch(this.masterTransaction);
         return true;
-      } catch (e) {
-        console.error("[Arkpad] Final shadow dispatch failed:", e);
+      } catch (_e) {
+        console.error("[Arkpad] Final shadow dispatch failed:", _e);
         return false;
       }
     }

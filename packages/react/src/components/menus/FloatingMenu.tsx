@@ -1,48 +1,41 @@
 import React, { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { ArkpadEditorAPI } from "@arkpad/core";
-import { BubbleMenu as BubbleMenuExtension } from "@arkpad/extension-bubble-menu";
+import { FloatingMenu as FloatingMenuExtension } from "@arkpad/extension-floating-menu";
 import { EditorState } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
-import { useMenuPositioner } from "./useMenuPositioner";
+import { useMenuPositioner } from "../../hooks/useMenuPositioner";
 
-export interface BubbleMenuProps {
+export interface FloatingMenuProps {
   editor: ArkpadEditorAPI | null;
   children: React.ReactNode;
   className?: string;
   offset?: number;
-  shouldShow?: (props: {
-    state: EditorState;
-    view: EditorView;
-    from: number;
-    to: number;
-    empty: boolean;
-  }) => boolean;
+  shouldShow?: (props: { state: EditorState; view: EditorView }) => boolean;
 }
 
 /**
- * BubbleMenu component that leverages the Headless Menu Engine in @arkpad/core.
+ * FloatingMenu component that leverages the Headless Menu Engine in @arkpad/core.
  * It provides zero-flicker, GPU-accelerated positioning.
  */
-export const BubbleMenu: React.FC<BubbleMenuProps> = ({
+export const FloatingMenu: React.FC<FloatingMenuProps> = ({
   editor,
   children,
   className = "",
-  offset = 12,
+  offset = 40,
   shouldShow,
 }) => {
   const { ref, style, active } = useMenuPositioner({
     editor,
-    extensionName: "bubbleMenu",
-    type: "bubble",
+    extensionName: "floatingMenu",
+    type: "floating",
     offset,
   });
 
   useEffect(() => {
     if (!editor) return;
 
-    // Register the bubble menu extension logic with the core
-    const extension = BubbleMenuExtension.configure({
+    const extension = FloatingMenuExtension.configure({
       shouldShow: shouldShow as any,
     });
 

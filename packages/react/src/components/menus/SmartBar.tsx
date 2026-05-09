@@ -1,7 +1,7 @@
 import React from "react";
 import { BubbleMenu } from "./BubbleMenu";
-import { useArkpadContext } from "./context";
-import { useEditorState } from "./useEditorState";
+import { useArkpadContext } from "../editor/context";
+import { useEditorState } from "../../hooks/useEditorState";
 import { ArkpadEditorAPI } from "@arkpad/core";
 
 export interface SmartBarProps {
