@@ -36,7 +36,7 @@ export const Section = Node.create<SectionOptions>({
         },
       },
       padding: {
-        default: "2rem",
+        default: "0",
         parseHTML: (element) => element.style.padding,
         renderHTML: (attributes) => {
           if (!attributes.padding) return {};

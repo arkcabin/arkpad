@@ -13,7 +13,7 @@ const DEFAULT_BLOCKS = [
     type: "section",
     icon: "M4 6h16M4 12h16M4 18h16",
     category: "Layout",
-    attrs: { padding: "60px 0", backgroundColor: "transparent" },
+    attrs: { padding: "0", backgroundColor: "transparent" },
     content: [{ type: "paragraph", content: [{ type: "text", text: "Section content" }] }],
   },
   {
@@ -22,7 +22,7 @@ const DEFAULT_BLOCKS = [
     type: "container",
     icon: "M4 4h16v16H4z",
     category: "Layout",
-    attrs: { maxWidth: "1200px", padding: "20px" },
+    attrs: { maxWidth: "1200px", padding: "0" },
   },
   {
     id: "columns",
