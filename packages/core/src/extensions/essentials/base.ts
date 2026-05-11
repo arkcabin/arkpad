@@ -14,7 +14,6 @@ function trailingNodePlugin() {
   return new Plugin({
     appendTransaction: (transactions, oldState, newState) => {
       const { doc, schema } = newState;
-      const lastNode = doc.lastChild;
 
       const paragraph = schema.nodes.paragraph;
       if (!paragraph) return null;

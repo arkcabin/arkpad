@@ -2,19 +2,31 @@ import React, { Suspense, lazy, useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { Sidebar } from "./components/Sidebar";
 
-
-
 // Lazy load components
 const BoldDemo = lazy(() => import("./demos/BoldDemo").then((m) => ({ default: m.BoldDemo })));
-const ItalicDemo = lazy(() => import("./demos/ItalicDemo").then((m) => ({ default: m.ItalicDemo })));
-const UnderlineDemo = lazy(() => import("./demos/UnderlineDemo").then((m) => ({ default: m.UnderlineDemo })));
-const StrikeDemo = lazy(() => import("./demos/StrikeDemo").then((m) => ({ default: m.StrikeDemo })));
+const ItalicDemo = lazy(() =>
+  import("./demos/ItalicDemo").then((m) => ({ default: m.ItalicDemo }))
+);
+const UnderlineDemo = lazy(() =>
+  import("./demos/UnderlineDemo").then((m) => ({ default: m.UnderlineDemo }))
+);
+const StrikeDemo = lazy(() =>
+  import("./demos/StrikeDemo").then((m) => ({ default: m.StrikeDemo }))
+);
 const CodeDemo = lazy(() => import("./demos/CodeDemo").then((m) => ({ default: m.CodeDemo })));
-const SuperscriptDemo = lazy(() => import("./demos/SuperscriptDemo").then((m) => ({ default: m.SuperscriptDemo })));
-const SubscriptDemo = lazy(() => import("./demos/SubscriptDemo").then((m) => ({ default: m.SubscriptDemo })));
+const SuperscriptDemo = lazy(() =>
+  import("./demos/SuperscriptDemo").then((m) => ({ default: m.SuperscriptDemo }))
+);
+const SubscriptDemo = lazy(() =>
+  import("./demos/SubscriptDemo").then((m) => ({ default: m.SubscriptDemo }))
+);
 const TableDemo = lazy(() => import("./demos/TableDemo").then((m) => ({ default: m.TableDemo })));
-const HighlightDemo = lazy(() => import("./demos/HighlightDemo").then((m) => ({ default: m.HighlightDemo })));
-const StandardEditor = lazy(() => import("./demos/StandardEditor").then((m) => ({ default: m.StandardEditor })));
+const HighlightDemo = lazy(() =>
+  import("./demos/HighlightDemo").then((m) => ({ default: m.HighlightDemo }))
+);
+const StandardEditor = lazy(() =>
+  import("./demos/StandardEditor").then((m) => ({ default: m.StandardEditor }))
+);
 
 function Loader() {
   return (
@@ -37,8 +49,6 @@ const ROUTE_NAMES: Record<string, string> = {
   "/extensions/highlight": "Highlight",
 };
 
-const isStandardPath = (pathname: string) => pathname === "/";
-
 function TopBar({ onSidebarToggle }: { onSidebarToggle: () => void }) {
   const location = useLocation();
   const pageName = ROUTE_NAMES[location.pathname] || "Arkpad";
@@ -46,9 +56,22 @@ function TopBar({ onSidebarToggle }: { onSidebarToggle: () => void }) {
   return (
     <div className="h-10 px-4 border-b border-[var(--border)] flex items-center justify-between shrink-0 bg-white z-50">
       <div className="flex items-center gap-3">
-        <button onClick={onSidebarToggle} className="p-1 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-            <line x1="2" y1="4" x2="14" y2="4" /><line x1="2" y1="8" x2="14" y2="8" /><line x1="2" y1="12" x2="14" y2="12" />
+        <button
+          onClick={onSidebarToggle}
+          className="p-1 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+          >
+            <line x1="2" y1="4" x2="14" y2="4" />
+            <line x1="2" y1="8" x2="14" y2="8" />
+            <line x1="2" y1="12" x2="14" y2="12" />
           </svg>
         </button>
         <div className="flex items-center gap-2 text-[10px] font-medium tracking-tight">
@@ -61,22 +84,10 @@ function TopBar({ onSidebarToggle }: { onSidebarToggle: () => void }) {
   );
 }
 
-const BoxIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="2" y="2" width="12" height="12" rx="1" /><line x1="7" y1="2" x2="7" y2="14" />
-  </svg>
-);
-
-const LayoutIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="2" y="2" width="12" height="12" rx="1" /><line x1="9" y1="2" x2="9" y2="14" />
-  </svg>
-);
-
 export function Router() {
   return (
     <BrowserRouter>
-        <AppShell />
+      <AppShell />
     </BrowserRouter>
   );
 }
@@ -92,7 +103,14 @@ function AppShell() {
         <main className="flex-1 h-full overflow-hidden relative flex flex-col">
           <Suspense fallback={<Loader />}>
             <Routes>
-              <Route path="/" element={<div className="flex-1 overflow-hidden"><StandardEditor /></div>} />
+              <Route
+                path="/"
+                element={
+                  <div className="flex-1 overflow-hidden">
+                    <StandardEditor />
+                  </div>
+                }
+              />
               <Route path="/extensions/bold" element={<BoldDemo />} />
               <Route path="/extensions/italic" element={<ItalicDemo />} />
               <Route path="/extensions/underline" element={<UnderlineDemo />} />
