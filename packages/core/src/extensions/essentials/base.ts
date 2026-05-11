@@ -5,6 +5,7 @@ import { Selection, TextSelection, Plugin } from "prosemirror-state";
 import { Node } from "../../sdk/Node";
 import { Extension } from "../../sdk/Extension";
 import { Attributes } from "../../api";
+import { NodeRole } from "../../core/Governance";
 
 /**
  * Ensures there is always a trailing section with content at the end of the document.
@@ -51,10 +52,11 @@ export interface DocumentOptions {
 export function createDocument(): Node<DocumentOptions> {
   return Node.create<DocumentOptions>({
     name: "doc",
+    role: NodeRole.ROOT,
 
     addOptions() {
       return {
-        content: "block+",
+        content: "block*",
         attributes: {},
       };
     },
@@ -67,13 +69,8 @@ export function createDocument(): Node<DocumentOptions> {
       return ["main", { id: "ark-page-root", "data-ark-studio": "true" }, 0];
     },
 
-    addNodes() {
-      return {
-        doc: {
-          content: this.options.content,
-        },
-      };
-    },
+    // Use the native content property so SchemaBuilder picks it up correctly
+    content: "block*",
 
     addCommands: () => ({
       /**
@@ -175,6 +172,7 @@ export function createHardBreak(): Node {
     inline: true,
     group: "inline",
     selectable: false,
+    role: NodeRole.ATOM, // Explicitly set role to ATOM (1) to prevent it being a block (2)
 
     parseHTML() {
       return [{ tag: "br" }];

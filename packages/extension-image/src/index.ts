@@ -6,15 +6,26 @@ export const Image = Extension.create({
   addNodes() {
     return {
       image: {
-        inline: true,
+        inline: false,
         attrs: {
           src: {},
           alt: { default: null },
           title: { default: null },
         },
-        group: "inline",
+        group: "block widget",
         draggable: true,
         parseDOM: [
+          {
+            tag: "div.ark-image-block",
+            getAttrs: (dom: HTMLElement) => {
+              const img = dom.querySelector("img");
+              return {
+                src: img?.getAttribute("src"),
+                title: img?.getAttribute("title"),
+                alt: img?.getAttribute("alt"),
+              };
+            },
+          },
           {
             tag: "img[src]",
             getAttrs: (dom: HTMLElement) => ({
@@ -26,7 +37,7 @@ export const Image = Extension.create({
         ],
         toDOM(node: any) {
           const { src, alt, title } = node.attrs;
-          return ["img", { src, alt, title }];
+          return ["div", { class: "ark-image-block" }, ["img", { src, alt, title }]];
         },
       },
     };

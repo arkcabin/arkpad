@@ -7,7 +7,8 @@ export const ListItem = Extension.create({
   addNodes() {
     return {
       list_item: {
-        content: "paragraph block*",
+        content: "block+",
+        group: "block",
         marks: "_",
         defining: true,
         parseDOM: [{ tag: "li" }],

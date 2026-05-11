@@ -134,15 +134,33 @@ export class ExtensionManager {
     const allExtensions: ArkpadExtension[] = [];
     const seenNames = new Set<string>(this.extensions.map((ext) => ext.name));
 
-    const flattenExtensions = (exts: ArkpadExtension[]) => {
+    const flattenExtensions = (exts: any[]) => {
       for (const extension of exts) {
+        if (!extension) continue;
+
+        // CRITICAL: Recursively flatten arrays
+        if (Array.isArray(extension)) {
+          flattenExtensions(extension);
+          continue;
+        }
+
+        if (typeof extension.name !== "string") {
+          console.warn("⚠️ [Arkpad] Skipping invalid extension in manager:", extension);
+          continue;
+        }
+
         if (!seenNames.has(extension.name)) {
           allExtensions.push(extension);
           seenNames.add(extension.name);
         }
 
         if (extension.addExtensions) {
-          flattenExtensions(extension.addExtensions());
+          try {
+            const nested = extension.addExtensions();
+            if (Array.isArray(nested)) flattenExtensions(nested);
+          } catch (e) {
+            console.error(`[Arkpad] Failed to load nested extensions in manager:`, e);
+          }
         }
       }
     };

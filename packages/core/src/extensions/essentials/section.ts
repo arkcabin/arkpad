@@ -8,8 +8,8 @@ import { setBlockType } from "prosemirror-commands";
 export function createSection(): Node {
   return Node.create({
     name: "section",
-    group: "block",
-    content: "block+", // Must contain at least one block (e.g. a paragraph)
+    group: "block layout",
+    content: "block*", // Must contain at least one block (e.g. a paragraph)
     
     addAttributes() {
       return {

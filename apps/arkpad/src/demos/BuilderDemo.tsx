@@ -37,6 +37,12 @@ export function BuilderDemo() {
     autofocus: true,
   });
 
+  React.useEffect(() => {
+    if (editor) {
+      (window as any).editor = editor;
+    }
+  }, [editor]);
+
   return (
     <ArkpadStudio
       editor={editor}

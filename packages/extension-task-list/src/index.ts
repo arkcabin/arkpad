@@ -16,7 +16,8 @@ export const TaskItem = Extension.create({
   addNodes() {
     return {
       task_item: {
-        content: "paragraph block*",
+        content: "block+",
+        group: "block",
         defining: true,
         attrs: {
           checked: { default: false },

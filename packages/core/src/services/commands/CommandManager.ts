@@ -6,7 +6,7 @@ import {
   NodeSelection,
 } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
-import { Slice, Schema } from "prosemirror-model";
+import { Slice, Schema, Fragment } from "prosemirror-model";
 import {
   ChainedCommands,
   ArkpadCommand,
@@ -413,7 +413,9 @@ class CommandManagerInstance {
   public insertContent(content: ArkpadContent): ChainedCommands {
     if (!this.allSuccessful) return this as unknown as ChainedCommands;
     const parsedDoc = parseContent(content, this.schema);
-    const slice = new Slice(parsedDoc.content, 0, 0);
+    // If we get a doc node, extract its content; otherwise use the node itself
+    const contentToInsert = parsedDoc.type.name === 'doc' ? parsedDoc.content : Fragment.from(parsedDoc);
+    const slice = new Slice(contentToInsert, 0, 0);
     const localTr = this.virtualState.tr.replaceSelection(slice);
     this.merge(localTr);
     return this as unknown as ChainedCommands;

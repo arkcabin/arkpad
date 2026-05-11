@@ -3,7 +3,6 @@ import { Node } from "../../sdk/Node";
 export const ButtonNode = Node.create({
   name: "button",
   group: "block",
-  content: "inline*",
   atom: true,
 
   addAttributes() {
@@ -19,7 +18,7 @@ export const ButtonNode = Node.create({
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ["button", { ...HTMLAttributes, class: "ark-button" }, 0];
+    return ["button", { ...HTMLAttributes, class: "ark-button" }];
   },
 });
 
@@ -89,8 +88,8 @@ export const DividerNode = Node.create({
 
 export const ContainerNode = Node.create({
   name: "container",
-  group: "block",
-  content: "block*",
+  group: "block container",
+  content: "block+",
 
   addAttributes() {
     return {
@@ -153,7 +152,7 @@ export const VideoNode = Node.create({
 
 export const IconNode = Node.create({
   name: "icon",
-  group: "inline",
+  group: "block",
   atom: true,
 
   addAttributes() {
@@ -169,14 +168,13 @@ export const IconNode = Node.create({
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ["span", { ...HTMLAttributes, class: "ark-icon" }];
+    return ["div", { ...HTMLAttributes, class: "ark-icon" }];
   },
 });
 
 export const BadgeNode = Node.create({
   name: "badge",
-  group: "inline",
-  content: "text*",
+  group: "block",
   atom: true,
 
   addAttributes() {
@@ -190,7 +188,7 @@ export const BadgeNode = Node.create({
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ["span", { ...HTMLAttributes, class: "ark-badge" }, 0];
+    return ["div", { ...HTMLAttributes, class: "ark-badge" }];
   },
 });
 
@@ -241,7 +239,7 @@ export const TabsNode = Node.create({
 
 export const TabPanelNode = Node.create({
   name: "tabPanel",
-  group: "block",
+  group: "block tabPanel",
   content: "block+",
 
   addAttributes() {
@@ -281,7 +279,7 @@ export const AccordionNode = Node.create({
 
 export const AccordionItemNode = Node.create({
   name: "accordionItem",
-  group: "block",
+  group: "block accordionItem",
   content: "block+",
 
   addAttributes() {

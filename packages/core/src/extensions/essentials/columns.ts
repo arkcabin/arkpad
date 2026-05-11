@@ -6,7 +6,7 @@ import { Node } from "../../sdk/Node";
 export function createColumns(): Node {
   return Node.create({
     name: "columns",
-    group: "block",
+    group: "block layout",
     content: "column+",
     
     addAttributes() {
@@ -66,7 +66,9 @@ export function createColumns(): Node {
 export function createColumn(): Node {
   return Node.create({
     name: "column",
-    content: "block+",
+    content: "block*",
+    group: "block column",
+    defining: true,
     
     parseHTML() {
       return [{ tag: "div.ark-column" }];

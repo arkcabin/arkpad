@@ -158,6 +158,7 @@ export const Column = Node.create({
   name: "column",
 
   content: "block+",
+  group: "block",
   defining: true,
 
   addAttributes() {

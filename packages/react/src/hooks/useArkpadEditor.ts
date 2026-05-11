@@ -54,24 +54,46 @@ export function useArkpadEditor(options: UseArkpadEditorOptions = {}) {
     const timeout = setTimeout(() => {
       if (!isMounted.current) return;
 
-      const container = document.createElement("div");
-      container.className = "arkpad-editor-wrapper";
+      try {
+        const container = document.createElement("div");
+        container.className = "arkpad-editor-wrapper";
 
-      const instance = new ArkpadEditor({
-        ...options,
-        nodeViews,
-        element: container,
-        onUpdate: (payload) => {
-          options.onUpdate?.(payload);
-        },
-      });
+        const instance = new ArkpadEditor({
+          ...options,
+          nodeViews,
+          element: container,
+          onUpdate: (payload) => {
+            options.onUpdate?.(payload);
+          },
+        });
 
-      editorRef.current = instance;
-      setEditor(instance);
-      options.onCreate?.(instance);
+        editorRef.current = instance;
+        setEditor(instance);
+        options.onCreate?.(instance);
 
-      // We mark initial content as applied immediately on boot
-      initialContentApplied.current = true;
+        // We mark initial content as applied immediately on boot
+        initialContentApplied.current = true;
+      } catch (error: any) {
+        console.error("❌ CRITICAL: Arkpad Editor Failed to Initialize", error);
+        if (typeof window !== "undefined") {
+          (window as any).ARKPAD_INIT_ERROR = error.message;
+          (window as any).ARKPAD_INIT_STACK = error.stack;
+
+          // Only append if it's not already there
+          if (!document.getElementById("arkpad-init-error")) {
+            const errorDiv = document.createElement("div");
+            errorDiv.id = "arkpad-init-error";
+            errorDiv.style.cssText = "position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);color:#ff4d4d;padding:40px;z-index:10000;overflow:auto;font-family:monospace;line-height:1.5;";
+            errorDiv.innerHTML = `
+              <h1 style="color:#ff4d4d;margin-top:0">🚨 Arkpad Editor Initialization Crash</h1>
+              <p><strong>Error:</strong> ${error.message}</p>
+              <pre style="background:#111;padding:20px;border-radius:4px;color:#888;font-size:12px;">${error.stack}</pre>
+              <p style="color:#aaa;font-size:12px;margin-top:20px;">Check the console for a full schema dump if this was a SyntaxError.</p>
+            `;
+            document.body.appendChild(errorDiv);
+          }
+        }
+      }
     }, 0);
 
     return () => {

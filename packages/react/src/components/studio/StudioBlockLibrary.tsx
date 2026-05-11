@@ -14,6 +14,7 @@ const DEFAULT_BLOCKS = [
     icon: "M4 6h16M4 12h16M4 18h16",
     category: "Layout",
     attrs: { padding: "60px 0", backgroundColor: "transparent" },
+    content: [{ type: "paragraph", content: [{ type: "text", text: "Section content" }] }],
   },
   {
     id: "container",
@@ -83,7 +84,7 @@ const DEFAULT_BLOCKS = [
   {
     id: "codeBlock",
     name: "Code",
-    type: "codeBlock",
+    type: "code_block",
     icon: "M4 4l4 4-4 4M12 4l4 4-4 4",
     category: "Typography",
     content: [],

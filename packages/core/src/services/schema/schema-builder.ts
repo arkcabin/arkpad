@@ -36,13 +36,51 @@ export class SchemaBuilder {
     let nodes = arkpadSchema.spec.nodes as any;
     let marks = arkpadSchema.spec.marks as any;
 
+    const getKeys = (map: any) => {
+      const k: string[] = [];
+      if (map && typeof map.forEach === "function") {
+        // OrderedMap.forEach signature is (key, value)
+        // Map.forEach signature is (value, key)
+        // We detect OrderedMap via constructor name or by checking arguments if needed.
+        // In Arkpad, nodes/marks are always OrderedMaps from prosemirror-model.
+        map.forEach((key: any, value: any) => {
+          if (typeof key === "string") {
+            k.push(key);
+          } else if (typeof value === "string") {
+            // Fallback for native Map if it somehow leaked in
+            k.push(value);
+          }
+        });
+      } else if (map && typeof map === "object") {
+        return Object.keys(map);
+      }
+      return k;
+    };
+
+    console.log("🏁 [Arkpad] Build started. Initial nodes:", getKeys(nodes));
+    console.log("🏁 [Arkpad] Build started. Initial marks:", getKeys(marks));
+
     // Phase 1: Collect Base Nodes & Marks
     allExtensions.forEach((ext) => {
       // 1. Check for specialized Node/Mark classes
       if (ext instanceof Node) {
-        const name = ext.name;
+        const name = String(ext.name);
+        
+        // SECURITY GATE: Prevent invalid node names from crashing the schema
+        if (!ext.name || typeof ext.name !== "string" || name === "[object Object]" || !/^[a-zA-Z0-9_-]+$/.test(name)) {
+          console.error(`🚨 [Arkpad] CRITICAL: Extension attempted to register invalid node name: "${name}"`, {
+            extension: ext,
+            nameField: ext.name,
+            stack: new Error().stack
+          });
+          return;
+        }
+
+        // CRITICAL: Skip reserved nodes that are already in the base schema
+        if (name === "text") return;
+
         const config = (ext as any).config;
-        const spec: any = {
+        const spec = this.processNodeSpec(name, {
           content: config.content,
           marks: config.marks,
           group: config.group,
@@ -61,20 +99,7 @@ export class SchemaBuilder {
           isWidget: config.isWidget,
           role: config.role,
           allowedRoles: config.allowedRoles,
-        };
-
-        // Bridge: Map Bitmask Role to Native ProseMirror Groups
-        if (spec.role) {
-          const roles: string[] = [];
-          if (spec.role & 2) roles.push("block"); // NodeRole.CONTENT
-          if (spec.role & 8) roles.push("layout"); // NodeRole.LAYOUT
-          if (spec.role & 4) roles.push("widget"); // NodeRole.WIDGET
-
-          if (roles.length > 0) {
-            const existingGroups = spec.group ? spec.group.split(" ") : [];
-            spec.group = Array.from(new Set([...existingGroups, ...roles])).join(" ");
-          }
-        }
+        });
 
         if ((ext as any).config.renderHTML) {
           spec.toDOM = (node: any) =>
@@ -106,7 +131,23 @@ export class SchemaBuilder {
 
         nodes = nodes.get(name) ? nodes.update(name, spec) : nodes.addToEnd(name, spec);
       } else if (ext instanceof Mark) {
-        const name = ext.name;
+        const name = String(ext.name);
+
+        if (!ext.name || typeof ext.name !== "string" || name === "[object Object]" || !/^[a-zA-Z0-9_-]+$/.test(name)) {
+          console.error(`🚨 [Arkpad] CRITICAL: Extension attempted to register invalid mark name: "${name}"`, {
+            extension: ext,
+            nameField: ext.name,
+            stack: new Error().stack
+          });
+          return;
+        }
+
+        // COLLISION PREVENTION: Check if this mark name is already used as a node
+        if (nodes.get(name)) {
+          console.error(`🚨 [Arkpad] Collision: "${name}" is already defined as a node. Skipping mark registration.`);
+          return;
+        }
+
         const config = (ext as any).config;
         const spec: any = {
           inclusive: config.inclusive,
@@ -151,37 +192,62 @@ export class SchemaBuilder {
       // 2. Legacy addNodes/addMarks support
       if (ext.addNodes) {
         const extNodes = ext.addNodes();
-        Object.entries(extNodes).forEach(([name, spec]) => {
-          if (marks.get(name)) {
-            throw new Error(
-              `Collision: "${name}" is already defined as a mark. Cannot add as node.`
-            );
-          }
-          nodes = nodes.get(name) ? nodes.update(name, spec) : nodes.addToEnd(name, spec);
-        });
+        if (extNodes && typeof extNodes === "object" && !Array.isArray(extNodes)) {
+          Object.entries(extNodes).forEach(([rawName, spec]) => {
+            const name = String(rawName);
+            // SECURITY GATE: Prevent invalid node names from crashing the schema
+            if (!rawName || typeof rawName !== "string" || name === "[object Object]" || !/^[a-zA-Z0-9_-]+$/.test(name)) {
+              console.error(`🚨 [Arkpad] CRITICAL: Extension attempted to register invalid legacy node name: "${name}"`, {
+                extension: ext,
+                rawName: rawName,
+                stack: new Error().stack
+              });
+              return;
+            }
+
+            // COLLISION PREVENTION: Check if this node name is already used as a mark
+            if (marks.get(name)) {
+              console.error(`🚨 [Arkpad] Collision: "${name}" is already defined as a mark. Skipping legacy node registration.`);
+              return;
+            }
+
+            const processedSpec = this.processNodeSpec(name, spec);
+            nodes = nodes.get(name) ? nodes.update(name, processedSpec) : nodes.addToEnd(name, processedSpec);
+          });
+        }
       }
 
       if (ext.addMarks) {
         const extMarks = ext.addMarks();
-        Object.entries(extMarks).forEach(([name, spec]) => {
-          if (nodes.get(name)) {
-            throw new Error(
-              `Collision: "${name}" is already defined as a node. Cannot add as mark.`
-            );
-          }
-          marks = marks.get(name) ? marks.update(name, spec) : marks.addToEnd(name, spec);
-        });
+        if (extMarks && typeof extMarks === "object" && !Array.isArray(extMarks)) {
+          Object.entries(extMarks).forEach(([rawName, spec]) => {
+            const name = String(rawName);
+            // SECURITY GATE: Prevent invalid mark names from crashing the schema
+            if (!rawName || typeof rawName !== "string" || name === "[object Object]" || !/^[a-zA-Z0-9_-]+$/.test(name)) {
+              console.error(`🚨 [Arkpad] CRITICAL: Extension attempted to register invalid legacy mark name: "${name}"`, {
+                extension: ext,
+                rawName: rawName,
+                stack: new Error().stack
+              });
+              return;
+            }
+
+            // COLLISION PREVENTION: Check if this mark name is already used as a node
+            if (nodes.get(name)) {
+              console.error(`🚨 [Arkpad] Collision: "${name}" is already defined as a node. Skipping legacy mark registration.`);
+              return;
+            }
+
+            marks = marks.get(name) ? marks.update(name, spec) : marks.addToEnd(name, spec);
+          });
+        }
       }
     });
 
     // Phase 2: Schema Extensions (Decorators)
     allExtensions.forEach((ext) => {
       if (ext.extendNodeSchema) {
-        nodes.forEach((a: any, b: any) => {
-          // Identify which argument is the name (string) and which is the spec (object)
-          const name = typeof a === "string" ? a : b;
-          const spec = typeof a === "object" ? a : b;
-
+        nodes.forEach((name: string, spec: any) => {
           const newSpec = ext.extendNodeSchema!(spec, name);
           if (newSpec) {
             nodes = nodes.update(name, newSpec);
@@ -189,10 +255,7 @@ export class SchemaBuilder {
         });
       }
       if (ext.extendMarkSchema) {
-        marks.forEach((a: any, b: any) => {
-          const name = typeof a === "string" ? a : b;
-          const spec = typeof a === "object" ? a : b;
-
+        marks.forEach((name: string, spec: any) => {
           const newSpec = ext.extendMarkSchema!(spec, name);
           if (newSpec) {
             marks = marks.update(name, newSpec);
@@ -203,16 +266,122 @@ export class SchemaBuilder {
 
     // Phase 3: Global Attributes (The Tiptap "Power-Up")
     const globalAttributes = this.collectGlobalAttributes(allExtensions);
+    
     nodes = this.enhanceSchemaElements(nodes, globalAttributes, "node");
     marks = this.enhanceSchemaElements(marks, globalAttributes, "mark");
 
-    const schema = new Schema({ nodes, marks });
+    // --- FINAL SANITY CHECK ---
+    const debugInfo: any[] = [];
+    nodes.forEach((name: string, spec: any) => {
+      debugInfo.push({
+        name,
+        inline: !!spec.inline,
+        group: spec.group,
+        content: spec.content
+      });
+    });
 
-    // Cache management
-    if (SchemaBuilder.schemaCache.size > 50) SchemaBuilder.schemaCache.clear();
-    SchemaBuilder.schemaCache.set(cacheKey, schema);
+    if (typeof window !== "undefined") {
+      (window as any).__ARKPAD_SCHEMA_DEBUG__ = debugInfo;
+      console.log("🛠️ Arkpad Schema Build Plan:", debugInfo);
+    }
 
-    return schema;
+    // --- FINAL SANITIZATION: Ensure no invalid keys exist ---
+    const sanitizeMap = (map: any, label: string) => {
+      let result = map;
+      const keys = getKeys(map);
+      keys.forEach((key: string) => {
+        if (key === "[object Object]" || key === "undefined" || key === "null" || !/^[a-zA-Z0-9_-]+$/.test(key)) {
+          console.error(`☢️ [Arkpad] SANITIZER: Purging invalid ${label} key: "${key}"`);
+          if (typeof result.remove === "function") {
+            result = result.remove(key);
+          } else if (typeof result === "object") {
+            delete result[key];
+          }
+        }
+      });
+      return result;
+    };
+
+    nodes = sanitizeMap(nodes, "node");
+    marks = sanitizeMap(marks, "mark");
+
+    // --- NUCLEAR PURGE: Force-remove [object Object] if it somehow leaked through ---
+    if (nodes.get("[object Object]")) {
+      console.error("☢️ NUCLEAR PURGE: Removing '[object Object]' from nodes!");
+      nodes = nodes.remove("[object Object]");
+    }
+    if (marks.get("[object Object]")) {
+      console.error("☢️ NUCLEAR PURGE: Removing '[object Object]' from marks!");
+      marks = marks.remove("[object Object]");
+    }
+
+    try {
+      const schema = new Schema({ nodes, marks });
+      SchemaBuilder.schemaCache.set(cacheKey, schema);
+      return schema;
+    } catch (error: any) {
+      console.error("❌ PROSEMIRROR SCHEMA BUILD FAILED");
+      console.error("Error:", error.message);
+      
+      if (typeof window !== "undefined") {
+        (window as any).ARKPAD_EDITOR_ERROR = error.message;
+        
+        const errorDiv = document.createElement("div");
+        errorDiv.id = "arkpad-critical-error";
+        errorDiv.style.cssText = "position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);color:#ff4d4d;padding:40px;z-index:9999;overflow:auto;font-family:monospace;line-height:1.5;font-size:14px;";
+        
+        let nodesList = "";
+        nodes.forEach((name: string, spec: any) => {
+          nodesList += `- [${spec.inline ? "INLINE" : "BLOCK"}] ${name} (group: ${spec.group || "none"}) (content: ${spec.content || "none"})\n`;
+        });
+
+        errorDiv.innerHTML = `
+          <h1 style="color:#ff4d4d;margin-top:0">🚨 Arkpad Schema Initialization Failed</h1>
+          <p><strong>Error:</strong> ${error.message}</p>
+          <hr style="border-color:#333">
+          <pre>${nodesList}</pre>
+        `;
+        document.body.appendChild(errorDiv);
+      }
+
+      console.error("--- Node Configuration Dump ---");
+      nodes.forEach((name: string, spec: any) => {
+        const isInline = !!spec.inline;
+        const groups = spec.group || "none";
+        console.error(`- [${isInline ? "INLINE" : "BLOCK"}] ${name} (group: ${groups}) (content: ${spec.content || "none"})`);
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Processes a node specification to ensure it follows Arkpad's structural governance.
+   * This includes forcing block-level nodes to be non-inline and promoting groups.
+   */
+  private processNodeSpec(name: string, spec: any): any {
+    const processedSpec = { ...spec };
+
+    // Resolve Effective Role
+    const effectiveRole = processedSpec.role || (processedSpec.isLayout ? 8 : (processedSpec.isWidget ? 4 : 0));
+    
+    // Detect Block Status
+    const groupList = processedSpec.group ? processedSpec.group.split(" ") : [];
+    const hasBlockGroup = groupList.includes("block") || groupList.includes("layout") || groupList.includes("widget");
+    const isBlockLevel = (effectiveRole & (2 | 4 | 8 | 16 | 32)) !== 0 || hasBlockGroup;
+
+    if (isBlockLevel) {
+      // PRO-TIP: ProseMirror crashes if a block-level node is marked as inline.
+      processedSpec.inline = false;
+      
+      const roles: string[] = ["block"];
+      if (effectiveRole & 8 || processedSpec.isLayout) roles.push("layout"); 
+      if (effectiveRole & 4 || processedSpec.isWidget) roles.push("widget"); 
+
+      processedSpec.group = Array.from(new Set([...groupList, ...roles])).join(" ");
+    }
+
+    return processedSpec;
   }
 
   private collectGlobalAttributes(allExtensions: ArkpadExtension[]) {
@@ -241,12 +410,15 @@ export class SchemaBuilder {
     // 2. Apply all attributes in a single pass per node type
     Object.entries(attributesByTypeName).forEach(([typeName, allAttrs]) => {
       const spec = enhancedElements.get(typeName);
-      if (!spec) return;
-
+      if (!spec || typeName === "text") return; // Do not modify the base text node!
+      
+      // Let's copy it carefully
+      const newSpec = { ...spec };
+      
       const renderMethod = "toDOM";
 
       enhancedElements = enhancedElements.update(typeName, {
-        ...spec,
+        ...newSpec,
         attrs: {
           ...spec.attrs,
           ...Object.assign(
@@ -304,14 +476,28 @@ export class SchemaBuilder {
     return enhancedElements;
   }
 
-  private flattenExtensions(extensions: ArkpadExtension[]): ArkpadExtension[] {
+  private flattenExtensions(extensions: any[]): ArkpadExtension[] {
     const flattened: ArkpadExtension[] = [];
-    const seen = new Set<ArkpadExtension>();
+    const seen = new Set<any>();
 
-    const traverse = (exts: ArkpadExtension[]) => {
+    const traverse = (exts: any[]) => {
       exts.forEach((ext) => {
-        if (!ext || typeof ext !== "object" || seen.has(ext)) return;
+        if (!ext) return;
+
+        // CRITICAL: Recursively flatten arrays
+        if (Array.isArray(ext)) {
+          traverse(ext);
+          return;
+        }
+
+        if (typeof ext !== "object" || seen.has(ext)) return;
         seen.add(ext);
+
+        // Security: Skip objects that aren't actually extensions
+        if (typeof ext.name !== "string" && !ext.addNodes && !ext.addMarks && !ext.addExtensions) {
+          console.warn("⚠️ [Arkpad] Skipping invalid extension object (no name or addNodes/Marks):", ext);
+          return;
+        }
 
         if (ext.addExtensions) {
           try {
