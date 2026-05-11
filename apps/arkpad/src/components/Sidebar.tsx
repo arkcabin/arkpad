@@ -32,7 +32,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
         { name: "Table", path: "/extensions/table" },
         { name: "Heading", path: "/extensions/heading" },
         { name: "Blockquote", path: "/extensions/blockquote" },
-        { name: "CodeBlock 🚧", path: "#" },
+        { name: "CodeBlock", path: "/extensions/codeblock" },
         { name: "Image 🚧", path: "#" },
       ],
     },
