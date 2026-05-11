@@ -45,6 +45,19 @@ export const DragDrop = Extension.create({
 
       event.preventDefault();
 
+      let targetPos = pos.pos;
+      const data = studioBlockData ? JSON.parse(studioBlockData) : null;
+
+      // SURGICAL FIX: If dropping a Section, force it to the root level (depth 0)
+      // This prevents sections from nesting into paragraphs or other sections
+      if (data?.type === "section") {
+        const $pos = state.doc.resolve(targetPos);
+        // If we are inside any node, move to the after position of the top-most node
+        if ($pos.depth > 0) {
+          targetPos = $pos.after(1);
+        }
+      }
+
       // Clean up visual state
       const canvas = view.dom.closest(".arkpad-builder-canvas") || view.dom.closest("[data-arkpad-content]");
       canvas?.classList.remove("drag-active");
@@ -103,12 +116,14 @@ export const DragDrop = Extension.create({
       if (studioBlockData) {
         try {
           const data = JSON.parse(studioBlockData);
-          // Handle direct insertion from Studio Library
-          chain = chain.insertContent({
-            type: data.type,
-            attrs: data.attrs || {},
-            content: data.content || undefined,
-          });
+          // Handle direct insertion at snapped position
+          return (view.editor.chain() as any)
+            .insertContentAt(targetPos, {
+              type: data.type,
+              attrs: data.attrs || {},
+              content: data.content || undefined,
+            })
+            .run();
         } catch (e) {
           console.error("Failed to parse studio block data", e);
           return false;
@@ -236,8 +251,18 @@ export const DragDrop = Extension.create({
 
               const pos = view.posAtCoords({ left: event.clientX, top: event.clientY });
               if (pos) {
+                let indicatorPos = pos.pos;
+                
+                // If we're dragging something that should be at root, snap the indicator
+                if (isStudioBlock || isLegacyBlock) {
+                  const $pos = view.state.doc.resolve(indicatorPos);
+                  if ($pos.depth > 0) {
+                    indicatorPos = $pos.after(1);
+                  }
+                }
+                
                 // Update decoration position
-                view.dispatch(view.state.tr.setMeta("dragPosUpdate", { pos: pos.pos }));
+                view.dispatch(view.state.tr.setMeta("dragPosUpdate", { pos: indicatorPos }));
               }
 
               event.preventDefault();
