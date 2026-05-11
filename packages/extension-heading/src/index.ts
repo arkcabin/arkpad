@@ -1,4 +1,4 @@
-import { Node, ArkpadCommandProps, PMNode, } from "@arkpad/core";
+import { Node, ArkpadCommandProps, PMNode, setBlockType } from "@arkpad/core";
 
 declare module "@arkpad/core" {
   interface ArkpadCommands {
@@ -27,11 +27,22 @@ export const Heading = Node.create<HeadingOptions>({
   defining: true,
   trailingNode: true,
 
+  activeMapping: {
+    h1: "heading",
+    h2: "heading",
+    h3: "heading",
+    h4: "heading",
+    h5: "heading",
+    h6: "heading",
+  },
+
   addAttributes() {
     return {
       level: {
         default: 1,
         rendered: false,
+        // Ensure the attribute value is strictly checked as a number for active state matching
+        keepOnSplit: true,
       },
     };
   },
@@ -54,14 +65,32 @@ export const Heading = Node.create<HeadingOptions>({
     return {
       setHeading:
         (attrs: { level: number }) =>
-          ({ chain }: ArkpadCommandProps) => {
-            return chain().toggleBlock("heading", attrs);
-          },
+        ({ state, dispatch }: ArkpadCommandProps) => {
+          const { schema } = state;
+          const type = schema.nodes.heading;
+          if (!type) return false;
+
+          const level = typeof attrs.level === "string" ? parseInt(attrs.level, 10) : attrs.level;
+
+          return setBlockType(type, { level })(state, dispatch);
+        },
       toggleHeading:
         (attrs: { level: number }) =>
-          ({ chain }: ArkpadCommandProps) => {
-            return chain().toggleBlock("heading", attrs);
-          },
+        ({ state, dispatch, editor }: ArkpadCommandProps) => {
+          const { schema, selection } = state;
+          const type = schema.nodes.heading;
+          if (!type) return false;
+
+          const level = typeof attrs.level === "string" ? parseInt(attrs.level, 10) : attrs.level;
+
+          const isActive = editor.isActive("heading", { level });
+
+          if (isActive) {
+            return setBlockType(schema.nodes.paragraph!)(state, dispatch);
+          }
+
+          return setBlockType(type, { level })(state, dispatch);
+        },
     };
   },
 

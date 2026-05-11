@@ -11,9 +11,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
   const sections = [
     {
       title: "PLATFORM",
-      items: [
-        { name: "Standard Editor", path: "/" },
-      ],
+      items: [{ name: "Standard Editor", path: "/" }],
     },
     {
       title: "MARKS",
@@ -32,7 +30,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
       title: "NODES",
       items: [
         { name: "Table", path: "/extensions/table" },
-        { name: "Heading 🚧", path: "#" },
+        { name: "Heading", path: "/extensions/heading" },
         { name: "Blockquote 🚧", path: "#" },
         { name: "CodeBlock 🚧", path: "#" },
         { name: "Image 🚧", path: "#" },

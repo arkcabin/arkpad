@@ -139,7 +139,7 @@ export class ArkpadEditor implements IArkpadEditor {
     // This will be our editor container
     this.element = document.createElement(resolved.contentTag);
     this.element.classList.add("arkpad-editor");
-    this.element.classList.add("arkpad-content"); 
+    this.element.classList.add("arkpad-content");
 
     this.view = new EditorView(this.element, {
       state,
@@ -296,19 +296,42 @@ export class ArkpadEditor implements IArkpadEditor {
 
   public isActive(name: string, attrs: Record<string, any> = {}): boolean {
     const { state } = this.view;
-    if (name === "textAlign") return state.selection.$from.parent.attrs.align === attrs.align;
+
+    // Special case for textAlign
+    if (name === "textAlign") {
+      const align = attrs.align || "left";
+      return state.selection.$from.parent.attrs.align === align;
+    }
+
+    // Resolve target name from mapping or use the provided name
     const targetName = this.extensionManager.activeMappings[name] || name;
+
+    // 1. Check if it's a Mark
     const markType = state.schema.marks[targetName];
-    if (markType) return isMarkActive(state, markType);
+    if (markType) {
+      return isMarkActive(state, markType);
+    }
+
+    // 2. Check if it's a Node
     const nodeType = state.schema.nodes[targetName];
-    if (nodeType) return isNodeActive(state, nodeType, attrs);
+    if (nodeType) {
+      // Use standard utility for direct active check
+      if (isNodeActive(state, nodeType, attrs)) {
+        return true;
+      }
+    }
+
+    // 3. Fallback: Deep Hierarchy check for attributes
+    // Sometimes isNodeActive might miss deeply nested or specific attribute combinations
     const { $from } = state.selection;
     for (let depth = $from.depth; depth >= 0; depth--) {
       const node = $from.node(depth);
-      if (node.type.name === targetName) {
-        if (Object.entries(attrs).every(([k, v]) => node.attrs[k] === v)) return true;
+      if (node.type.name === targetName || node.type === nodeType) {
+        const matchesAttrs = Object.entries(attrs).every(([k, v]) => node.attrs[k] === v);
+        if (matchesAttrs) return true;
       }
     }
+
     return false;
   }
 

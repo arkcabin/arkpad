@@ -30,21 +30,91 @@ import {
   Code2,
 } from "lucide-react";
 
+// Custom SVG Icons for H4, H5, H6 to match Lucide style
+const Heading4 = ({ className }: { className?: string }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M4 12h8" />
+    <path d="M4 18V6" />
+    <path d="M12 18V6" />
+    <path d="M17 10l3 5v2h-3" />
+    <path d="M21 15h-4" />
+  </svg>
+);
+
+const Heading5 = ({ className }: { className?: string }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M4 12h8" />
+    <path d="M4 18V6" />
+    <path d="M12 18V6" />
+    <path d="M17 13v-3h4" />
+    <path d="M17 17a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2h-3" />
+  </svg>
+);
+
+const Heading6 = ({ className }: { className?: string }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M4 12h8" />
+    <path d="M4 18V6" />
+    <path d="M12 18V6" />
+    <circle cx="19" cy="16" r="3" />
+    <path d="M22 13a3 3 0 0 0-3-3 3 3 0 0 0-3 3" />
+  </svg>
+);
+
 function ToolbarButton({
   command,
+  args,
   name,
+  attrs,
   children,
   title,
 }: {
   command: string;
+  args?: any[];
   name?: string;
+  attrs?: Record<string, any>;
   children: React.ReactNode;
   title?: string;
 }) {
   return (
     <EditorButton
       command={command}
+      args={args}
       name={name}
+      attrs={attrs}
       title={title}
       className="p-2 rounded-md hover:bg-gray-100 text-gray-600 transition-colors flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed [&.active]:bg-blue-50 [&.active]:text-blue-600"
       activeClassName="active"
@@ -65,7 +135,7 @@ export function StandardEditor() {
       <h1>Clean Rich Text Editor</h1>
       <p>This project has been pruned of all "Page Builder" architecture. You are now working with a high-performance, standard document editor.</p>
       <ul>
-        <li>Standard Paragraphs & Headings</li>
+        <li>Standard Paragraphs & Headings (H1-H6)</li>
         <li>Tables & Lists</li>
         <li>Markdown Support</li>
         <li>Pruned "Studio" logic</li>
@@ -82,7 +152,7 @@ export function StandardEditor() {
       <div className="flex-1 flex flex-col min-h-screen bg-gray-50/50">
         {/* Full Toolbar */}
         <div className="sticky top-0 z-10 w-full bg-white border-b border-gray-200 shadow-sm">
-          <div className="max-w-4xl mx-auto px-4 h-14 flex items-center gap-0.5 overflow-x-auto no-scrollbar">
+          <div className="max-w-5xl mx-auto px-4 h-14 flex items-center gap-0.5 overflow-x-auto no-scrollbar">
             {/* History */}
             <ToolbarButton command="undo" title="Undo">
               <Undo className="w-4 h-4" />
@@ -94,26 +164,71 @@ export function StandardEditor() {
             <Divider />
 
             {/* Headings */}
-            <ToolbarButton command="toggleHeading" name="h1" title="Heading 1">
+            <ToolbarButton
+              command="toggleHeading"
+              args={[{ level: 1 }]}
+              name="h1"
+              attrs={{ level: 1 }}
+              title="Heading 1"
+            >
               <Heading1 className="w-4 h-4" />
             </ToolbarButton>
-            <ToolbarButton command="toggleHeading" name="h2" title="Heading 2">
+            <ToolbarButton
+              command="toggleHeading"
+              args={[{ level: 2 }]}
+              name="h2"
+              attrs={{ level: 2 }}
+              title="Heading 2"
+            >
               <Heading2 className="w-4 h-4" />
             </ToolbarButton>
-            <ToolbarButton command="toggleHeading" name="h3" title="Heading 3">
+            <ToolbarButton
+              command="toggleHeading"
+              args={[{ level: 3 }]}
+              name="h3"
+              attrs={{ level: 3 }}
+              title="Heading 3"
+            >
               <Heading3 className="w-4 h-4" />
             </ToolbarButton>
-            <ToolbarButton command="setParagraph" title="Paragraph">
+            <ToolbarButton
+              command="toggleHeading"
+              args={[{ level: 4 }]}
+              name="h4"
+              attrs={{ level: 4 }}
+              title="Heading 4"
+            >
+              <Heading4 className="w-4 h-4" />
+            </ToolbarButton>
+            <ToolbarButton
+              command="toggleHeading"
+              args={[{ level: 5 }]}
+              name="h5"
+              attrs={{ level: 5 }}
+              title="Heading 5"
+            >
+              <Heading5 className="w-4 h-4" />
+            </ToolbarButton>
+            <ToolbarButton
+              command="toggleHeading"
+              args={[{ level: 6 }]}
+              name="h6"
+              attrs={{ level: 6 }}
+              title="Heading 6"
+            >
+              <Heading6 className="w-4 h-4" />
+            </ToolbarButton>
+            <ToolbarButton command="setParagraph" name="paragraph" title="Paragraph">
               <Type className="w-4 h-4" />
             </ToolbarButton>
 
             <Divider />
 
             {/* Marks */}
-            <ToolbarButton command="toggleBold" name="strong" title="Bold">
+            <ToolbarButton command="toggleBold" name="bold" title="Bold">
               <Bold className="w-4 h-4" />
             </ToolbarButton>
-            <ToolbarButton command="toggleItalic" name="em" title="Italic">
+            <ToolbarButton command="toggleItalic" name="italic" title="Italic">
               <Italic className="w-4 h-4" />
             </ToolbarButton>
             <ToolbarButton command="toggleUnderline" name="underline" title="Underline">
@@ -129,13 +244,31 @@ export function StandardEditor() {
             <Divider />
 
             {/* Alignment */}
-            <ToolbarButton command="setTextAlign" name="left" title="Align Left">
+            <ToolbarButton
+              command="setTextAlign"
+              args={["left"]}
+              name="textAlign"
+              attrs={{ align: "left" }}
+              title="Align Left"
+            >
               <AlignLeft className="w-4 h-4" />
             </ToolbarButton>
-            <ToolbarButton command="setTextAlign" name="center" title="Align Center">
+            <ToolbarButton
+              command="setTextAlign"
+              args={["center"]}
+              name="textAlign"
+              attrs={{ align: "center" }}
+              title="Align Center"
+            >
               <AlignCenter className="w-4 h-4" />
             </ToolbarButton>
-            <ToolbarButton command="setTextAlign" name="right" title="Align Right">
+            <ToolbarButton
+              command="setTextAlign"
+              args={["right"]}
+              name="textAlign"
+              attrs={{ align: "right" }}
+              title="Align Right"
+            >
               <AlignRight className="w-4 h-4" />
             </ToolbarButton>
 
@@ -154,7 +287,7 @@ export function StandardEditor() {
             <ToolbarButton command="toggleBlockquote" name="blockquote" title="Blockquote">
               <Quote className="w-4 h-4" />
             </ToolbarButton>
-            <ToolbarButton command="toggleCodeBlock" name="code_block" title="Code Block">
+            <ToolbarButton command="toggleCodeBlock" name="codeBlock" title="Code Block">
               <Code2 className="w-4 h-4" />
             </ToolbarButton>
 
@@ -167,7 +300,7 @@ export function StandardEditor() {
             <ToolbarButton command="toggleSubscript" name="subscript" title="Subscript">
               <Subscript className="w-4 h-4" />
             </ToolbarButton>
-            <ToolbarButton command="setHighlighter" title="Highlight">
+            <ToolbarButton command="setHighlighter" name="highlighter" title="Highlight">
               <Highlighter className="w-4 h-4" />
             </ToolbarButton>
             <ToolbarButton command="setEraser" title="Eraser">
@@ -180,10 +313,14 @@ export function StandardEditor() {
             <ToolbarButton command="toggleLink" name="link" title="Link">
               <Link className="w-4 h-4" />
             </ToolbarButton>
-            <ToolbarButton command="insertHorizontalRule" title="Horizontal Rule">
+            <ToolbarButton
+              command="insertHorizontalRule"
+              name="horizontalRule"
+              title="Horizontal Rule"
+            >
               <Minus className="w-4 h-4" />
             </ToolbarButton>
-            <ToolbarButton command="insertTable" title="Insert Table">
+            <ToolbarButton command="insertTable" name="table" title="Insert Table">
               <TableIcon className="w-4 h-4" />
             </ToolbarButton>
           </div>
