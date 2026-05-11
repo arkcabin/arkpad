@@ -1,4 +1,4 @@
-import { Extension, ArkpadCommandProps } from "@arkpad/core";
+import { Node, ArkpadCommandProps, PMNode } from "@arkpad/core";
 import ListItem from "@arkpad/extension-list-item";
 
 declare module "@arkpad/core" {
@@ -7,29 +7,33 @@ declare module "@arkpad/core" {
   }
 }
 
-export const BulletList = Extension.create({
+export interface BulletListOptions {
+  HTMLAttributes: Record<string, any>;
+}
+
+export const BulletList = Node.create<BulletListOptions>({
   name: "bulletList",
 
-  activeMapping: {
-    toggleBulletList: "bulletList",
+  addOptions() {
+    return {
+      HTMLAttributes: {},
+    };
   },
 
   addExtensions() {
     return [ListItem];
   },
 
-  addNodes() {
-    return {
-      bullet_list: {
-        content: "list_item+",
-        group: "block",
-        trailingNode: true,
-        parseDOM: [{ tag: "ul" }],
-        toDOM() {
-          return ["ul", 0];
-        },
-      },
-    };
+  group: "block",
+  content: "listItem+",
+  trailingNode: true,
+
+  parseHTML() {
+    return [{ tag: "ul" }];
+  },
+
+  renderHTML({ HTMLAttributes }: { node: PMNode; HTMLAttributes: Record<string, any> }) {
+    return ["ul", { ...this.options.HTMLAttributes, ...HTMLAttributes }, 0];
   },
 
   addCommands() {
@@ -37,7 +41,7 @@ export const BulletList = Extension.create({
       toggleBulletList:
         () =>
         ({ chain }: ArkpadCommandProps) => {
-          return chain().toggleList("bullet_list", "list_item").run();
+          return chain().toggleList("bulletList", "listItem").run();
         },
     };
   },
@@ -46,6 +50,17 @@ export const BulletList = Extension.create({
     return {
       "Mod-Shift-8": () => this.editor!.runCommand("toggleBulletList"),
     };
+  },
+
+  addInputRules() {
+    return [
+      {
+        find: /^\s*([-+*])\s$/,
+        handler: ({ chain }: any) => {
+          chain().toggleBulletList().run();
+        },
+      },
+    ];
   },
 });
 

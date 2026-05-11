@@ -69,6 +69,11 @@
   color: var(--text-main) !important;
 }
 
+/* Ensure block elements clear floats (for images) */
+.prose > * {
+  clear: both;
+}
+
 .prose h1,
 .prose h2,
 .prose h3,

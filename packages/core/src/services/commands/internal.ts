@@ -1,4 +1,4 @@
-import { wrapInList } from "prosemirror-schema-list";
+import { wrapInList, liftListItem } from "prosemirror-schema-list";
 import {
   toggleMark as pmToggleMark,
   setBlockType,
@@ -91,11 +91,22 @@ export const updateAttributes =
     return true;
   };
 
-export const toggleList = (listType: string | NodeType) => (props: any) => {
-  const lType = typeof listType === "string" ? props.state.schema.nodes[listType] : listType;
-  if (!lType) return false;
-  return wrapInList(lType)(props.state, props.dispatch);
-};
+export const toggleList =
+  (type: string | NodeType, itemType: string | NodeType) => (props: any) => {
+    const { state, dispatch, editor } = props;
+    const listType = typeof type === "string" ? state.schema.nodes[type] : type;
+    const listItemType = typeof itemType === "string" ? state.schema.nodes[itemType] : itemType;
+
+    if (!listType || !listItemType) return false;
+
+    const isActive = editor.isActive(typeof type === "string" ? type : listType.name);
+
+    if (isActive) {
+      return liftListItem(listItemType)(state, dispatch);
+    }
+
+    return wrapInList(listType)(state, dispatch);
+  };
 
 export const setNode = (type: string | NodeType, attrs?: Record<string, any>) => (props: any) => {
   const nodeType = typeof type === "string" ? props.state.schema.nodes[type] : type;

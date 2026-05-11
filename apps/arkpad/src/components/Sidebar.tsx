@@ -25,10 +25,9 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
     {
       title: "RICH CONTENT",
       items: [
+        { name: "List", path: "/extensions/list" },
         { name: "Table", path: "/extensions/table" },
-        { name: "Image 🚧", path: "#" },
-        { name: "Bullet List 🚧", path: "#" },
-        { name: "Ordered List 🚧", path: "#" },
+        { name: "Image", path: "/extensions/image" },
         { name: "Task List 🚧", path: "#" },
       ],
     },

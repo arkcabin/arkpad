@@ -52,6 +52,7 @@ export interface ChainedCommands {
   setMark(typeOrName: string, attributes?: Record<string, any>): ChainedCommands;
   unsetMark(typeOrName: string): ChainedCommands;
   setNodeMarkup(typeOrName: string, attributes?: Record<string, any>): ChainedCommands;
+  toggleList(listTypeOrName: string, itemTypeOrName: string): ChainedCommands;
   deleteRange(from: number, to: number): ChainedCommands;
   command(fn: (props: ArkpadCommandProps) => boolean, label?: string): ChainedCommands;
   run(): boolean;

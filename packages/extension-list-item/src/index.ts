@@ -1,54 +1,68 @@
-import { Extension } from "@arkpad/core";
+import { Node, ArkpadCommandProps, PMNode } from "@arkpad/core";
 import { sinkListItem, liftListItem, splitListItem } from "prosemirror-schema-list";
 
-export const ListItem = Extension.create({
+declare module "@arkpad/core" {
+  interface ArkpadCommands {
+    sinkListItem: () => void;
+    liftListItem: () => void;
+    splitListItem: () => void;
+    indentList: () => void;
+    outdentList: () => void;
+  }
+}
+
+export const ListItem = Node.create({
   name: "listItem",
 
-  addNodes() {
+  addOptions() {
     return {
-      list_item: {
-        content: "block+",
-        group: "block",
-        marks: "_",
-        defining: true,
-        parseDOM: [{ tag: "li" }],
-        toDOM() {
-          return ["li", 0];
-        },
-      },
+      HTMLAttributes: {},
     };
+  },
+
+  content: "block+",
+  group: "block",
+  marks: "_",
+  defining: true,
+
+  parseHTML() {
+    return [{ tag: "li" }];
+  },
+
+  renderHTML({ HTMLAttributes }: { node: PMNode; HTMLAttributes: Record<string, any> }) {
+    return ["li", { ...this.options.HTMLAttributes, ...HTMLAttributes }, 0];
   },
 
   addCommands() {
     return {
-      sinkListItem: () => (props: any) => {
+      sinkListItem: () => (props: ArkpadCommandProps) => {
         const { state, dispatch } = props;
-        const type = state.schema.nodes.list_item;
+        const type = state.schema.nodes.listItem;
         if (!type) return false;
         return sinkListItem(type)(state, dispatch);
       },
-      liftListItem: () => (props: any) => {
+      liftListItem: () => (props: ArkpadCommandProps) => {
         const { state, dispatch } = props;
-        const type = state.schema.nodes.list_item;
+        const type = state.schema.nodes.listItem;
         if (!type) return false;
         return liftListItem(type)(state, dispatch);
       },
-      splitListItem: () => (props: any) => {
+      splitListItem: () => (props: ArkpadCommandProps) => {
         const { state, dispatch } = props;
-        const type = state.schema.nodes.list_item;
+        const type = state.schema.nodes.listItem;
         if (!type) return false;
         return splitListItem(type)(state, dispatch);
       },
-      indentList: () => () => this.editor.runCommand("sinkListItem"),
-      outdentList: () => () => this.editor.runCommand("liftListItem"),
+      indentList: () => (props: ArkpadCommandProps) => props.editor.runCommand("sinkListItem"),
+      outdentList: () => (props: ArkpadCommandProps) => props.editor.runCommand("liftListItem"),
     };
   },
 
   addKeyboardShortcuts() {
     return {
-      Enter: () => this.editor.runCommand("splitListItem"),
-      Tab: () => this.editor.runCommand("sinkListItem"),
-      "Shift-Tab": () => this.editor.runCommand("liftListItem"),
+      Enter: () => this.editor!.runCommand("splitListItem"),
+      Tab: () => this.editor!.runCommand("sinkListItem"),
+      "Shift-Tab": () => this.editor!.runCommand("liftListItem"),
     };
   },
 });

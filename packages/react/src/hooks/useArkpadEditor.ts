@@ -50,9 +50,15 @@ export function useArkpadEditor(options: UseArkpadEditorOptions = {}) {
       nodeViews.taskItem = TaskView;
     }
 
+    // Use a unique ID for this instance to help with cleanup detection
+    const instanceId = Math.random().toString(36).substring(7);
+
     // Initialize editor asynchronously to avoid blocking the initial paint
     const timeout = setTimeout(() => {
-      if (!isMounted.current) return;
+      if (!isMounted.current) {
+        console.log(`[Arkpad] Aborting init for ${instanceId} (already unmounted)`);
+        return;
+      }
 
       try {
         const container = document.createElement("div");
@@ -66,6 +72,12 @@ export function useArkpadEditor(options: UseArkpadEditorOptions = {}) {
             options.onUpdate?.(payload);
           },
         });
+
+        // Final check before committing the reference
+        if (!isMounted.current) {
+          instance.destroy();
+          return;
+        }
 
         editorRef.current = instance;
         setEditor(instance);
@@ -83,10 +95,12 @@ export function useArkpadEditor(options: UseArkpadEditorOptions = {}) {
           if (!document.getElementById("arkpad-init-error")) {
             const errorDiv = document.createElement("div");
             errorDiv.id = "arkpad-init-error";
-            errorDiv.style.cssText = "position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);color:#ff4d4d;padding:40px;z-index:10000;overflow:auto;font-family:monospace;line-height:1.5;";
+            errorDiv.style.cssText =
+              "position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);color:#ff4d4d;padding:40px;z-index:10000;overflow:auto;font-family:monospace;line-height:1.5;";
             errorDiv.innerHTML = `
               <h1 style="color:#ff4d4d;margin-top:0">🚨 Arkpad Editor Initialization Crash</h1>
               <p><strong>Error:</strong> ${error.message}</p>
+              <p><strong>Instance ID:</strong> ${instanceId}</p>
               <pre style="background:#111;padding:20px;border-radius:4px;color:#888;font-size:12px;">${error.stack}</pre>
               <p style="color:#aaa;font-size:12px;margin-top:20px;">Check the console for a full schema dump if this was a SyntaxError.</p>
             `;
@@ -99,16 +113,20 @@ export function useArkpadEditor(options: UseArkpadEditorOptions = {}) {
     return () => {
       isMounted.current = false;
       clearTimeout(timeout);
+
+      // Remove any existing crash screen if we are cleaning up
+      const crashDiv = document.getElementById("arkpad-init-error");
+      if (crashDiv) crashDiv.remove();
+
       if (editorRef.current) {
-        editorRef.current.destroy();
-
-        // Clean up DOM element
-        if (editorRef.current.element) {
-          editorRef.current.element.remove();
-        }
-
+        const instance = editorRef.current;
         editorRef.current = null;
         setEditor(null);
+
+        instance.destroy();
+        if (instance.element) {
+          instance.element.remove();
+        }
       }
     };
   }, []);
@@ -120,13 +138,8 @@ export function useArkpadEditor(options: UseArkpadEditorOptions = {}) {
     const isHtmlContent = typeof options.content === "string";
 
     if (isHtmlContent) {
-      // PRO-TIP: We compare rendered results to avoid loops caused by default attributes (like data-align)
-      // If the editor already "represents" the incoming HTML, we skip the expensive setContent call.
       const currentHtml = editor.getHTML();
       if (options.content === currentHtml) return;
-      
-      // Secondary check: Parse incoming HTML and compare JSON structures for semantic equality
-      // This is more expensive but prevents "The Infinite Alignment Loop"
       editor.setContent(options.content, false);
     } else {
       const currentJson = editor.getJSON();

@@ -45,8 +45,8 @@ export const BaseCommands = Extension.create({
     toggleBlock: (type: string | NodeType, attrs?: Record<string, any>) => (props: any) => {
       return toggleBlock(type, attrs)(props);
     },
-    toggleList: (listType: string | NodeType) => (props: any) => {
-      return toggleList(listType)(props);
+    toggleList: (listType: string | NodeType, itemType: string | NodeType) => (props: any) => {
+      return toggleList(listType, itemType)(props);
     },
     setTextAlign: (align: string) => (props: any) => {
       return setTextAlign(align)(props);
