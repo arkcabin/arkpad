@@ -33,6 +33,9 @@ const BlockquoteDemo = lazy(() =>
 const CodeBlockDemo = lazy(() =>
   import("./demos/CodeBlockDemo").then((m) => ({ default: m.CodeBlockDemo }))
 );
+const HorizontalRuleDemo = lazy(() =>
+  import("./demos/HorizontalRuleDemo").then((m) => ({ default: m.HorizontalRuleDemo }))
+);
 const StandardEditor = lazy(() =>
   import("./demos/StandardEditor").then((m) => ({ default: m.StandardEditor }))
 );
@@ -59,6 +62,7 @@ const ROUTE_NAMES: Record<string, string> = {
   "/extensions/heading": "Heading",
   "/extensions/blockquote": "Blockquote",
   "/extensions/codeblock": "CodeBlock",
+  "/extensions/horizontal-rule": "Horizontal Rule",
 };
 
 function TopBar({ onSidebarToggle }: { onSidebarToggle: () => void }) {
@@ -135,6 +139,7 @@ function AppShell() {
               <Route path="/extensions/heading" element={<HeadingDemo />} />
               <Route path="/extensions/blockquote" element={<BlockquoteDemo />} />
               <Route path="/extensions/codeblock" element={<CodeBlockDemo />} />
+              <Route path="/extensions/horizontal-rule" element={<HorizontalRuleDemo />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Suspense>

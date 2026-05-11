@@ -108,6 +108,19 @@
   color: #60a5fa;
 }
 
+.prose hr {
+  @apply my-6 border-none h-px bg-[var(--border)];
+  opacity: 0.4;
+}
+
+.dark .prose hr {
+  background-color: var(--border);
+}
+
+.prose hr + * {
+  @apply mt-0;
+}
+
 /* Transitions */
 @keyframes fadeIn {
   from {

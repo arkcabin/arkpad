@@ -19,7 +19,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
         { name: "Heading", path: "/extensions/heading" },
         { name: "Blockquote", path: "/extensions/blockquote" },
         { name: "CodeBlock", path: "/extensions/codeblock" },
-        { name: "Horizontal Rule 🚧", path: "#" },
+        { name: "Horizontal Rule", path: "/extensions/horizontal-rule" },
       ],
     },
     {
@@ -84,7 +84,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
                     "flex items-center px-3 py-1.5 text-sm transition-colors",
                     isActive && item.path !== "#"
                       ? "bg-[var(--selection)] text-[var(--text-main)] font-medium"
-                      : "text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--selection)]",
+                      : "text-[var(--text-muted)] hover:text-[var(--text-main)]",
                     item.path === "#" && "cursor-default opacity-50"
                   )
                 }
