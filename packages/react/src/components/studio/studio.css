@@ -22,7 +22,7 @@
   align-items: center;
   background-color: #ffffff;
   overflow-y: auto;
-  padding: 40px 0;
+  padding: 0;
 }
 
 .dark .arkpad-canvas-viewport {
@@ -174,13 +174,12 @@
 }
 
 .arkpad-builder-canvas .ProseMirror {
-  min-height: 500px;
-  padding: 60px 40px;
+  min-height: 100vh;
+  padding: 0;
   outline: none;
   cursor: default;
-  border: 1px dashed #e5e5e5;
-  transition: border-color 0.3s ease;
-  margin: 20px;
+  border: none;
+  margin: 0;
   background-color: #ffffff;
 }
 
