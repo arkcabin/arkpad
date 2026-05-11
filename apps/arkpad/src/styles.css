@@ -26,7 +26,9 @@
 }
 
 .arkpad-container {
-  @apply outline-none min-h-[300px] text-[var(--text-main)];
+  outline: none !important;
+  min-height: 300px;
+  color: var(--text-main);
 }
 
 /* Simple flat toolbar */
@@ -52,15 +54,19 @@
   @apply max-w-none text-[var(--text-main)];
 }
 
-.prose h1, .prose h2, .prose h3 {
+.prose h1,
+.prose h2,
+.prose h3 {
   @apply font-bold mt-6 mb-4 text-[var(--text-main)];
 }
 
-.prose strong, .prose b {
+.prose strong,
+.prose b {
   @apply font-bold;
 }
 
-.prose em, .prose i {
+.prose em,
+.prose i {
   @apply italic;
 }
 
@@ -75,8 +81,14 @@
 
 /* Transitions */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-page-in {
@@ -111,8 +123,14 @@
   min-height: 1.5em;
 }
 
-.arkpad-editor:focus, .arkpad-editor-focused {
+.arkpad-editor:focus,
+.arkpad-editor-focused,
+.ProseMirror,
+.ProseMirror:focus,
+.ProseMirror-focused {
   outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 /* Side handle - Hidden for clean UI */
@@ -197,8 +215,8 @@
 /* ── Selection Outlines & Labels ─────────────────────────────── */
 
 .arkpad-editor-container .ark-selected-node {
-  outline: 2px solid #3b82f6 !important;
-  outline-offset: -2px;
+  outline: none !important;
+  border: none !important;
   position: relative;
   z-index: 1;
 }
@@ -211,7 +229,7 @@
 
 /* Empty Canvas Placeholder */
 .arkpad-editor:empty::before {
-  content: 'Drag and drop blocks here';
+  content: "Drag and drop blocks here";
   position: absolute;
   top: 50%;
   left: 50%;
@@ -223,8 +241,14 @@
 }
 
 @keyframes labelIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ── Premium Drag & Drop UI ──────────────────────────────────── */
@@ -241,8 +265,15 @@
 }
 
 @keyframes gapPulse {
-  0%, 100% { opacity: 1; transform: translateY(-50%) scaleX(1); }
-  50% { opacity: 0.6; transform: translateY(-50%) scaleX(0.985); }
+  0%,
+  100% {
+    opacity: 1;
+    transform: translateY(-50%) scaleX(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: translateY(-50%) scaleX(0.985);
+  }
 }
 
 .arkpad-editor-container.drag-active {
@@ -321,25 +352,29 @@
   --e-border-dark: #d5d8dc;
   --e-text: #495157;
   --e-text-light: #a4afb7;
-  --e-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  --e-shadow-hover: 0 4px 12px rgba(0,0,0,0.12);
+  --e-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --e-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 /* Elementor-style Canvas Background */
 .arkpad-canvas-viewport {
   background-color: var(--e-bg-canvas) !important;
-  background-image: 
+  background-image:
     linear-gradient(45deg, #e5e5e5 25%, transparent 25%),
     linear-gradient(-45deg, #e5e5e5 25%, transparent 25%),
     linear-gradient(45deg, transparent 75%, #e5e5e5 75%),
     linear-gradient(-45deg, transparent 75%, #e5e5e5 75%) !important;
   background-size: 20px 20px !important;
-  background-position: 0 0, 0 10px, 10px -10px, -10px 0px !important;
+  background-position:
+    0 0,
+    0 10px,
+    10px -10px,
+    -10px 0px !important;
 }
 
 .dark .arkpad-canvas-viewport {
   background-color: #1a1a1a !important;
-  background-image: 
+  background-image:
     linear-gradient(45deg, #2a2a2a 25%, transparent 25%),
     linear-gradient(-45deg, #2a2a2a 25%, transparent 25%),
     linear-gradient(45deg, transparent 75%, #2a2a2a 75%),
@@ -349,14 +384,14 @@
 /* Center page on canvas like Elementor */
 .arkpad-canvas-container {
   background-color: #ffffff;
-  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
   margin: 40px auto;
   min-height: calc(100vh - 80px);
 }
 
 .dark .arkpad-canvas-container {
   background-color: #0a0a0a;
-  box-shadow: 0 0 20px rgba(0,0,0,0.3);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
 }
 
 /* Elementor-style Selection (Primary Red Color) */
@@ -374,7 +409,9 @@
 .arkpad-builder-canvas .ProseMirror .ark-section.ProseMirror-selectednode {
   border-color: var(--e-primary) !important;
   border-style: solid !important;
-  box-shadow: 0 0 0 1px var(--e-primary), 0 0 0 4px rgba(147, 0, 60, 0.1) !important;
+  box-shadow:
+    0 0 0 1px var(--e-primary),
+    0 0 0 4px rgba(147, 0, 60, 0.1) !important;
 }
 
 /* Elementor-style Section Label */
@@ -502,7 +539,8 @@
 
 /* Drop Animation */
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
     transform: scaleY(1);
   }
@@ -515,16 +553,22 @@
 /* Enhanced Selection Ring */
 .arkpad-builder-canvas .ProseMirror .ark-container.ProseMirror-selectednode {
   border: 2px solid var(--e-primary) !important;
-  box-shadow: 0 0 0 1px var(--e-primary), 0 0 0 4px rgba(147, 0, 60, 0.15) !important;
+  box-shadow:
+    0 0 0 1px var(--e-primary),
+    0 0 0 4px rgba(147, 0, 60, 0.15) !important;
   animation: selectionGlow 0.3s ease !important;
 }
 
 @keyframes selectionGlow {
   from {
-    box-shadow: 0 0 0 1px var(--e-primary), 0 0 0 8px rgba(147, 0, 60, 0.3);
+    box-shadow:
+      0 0 0 1px var(--e-primary),
+      0 0 0 8px rgba(147, 0, 60, 0.3);
   }
   to {
-    box-shadow: 0 0 0 1px var(--e-primary), 0 0 0 4px rgba(147, 0, 60, 0.15);
+    box-shadow:
+      0 0 0 1px var(--e-primary),
+      0 0 0 4px rgba(147, 0, 60, 0.15);
   }
 }
 
