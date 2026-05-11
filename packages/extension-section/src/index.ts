@@ -20,7 +20,7 @@ export const Section = Node.create<SectionOptions>({
   },
 
   content: "block*",
-  group: "block",
+  group: "layout",
   isLayout: true,
   defining: true,
   draggable: true,

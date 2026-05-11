@@ -251,7 +251,55 @@
   opacity: 0.98;
 }
 
-/* Ensure sections have enough space for the label */
-section[data-type="section"] {
+/* ── Section Selection & Clean UI ────────────────────────────── */
+
+.ark-section {
+  border: 1px solid transparent !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
+}
+
+/* Subtle dashed border on hover for orientation */
+.ark-section:hover {
+  border: 1px dashed rgba(37, 99, 235, 0.2) !important;
+}
+
+/* Active Section: Blue border and light background */
+.ark-section.has-focus,
+.ark-section.ProseMirror-selectednode {
+  border: 2px solid #2563eb !important;
+  border-style: solid !important;
+  background-color: rgba(37, 99, 235, 0.04) !important;
+  outline: none !important;
+}
+
+/* Tree Structure - Nested Sections */
+.ark-section .ark-section {
+  margin: 1rem !important;
+  border-radius: 4px;
+}
+
+/* Visibility of UI elements (labels, handles) only on focus */
+.ark-section::before,
+.ark-section::after,
+.ark-section [class*="label"],
+.ark-section [class*="badge"],
+.ark-section .SECTION {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.ark-section.has-focus::before,
+.ark-section.has-focus::after,
+.ark-section.has-focus [class*="label"],
+.ark-section.has-focus [class*="badge"],
+.ark-section.has-focus .SECTION,
+.ark-section.ProseMirror-selectednode::before,
+.ark-section.ProseMirror-selectednode::after,
+.ark-section.ProseMirror-selectednode [class*="label"],
+.ark-section.ProseMirror-selectednode [class*="badge"],
+.ark-section.ProseMirror-selectednode .SECTION {
+  opacity: 1;
+  pointer-events: auto;
 }

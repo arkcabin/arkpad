@@ -138,15 +138,17 @@ export const DragDrop = Extension.create({
   addProseMirrorPlugins() {
     let scrollInterval: ReturnType<typeof setInterval> | null = null;
     let currentDragPos = -1;
+    let currentDragOverContainerPos = -1;
 
     return [
       new Plugin({
         state: {
-          init: () => ({ pos: -1 }),
+          init: () => ({ pos: -1, containerPos: -1 }),
           apply: (tr, value) => {
             const meta = tr.getMeta("dragPosUpdate");
             if (meta) {
               currentDragPos = meta.pos;
+              currentDragOverContainerPos = meta.containerPos ?? -1;
               return meta;
             }
             return value;
@@ -159,18 +161,35 @@ export const DragDrop = Extension.create({
         },
         props: {
           decorations: (state) => {
-            if (currentDragPos === -1) return DecorationSet.empty;
+            const decos: Decoration[] = [];
+            
+            // Gap indicator
+            if (currentDragPos !== -1) {
+              const gap = Decoration.widget(currentDragPos, () => {
+                const el = document.createElement("div");
+                el.className = "ark-drop-gap";
+                const line = document.createElement("div");
+                line.className = "ark-drop-gap-line";
+                el.appendChild(line);
+                return el;
+              });
+              decos.push(gap);
+            }
 
-            const gap = Decoration.widget(currentDragPos, () => {
-              const el = document.createElement("div");
-              el.className = "ark-drop-indicator";
-              const line = document.createElement("div");
-              line.className = "ark-drop-indicator-line";
-              el.appendChild(line);
-              return el;
-            });
+            // Container highlight
+            if (currentDragOverContainerPos !== -1) {
+              const node = state.doc.nodeAt(currentDragOverContainerPos);
+              if (node) {
+                const highlight = Decoration.node(
+                  currentDragOverContainerPos, 
+                  currentDragOverContainerPos + node.nodeSize, 
+                  { class: "ark-drag-over-container" }
+                );
+                decos.push(highlight);
+              }
+            }
 
-            return DecorationSet.create(state.doc, [gap]);
+            return DecorationSet.create(state.doc, decos);
           },
           handleDOMEvents: {
             dragover: (view: any, event: any) => {
@@ -203,10 +222,28 @@ export const DragDrop = Extension.create({
                 }, 20);
               }
 
-              // Gap Indicator logic
+              // Gap and Container logic
               const pos = view.posAtCoords({ left: event.clientX, top: event.clientY });
-              if (pos && pos.pos !== currentDragPos) {
-                view.dispatch(view.state.tr.setMeta("dragPosUpdate", { pos: pos.pos }));
+              if (pos) {
+                const $pos = view.state.doc.resolve(pos.pos);
+                let containerPos = -1;
+
+                // Find nearest layout ancestor
+                for (let d = $pos.depth; d > 0; d--) {
+                  const node = $pos.node(d);
+                  // Check if it's a layout node (section, container, etc)
+                  if (node.type.spec.isLayout) {
+                    containerPos = $pos.before(d);
+                    break;
+                  }
+                }
+
+                if (pos.pos !== currentDragPos || containerPos !== currentDragOverContainerPos) {
+                  view.dispatch(view.state.tr.setMeta("dragPosUpdate", { 
+                    pos: pos.pos, 
+                    containerPos 
+                  }));
+                }
               }
 
               return false;
@@ -214,13 +251,13 @@ export const DragDrop = Extension.create({
             dragleave: (view: any) => {
               if (scrollInterval) clearInterval(scrollInterval);
               view.dom.closest(".arkpad-builder-canvas")?.classList.remove("drag-active");
-              view.dispatch(view.state.tr.setMeta("dragPosUpdate", { pos: -1 }));
+              view.dispatch(view.state.tr.setMeta("dragPosUpdate", { pos: -1, containerPos: -1 }));
               return false;
             },
             drop: (view: any) => {
               if (scrollInterval) clearInterval(scrollInterval);
               view.dom.closest(".arkpad-builder-canvas")?.classList.remove("drag-active");
-              view.dispatch(view.state.tr.setMeta("dragPosUpdate", { pos: -1 }));
+              view.dispatch(view.state.tr.setMeta("dragPosUpdate", { pos: -1, containerPos: -1 }));
               return false;
             },
           },

@@ -56,7 +56,7 @@ export function createDocument(): Node<DocumentOptions> {
 
     addOptions() {
       return {
-        content: "block*",
+        content: "(layout | block)*",
         attributes: {},
       };
     },
@@ -70,7 +70,7 @@ export function createDocument(): Node<DocumentOptions> {
     },
 
     // Use the native content property so SchemaBuilder picks it up correctly
-    content: "block*",
+    content: "(layout | block)*",
 
     addCommands: () => ({
       /**
