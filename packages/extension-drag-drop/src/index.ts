@@ -51,17 +51,14 @@ export const DragDrop = Extension.create({
         const nodeToMove = state.doc.nodeAt(from);
         if (!nodeToMove) return false;
 
-        // Calculate new position
-        let targetIndex: number;
         if (targetPos < from) {
-          targetIndex = $pos.index();
+          // Calculation logic removed as targetIndex was unused
         } else {
-          targetIndex = $pos.index() - 1;
+          // Calculation logic removed as targetIndex was unused
         }
 
         // Perform the move using replaceStep
         const tr = state.tr;
-        const nodeRange = from;
         const nodeSize = nodeToMove.nodeSize;
 
         // Delete from original position

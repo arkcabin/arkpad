@@ -1,30 +1,10 @@
-import React, { Suspense, lazy, useState, createContext, useContext } from "react";
+import React, { Suspense, lazy, useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { Sidebar } from "./components/Sidebar";
 import { cn } from "./lib/utils";
 import { Edit3, Eye, Monitor, Smartphone, Tablet } from "lucide-react";
 
-// Types
-export type DeviceType = "desktop" | "tablet" | "mobile";
-
-interface StudioContextType {
-  device: DeviceType;
-  setDevice: (device: DeviceType) => void;
-  previewMode: boolean;
-  setPreviewMode: (preview: boolean) => void;
-  isSidebarOpen: boolean;
-  setSidebarOpen: (open: boolean) => void;
-  isPropertyPanelOpen: boolean;
-  setPropertyPanelOpen: (open: boolean) => void;
-}
-
-const StudioContext = createContext<StudioContextType | undefined>(undefined);
-
-export function useStudio() {
-  const context = useContext(StudioContext);
-  if (!context) throw new Error("useStudio must be used within StudioProvider");
-  return context;
-}
+import { StudioProvider, useStudio, DeviceType } from "./context/StudioContext";
 
 // Lazy load components
 const BoldDemo = lazy(() => import("./demos/BoldDemo").then((m) => ({ default: m.BoldDemo })));
@@ -134,19 +114,11 @@ const LayoutIcon = () => (
 );
 
 export function Router() {
-  const [device, setDevice] = useState<DeviceType>("desktop");
-  const [previewMode, setPreviewMode] = useState(false);
-  const [isSidebarOpen, setSidebarOpen] = useState(true);
-  const [isPropertyPanelOpen, setPropertyPanelOpen] = useState(false);
-
   return (
     <BrowserRouter>
-      <StudioContext.Provider value={{ 
-        device, setDevice, previewMode, setPreviewMode, 
-        isSidebarOpen, setSidebarOpen, isPropertyPanelOpen, setPropertyPanelOpen 
-      }}>
+      <StudioProvider>
         <AppShell />
-      </StudioContext.Provider>
+      </StudioProvider>
     </BrowserRouter>
   );
 }

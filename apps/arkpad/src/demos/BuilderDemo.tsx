@@ -8,7 +8,7 @@ import {
 } from "@arkpad/react";
 import { StarterKit } from "@arkpad/starter-kit";
 import { Document } from "@arkpad/core";
-import { useStudio } from "../Router";
+import { useStudio } from "../context/StudioContext";
 
 export function BuilderDemo() {
   const { device, previewMode, isSidebarOpen, isPropertyPanelOpen } = useStudio();

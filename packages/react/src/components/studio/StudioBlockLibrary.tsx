@@ -159,9 +159,7 @@ export function StudioBlockLibrary({ className }: StudioBlockLibraryProps) {
 
   useEffect(() => {
     if (editor?.blockRegistry) {
-      const blocks = editor.blockRegistry.getAllBlocks();
-      if (blocks.length === 0) {
-      }
+      editor.blockRegistry.getAllBlocks();
     }
   }, [editor]);
 
@@ -255,20 +253,6 @@ export function StudioBlockLibrary({ className }: StudioBlockLibraryProps) {
     }
   };
 
-  const getCategoryIcon = (category: string) => {
-    switch (category) {
-      case "Layout":
-        return "M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z";
-      case "Typography":
-        return "M4 4h16v2H4zM4 10h16v2H4zM4 16h16v2H4z";
-      case "Components":
-        return "M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z";
-      case "Media":
-        return "M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14";
-      default:
-        return "M4 4h16v16H4z";
-    }
-  };
 
   return (
     <div
