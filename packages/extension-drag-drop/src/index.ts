@@ -48,11 +48,11 @@ export const DragDrop = Extension.create({
       let targetPos = pos.pos;
       const data = studioBlockData ? JSON.parse(studioBlockData) : null;
 
-      // SURGICAL FIX: If dropping a Section, force it to the root level (depth 0)
-      // This prevents sections from nesting into paragraphs or other sections
-      if (data?.type === "section") {
+      const isLayout = event.dataTransfer?.types.includes("application/arkpad-layout");
+      
+      // SURGICAL FIX: If dropping a Section/Layout, force it to the root level (depth 0)
+      if (isLayout || data?.type === "section") {
         const $pos = state.doc.resolve(targetPos);
-        // If we are inside any node, move to the after position of the top-most node
         if ($pos.depth > 0) {
           targetPos = $pos.after(1);
         }
@@ -253,8 +253,9 @@ export const DragDrop = Extension.create({
               if (pos) {
                 let indicatorPos = pos.pos;
                 
-                // If we're dragging something that should be at root, snap the indicator
-                if (isStudioBlock || isLegacyBlock) {
+                // Only snap to root if it's a layout block
+                const isLayout = event.dataTransfer?.types.includes("application/arkpad-layout");
+                if (isLayout) {
                   const $pos = view.state.doc.resolve(indicatorPos);
                   if ($pos.depth > 0) {
                     indicatorPos = $pos.after(1);

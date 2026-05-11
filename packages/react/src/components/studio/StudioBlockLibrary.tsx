@@ -14,7 +14,7 @@ const DEFAULT_BLOCKS = [
     icon: "M4 6h16M4 12h16M4 18h16",
     category: "Layout",
     attrs: { padding: "0", backgroundColor: "transparent" },
-    content: [{ type: "paragraph", content: [{ type: "text", text: "Section content" }] }],
+    content: [],
   },
   {
     id: "container",
@@ -195,11 +195,10 @@ export function StudioBlockLibrary({ className }: StudioBlockLibraryProps) {
       content: item.content,
     };
 
-    if (item.type === "section") {
-      e.dataTransfer.setData("application/arkpad-type-section", "true");
-    }
-
     e.dataTransfer.setData("application/arkpad-block", JSON.stringify(dragData));
+    if (item.type === "section") {
+      e.dataTransfer.setData("application/arkpad-layout", "true");
+    }
     e.dataTransfer.effectAllowed = "move";
 
     const ghost = document.createElement("div");
