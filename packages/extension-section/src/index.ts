@@ -36,7 +36,7 @@ export const Section = Node.create<SectionOptions>({
         },
       },
       padding: {
-        default: "0",
+        default: "60px 20px",
         parseHTML: (element) => element.style.padding,
         renderHTML: (attributes) => {
           if (!attributes.padding) return {};
@@ -67,6 +67,7 @@ export const Section = Node.create<SectionOptions>({
       borderColor,
       maxWidth,
     } = node.attrs;
+
     const styles = [
       backgroundColor ? `background-color: ${backgroundColor}` : "",
       padding ? `padding: ${padding}` : "",
@@ -84,14 +85,18 @@ export const Section = Node.create<SectionOptions>({
       .filter(Boolean)
       .join("; ");
 
+    // High-Fidelity Merge: Preserve "ark-section" while allowing custom classes from inspector
+    const incomingClasses = HTMLAttributes.class || "";
+    const mergedClasses = ["ark-section", incomingClasses].filter(Boolean).join(" ");
+
     return [
       "section",
       {
-        "data-type": "section",
-        class: "ark-section",
-        style: styles,
         ...this.options.HTMLAttributes,
         ...HTMLAttributes,
+        "data-type": "section",
+        class: mergedClasses,
+        style: styles,
       },
       0,
     ];
@@ -105,7 +110,7 @@ export const Section = Node.create<SectionOptions>({
       create: (options: any) => ({
         type: "section",
         attrs: options,
-        content: options?.content || [],
+        content: options?.content || [{ type: "paragraph", content: [{ type: "text", text: "" }] }],
       }),
     });
   },
@@ -119,7 +124,7 @@ export const Section = Node.create<SectionOptions>({
             .insertContent({
               type: this.name,
               attrs,
-              content: attrs?.content || [],
+              content: attrs?.content || [{ type: "paragraph", content: [{ type: "text", text: "" }] }],
             })
             .run();
         },

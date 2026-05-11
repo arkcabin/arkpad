@@ -18,7 +18,8 @@ export const ButtonNode = Node.create({
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ["button", { ...HTMLAttributes, class: "ark-button" }];
+    const { class: customClass, ...rest } = HTMLAttributes;
+    return ["button", { ...rest, class: `ark-button ${customClass || ""}`.trim() }];
   },
 });
 
@@ -39,7 +40,8 @@ export const CardNode = Node.create({
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ["div", { ...HTMLAttributes, class: "ark-card" }, 0];
+    const { class: customClass, ...rest } = HTMLAttributes;
+    return ["div", { ...rest, class: `ark-card ${customClass || ""}`.trim() }, 0];
   },
 });
 
@@ -95,6 +97,9 @@ export const ContainerNode = Node.create({
     return {
       maxWidth: { default: "1200px" },
       padding: { default: "20px" },
+      backgroundColor: { default: "transparent" },
+      minHeight: { default: "auto" },
+      width: { default: "100%" },
     };
   },
 
@@ -103,7 +108,36 @@ export const ContainerNode = Node.create({
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ["div", { ...HTMLAttributes, class: "ark-container" }, 0];
+    const { 
+      class: customClass, 
+      maxWidth, 
+      padding, 
+      backgroundColor, 
+      minHeight, 
+      width,
+      ...rest 
+    } = HTMLAttributes;
+    
+    const styles = [
+      maxWidth ? `max-width: ${maxWidth}` : "",
+      padding ? `padding: ${padding}` : "",
+      backgroundColor && backgroundColor !== "transparent" ? `background-color: ${backgroundColor}` : "",
+      minHeight && minHeight !== "auto" ? `min-height: ${minHeight}` : "",
+      width && width !== "100%" ? `width: ${width}` : "",
+    ]
+      .filter(Boolean)
+      .join("; ");
+    
+    return [
+      "div", 
+      { 
+        ...rest, 
+        class: `ark-container ${customClass || ""}`.trim(),
+        style: styles || undefined,
+        "data-type": "container"
+      }, 
+      0
+    ];
   },
 });
 
@@ -124,7 +158,8 @@ export const GridNode = Node.create({
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ["div", { ...HTMLAttributes, class: "ark-grid" }, 0];
+    const { class: customClass, ...rest } = HTMLAttributes;
+    return ["div", { ...rest, class: `ark-grid ${customClass || ""}`.trim() }, 0];
   },
 });
 
@@ -209,9 +244,10 @@ export const AlertNode = Node.create({
   },
 
   renderHTML({ HTMLAttributes }) {
+    const { class: customClass, ...rest } = HTMLAttributes;
     return [
       "div",
-      { ...HTMLAttributes, class: `ark-alert ark-alert-${HTMLAttributes.variant}` },
+      { ...rest, class: `ark-alert ark-alert-${HTMLAttributes.variant} ${customClass || ""}`.trim() },
       0,
     ];
   },

@@ -8,21 +8,13 @@ interface StudioBlockLibraryProps {
 
 const DEFAULT_BLOCKS = [
   {
-    id: "section",
-    name: "Section",
-    type: "section",
-    icon: "M4 6h16M4 12h16M4 18h16",
-    category: "Layout",
-    attrs: { padding: "0", backgroundColor: "transparent" },
-    content: [],
-  },
-  {
     id: "container",
     name: "Container",
     type: "container",
     icon: "M4 4h16v16H4z",
     category: "Layout",
-    attrs: { maxWidth: "1200px", padding: "0" },
+    attrs: { maxWidth: "1200px", padding: "60px 20px", backgroundColor: "transparent", minHeight: "200px", width: "100%" },
+    content: [{ type: "paragraph", content: [{ type: "text", text: " " }] }],
   },
   {
     id: "columns",
@@ -196,15 +188,20 @@ export function StudioBlockLibrary({ className }: StudioBlockLibraryProps) {
     };
 
     e.dataTransfer.setData("application/arkpad-block", JSON.stringify(dragData));
-    if (item.type === "section") {
-      e.dataTransfer.setData("application/arkpad-layout", "true");
-    }
     e.dataTransfer.effectAllowed = "move";
 
     const ghost = document.createElement("div");
     ghost.className =
-      "fixed top-[-1000px] left-[-1000px] px-4 py-2 bg-blue-500 text-white text-[10px] font-bold uppercase tracking-widest rounded-sm shadow-2xl pointer-events-none flex items-center gap-2 border border-blue-400";
-    ghost.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="${item.icon}"/></svg> ${item.name}`;
+      "fixed top-[-1000px] left-[-1000px] px-4 py-3 bg-red-600 text-white text-[11px] font-semibold uppercase tracking-wider rounded-md shadow-2xl pointer-events-none flex items-center gap-3 border border-red-500 z-[1000]";
+    ghost.innerHTML = `
+      <div class="w-4 h-4 flex items-center justify-center">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="${item.icon}"/>
+        </svg>
+      </div>
+      <span class="font-bold">${item.name}</span>
+      <div class="ml-auto text-xs opacity-75">Drag to page</div>
+    `;
     document.body.appendChild(ghost);
     e.dataTransfer.setDragImage(ghost, ghost.offsetWidth / 2, ghost.offsetHeight / 2);
 
@@ -218,9 +215,7 @@ export function StudioBlockLibrary({ className }: StudioBlockLibraryProps) {
   const handleManualClick = (item: any) => {
     if (!editor) return;
 
-    if (item.type === "section") {
-      editor.commands.setSection();
-    } else if (item.type === "columns") {
+    if (item.type === "columns") {
       editor.commands.setColumns(item.attrs);
     } else if (item.type === "grid") {
       editor
@@ -260,18 +255,21 @@ export function StudioBlockLibrary({ className }: StudioBlockLibraryProps) {
         className
       )}
     >
-      {/* Header */}
-      <div className="h-14 px-4 flex items-center border-b border-neutral-100 dark:border-neutral-900 bg-neutral-50/50 dark:bg-neutral-900/50">
-        <span className="text-[10px] font-bold text-neutral-500 dark:text-neutral-400 uppercase tracking-[0.1em]">
-          Elements
-        </span>
+      {/* Header - Elementor Style */}
+      <div className="h-12 px-4 flex items-center border-b border-neutral-200 dark:border-neutral-800 bg-white dark:bg-[#0A0A0A]">
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-red-600"></div>
+          <span className="text-[12px] font-semibold text-neutral-700 dark:text-neutral-300">
+            ELEMENTS
+          </span>
+        </div>
       </div>
 
-      {/* Search */}
-      <div className="p-3 border-b border-neutral-100 dark:border-neutral-900">
+      {/* Search - Elementor Style */}
+      <div className="p-3 border-b border-neutral-200 dark:border-neutral-800">
         <div className="relative">
           <svg
-            className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400"
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-400"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -282,23 +280,23 @@ export function StudioBlockLibrary({ className }: StudioBlockLibraryProps) {
           </svg>
           <input
             type="text"
-            placeholder="Search blocks..."
+            placeholder="Search widgets..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 text-[12px] bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+            className="w-full pl-8 pr-3 py-1.5 text-[11px] bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded outline-none focus:border-red-500 focus:ring-0 transition-all"
           />
         </div>
       </div>
 
-      {/* Category Tabs */}
-      <div className="flex gap-1 p-2 border-b border-neutral-100 dark:border-neutral-900 overflow-x-auto scrollbar-hide">
+      {/* Category Tabs - Elementor Style */}
+      <div className="flex gap-0.5 p-2 border-b border-neutral-200 dark:border-neutral-800 overflow-x-auto scrollbar-hide">
         <button
           onClick={() => setActiveCategory(null)}
           className={cn(
-            "px-3 py-1.5 text-[10px] font-medium rounded-md whitespace-nowrap transition-all",
+            "px-3 py-1.5 text-[10px] font-medium whitespace-nowrap transition-all border-b-2",
             activeCategory === null
-              ? "bg-blue-500 text-white"
-              : "bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200"
+              ? "text-red-600 border-red-600"
+              : "text-neutral-500 border-transparent hover:text-neutral-700"
           )}
         >
           All
@@ -308,10 +306,10 @@ export function StudioBlockLibrary({ className }: StudioBlockLibraryProps) {
             key={cat}
             onClick={() => setActiveCategory(cat)}
             className={cn(
-              "px-3 py-1.5 text-[10px] font-medium rounded-md whitespace-nowrap transition-all",
+              "px-3 py-1.5 text-[10px] font-medium whitespace-nowrap transition-all border-b-2 capitalize",
               activeCategory === cat
-                ? "bg-blue-500 text-white"
-                : "bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200"
+                ? "text-red-600 border-red-600"
+                : "text-neutral-500 border-transparent hover:text-neutral-700"
             )}
           >
             {cat}
@@ -319,49 +317,63 @@ export function StudioBlockLibrary({ className }: StudioBlockLibraryProps) {
         ))}
       </div>
 
-      {/* Blocks Grid */}
-      <div className="flex-1 overflow-y-auto p-3 scrollbar-hide">
+      {/* Blocks Grid - Elementor Style */}
+      <div className="flex-1 overflow-y-auto p-2 scrollbar-hide">
         {filteredBlocks.length === 0 ? (
           <div className="text-center py-8">
-            <p className="text-[12px] text-neutral-400">No blocks found</p>
+            <p className="text-[11px] text-neutral-400 italic">No widgets found</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-2">
+          <div className="space-y-1">
             {filteredBlocks.map((item) => (
               <div
                 key={item.id}
                 draggable
                 onDragStart={(e) => handleDragStart(e, item)}
                 onClick={() => handleManualClick(item)}
-                className="group flex flex-col items-center justify-center aspect-square bg-neutral-50 dark:bg-neutral-900/40 border border-neutral-100 dark:border-neutral-800 rounded-lg hover:border-blue-500/50 hover:bg-blue-50/30 dark:hover:bg-blue-500/5 cursor-grab active:cursor-grabbing transition-all duration-200"
+                className="group flex items-center gap-3 px-3 py-2.5 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-500 hover:shadow-md cursor-grab active:cursor-grabbing active:scale-95 transition-all duration-200 transform"
               >
-                <div className="w-8 h-8 flex items-center justify-center rounded-md bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 group-hover:border-blue-500/30 group-hover:text-blue-500 transition-colors shadow-sm">
+                <div className="w-7 h-7 flex items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800 group-hover:bg-red-100 dark:group-hover:bg-red-900/30 transition-all duration-200 border border-neutral-200 dark:border-neutral-700 group-hover:border-red-300 dark:group-hover:border-red-600">
                   <svg
-                    width="16"
-                    height="16"
+                    width="14"
+                    height="14"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
-                    strokeWidth="2"
+                    strokeWidth="2.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
+                    className="text-neutral-600 dark:text-neutral-400 group-hover:text-red-600 transition-all duration-200"
                   >
                     <path d={item.icon} />
                   </svg>
                 </div>
-                <span className="mt-2 text-[10px] font-medium text-neutral-600 dark:text-neutral-400 group-hover:text-blue-500 transition-colors">
+                <span className="text-[11px] font-semibold text-neutral-700 dark:text-neutral-300 group-hover:text-red-700 dark:group-hover:text-red-400 transition-all duration-200">
                   {item.name}
                 </span>
+                <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    className="text-red-500"
+                  >
+                    <path d="M9 18l6-6-6-6" />
+                  </svg>
+                </div>
               </div>
             ))}
           </div>
         )}
       </div>
 
-      {/* Footer */}
-      <div className="p-3 border-t border-neutral-100 dark:border-neutral-900 bg-neutral-50/30 dark:bg-neutral-900/20">
-        <p className="text-[9px] text-neutral-400 dark:text-neutral-600 text-center">
-          Drag or click to add
+      {/* Footer - Elementor Style */}
+      <div className="p-3 border-t border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900">
+        <p className="text-[9px] text-neutral-500 dark:text-neutral-500 text-center italic">
+          Drag widget to page
         </p>
       </div>
     </div>

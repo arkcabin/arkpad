@@ -52,7 +52,14 @@ export const BubbleMenu: React.FC<BubbleMenuProps> = ({
     editor.registerExtension(extension);
 
     return () => {
-      editor.unregisterExtension(extension.name);
+      if (editor && extension.name) {
+        try {
+          editor.unregisterExtension(extension.name);
+        } catch (error) {
+          // Ignore errors during cleanup - editor might be destroyed
+          console.warn("BubbleMenu cleanup error:", error);
+        }
+      }
     };
   }, [editor, shouldShow]);
 

@@ -194,7 +194,7 @@
   border-color: #3b82f6;
 }
 /* Section & Block Labels */
-.arkpad-builder-canvas .ProseMirror > .ark-section {
+.arkpad-builder-canvas .ProseMirror .ark-section {
   position: relative;
   border: 1px dashed rgba(37, 99, 235, 0.15);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -204,15 +204,15 @@
   margin: 0;
 }
 
-.arkpad-builder-canvas .ProseMirror > .ark-section:hover,
-.arkpad-builder-canvas .ProseMirror > .ark-section.has-focus,
-.arkpad-builder-canvas .ProseMirror > .ark-section.ProseMirror-selectednode {
+.arkpad-builder-canvas .ProseMirror .ark-section:hover,
+.arkpad-builder-canvas .ProseMirror .ark-section.has-focus,
+.arkpad-builder-canvas .ProseMirror .ark-section.ProseMirror-selectednode {
   border-color: #3b82f6;
   border-style: solid;
   box-shadow: 0 0 0 1px #3b82f6;
 }
 
-.arkpad-builder-canvas .ProseMirror > .ark-section::before {
+.arkpad-builder-canvas .ProseMirror .ark-section::before {
   content: "Section";
   position: absolute;
   top: -10px;
@@ -232,8 +232,8 @@
   letter-spacing: 0.05em;
 }
 
-.arkpad-builder-canvas .ProseMirror > .ark-section:hover::before,
-.arkpad-builder-canvas .ProseMirror > .ark-section.ProseMirror-selectednode::before {
+.arkpad-builder-canvas .ProseMirror .ark-section:hover::before,
+.arkpad-builder-canvas .ProseMirror .ark-section.ProseMirror-selectednode::before {
   opacity: 1;
   transform: translateY(0);
 }

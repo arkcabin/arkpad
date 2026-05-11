@@ -190,7 +190,9 @@ export const Column = Node.create({
   },
 
   renderHTML({ HTMLAttributes }: { HTMLAttributes: Record<string, any> }) {
-    return ["div", { "data-type": "column", class: "ark-column", ...HTMLAttributes }, 0];
+    const incomingClasses = HTMLAttributes.class || "";
+    const mergedClasses = ["ark-column", incomingClasses].filter(Boolean).join(" ");
+    return ["div", { ...HTMLAttributes, "data-type": "column", class: mergedClasses }, 0];
   },
 });
 

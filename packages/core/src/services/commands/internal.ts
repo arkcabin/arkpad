@@ -167,3 +167,10 @@ export const moveNodeDown = (pos?: number) => (props: any) => {
   return true;
 };
 
+export const insertContentAt = (pos: number, content: any) => (props: any) => {
+  const { tr, state } = props;
+  const node = state.schema.nodeFromJSON(content);
+  if (!node) return false;
+  tr.insert(pos, node);
+  return true;
+};

@@ -9,7 +9,8 @@ export function createSection(): Node {
   return Node.create({
     name: "section",
     group: "block layout",
-    content: "block*", // Must contain at least one block (e.g. a paragraph)
+    content: "block*",
+    isLayout: true, // Explicitly mark as layout for Governance
     
     addAttributes() {
       return {
@@ -17,6 +18,7 @@ export function createSection(): Node {
         padding: { default: "60px 0" },
         backgroundColor: { default: "transparent" },
         maxWidth: { default: "1200px" },
+        class: { default: null },
       };
     },
 
@@ -29,18 +31,22 @@ export function createSection(): Node {
     },
 
     renderHTML({ HTMLAttributes }) {
-      return ["section", { ...HTMLAttributes, class: "ark-section" }, 0];
+      const { class: customClass, ...rest } = HTMLAttributes;
+      return [
+        "section",
+        {
+          ...rest,
+          class: `ark-section ${customClass || ""}`.trim(),
+        },
+        0,
+      ];
     },
 
     addCommands: () => ({
       setSection: () => (props: any) => {
-        const { state, dispatch } = props;
-        const section = state.schema.nodes.section;
-        if (!section) return false;
-        
-        return setBlockType(section)(state, dispatch);
+        return props.editor.commands.insertSection();
       },
-      insertSection: () => (props: any) => {
+      insertSection: (attrs?: any) => (props: any) => {
         const { state, dispatch } = props;
         const { tr } = state;
         const section = state.schema.nodes.section;
@@ -48,8 +54,8 @@ export function createSection(): Node {
         
         if (!section || !p) return false;
 
-        const newNode = section.create(null, [p.create()]);
-        if (dispatch) {
+        const newNode = section.createAndFill(attrs || null, [p.create()]);
+        if (newNode && dispatch) {
           dispatch(tr.replaceSelectionWith(newNode).scrollIntoView());
         }
         return true;

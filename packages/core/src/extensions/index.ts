@@ -35,6 +35,7 @@ import { GhostText } from "./ux/GhostText";
 import { FocusDecorator } from "./ux/focusDecorator";
 import { BaseBlocks } from "./BaseBlocks";
 import { UIBlocks } from "./ui-blocks";
+import { DropHandler } from "./ux/DropHandler";
 
 import { ArkpadExtension } from "../api/extensions";
 import {
@@ -46,6 +47,7 @@ import {
   updateAttributes,
   setNode,
   insertContent,
+  insertContentAt,
   deleteNode,
   duplicateNode,
 } from "../services/commands";
@@ -81,6 +83,9 @@ export const BaseCommands = Extension.create({
     },
     insertContent: (content: any) => (props: any) => {
       return insertContent(content)(props);
+    },
+    insertContentAt: (pos: number, content: any) => (props: any) => {
+      return insertContentAt(pos, content)(props);
     },
     deleteNode: (pos?: number) => (props: any) => {
       return deleteNode(pos)(props);
@@ -163,6 +168,7 @@ export const CoreEssentials: ArkpadExtension[] = [
   Gapcursor,
   GhostText,
   FocusDecorator,
+  DropHandler,
   BaseBlocks,
   UIBlocks,
 ];

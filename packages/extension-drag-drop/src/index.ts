@@ -50,13 +50,8 @@ export const DragDrop = Extension.create({
 
       const isLayout = event.dataTransfer?.types.includes("application/arkpad-layout");
       
-      // SURGICAL FIX: If dropping a Section/Layout, force it to the root level (depth 0)
-      if (isLayout || data?.type === "section") {
-        const $pos = state.doc.resolve(targetPos);
-        if ($pos.depth > 0) {
-          targetPos = $pos.after(1);
-        }
-      }
+      // RELAXED GOVERNANCE: Sections can now be nested if the schema allows it.
+      // We removed the code that forced targetPos to depth 0.
 
       // Clean up visual state
       const canvas = view.dom.closest(".arkpad-builder-canvas") || view.dom.closest("[data-arkpad-content]");
@@ -71,9 +66,9 @@ export const DragDrop = Extension.create({
 
           // Skip if dropping in the same position
           const $pos = state.doc.resolve(pos.pos);
-          const targetPos = $pos.pos;
+          const currentTargetPos = $pos.pos;
 
-          if (targetPos >= from && targetPos <= to) {
+          if (currentTargetPos >= from && currentTargetPos <= to) {
             return false;
           }
 
@@ -89,7 +84,7 @@ export const DragDrop = Extension.create({
           tr.delete(from, from + nodeSize);
 
           // Insert at new position - we need to recalculate because positions shifted
-          const newPos = targetPos < from ? targetPos : targetPos - nodeSize;
+          const newPos = currentTargetPos < from ? currentTargetPos : currentTargetPos - nodeSize;
           const $newPos = state.doc.resolve(newPos);
 
           tr.insert($newPos.pos, nodeToMove);
@@ -103,25 +98,44 @@ export const DragDrop = Extension.create({
       }
 
       // Build chain for new blocks from library
-      let chain = editor.chain();
-
-      // Set text selection at the drop point
-      chain = chain.command(({ tr }: { tr: any }) => {
-        const $pos = tr.doc.resolve(pos.pos);
-        const selection = Selection.near($pos);
-        tr.setSelection(selection);
-        return true;
-      });
-
       if (studioBlockData) {
         try {
           const data = JSON.parse(studioBlockData);
-          // Handle direct insertion at snapped position
-          return (view.editor.chain() as any)
-            .insertContentAt(targetPos, {
-              type: data.type,
-              attrs: data.attrs || {},
-              content: data.content || undefined,
+          const nodeType = state.schema.nodes[data.type];
+          
+          // Ensure containers have at least one child if empty and fix empty text nodes
+          let content = data.content;
+          if (nodeType && nodeType.spec.content && (!content || content.length === 0)) {
+            content = [{ type: "paragraph", content: [{ type: "text", text: " " }] }];
+          }
+          
+          // Fix empty text nodes in content
+          const fixEmptyTextNodes = (nodes: any[]): any[] => {
+            return nodes.map(node => {
+              if (node.type === "text" && (!node.text || node.text.trim() === "")) {
+                return { type: "text", text: " " };
+              }
+              if (node.content && Array.isArray(node.content)) {
+                return { ...node, content: fixEmptyTextNodes(node.content) };
+              }
+              return node;
+            });
+          };
+          
+          content = fixEmptyTextNodes(content);
+
+          // Use insertContent instead of insertContentAt for better reliability
+          return (editor.chain() as any)
+            .command(({ tr, state }: { tr: any; state: any }) => {
+              const $pos = state.doc.resolve(targetPos);
+              const node = state.schema.nodeFromJSON({
+                type: data.type,
+                attrs: data.attrs || {},
+                content: content,
+              });
+              if (!node) return false;
+              tr.insert(targetPos, node);
+              return true;
             })
             .run();
         } catch (e) {
@@ -130,6 +144,7 @@ export const DragDrop = Extension.create({
         }
       } else {
         // Legacy handling
+        let chain = editor.chain();
         const block = editor.blockRegistry.getBlock(legacyBlockType);
         if (block) {
           const content = block.create();
@@ -140,9 +155,8 @@ export const DragDrop = Extension.create({
             content: [{ type: "text", text: `New ${legacyBlockType}` }],
           });
         }
+        return chain.run();
       }
-
-      return chain.run();
     };
 
     return [
