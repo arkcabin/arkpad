@@ -16,11 +16,7 @@ import { Superscript } from "@arkpad/extension-superscript";
 import { Subscript } from "@arkpad/extension-subscript";
 import { CodeBlock } from "@arkpad/extension-code-block";
 import { FloatingMenu } from "@arkpad/extension-floating-menu";
-// import { BuilderUI } from "@arkpad/extension-builder-ui";
 import { Image } from "@arkpad/extension-image";
-import { Section } from "@arkpad/extension-section";
-import { DragDrop } from "@arkpad/extension-drag-drop";
-import { Columns, Column } from "@arkpad/extension-columns";
 import { CharacterCount } from "@arkpad/core";
 import {
   FocusEvents,
@@ -107,12 +103,7 @@ export const StarterKit = Extension.create({
     extensions.push(FloatingMenu.configure({
         shouldShow: ({ state }) => state.selection.empty && state.doc.content.size > 0,
       }));
-    // extensions.push(BuilderUI);
     extensions.push(Image);
-    extensions.push(Section);
-    extensions.push(Columns);
-    extensions.push(Column);
-    extensions.push(DragDrop);
     extensions.push(HighlighterTool);
     extensions.push(EraserTool);
     extensions.push(createTextAlign());

@@ -37,7 +37,7 @@ export class PluginFactory {
         },
         handleDrop: (view, event, slice, moved) => {
           for (const ext of hooks.eventHooks.onDrop) {
-            if (ext.onDrop!(event, slice, moved) === true) return true;
+            if (ext.onDrop!(event as any, slice, moved) === true) return true;
           }
           return false;
         },

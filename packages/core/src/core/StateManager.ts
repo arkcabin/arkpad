@@ -36,7 +36,7 @@ export class StateManager {
     const nextState = EditorState.create({
       schema,
       doc: parseContent(content, schema),
-      plugins,
+      plugins: [...plugins],
     });
     this.editor.getView().updateState(nextState);
     this.editor.emitUpdate(nextState);

@@ -12,7 +12,7 @@ export const tableRowNode: NodeSpec = {
   parseDOM: [
     {
       tag: "tr",
-      getAttrs: (dom: HTMLElement) => ({
+      getAttrs: (dom: any) => ({
         height: dom.style.height ? parseInt(dom.style.height, 10) : null,
       }),
     },

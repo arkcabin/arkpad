@@ -17,8 +17,7 @@ export * from "./components/menus/BubbleMenu";
 export * from "./components/menus/FloatingMenu";
 export * from "./components/menus/SmartBar";
 
-// Studio / Builder
-export * from "./components/studio";
+
 
 // UI Components
 export * from "./components/ui/EditorButton";

@@ -16,7 +16,7 @@ export const tableNode: NodeSpec = {
   parseDOM: [
     {
       tag: "table",
-      getAttrs: (dom: HTMLElement) => ({
+      getAttrs: (dom: any) => ({
         style: dom.getAttribute("style"),
       }),
     },

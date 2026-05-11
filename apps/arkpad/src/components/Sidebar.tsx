@@ -12,8 +12,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
     {
       title: "PLATFORM",
       items: [
-        { name: "Full Editor", path: "/" },
-        { name: "Page Builder", path: "/builder" },
+        { name: "Standard Editor", path: "/" },
       ],
     },
     {

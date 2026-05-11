@@ -6,24 +6,6 @@ import {
   createHardBreak,
   createHistory,
 } from "./essentials/base";
-import { createSection as createSectionNode } from "./essentials/section";
-import { createColumns, createColumn } from "./essentials/columns";
-import {
-  ButtonNode,
-  CardNode,
-  SpacerNode,
-  DividerNode,
-  ContainerNode,
-  GridNode,
-  VideoNode,
-  IconNode,
-  BadgeNode,
-  AlertNode,
-  TabsNode,
-  TabPanelNode,
-  AccordionNode,
-  AccordionItemNode,
-} from "./nodes/ui-nodes";
 import { createUniqueId } from "./infrastructure/unique-id";
 import { FocusEvents } from "./infrastructure/focusEvents";
 import { ClipboardTextSerializer } from "./infrastructure/clipboardTextSerializer";
@@ -32,10 +14,7 @@ import { ListKeymap } from "./infrastructure/listKeymap";
 import { Dropcursor } from "./ux/dropcursor";
 import { Gapcursor } from "./ux/gapcursor";
 import { GhostText } from "./ux/GhostText";
-import { FocusDecorator } from "./ux/focusDecorator";
 import { BaseBlocks } from "./BaseBlocks";
-import { UIBlocks } from "./ui-blocks";
-import { DropHandler } from "./ux/DropHandler";
 
 import { ArkpadExtension } from "../api/extensions";
 import {
@@ -138,23 +117,6 @@ export const Engine = Extension.create({
       Keymap,
       ListKeymap,
       BaseCommands,
-      createSectionNode(),
-      createColumns(),
-      createColumn(),
-      ButtonNode,
-      CardNode,
-      SpacerNode,
-      DividerNode,
-      ContainerNode,
-      GridNode,
-      VideoNode,
-      IconNode,
-      BadgeNode,
-      AlertNode,
-      TabsNode,
-      TabPanelNode,
-      AccordionNode,
-      AccordionItemNode,
     ];
   },
 });
@@ -167,10 +129,7 @@ export const CoreEssentials: ArkpadExtension[] = [
   Dropcursor,
   Gapcursor,
   GhostText,
-  FocusDecorator,
-  DropHandler,
   BaseBlocks,
-  UIBlocks,
 ];
 
 /**
@@ -189,7 +148,4 @@ export * from "./infrastructure/listKeymap";
 export * from "./infrastructure/textDirection";
 export * from "./ux/dropcursor";
 export * from "./ux/gapcursor";
-export * from "./ux/BlockHandle";
-export * from "./nodes/ui-nodes";
-export { UIBlocks } from "./ui-blocks";
 export { CharacterCount } from "./infrastructure/character-count";

@@ -41,9 +41,6 @@
     "@arkpad/extension-markdown": "*",
     "@arkpad/extension-bubble-menu": "*",
     "@arkpad/extension-floating-menu": "*",
-    "@arkpad/extension-drag-drop": "*",
-    "@arkpad/extension-section": "*",
-    "@arkpad/extension-columns": "*",
     "prosemirror-history": "^1.4.1",
     "prosemirror-placeholder": "^1.0.7"
   },

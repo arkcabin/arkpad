@@ -102,11 +102,7 @@ export const Table = Extension.create<TableOptions>({
           handleWidth: this.options.handleWidth,
           cellMinWidth: this.options.cellMinWidth,
           lastColumnResizable: this.options.lastColumnResizable,
-          // Use our custom TableView that adds .ark-table class
-          // and applies node.attrs.style, while remaining fully
-          // compatible with prosemirror-tables' resize protocol.
-          View: TableView as any,
-        })
+        } as Parameters<typeof columnResizing>[0])
       );
     }
 
@@ -145,13 +141,15 @@ export const Table = Extension.create<TableOptions>({
                             new CellSelection(
                               selection.$anchorCell,
                               view.state.doc.resolve(cellPos)
-                            )
+                            ) as unknown as Selection
                           )
                         );
                       }
                     } else {
                       view.dispatch(
-                        view.state.tr.setSelection(CellSelection.create(view.state.doc, cellPos))
+                        view.state.tr.setSelection(
+                          CellSelection.create(view.state.doc, cellPos) as unknown as Selection
+                        )
                       );
                     }
                     event.preventDefault();

@@ -16,27 +16,12 @@ function trailingNodePlugin() {
       const { doc, schema } = newState;
       const lastNode = doc.lastChild;
 
-      // Try to use section if available, otherwise fallback to paragraph
-      const section = schema.nodes.section;
-      const fallbackNode = section || schema.nodes.paragraph;
-      if (!fallbackNode) return null;
+      const paragraph = schema.nodes.paragraph;
+      if (!paragraph) return null;
 
-      // Only insert if document is completely empty AND we actually want a default node
-      // For the Studio/Builder, we often want a truly blank canvas.
-      if (!lastNode || lastNode.type === schema.nodes.doc) {
-        return null;
-      }
-
-      // If using sections, ensure last section has content
-      if (section && lastNode.type === section && lastNode.childCount === 0) {
-        const paragraph = schema.nodes.paragraph;
-        if (!paragraph) return null;
-
-        const tr = newState.tr;
-        const newSection = lastNode.type.create(lastNode.attrs, [paragraph.create()]);
-        // Calculate position of last node: doc size minus last node size
-        const start = doc.content.size - lastNode.nodeSize;
-        return tr.replaceWith(start, doc.content.size, newSection).scrollIntoView();
+      // If document is empty, insert a paragraph
+      if (doc.content.size === 0) {
+        return newState.tr.insert(0, paragraph.create()).scrollIntoView();
       }
 
       return null;
@@ -56,7 +41,7 @@ export function createDocument(): Node<DocumentOptions> {
 
     addOptions() {
       return {
-        content: "(layout | block)*",
+        content: "block+",
         attributes: {},
       };
     },
@@ -66,11 +51,11 @@ export function createDocument(): Node<DocumentOptions> {
     },
 
     renderHTML() {
-      return ["main", { id: "ark-page-root", "data-ark-studio": "true" }, 0];
+      return ["main", { class: "arkpad-editor" }, 0];
     },
 
     // Use the native content property so SchemaBuilder picks it up correctly
-    content: "(layout | block)*",
+    content: "block+",
 
     addCommands: () => ({
       /**

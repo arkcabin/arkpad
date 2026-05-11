@@ -339,7 +339,7 @@ export class ArkpadEditor implements IArkpadEditor {
   }
 
   public blur() {
-    this.view.dom.blur();
+    (this.view.dom as HTMLElement).blur();
     this.events.emit("blur", { editor: this });
   }
 
@@ -358,9 +358,8 @@ export class ArkpadEditor implements IArkpadEditor {
 
     // Fallback for some browser environments or during event transitions
     if (typeof document !== "undefined") {
-      return (
-        this.view.dom.contains(document.activeElement) || document.activeElement === this.view.dom
-      );
+      const dom = this.view.dom as HTMLElement;
+      return dom.contains(document.activeElement) || document.activeElement === dom;
     }
 
     return false;

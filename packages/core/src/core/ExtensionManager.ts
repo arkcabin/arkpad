@@ -75,7 +75,7 @@ export class ExtensionManager {
               // If we are clicked outside, we must ensure the editor loses focus
               // so that isFocused() returns false and menus hide.
               if (view.hasFocus()) {
-                view.dom.blur();
+                (view.dom as HTMLElement).blur();
               }
 
               // Force the menu engine to recalculate immediately with forceHide=true

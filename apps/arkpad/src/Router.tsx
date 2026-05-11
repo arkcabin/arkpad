@@ -1,10 +1,8 @@
 import React, { Suspense, lazy, useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { Sidebar } from "./components/Sidebar";
-import { cn } from "./lib/utils";
-import { Edit3, Eye, Monitor, Smartphone, Tablet } from "lucide-react";
 
-import { StudioProvider, useStudio, DeviceType } from "./context/StudioContext";
+
 
 // Lazy load components
 const BoldDemo = lazy(() => import("./demos/BoldDemo").then((m) => ({ default: m.BoldDemo })));
@@ -16,7 +14,7 @@ const SuperscriptDemo = lazy(() => import("./demos/SuperscriptDemo").then((m) =>
 const SubscriptDemo = lazy(() => import("./demos/SubscriptDemo").then((m) => ({ default: m.SubscriptDemo })));
 const TableDemo = lazy(() => import("./demos/TableDemo").then((m) => ({ default: m.TableDemo })));
 const HighlightDemo = lazy(() => import("./demos/HighlightDemo").then((m) => ({ default: m.HighlightDemo })));
-const BuilderDemo = lazy(() => import("./demos/BuilderDemo").then((m) => ({ default: m.BuilderDemo })));
+const StandardEditor = lazy(() => import("./demos/StandardEditor").then((m) => ({ default: m.StandardEditor })));
 
 function Loader() {
   return (
@@ -27,8 +25,7 @@ function Loader() {
 }
 
 const ROUTE_NAMES: Record<string, string> = {
-  "/": "Full Editor",
-  "/builder": "Page Builder",
+  "/": "Standard Editor",
   "/extensions/bold": "Bold",
   "/extensions/italic": "Italic",
   "/extensions/underline": "Underline",
@@ -40,24 +37,11 @@ const ROUTE_NAMES: Record<string, string> = {
   "/extensions/highlight": "Highlight",
 };
 
-const isBuilderPath = (pathname: string) => pathname === "/builder" || pathname === "/";
+const isStandardPath = (pathname: string) => pathname === "/";
 
 function TopBar({ onSidebarToggle }: { onSidebarToggle: () => void }) {
   const location = useLocation();
   const pageName = ROUTE_NAMES[location.pathname] || "Arkpad";
-  const { 
-    device, setDevice, 
-    previewMode, setPreviewMode, 
-    isSidebarOpen, setSidebarOpen,
-    isPropertyPanelOpen, setPropertyPanelOpen 
-  } = useStudio();
-  
-  const isBuilder = isBuilderPath(location.pathname);
-
-  const getDeviceClass = (d: DeviceType) =>
-    `p-1 rounded transition-all shadow-none hover:shadow-sm ${
-      device === d ? "text-black bg-white shadow-sm" : "text-gray-400 hover:text-black hover:bg-white"
-    }`;
 
   return (
     <div className="h-10 px-4 border-b border-[var(--border)] flex items-center justify-between shrink-0 bg-white z-50">
@@ -68,35 +52,11 @@ function TopBar({ onSidebarToggle }: { onSidebarToggle: () => void }) {
           </svg>
         </button>
         <div className="flex items-center gap-2 text-[10px] font-medium tracking-tight">
-          <span className="text-[var(--text-muted)] hover:text-[var(--text-main)]">Pages</span>
+          <span className="text-[var(--text-muted)] hover:text-[var(--text-main)]">Editor</span>
           <span className="text-[var(--text-muted)] opacity-30">/</span>
           <span className="text-[var(--text-main)] font-semibold">{pageName}</span>
         </div>
       </div>
-
-      {isBuilder && (
-        <div className="absolute left-1/2 -translate-x-1/2 flex items-center bg-gray-100/50 p-0.5 rounded-lg border border-gray-200/50">
-          <button onClick={() => setDevice("desktop")} className={getDeviceClass("desktop")}><Monitor size={12} /></button>
-          <button onClick={() => setDevice("tablet")} className={getDeviceClass("tablet")}><Tablet size={12} /></button>
-          <button onClick={() => setDevice("mobile")} className={getDeviceClass("mobile")}><Smartphone size={12} /></button>
-        </div>
-      )}
-
-      {isBuilder && (
-        <div className="flex items-center gap-4">
-          <div className="flex bg-gray-100/50 p-0.5 rounded-lg border border-gray-200/50">
-            <button onClick={() => setPreviewMode(false)} className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-[9px] font-bold ${!previewMode ? "bg-white text-black shadow-sm ring-1 ring-black/5" : "text-gray-400"}`}>
-              <Edit3 size={11} /> EDIT
-            </button>
-            <button onClick={() => setPreviewMode(true)} className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-[9px] font-bold ${previewMode ? "bg-white text-black shadow-sm ring-1 ring-black/5" : "text-gray-400"}`}>
-              <Eye size={11} /> PREVIEW
-            </button>
-          </div>
-          <div className="w-px h-4 bg-[var(--border)]" />
-          <button onClick={() => setSidebarOpen(!isSidebarOpen)} className={cn("p-1", isSidebarOpen ? "text-black" : "text-gray-400")}><BoxIcon /></button>
-          <button onClick={() => setPropertyPanelOpen(!isPropertyPanelOpen)} className={cn("p-1", isPropertyPanelOpen ? "text-black" : "text-gray-400")}><LayoutIcon /></button>
-        </div>
-      )}
     </div>
   );
 }
@@ -116,9 +76,7 @@ const LayoutIcon = () => (
 export function Router() {
   return (
     <BrowserRouter>
-      <StudioProvider>
         <AppShell />
-      </StudioProvider>
     </BrowserRouter>
   );
 }
@@ -134,8 +92,7 @@ function AppShell() {
         <main className="flex-1 h-full overflow-hidden relative flex flex-col">
           <Suspense fallback={<Loader />}>
             <Routes>
-              <Route path="/" element={<div className="flex-1 overflow-hidden"><BuilderDemo /></div>} />
-              <Route path="/builder" element={<div className="flex-1 overflow-hidden"><BuilderDemo /></div>} />
+              <Route path="/" element={<div className="flex-1 overflow-hidden"><StandardEditor /></div>} />
               <Route path="/extensions/bold" element={<BoldDemo />} />
               <Route path="/extensions/italic" element={<ItalicDemo />} />
               <Route path="/extensions/underline" element={<UnderlineDemo />} />

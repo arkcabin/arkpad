@@ -1,7 +1,7 @@
 import * as React from "react";
 import { createRoot, type Root } from "react-dom/client";
 import type { Node as PMNode } from "prosemirror-model";
-import type { EditorView, NodeView, ViewMutationRecord } from "prosemirror-view";
+import type { EditorView, NodeView } from "prosemirror-view";
 
 export interface ReactNodeViewProps {
   node: PMNode;
@@ -134,7 +134,7 @@ export class ReactNodeView implements NodeView {
     return true;
   }
 
-  public ignoreMutation(mutation: ViewMutationRecord) {
+  public ignoreMutation(mutation: any) {
     // If the mutation is in the content area, don't ignore it
     if (this.contentDOM?.contains(mutation.target)) {
       return false;

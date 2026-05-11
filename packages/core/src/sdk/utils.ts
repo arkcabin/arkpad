@@ -10,7 +10,7 @@ export function markInputRule(regexp: RegExp, markType: MarkType, getAttrs?: (ma
     const m = match.length - 1;
 
     if (match[m]) {
-      const textStart = start + match[0].indexOf(match[m]);
+      const textStart = start + (match[0] as string).indexOf(match[m]);
       const textEnd = textStart + match[m].length;
       const attrs = getAttrs ? getAttrs(match) : null;
 

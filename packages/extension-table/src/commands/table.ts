@@ -1,10 +1,6 @@
 import type { ArkpadCommandProps } from "@arkpad/core";
 import { TextSelection } from "prosemirror-state";
-import {
-  fixTables as pmFixTables,
-  deleteTable as pmDeleteTable,
-  TableMap,
-} from "prosemirror-tables";
+import { deleteTable as pmDeleteTable, TableMap } from "prosemirror-tables";
 import type { InsertTableOptions, CommandFactory } from "../types";
 import { createTable } from "../nodes/utilities/createTable";
 
@@ -85,13 +81,43 @@ export const fixTables: CommandFactory =
   () =>
   ({ chain }: ArkpadCommandProps) => {
     return chain()
-      .command(({ state, dispatch }: ArkpadCommandProps) => {
-        const tr = pmFixTables(state);
-        if (tr && dispatch) {
+      .command(({ state, tr, dispatch }: ArkpadCommandProps) => {
+        let fixed = false;
+        const { doc } = state;
+        doc.descendants((node, pos) => {
+          if (node.type.name === "table") {
+            const table = node;
+            const map = TableMap.get(table);
+            for (let row = 0; row < map.height; row++) {
+              for (let col = 0; col < map.width; col++) {
+                const cellPos = map.positionAt(row, col, table);
+                if (cellPos === -1) continue;
+                const cell = doc.nodeAt(pos + 1 + cellPos);
+                if (!cell) {
+                  return;
+                }
+                const colspan = cell.attrs.colspan || 1;
+                const rowspan = cell.attrs.rowspan || 1;
+                if (col + colspan > map.width || row + rowspan > map.height) {
+                  const newAttrs = { ...cell.attrs };
+                  if (col + colspan > map.width) {
+                    newAttrs.colspan = map.width - col;
+                  }
+                  if (row + rowspan > map.height) {
+                    newAttrs.rowspan = map.height - row;
+                  }
+                  tr.setNodeMarkup(pos + 1 + cellPos, undefined, newAttrs);
+                  fixed = true;
+                }
+              }
+            }
+          }
+        });
+        if (fixed && dispatch) {
           dispatch(tr);
           return true;
         }
-        return !!tr;
+        return false;
       }, "fixTables")
       .run();
   };

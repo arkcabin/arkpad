@@ -12,5 +12,5 @@
     "composite": false,
     "lib": ["ESNext", "DOM"]
   },
-  "include": ["src"]
+  "include": ["src", "../../packages/core/src/typings"]
 }

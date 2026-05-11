@@ -1,8 +1,9 @@
-import type { NodeSpec } from "prosemirror-model";
+import type { NodeSpec, DOMOutputSpec } from "prosemirror-model";
 import { NodeRole } from "@arkpad/core";
 import type { TableCellAttrs } from "../types";
 
-export function parseCellAttrs(dom: HTMLElement): Partial<TableCellAttrs> {
+export function parseCellAttrs(dom: any): Partial<TableCellAttrs> | null {
+  if (typeof dom === "string") return null;
   return {
     colspan: parseInt(dom.getAttribute("colspan") || "1", 10),
     rowspan: parseInt(dom.getAttribute("rowspan") || "1", 10),
@@ -10,16 +11,13 @@ export function parseCellAttrs(dom: HTMLElement): Partial<TableCellAttrs> {
       ? dom
           .getAttribute("data-colwidth")!
           .split(",")
-          .map((v) => parseInt(v, 10))
+          .map((v: string) => parseInt(v, 10))
       : null,
     background: dom.style.backgroundColor || null,
   };
 }
 
-export function renderCellAttrs(
-  attrs: TableCellAttrs,
-  tag: string
-): [string, Record<string, any>, number] {
+export function renderCellAttrs(attrs: TableCellAttrs, tag: string): DOMOutputSpec {
   const domAttrs: Record<string, any> = {};
   if (attrs.colspan !== 1) domAttrs.colspan = attrs.colspan;
   if (attrs.rowspan !== 1) domAttrs.rowspan = attrs.rowspan;

@@ -1,7 +1,9 @@
-import type { Command, EditorState, Transaction } from "prosemirror-state";
+import type { EditorState, Transaction } from "prosemirror-state";
 import type { EditorView } from "prosemirror-view";
 import type { Schema } from "prosemirror-model";
 import type { ArkpadExtension } from "./extensions";
+
+export type Command = (state: EditorState, dispatch?: (tr: Transaction) => void) => boolean;
 
 export type Dispatch = (tr: Transaction) => void;
 export type EditorSubscriptionScope = "state" | "ui" | "all";

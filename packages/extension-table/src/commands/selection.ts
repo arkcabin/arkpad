@@ -55,7 +55,9 @@ export const selectColumn: CommandFactory =
 
       if (dispatch) {
         dispatch(
-          tr.setSelection(new CellSelection(tr.doc.resolve(anchorCell), tr.doc.resolve(headCell)))
+          tr.setSelection(
+            new CellSelection(tr.doc.resolve(anchorCell), tr.doc.resolve(headCell)) as any
+          )
         );
       }
       return true;
@@ -116,7 +118,9 @@ export const selectRow: CommandFactory =
 
       if (dispatch) {
         dispatch(
-          tr.setSelection(new CellSelection(tr.doc.resolve(anchorCell), tr.doc.resolve(headCell)))
+          tr.setSelection(
+            new CellSelection(tr.doc.resolve(anchorCell), tr.doc.resolve(headCell)) as any
+          )
         );
       }
       return true;

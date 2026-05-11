@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { useArkpadContext } from "../editor/context";
 import { useEditorState } from "../../hooks/useEditorState";
 import { ArkpadEditorAPI } from "@arkpad/core";
@@ -44,15 +44,23 @@ export const EditorButton: React.FC<EditorButtonProps> = ({
 }) => {
   const editor = useArkpadContext();
 
-  // Reactively track editor state (active and executable)
-  const { isActive, canRun } = useEditorState(
-    editor,
+  const selector = useCallback(
     (s: ArkpadEditorAPI) => ({
       isActive: s.isActive(name || command, attrs),
       canRun: s.canRunCommand(command, ...(args as any[])),
     }),
-    (a: any, b: any) => a?.isActive === b?.isActive && a?.canRun === b?.canRun
-  ) ?? { isActive: false, canRun: false };
+    [name, command, attrs, args]
+  );
+
+  const equalityFn = useCallback(
+    (a: any, b: any) => a?.isActive === b?.isActive && a?.canRun === b?.canRun,
+    []
+  );
+
+  // Reactively track editor state (active and executable)
+  const state = useEditorState(editor, selector, equalityFn);
+
+  const { isActive, canRun } = state ?? { isActive: false, canRun: false };
 
   return (
     <button

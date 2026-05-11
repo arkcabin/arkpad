@@ -17,7 +17,7 @@
   "scripts": {
     "dev:app": "npm run dev -w @arkpad/app",
     "dev": "npm run dev -w @arkpad/app",
-    "build": "npm run build -w @arkpad/core && npm run build -w @arkpad/extension-bold && npm run build -w @arkpad/extension-italic && npm run build -w @arkpad/extension-underline && npm run build -w @arkpad/extension-strike && npm run build -w @arkpad/extension-code && npm run build -w @arkpad/extension-link && npm run build -w @arkpad/extension-heading && npm run build -w @arkpad/extension-blockquote && npm run build -w @arkpad/extension-list-item && npm run build -w @arkpad/extension-bullet-list && npm run build -w @arkpad/extension-ordered-list && npm run build -w @arkpad/extension-horizontal-rule && npm run build -w @arkpad/extension-table && npm run build -w @arkpad/extension-ai && npm run build -w @arkpad/extension-alignment && npm run build -w @arkpad/extension-bubble-menu && npm run build -w @arkpad/extension-floating-menu && npm run build -w @arkpad/extension-markdown && npm run build -w @arkpad/extension-image && npm run build -w @arkpad/extension-highlight && npm run build -w @arkpad/extension-highlighter && npm run build -w @arkpad/extension-task-list && npm run build -w @arkpad/extension-eraser && npm run build -w @arkpad/extension-superscript && npm run build -w @arkpad/extension-subscript && npm run build -w @arkpad/extension-code-block && npm run build -w @arkpad/extension-section && npm run build -w @arkpad/extension-columns && npm run build -w @arkpad/extension-drag-drop && npm run build -w @arkpad/react && npm run build -w @arkpad/starter-kit && npm run build -w @arkpad/app",
+    "build": "npm run build -w @arkpad/core && npm run build -w @arkpad/extension-bold && npm run build -w @arkpad/extension-italic && npm run build -w @arkpad/extension-underline && npm run build -w @arkpad/extension-strike && npm run build -w @arkpad/extension-code && npm run build -w @arkpad/extension-link && npm run build -w @arkpad/extension-heading && npm run build -w @arkpad/extension-blockquote && npm run build -w @arkpad/extension-list-item && npm run build -w @arkpad/extension-bullet-list && npm run build -w @arkpad/extension-ordered-list && npm run build -w @arkpad/extension-horizontal-rule && npm run build -w @arkpad/extension-table && npm run build -w @arkpad/extension-ai && npm run build -w @arkpad/extension-alignment && npm run build -w @arkpad/extension-bubble-menu && npm run build -w @arkpad/extension-floating-menu && npm run build -w @arkpad/extension-markdown && npm run build -w @arkpad/extension-image && npm run build -w @arkpad/extension-highlight && npm run build -w @arkpad/extension-highlighter && npm run build -w @arkpad/extension-task-list && npm run build -w @arkpad/extension-eraser && npm run build -w @arkpad/extension-superscript && npm run build -w @arkpad/extension-subscript && npm run build -w @arkpad/extension-code-block && npm run build -w @arkpad/react && npm run build -w @arkpad/starter-kit && npm run build -w @arkpad/app",
     "typecheck": "npm run build -w @arkpad/core && npm run build -w @arkpad/react && npm run typecheck --workspaces",
     "lint": "eslint .",
     "format": "prettier . --write",
@@ -29,8 +29,8 @@
     "prepare": "husky"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
     "@changesets/cli": "^2.27.12",
+    "@eslint/js": "^10.0.1",
     "eslint": "^10.2.1",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
@@ -38,12 +38,28 @@
     "husky": "^9.1.7",
     "jiti": "^2.6.1",
     "prettier": "^3.8.3",
-    "typescript-eslint": "^8.59.0",
     "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "react-dom": "^19.1.1",
+    "typescript-eslint": "^8.59.0"
   },
   "overrides": {
     "react": "$react",
     "react-dom": "$react-dom"
+  },
+  "dependencies": {
+    "@radix-ui/primitive": "1.1.3",
+    "@radix-ui/react-checkbox": "1.3.3",
+    "@radix-ui/react-compose-refs": "1.1.2",
+    "@radix-ui/react-context": "1.1.2",
+    "@radix-ui/react-presence": "1.1.5",
+    "@radix-ui/react-primitive": "2.1.3",
+    "@radix-ui/react-use-controllable-state": "1.2.2",
+    "@radix-ui/react-use-previous": "1.1.1",
+    "@radix-ui/react-use-size": "1.1.1",
+    "class-variance-authority": "0.7.1",
+    "prosemirror-placeholder": "1.0.7",
+    "react-router-dom": "^7.15.0",
+    "tailwind-merge": "2.6.0",
+    "vite": "6.2.6"
   }
 }
