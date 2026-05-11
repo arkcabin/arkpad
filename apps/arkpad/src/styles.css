@@ -4,40 +4,54 @@
 
 :root {
   --bg-main: #ffffff;
-  --text-main: #000000;
-  --text-muted: #666666;
-  --border: #eeeeee;
-  --selection: rgba(0, 0, 0, 0.1);
+  --bg-canvas: #f8fafc;
+  --bg-editor: #ffffff;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --border: #e2e8f0;
+  --selection: rgba(59, 130, 246, 0.1);
   --font-sans: system-ui, -apple-system, sans-serif;
 }
 
 .dark {
-  --bg-main: #000000;
-  --text-main: #ffffff;
-  --text-muted: #888888;
-  --border: #222222;
+  --bg-main: #020617;
+  --bg-canvas: #0f172a;
+  --bg-editor: #1e293b;
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  --border: #334155;
   --selection: rgba(255, 255, 255, 0.1);
 }
 
 @layer base {
   body {
-    @apply bg-[var(--bg-main)] text-[var(--text-main)] font-sans antialiased m-0 p-0;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    font-family: var(--font-sans);
+    @apply antialiased m-0 p-0;
   }
 }
 
 .arkpad-container {
   outline: none !important;
   min-height: 300px;
-  color: var(--text-main);
+  color: var(--text-main) !important;
 }
 
 /* Simple flat toolbar */
 .toolbar-btn {
-  @apply p-2 rounded-none transition-colors text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--selection)];
+  @apply p-2 rounded-none transition-colors;
+  color: var(--text-muted);
+}
+
+.toolbar-btn:hover {
+  color: var(--text-main);
+  background-color: var(--selection);
 }
 
 .toolbar-btn.active {
-  @apply text-[var(--text-main)] bg-[var(--selection)];
+  color: #3b82f6;
+  background-color: rgba(59, 130, 246, 0.1);
 }
 
 /* Hide scrollbars but keep functionality */
@@ -51,32 +65,47 @@
 
 /* Prose Mirror basic cleanup */
 .prose {
-  @apply max-w-none text-[var(--text-main)];
+  @apply max-w-none;
+  color: var(--text-main) !important;
 }
 
 .prose h1,
 .prose h2,
-.prose h3 {
-  @apply font-bold mt-6 mb-4 text-[var(--text-main)];
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6 {
+  @apply font-bold mt-6 mb-4;
+  color: var(--text-main) !important;
 }
 
 .prose strong,
 .prose b {
   @apply font-bold;
+  color: inherit;
 }
 
 .prose em,
 .prose i {
   @apply italic;
+  color: inherit;
 }
 
-.prose p {
+.prose p,
+.prose li {
   @apply mb-4 leading-relaxed;
+  color: var(--text-main) !important;
 }
 
 /* Prose code cleanup */
 .prose code {
-  @apply bg-[var(--selection)] px-1 rounded-sm font-mono text-[0.9em];
+  background-color: var(--selection);
+  color: #3b82f6;
+  @apply px-1 rounded-sm font-mono text-[0.9em];
+}
+
+.dark .prose code {
+  color: #60a5fa;
 }
 
 /* Transitions */
@@ -93,6 +122,25 @@
 
 .animate-page-in {
   animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* ── Global Scrollbar for Content ── */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
 }
 
 /* ── Page Builder ─────────────────────────────────────────────── */

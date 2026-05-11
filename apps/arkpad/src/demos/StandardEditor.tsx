@@ -149,9 +149,9 @@ export function StandardEditor() {
 
   return (
     <ArkpadProvider editor={editor}>
-      <div className="flex-1 flex flex-col min-h-screen bg-gray-50/50">
+      <div className="flex-1 flex flex-col min-h-screen bg-[var(--bg-canvas)]">
         {/* Full Toolbar */}
-        <div className="sticky top-0 z-10 w-full bg-white border-b border-gray-200 shadow-sm">
+        <div className="sticky top-0 z-10 w-full bg-[var(--bg-editor)] border-b border-[var(--border)] shadow-sm">
           <div className="max-w-5xl mx-auto px-4 h-14 flex items-center gap-0.5 overflow-x-auto no-scrollbar">
             {/* History */}
             <ToolbarButton command="undo" title="Undo">
@@ -327,7 +327,7 @@ export function StandardEditor() {
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 sm:p-8">
-          <div className="max-w-4xl mx-auto bg-white border border-gray-200 shadow-sm min-h-[calc(100vh-12rem)]">
+          <div className="max-w-4xl mx-auto bg-[var(--bg-editor)] border border-[var(--border)] shadow-sm min-h-[calc(100vh-12rem)]">
             <div className="p-8 sm:p-12">
               <ArkpadEditorContent
                 editor={editor}
