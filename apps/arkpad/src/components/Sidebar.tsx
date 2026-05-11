@@ -14,6 +14,25 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
       items: [{ name: "Standard Editor", path: "/" }],
     },
     {
+      title: "TYPOGRAPHY",
+      items: [
+        { name: "Heading", path: "/extensions/heading" },
+        { name: "Blockquote", path: "/extensions/blockquote" },
+        { name: "CodeBlock", path: "/extensions/codeblock" },
+        { name: "Horizontal Rule 🚧", path: "#" },
+      ],
+    },
+    {
+      title: "RICH CONTENT",
+      items: [
+        { name: "Table", path: "/extensions/table" },
+        { name: "Image 🚧", path: "#" },
+        { name: "Bullet List 🚧", path: "#" },
+        { name: "Ordered List 🚧", path: "#" },
+        { name: "Task List 🚧", path: "#" },
+      ],
+    },
+    {
       title: "MARKS",
       items: [
         { name: "Bold", path: "/extensions/bold" },
@@ -27,18 +46,12 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
       ],
     },
     {
-      title: "NODES",
+      title: "INTERACTION",
       items: [
-        { name: "Table", path: "/extensions/table" },
-        { name: "Heading", path: "/extensions/heading" },
-        { name: "Blockquote", path: "/extensions/blockquote" },
-        { name: "CodeBlock", path: "/extensions/codeblock" },
-        { name: "Image 🚧", path: "#" },
+        { name: "Bubble Menu 🚧", path: "#" },
+        { name: "Floating Menu 🚧", path: "#" },
+        { name: "Placeholder 🚧", path: "#" },
       ],
-    },
-    {
-      title: "UTILITIES",
-      items: [{ name: "Placeholder", path: "#" }],
     },
   ];
 
@@ -56,9 +69,9 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
     >
       <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-6 scrollbar-hide">
         {sections.map((section) => (
-          <div key={section.title} className="space-y-1">
+          <div key={section.title} className="space-y-0.5">
             {!isCollapsed && (
-              <div className="px-3 text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">
+              <div className="px-3 text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1.5 opacity-60">
                 {section.title}
               </div>
             )}
@@ -68,18 +81,18 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
                 to={item.path}
                 className={({ isActive }) =>
                   cn(
-                    "flex items-center px-3 py-1.5 text-sm rounded-none transition-colors",
+                    "flex items-center px-3 py-1.5 text-sm transition-colors",
                     isActive && item.path !== "#"
                       ? "bg-[var(--selection)] text-[var(--text-main)] font-medium"
-                      : "text-[var(--text-muted)] hover:text-[var(--text-main)]",
-                    item.path === "#" && "cursor-default opacity-60 hover:text-[var(--text-muted)]"
+                      : "text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--selection)]",
+                    item.path === "#" && "cursor-default opacity-50"
                   )
                 }
                 onClick={(e) => {
                   if (item.path === "#") e.preventDefault();
                 }}
               >
-                {item.name}
+                {!isCollapsed && <span className="truncate">{item.name}</span>}
               </NavLink>
             ))}
           </div>
@@ -89,7 +102,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
       <div className="p-2 border-t border-[var(--border)]">
         <button
           onClick={toggleTheme}
-          className="w-full flex items-center justify-center p-2 text-[var(--text-muted)] hover:text-[var(--text-main)]"
+          className="w-full flex items-center justify-center p-2 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors"
         >
           <Sun className="w-4 h-4 dark:hidden" />
           <Moon className="w-4 h-4 hidden dark:block" />
