@@ -1,38 +1,58 @@
 import { wrapInList } from "prosemirror-schema-list";
-import { toggleMark as pmToggleMark, setBlockType, } from "prosemirror-commands";
+import {
+  toggleMark as pmToggleMark,
+  setBlockType,
+  wrapIn as pmWrapIn,
+  lift as pmLift,
+} from "prosemirror-commands";
 import { type NodeType, type MarkType } from "prosemirror-model";
 import { NodeSelection } from "prosemirror-state";
 
+export const toggleMark =
+  (type: string | MarkType, attrs?: Record<string, any>) => (props: any) => {
+    const markType = typeof type === "string" ? props.state.schema.marks[type] : type;
+    if (!markType) return false;
+    return pmToggleMark(markType, attrs)(props.state, props.dispatch);
+  };
 
-export const toggleMark = (type: string | MarkType, attrs?: Record<string, any>) => (props: any) => {
-  const markType = typeof type === "string" ? props.state.schema.marks[type] : type;
-  if (!markType) return false;
-  return pmToggleMark(markType, attrs)(props.state, props.dispatch);
-};
-
-export const toggleBlock = (type: string | NodeType, attrs?: Record<string, any>) => (props: any) => {
+export const wrapIn = (type: string | NodeType, attrs?: Record<string, any>) => (props: any) => {
   const nodeType = typeof type === "string" ? props.state.schema.nodes[type] : type;
   if (!nodeType) return false;
-  
-  if (nodeType.isTextblock) {
-    return setBlockType(nodeType, attrs)(props.state, props.dispatch);
-  }
-  
-  // If it's a layout block (not a textblock), we should replace the current node or wrap it
-  if (props.dispatch) {
-    const node = nodeType.createAndFill(attrs);
-    if (node) {
-      props.tr.replaceSelectionWith(node);
-    }
-  }
-  return true;
+  return pmWrapIn(nodeType, attrs)(props.state, props.dispatch);
 };
+
+export const lift = () => (props: any) => {
+  return pmLift(props.state, props.dispatch);
+};
+
+export const toggleBlock =
+  (type: string | NodeType, attrs?: Record<string, any>) => (props: any) => {
+    const nodeType = typeof type === "string" ? props.state.schema.nodes[type] : type;
+    if (!nodeType) return false;
+
+    if (nodeType.isTextblock) {
+      return setBlockType(nodeType, attrs)(props.state, props.dispatch);
+    }
+
+    // If it's a layout block (not a textblock), we should replace the current node or wrap it
+    if (props.dispatch) {
+      const isActive = props.editor.isActive(
+        typeof type === "string" ? type : nodeType.name,
+        attrs
+      );
+      if (isActive) {
+        return pmLift(props.state, props.dispatch);
+      }
+      return pmWrapIn(nodeType, attrs)(props.state, props.dispatch);
+    }
+    return true;
+  };
 
 export const setTextAlign = (align: string) => (props: any) => {
   const { tr, dispatch, state } = props;
   const { selection } = state;
   const { from, to } = selection;
-  
+
   tr.doc.nodesBetween(from, to, (node, pos) => {
     if (node.isBlock) {
       tr.setNodeMarkup(pos, undefined, { ...node.attrs, align });
@@ -43,28 +63,33 @@ export const setTextAlign = (align: string) => (props: any) => {
   return true;
 };
 
-export const insertNode = (type: string | NodeType, attrs?: Record<string, any>) => (props: any) => {
-  const nodeType = typeof type === "string" ? props.state.schema.nodes[type] : type;
-  if (!nodeType) return false;
-  const node = nodeType.createAndFill(attrs);
-  if (!node) return false;
-  props.tr.replaceSelectionWith(node);
-  return true;
-};
+export const insertNode =
+  (type: string | NodeType, attrs?: Record<string, any>) => (props: any) => {
+    const nodeType = typeof type === "string" ? props.state.schema.nodes[type] : type;
+    if (!nodeType) return false;
+    const node = nodeType.createAndFill(attrs);
+    if (!node) return false;
+    props.tr.replaceSelectionWith(node);
+    return true;
+  };
 
-export const updateAttributes = (typeOrName: string, attributes: Record<string, any>) => (props: any) => {
-  const { tr, state } = props;
-  const { selection } = state;
-  const { from, to } = selection;
-  
-  tr.doc.nodesBetween(from, to, (node, pos) => {
-    const type = typeof typeOrName === "string" ? state.schema.nodes[typeOrName] || state.schema.marks[typeOrName] : typeOrName;
-    if (node.type === type) {
-      tr.setNodeMarkup(pos, undefined, { ...node.attrs, ...attributes });
-    }
-  });
-  return true;
-};
+export const updateAttributes =
+  (typeOrName: string, attributes: Record<string, any>) => (props: any) => {
+    const { tr, state } = props;
+    const { selection } = state;
+    const { from, to } = selection;
+
+    tr.doc.nodesBetween(from, to, (node, pos) => {
+      const type =
+        typeof typeOrName === "string"
+          ? state.schema.nodes[typeOrName] || state.schema.marks[typeOrName]
+          : typeOrName;
+      if (node.type === type) {
+        tr.setNodeMarkup(pos, undefined, { ...node.attrs, ...attributes });
+      }
+    });
+    return true;
+  };
 
 export const toggleList = (listType: string | NodeType) => (props: any) => {
   const lType = typeof listType === "string" ? props.state.schema.nodes[listType] : listType;
@@ -75,11 +100,15 @@ export const toggleList = (listType: string | NodeType) => (props: any) => {
 export const setNode = (type: string | NodeType, attrs?: Record<string, any>) => (props: any) => {
   const nodeType = typeof type === "string" ? props.state.schema.nodes[type] : type;
   if (!nodeType) return false;
-  
+
   if (nodeType.isTextblock) {
+    const isActive = props.editor.isActive(typeof type === "string" ? type : nodeType.name, attrs);
+    if (isActive) {
+      return setBlockType(props.state.schema.nodes.paragraph!, attrs)(props.state, props.dispatch);
+    }
     return setBlockType(nodeType, attrs)(props.state, props.dispatch);
   }
-  
+
   if (props.dispatch) {
     const node = nodeType.createAndFill(attrs);
     if (node) {
@@ -92,17 +121,20 @@ export const setNode = (type: string | NodeType, attrs?: Record<string, any>) =>
 export const insertContent = (content: any) => (props: any) => {
   const { tr, state } = props;
   const node = state.schema.nodeFromJSON(content);
-  
+
   if (!node) return false;
 
-  // If the selection is at the doc root and invalid for text, 
+  // If the selection is at the doc root and invalid for text,
   // insert at the end of the doc instead of replacing selection.
-  if (state.selection.$from.parent.type.name === 'doc' && !state.selection.$from.parent.type.allowsContent(state.schema.nodes.text!)) {
+  if (
+    state.selection.$from.parent.type.name === "doc" &&
+    !state.selection.$from.parent.type.allowsContent(state.schema.nodes.text!)
+  ) {
     tr.insert(state.doc.content.size, node);
   } else {
     tr.replaceSelectionWith(node);
   }
-  
+
   return true;
 };
 

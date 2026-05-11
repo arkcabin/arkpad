@@ -1,29 +1,57 @@
-import { Extension, ArkpadCommandProps } from "@arkpad/core";
+import { Node, ArkpadCommandProps } from "@arkpad/core";
 
-export const Blockquote = Extension.create({
+declare module "@arkpad/core" {
+  interface ArkpadCommands {
+    setBlockquote: () => void;
+    toggleBlockquote: () => void;
+    unsetBlockquote: () => void;
+  }
+}
+
+export interface BlockquoteOptions {
+  HTMLAttributes: Record<string, any>;
+}
+
+export const Blockquote = Node.create<BlockquoteOptions>({
   name: "blockquote",
 
-  addNodes() {
+  addOptions() {
     return {
-      blockquote: {
-        content: "block+",
-        marks: "_",
-        group: "block",
-        defining: true,
-        trailingNode: true,
-        parseDOM: [{ tag: "blockquote" }],
-        toDOM() {
-          return ["blockquote", 0];
-        },
-      },
+      HTMLAttributes: {},
     };
+  },
+
+  content: "block+",
+  marks: "_",
+  group: "block",
+  defining: true,
+  trailingNode: true,
+
+  parseHTML() {
+    return [{ tag: "blockquote" }];
+  },
+
+  renderHTML({ HTMLAttributes }: { HTMLAttributes: Record<string, any> }) {
+    return ["blockquote", { ...this.options.HTMLAttributes, ...HTMLAttributes }, 0];
   },
 
   addCommands() {
     return {
-      toggleBlockquote: () => ({ chain }: ArkpadCommandProps) => {
-        return chain().toggleBlock("blockquote");
-      },
+      setBlockquote:
+        () =>
+        ({ chain }: ArkpadCommandProps) => {
+          return chain().toggleBlock("blockquote").run();
+        },
+      toggleBlockquote:
+        () =>
+        ({ chain }: ArkpadCommandProps) => {
+          return chain().toggleBlock("blockquote").run();
+        },
+      unsetBlockquote:
+        () =>
+        ({ chain }: ArkpadCommandProps) => {
+          return chain().setNode("paragraph").run();
+        },
     };
   },
 

@@ -77,7 +77,7 @@ export const Heading = Node.create<HeadingOptions>({
       toggleHeading:
         (attrs: { level: number }) =>
         ({ state, dispatch, editor }: ArkpadCommandProps) => {
-          const { schema, selection } = state;
+          const { schema } = state;
           const type = schema.nodes.heading;
           if (!type) return false;
 

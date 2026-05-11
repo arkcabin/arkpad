@@ -31,7 +31,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
       items: [
         { name: "Table", path: "/extensions/table" },
         { name: "Heading", path: "/extensions/heading" },
-        { name: "Blockquote 🚧", path: "#" },
+        { name: "Blockquote", path: "/extensions/blockquote" },
         { name: "CodeBlock 🚧", path: "#" },
         { name: "Image 🚧", path: "#" },
       ],

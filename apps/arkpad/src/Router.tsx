@@ -27,6 +27,9 @@ const HighlightDemo = lazy(() =>
 const HeadingDemo = lazy(() =>
   import("./demos/HeadingDemo").then((m) => ({ default: m.HeadingDemo }))
 );
+const BlockquoteDemo = lazy(() =>
+  import("./demos/BlockquoteDemo").then((m) => ({ default: m.BlockquoteDemo }))
+);
 const StandardEditor = lazy(() =>
   import("./demos/StandardEditor").then((m) => ({ default: m.StandardEditor }))
 );
@@ -51,6 +54,7 @@ const ROUTE_NAMES: Record<string, string> = {
   "/extensions/table": "Table",
   "/extensions/highlight": "Highlight",
   "/extensions/heading": "Heading",
+  "/extensions/blockquote": "Blockquote",
 };
 
 function TopBar({ onSidebarToggle }: { onSidebarToggle: () => void }) {
@@ -125,6 +129,7 @@ function AppShell() {
               <Route path="/extensions/table" element={<TableDemo />} />
               <Route path="/extensions/highlight" element={<HighlightDemo />} />
               <Route path="/extensions/heading" element={<HeadingDemo />} />
+              <Route path="/extensions/blockquote" element={<BlockquoteDemo />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Suspense>
