@@ -71,7 +71,7 @@
 }
 
 /* --- Drag & Drop Indicator --- */
-.ark-drop-indicator {
+.ark-drop-indicator, .ark-drop-gap {
   position: absolute;
   left: 0;
   right: 0;
@@ -82,7 +82,7 @@
   align-items: center;
 }
 
-.ark-drop-indicator-line {
+.ark-drop-indicator-line, .ark-drop-gap-line {
   width: 100%;
   height: 2px;
   background: #3b82f6;
@@ -91,7 +91,9 @@
 }
 
 .ark-drop-indicator-line::before,
-.ark-drop-indicator-line::after {
+.ark-drop-indicator-line::after,
+.ark-drop-gap-line::before,
+.ark-drop-gap-line::after {
   content: "";
   position: absolute;
   top: 50%;
@@ -103,11 +105,11 @@
   box-shadow: 0 0 5px rgba(59, 130, 246, 0.8);
 }
 
-.ark-drop-indicator-line::before {
+.ark-drop-indicator-line::before, .ark-drop-gap-line::before {
   left: -4px;
 }
 
-.ark-drop-indicator-line::after {
+.ark-drop-indicator-line::after, .ark-drop-gap-line::after {
   right: -4px;
 }
 
@@ -194,12 +196,16 @@
 /* Section & Block Labels */
 .arkpad-builder-canvas .ProseMirror > .ark-section {
   position: relative;
-  border: 1px dashed transparent;
-  transition: all 0.2s ease;
-  margin-bottom: 24px;
+  border: 1px dashed rgba(37, 99, 235, 0.15);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
 }
 
 .arkpad-builder-canvas .ProseMirror > .ark-section:hover,
+.arkpad-builder-canvas .ProseMirror > .ark-section.has-focus,
 .arkpad-builder-canvas .ProseMirror > .ark-section.ProseMirror-selectednode {
   border-color: #3b82f6;
   border-style: solid;

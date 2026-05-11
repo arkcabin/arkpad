@@ -3,6 +3,7 @@ import { ArkpadEditorContent } from "../editor/ArkpadEditorContent";
 import { useArkpadContext } from "../editor/context";
 import { cn } from "../../utils/utils";
 import { useEditorStore } from "../../stores/editorStore";
+import { StudioBubbleMenu } from "./StudioBubbleMenu";
 import type { ArkpadEditorAPI } from "@arkpad/core";
 
 export interface ArkpadCanvasProps {
@@ -32,6 +33,7 @@ export function ArkpadCanvas({
         <div className="arkpad-canvas-frame">
           <div className="arkpad-page-root-container" data-selected-pos={selectedNodePos}>
             <ArkpadEditorContent editor={editor} className="arkpad-builder-canvas" />
+            <StudioBubbleMenu />
           </div>
         </div>
       </div>

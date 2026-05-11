@@ -1,123 +1,7 @@
-import { Selection, Plugin, Extension, Decoration, DecorationSet } from "@arkpad/core";
+import { Selection, Plugin, PluginKey, NodeSelection, Extension, Decoration, DecorationSet } from "@arkpad/core";
 
 export const DragDrop = Extension.create({
   name: "dragDrop",
-
-  onDrop(event: DragEvent) {
-    if (!event.dataTransfer) {
-      return false;
-    }
-
-    const studioBlockData = event.dataTransfer.getData("application/arkpad-block");
-    const legacyBlockType = event.dataTransfer.getData("application/x-arkpad-block");
-    const internalDragData = event.dataTransfer.getData("application/arkpad-internal-drag");
-
-    if (!studioBlockData && !legacyBlockType && !internalDragData) {
-      return false;
-    }
-
-    const { editor } = this;
-    const { view } = editor;
-    const { state } = view;
-
-    // Get the drop position
-    const pos = view.posAtCoords({ left: event.clientX, top: event.clientY });
-
-    if (!pos) {
-      return false;
-    }
-
-    event.preventDefault();
-
-    // Clean up visual state
-    view.dom.closest(".arkpad-builder-canvas")?.classList.remove("drag-active");
-    view.dispatch(view.state.tr.setMeta("dragPosUpdate", { pos: -1 }));
-
-    // Handle internal reordering (drag within editor)
-    if (internalDragData) {
-      try {
-        const dragInfo = JSON.parse(internalDragData);
-        const { from, to } = dragInfo;
-
-        // Skip if dropping in the same position
-        const $pos = state.doc.resolve(pos.pos);
-        const targetPos = $pos.pos;
-
-        if (targetPos >= from && targetPos <= to) {
-          return false;
-        }
-
-        // Get the node being moved
-        const nodeToMove = state.doc.nodeAt(from);
-        if (!nodeToMove) return false;
-
-        if (targetPos < from) {
-          // Calculation logic removed as targetIndex was unused
-        } else {
-          // Calculation logic removed as targetIndex was unused
-        }
-
-        // Perform the move using replaceStep
-        const tr = state.tr;
-        const nodeSize = nodeToMove.nodeSize;
-
-        // Delete from original position
-        tr.delete(from, from + nodeSize);
-
-        // Insert at new position - we need to recalculate because positions shifted
-        const newPos = targetPos < from ? targetPos : targetPos - nodeSize;
-        const $newPos = state.doc.resolve(newPos);
-
-        tr.insert($newPos.pos, nodeToMove);
-
-        view.dispatch(tr);
-        return true;
-      } catch (e) {
-        console.error("Failed to handle internal drag", e);
-        return false;
-      }
-    }
-
-    // Build chain for new blocks from library
-    let chain = editor.chain();
-
-    // Set text selection at the drop point
-    chain = chain.command(({ tr }: { tr: any }) => {
-      const $pos = tr.doc.resolve(pos.pos);
-      const selection = Selection.near($pos);
-      tr.setSelection(selection);
-      return true;
-    });
-
-    if (studioBlockData) {
-      try {
-        const data = JSON.parse(studioBlockData);
-        // Handle direct insertion from Studio Library
-        chain = chain.insertContent({
-          type: data.type,
-          attrs: data.attrs || {},
-          content: data.content || undefined,
-        });
-      } catch (e) {
-        console.error("Failed to parse studio block data", e);
-        return false;
-      }
-    } else {
-      // Legacy handling
-      const block = editor.blockRegistry.getBlock(legacyBlockType);
-      if (block) {
-        const content = block.create();
-        chain = chain.insertContent(content);
-      } else {
-        chain = chain.insertContent({
-          type: "paragraph",
-          content: [{ type: "text", text: `New ${legacyBlockType}` }],
-        });
-      }
-    }
-
-    return chain.run();
-  },
 
   addCommands() {
     return {
@@ -139,9 +23,116 @@ export const DragDrop = Extension.create({
     let scrollInterval: ReturnType<typeof setInterval> | null = null;
     let currentDragPos = -1;
     let currentDragOverContainerPos = -1;
+    const { editor } = this;
+
+    const handleDrop = (view: any, event: any) => {
+      const studioBlockData = event.dataTransfer.getData("application/arkpad-block");
+      const legacyBlockType = event.dataTransfer.getData("application/x-arkpad-block-type");
+      const internalDragData = event.dataTransfer.getData("application/x-arkpad-internal-drag");
+
+      if (!studioBlockData && !legacyBlockType && !internalDragData) {
+        return false;
+      }
+
+      const { state } = view;
+
+      // Get the drop position
+      const pos = view.posAtCoords({ left: event.clientX, top: event.clientY });
+
+      if (!pos) {
+        return false;
+      }
+
+      event.preventDefault();
+
+      // Clean up visual state
+      const canvas = view.dom.closest(".arkpad-builder-canvas") || view.dom.closest("[data-arkpad-content]");
+      canvas?.classList.remove("drag-active");
+      view.dispatch(view.state.tr.setMeta("dragPosUpdate", { pos: -1 }));
+
+      // Handle internal reordering (drag within editor)
+      if (internalDragData) {
+        try {
+          const dragInfo = JSON.parse(internalDragData);
+          const { from, to } = dragInfo;
+
+          // Skip if dropping in the same position
+          const $pos = state.doc.resolve(pos.pos);
+          const targetPos = $pos.pos;
+
+          if (targetPos >= from && targetPos <= to) {
+            return false;
+          }
+
+          // Get the node being moved
+          const nodeToMove = state.doc.nodeAt(from);
+          if (!nodeToMove) return false;
+
+          // Perform the move using replaceStep
+          const tr = state.tr;
+          const nodeSize = nodeToMove.nodeSize;
+
+          // Delete from original position
+          tr.delete(from, from + nodeSize);
+
+          // Insert at new position - we need to recalculate because positions shifted
+          const newPos = targetPos < from ? targetPos : targetPos - nodeSize;
+          const $newPos = state.doc.resolve(newPos);
+
+          tr.insert($newPos.pos, nodeToMove);
+
+          view.dispatch(tr);
+          return true;
+        } catch (e) {
+          console.error("Failed to handle internal drag", e);
+          return false;
+        }
+      }
+
+      // Build chain for new blocks from library
+      let chain = editor.chain();
+
+      // Set text selection at the drop point
+      chain = chain.command(({ tr }: { tr: any }) => {
+        const $pos = tr.doc.resolve(pos.pos);
+        const selection = Selection.near($pos);
+        tr.setSelection(selection);
+        return true;
+      });
+
+      if (studioBlockData) {
+        try {
+          const data = JSON.parse(studioBlockData);
+          // Handle direct insertion from Studio Library
+          chain = chain.insertContent({
+            type: data.type,
+            attrs: data.attrs || {},
+            content: data.content || undefined,
+          });
+        } catch (e) {
+          console.error("Failed to parse studio block data", e);
+          return false;
+        }
+      } else {
+        // Legacy handling
+        const block = editor.blockRegistry.getBlock(legacyBlockType);
+        if (block) {
+          const content = block.create();
+          chain = chain.insertContent(content);
+        } else {
+          chain = chain.insertContent({
+            type: "paragraph",
+            content: [{ type: "text", text: `New ${legacyBlockType}` }],
+          });
+        }
+      }
+
+      return chain.run();
+    };
 
     return [
       new Plugin({
+        key: new PluginKey("dragDrop"),
         state: {
           init: () => ({ pos: -1, containerPos: -1 }),
           apply: (tr, value) => {
@@ -192,73 +183,76 @@ export const DragDrop = Extension.create({
             return DecorationSet.create(state.doc, decos);
           },
           handleDOMEvents: {
+            dragstart: (view: any, event: any) => {
+              const { state } = view;
+              const { selection } = state;
+
+              if (selection instanceof NodeSelection) {
+                const { from, to } = selection;
+                const dragData = JSON.stringify({ from, to });
+                event.dataTransfer.setData("application/x-arkpad-internal-drag", dragData);
+                event.dataTransfer.effectAllowed = "move";
+              }
+
+              return false;
+            },
             dragover: (view: any, event: any) => {
               const isStudioBlock = event.dataTransfer?.types.includes("application/arkpad-block");
               const isLegacyBlock = event.dataTransfer?.types.includes(
-                "application/x-arkpad-block"
+                "application/x-arkpad-block-type"
+              );
+              const isInternalDrag = event.dataTransfer?.types.includes(
+                "application/x-arkpad-internal-drag"
               );
 
-              if (!isStudioBlock && !isLegacyBlock) return false;
-
-              view.dom.closest(".arkpad-builder-canvas")?.classList.add("drag-active");
+              if (!isStudioBlock && !isLegacyBlock && !isInternalDrag) return false;
+              
+              const canvas = view.dom.closest(".arkpad-builder-canvas") || view.dom.closest("[data-arkpad-content]");
+              canvas?.classList.add("drag-active");
 
               // Auto-scroll logic
               const threshold = 100;
-              const rect = view.dom.getBoundingClientRect();
               const { clientY } = event;
+              const { innerHeight } = window;
 
-              if (scrollInterval) clearInterval(scrollInterval);
-              if (clientY < rect.top + threshold) {
-                scrollInterval = setInterval(() => {
-                  const scrollParent = view.dom.closest(".overflow-auto");
-                  if (scrollParent) scrollParent.scrollBy(0, -15);
-                  else window.scrollBy(0, -15);
-                }, 20);
-              } else if (clientY > rect.bottom - threshold) {
-                scrollInterval = setInterval(() => {
-                  const scrollParent = view.dom.closest(".overflow-auto");
-                  if (scrollParent) scrollParent.scrollBy(0, 15);
-                  else window.scrollBy(0, 15);
-                }, 20);
+              if (clientY < threshold) {
+                if (!scrollInterval) {
+                  scrollInterval = setInterval(() => {
+                    window.scrollBy(0, -10);
+                  }, 20);
+                }
+              } else if (clientY > innerHeight - threshold) {
+                if (!scrollInterval) {
+                  scrollInterval = setInterval(() => {
+                    window.scrollBy(0, 10);
+                  }, 20);
+                }
+              } else {
+                if (scrollInterval) {
+                  clearInterval(scrollInterval);
+                  scrollInterval = null;
+                }
               }
 
-              // Gap and Container logic
               const pos = view.posAtCoords({ left: event.clientX, top: event.clientY });
               if (pos) {
-                const $pos = view.state.doc.resolve(pos.pos);
-                let containerPos = -1;
-
-                // Find nearest layout ancestor
-                for (let d = $pos.depth; d > 0; d--) {
-                  const node = $pos.node(d);
-                  // Check if it's a layout node (section, container, etc)
-                  if (node.type.spec.isLayout) {
-                    containerPos = $pos.before(d);
-                    break;
-                  }
-                }
-
-                if (pos.pos !== currentDragPos || containerPos !== currentDragOverContainerPos) {
-                  view.dispatch(view.state.tr.setMeta("dragPosUpdate", { 
-                    pos: pos.pos, 
-                    containerPos 
-                  }));
-                }
+                // Update decoration position
+                view.dispatch(view.state.tr.setMeta("dragPosUpdate", { pos: pos.pos }));
               }
 
-              return false;
+              event.preventDefault();
+              return true;
             },
             dragleave: (view: any) => {
               if (scrollInterval) clearInterval(scrollInterval);
-              view.dom.closest(".arkpad-builder-canvas")?.classList.remove("drag-active");
+              const canvas = view.dom.closest(".arkpad-builder-canvas") || view.dom.closest("[data-arkpad-content]");
+              canvas?.classList.remove("drag-active");
               view.dispatch(view.state.tr.setMeta("dragPosUpdate", { pos: -1, containerPos: -1 }));
               return false;
             },
-            drop: (view: any) => {
+            drop: (view: any, event: any) => {
               if (scrollInterval) clearInterval(scrollInterval);
-              view.dom.closest(".arkpad-builder-canvas")?.classList.remove("drag-active");
-              view.dispatch(view.state.tr.setMeta("dragPosUpdate", { pos: -1, containerPos: -1 }));
-              return false;
+              return handleDrop(view, event);
             },
           },
         },

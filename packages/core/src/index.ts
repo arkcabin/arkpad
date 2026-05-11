@@ -81,6 +81,7 @@ export {
   TextSelection,
   NodeSelection,
   Plugin,
+  PluginKey,
 } from "prosemirror-state";
 export { EditorView, Decoration, DecorationSet } from "prosemirror-view";
 

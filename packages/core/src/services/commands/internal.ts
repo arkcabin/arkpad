@@ -1,6 +1,7 @@
 import { wrapInList } from "prosemirror-schema-list";
 import { toggleMark as pmToggleMark, setBlockType, } from "prosemirror-commands";
 import { type NodeType, type MarkType } from "prosemirror-model";
+import { NodeSelection } from "prosemirror-state";
 
 
 export const toggleMark = (type: string | MarkType, attrs?: Record<string, any>) => (props: any) => {
@@ -121,6 +122,48 @@ export const duplicateNode = (pos?: number) => (props: any) => {
   if (!node) return false;
   const newNode = node.copy(node.content);
   tr.insert(position + node.nodeSize, newNode);
+  return true;
+};
+
+export const moveNodeUp = (pos?: number) => (props: any) => {
+  const { tr, state, dispatch } = props;
+  const position = pos ?? state.selection.from;
+  const node = state.doc.nodeAt(position);
+  if (!node) return false;
+
+  const $pos = state.doc.resolve(position);
+  if ($pos.index() === 0) return false;
+
+  const prevNode = $pos.parent.child($pos.index() - 1);
+  const prevPos = position - prevNode.nodeSize;
+
+  if (dispatch) {
+    tr.delete(position, position + node.nodeSize);
+    tr.insert(prevPos, node);
+    tr.setSelection(NodeSelection.create(tr.doc, prevPos));
+    dispatch(tr);
+  }
+  return true;
+};
+
+export const moveNodeDown = (pos?: number) => (props: any) => {
+  const { tr, state, dispatch } = props;
+  const position = pos ?? state.selection.from;
+  const node = state.doc.nodeAt(position);
+  if (!node) return false;
+
+  const $pos = state.doc.resolve(position);
+  if ($pos.index() === $pos.parent.childCount - 1) return false;
+
+  const nextNode = $pos.parent.child($pos.index() + 1);
+  const nextPos = position + nextNode.nodeSize;
+
+  if (dispatch) {
+    tr.delete(position, position + node.nodeSize);
+    tr.insert(nextPos, node);
+    tr.setSelection(NodeSelection.create(tr.doc, nextPos));
+    dispatch(tr);
+  }
   return true;
 };
 

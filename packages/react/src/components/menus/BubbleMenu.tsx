@@ -18,6 +18,7 @@ export interface BubbleMenuProps {
     to: number;
     empty: boolean;
   }) => boolean;
+  placement?: "center" | "top-right" | "top-left";
 }
 
 /**
@@ -30,12 +31,14 @@ export const BubbleMenu: React.FC<BubbleMenuProps> = ({
   className = "",
   offset = 12,
   shouldShow,
+  placement = "center",
 }) => {
   const { ref, style, active } = useMenuPositioner({
     editor,
     extensionName: "bubbleMenu",
     type: "bubble",
     offset,
+    placement,
   });
 
   useEffect(() => {

@@ -7,6 +7,7 @@ export interface UseMenuPositionerProps {
   extensionName: string;
   type: "bubble" | "floating";
   offset?: number;
+  placement?: "center" | "top-right" | "top-left";
 }
 
 export function useMenuPositioner({
@@ -14,6 +15,7 @@ export function useMenuPositioner({
   extensionName,
   type,
   offset = 2,
+  placement = "center",
 }: UseMenuPositionerProps) {
   const menuRef = useRef<HTMLDivElement | null>(null);
 
@@ -79,18 +81,26 @@ export function useMenuPositioner({
       let y: number;
 
       if (type === "bubble") {
-        const centerX = (viewportCoords.left + viewportCoords.right) / 2;
-        x = centerX;
-        y = viewportCoords.top - offset;
+        if (placement === "top-right") {
+          x = viewportCoords.right;
+          y = viewportCoords.top - offset;
+        } else {
+          const centerX = (viewportCoords.left + viewportCoords.right) / 2;
+          x = centerX;
+          y = viewportCoords.top - offset;
+        }
       } else {
         const floatingPadding = 4;
         x = viewportCoords.left - floatingPadding;
         y = viewportCoords.top;
       }
 
-      node.style.transform = `translate3d(${x}px, ${y}px, 0) ${
-        type === "bubble" ? "translate(-50%, -100%)" : "translate(0, -50%)"
-      }`;
+      const transformX = type === "bubble" 
+        ? (placement === "top-right" ? "-100%" : "-50%") 
+        : "0";
+      const transformY = type === "bubble" ? "-100%" : "-50%";
+
+      node.style.transform = `translate3d(${x}px, ${y}px, 0) translate(${transformX}, ${transformY})`;
     };
 
     const scheduleUpdate = () => {

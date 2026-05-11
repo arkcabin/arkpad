@@ -13,6 +13,7 @@ export interface SmartBarProps {
    * By default, it shows if there is a selection or if inside a table/image.
    */
   shouldShow?: (editor: ArkpadEditorAPI) => boolean;
+  placement?: "center" | "top-right" | "top-left";
 }
 
 export interface SmartBarGroupProps {
@@ -53,6 +54,7 @@ const SmartBarComponent: React.FC<SmartBarProps> = ({
   className = "",
   shouldShow,
   offset,
+  placement = "center",
 }) => {
   const editor = useArkpadContext();
 
@@ -67,6 +69,7 @@ const SmartBarComponent: React.FC<SmartBarProps> = ({
     <BubbleMenu
       editor={editor}
       offset={offset}
+      placement={placement}
       className={`arkpad-smart-bar ${className}`}
       shouldShow={() => {
         if (!editor) return false;

@@ -16,7 +16,7 @@ export function BuilderDemo() {
   const editor = useArkpadEditor({
     extensions: [
       Document.configure({
-        content: "block*",
+        content: "(block | layout)*",
         attributes: {
           title: { default: "Untitled Architecture" },
           theme: { default: "light" },
