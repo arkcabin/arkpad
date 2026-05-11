@@ -141,7 +141,7 @@ export class ArkpadEditor implements IArkpadEditor {
     contentElement.classList.add("arkpad-content"); // Backward compatibility
     this.element.appendChild(contentElement);
 
-    this.view = new EditorView(contentElement, {
+    this.view = new EditorView({ mount: contentElement }, {
       state,
       editable: () => this.editable,
       nodeViews: { ...this.extensionManager.nodeViews, ...this.nodeViews },
