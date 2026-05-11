@@ -118,8 +118,14 @@ export class ReactNodeView implements NodeView {
 
   destroy() {
     if (this.reactRoot) {
-      this.reactRoot.unmount();
+      const root = this.reactRoot;
       this.reactRoot = null;
+
+      // Use setTimeout to ensure unmounting happens after the current render cycle.
+      // This prevents the "Attempted to synchronously unmount a root while React was already rendering" error.
+      setTimeout(() => {
+        root.unmount();
+      }, 0);
     }
   }
 

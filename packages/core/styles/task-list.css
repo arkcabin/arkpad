@@ -2,31 +2,41 @@
 .prose ul[data-type="taskList"] {
   list-style: none;
   padding: 0;
+  margin: 1.5rem 0;
 
-  & li {
+  & li[data-type="taskItem"] {
     display: flex;
     align-items: flex-start;
-    gap: 0.5rem;
-    margin-bottom: 0.25rem;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
 
-    & > label {
-      user-select: none;
-      margin-top: 0.2rem;
-      
-      & input {
-        cursor: pointer;
-      }
+    /* React NodeView container */
+    & > [data-react-container] {
+      flex-shrink: 0;
+      margin-top: 0.25rem;
     }
 
-    & > div {
+    /* Content container */
+    & > [data-node-view-content] {
       flex: 1;
+      min-width: 0;
+
+      & > p {
+        margin: 0;
+      }
     }
 
-    &[data-checked="true"] {
-      & > div {
-        text-decoration: line-through;
-        color: var(--ark-text-muted);
-      }
+    &[data-checked="true"] > [data-node-view-content] {
+      text-decoration: line-through;
+      opacity: 0.5;
     }
   }
+}
+
+.dark
+  .prose
+  ul[data-type="taskList"]
+  li[data-type="taskItem"][data-checked="true"]
+  > [data-node-view-content] {
+  opacity: 0.4;
 }
