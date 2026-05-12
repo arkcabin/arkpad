@@ -10,7 +10,7 @@ export function ListDemo() {
   const editor = useArkpadEditor({
     extensions: [Engine, Heading, BulletList, OrderedList],
     content: `
-      <h1>List Extension</h1>
+      <h1>Lists</h1>
       <p>The list extension supports both bulleted and numbered lists with full support for nesting and indentation.</p>
       <ul>
         <li>

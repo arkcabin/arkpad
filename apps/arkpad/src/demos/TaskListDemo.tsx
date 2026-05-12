@@ -9,7 +9,7 @@ export function TaskListDemo() {
   const editor = useArkpadEditor({
     extensions: [Engine, Heading, TaskListExtension],
     content: `
-      <h1>Task List Extension</h1>
+      <h1>Task Lists</h1>
       <p>The task list extension allows you to create interactive to-do lists with checkboxes.</p>
       <ul data-type="taskList">
         <li data-type="taskItem" data-checked="true"><p>Completed task</p></li>
