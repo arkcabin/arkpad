@@ -1,4 +1,4 @@
-import { Node, ArkpadCommandProps, PMNode, setBlockType } from "@arkpad/core";
+import { Node, ArkpadCommandProps, PMNode, setBlockType, NodeRole } from "@arkpad/core";
 
 declare module "@arkpad/core" {
   interface ArkpadCommands {
@@ -24,6 +24,7 @@ export const Heading = Node.create<HeadingOptions>({
 
   content: "text*",
   group: "block",
+  role: NodeRole.CONTENT,
   defining: true,
   trailingNode: true,
 

@@ -1,4 +1,4 @@
-import { Node, ArkpadCommandProps, PMNode } from "@arkpad/core";
+import { Node, ArkpadCommandProps, PMNode, NodeRole } from "@arkpad/core";
 import ListItem from "@arkpad/extension-list-item";
 
 declare module "@arkpad/core" {
@@ -25,6 +25,7 @@ export const OrderedList = Node.create<OrderedListOptions>({
   },
 
   group: "block",
+  role: NodeRole.CONTENT,
   content: "listItem+",
   trailingNode: true,
 

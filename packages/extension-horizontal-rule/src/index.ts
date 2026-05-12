@@ -1,4 +1,4 @@
-import { Node, ArkpadCommandProps, TextSelection, PMNode } from "@arkpad/core";
+import { Node, ArkpadCommandProps, TextSelection, PMNode, NodeRole } from "@arkpad/core";
 
 declare module "@arkpad/core" {
   interface ArkpadCommands {
@@ -20,6 +20,7 @@ export const HorizontalRule = Node.create<HorizontalRuleOptions>({
   },
 
   group: "block",
+  role: NodeRole.CONTENT,
   trailingNode: true,
 
   parseHTML() {

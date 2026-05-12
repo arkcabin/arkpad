@@ -1,4 +1,4 @@
-import { Node, ArkpadCommandProps } from "@arkpad/core";
+import { Node, ArkpadCommandProps, NodeRole } from "@arkpad/core";
 
 declare module "@arkpad/core" {
   interface ArkpadCommands {
@@ -24,6 +24,7 @@ export const Blockquote = Node.create<BlockquoteOptions>({
   content: "block+",
   marks: "_",
   group: "block",
+  role: NodeRole.CONTENT,
   defining: true,
   trailingNode: true,
 

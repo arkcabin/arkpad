@@ -1,4 +1,4 @@
-import { Node, ArkpadCommandProps, PMNode } from "@arkpad/core";
+import { Node, ArkpadCommandProps, PMNode, NodeRole } from "@arkpad/core";
 import { sinkListItem, liftListItem, splitListItem } from "prosemirror-schema-list";
 
 declare module "@arkpad/core" {
@@ -22,6 +22,7 @@ export const ListItem = Node.create({
 
   content: "block+",
   group: "block",
+  role: NodeRole.CONTENT,
   marks: "_",
   defining: true,
 
