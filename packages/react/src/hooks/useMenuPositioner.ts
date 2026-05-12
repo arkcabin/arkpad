@@ -2,6 +2,8 @@ import { useEditorState } from "./useEditorState";
 import { ArkpadEditorAPI, GlobalMenuStorage } from "@arkpad/core";
 import { CSSProperties, useEffect, useRef } from "react";
 
+const VIEWPORT_PADDING = 8;
+
 export interface UseMenuPositionerProps {
   editor: ArkpadEditorAPI | null;
   extensionName: string;
@@ -18,6 +20,7 @@ export function useMenuPositioner({
   placement = "center",
 }: UseMenuPositionerProps) {
   const menuRef = useRef<HTMLDivElement | null>(null);
+  const sideRef = useRef<"top" | "bottom">("top");
 
   const menuState = useEditorState(
     editor,
@@ -79,26 +82,34 @@ export function useMenuPositioner({
 
       let x: number;
       let y: number;
+      let side: "top" | "bottom";
 
       if (type === "bubble") {
+        const menuHeight = node.offsetHeight || 40;
+        const spaceAbove = viewportCoords.top - VIEWPORT_PADDING;
+        const spaceBelow = window.innerHeight - viewportCoords.bottom - VIEWPORT_PADDING;
+
+        side =
+          spaceAbove < menuHeight + offset && spaceBelow > menuHeight + offset ? "bottom" : "top";
+
+        sideRef.current = side;
+
         if (placement === "top-right") {
           x = viewportCoords.right;
-          y = viewportCoords.top - offset;
         } else {
-          const centerX = (viewportCoords.left + viewportCoords.right) / 2;
-          x = centerX;
-          y = viewportCoords.top - offset;
+          x = (viewportCoords.left + viewportCoords.right) / 2;
         }
+
+        y = side === "top" ? viewportCoords.top - offset : viewportCoords.bottom + offset;
       } else {
         const floatingPadding = 4;
         x = viewportCoords.left - floatingPadding;
         y = viewportCoords.top;
+        side = "top";
       }
 
-      const transformX = type === "bubble" 
-        ? (placement === "top-right" ? "-100%" : "-50%") 
-        : "0";
-      const transformY = type === "bubble" ? "-100%" : "-50%";
+      const transformX = type === "bubble" ? (placement === "top-right" ? "-100%" : "-50%") : "0";
+      const transformY = type === "bubble" ? (sideRef.current === "top" ? "-100%" : "0") : "-50%";
 
       node.style.transform = `translate3d(${x}px, ${y}px, 0) translate(${transformX}, ${transformY})`;
     };
@@ -124,16 +135,7 @@ export function useMenuPositioner({
         window.cancelAnimationFrame(frame);
       }
     };
-  }, [
-    coords?.bottom,
-    coords?.left,
-    coords?.right,
-    coords?.top,
-    editor,
-    isActive,
-    offset,
-    type,
-  ]);
+  }, [coords?.bottom, coords?.left, coords?.right, coords?.top, editor, isActive, offset, type]);
 
   if (!isActive) {
     return {
@@ -148,8 +150,6 @@ export function useMenuPositioner({
     };
   }
 
-  // Position menus in viewport space so they stay aligned even when rendered
-  // outside the editor DOM tree (for example in portals or demo wrappers).
   const style: CSSProperties = {
     position: "fixed",
     top: 0,

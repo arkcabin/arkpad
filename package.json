@@ -56,6 +56,7 @@
     "@radix-ui/react-use-controllable-state": "1.2.2",
     "@radix-ui/react-use-previous": "1.1.1",
     "@radix-ui/react-use-size": "1.1.1",
+    "agent-skills-eval": "^0.1.1",
     "class-variance-authority": "0.7.1",
     "prosemirror-placeholder": "1.0.7",
     "react-router-dom": "^7.15.0",

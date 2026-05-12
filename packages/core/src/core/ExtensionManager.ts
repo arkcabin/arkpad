@@ -29,6 +29,7 @@ export class ExtensionManager {
   private isBatching = false;
   public menuEngine?: MenuEngine;
   private editor?: IArkpadEditor;
+  private menuPlugin?: Plugin;
 
   constructor(schema: Schema, extensions: ArkpadExtension[] = []) {
     this.schema = schema;
@@ -60,65 +61,59 @@ export class ExtensionManager {
     });
 
     // High-Performance Event Tracking
-    this.proseMirrorPlugins.push(
-      new Plugin({
-        view: (view) => {
-          const handleOutsideClick = (event: MouseEvent) => {
-            if (view.isDestroyed) return;
+    // Store as internal plugin so rebuild() preserves it
+    this.menuPlugin = new Plugin({
+      view: (view) => {
+        const handleOutsideClick = (event: MouseEvent) => {
+          if (view.isDestroyed) return;
 
-            const target = event.target as HTMLElement;
-            const isInsideEditor = view.dom.contains(target);
-            const isInsideMenu =
-              target.closest('[data-arkpad-menu="true"]') ||
-              target.closest('[data-arkpad-ignore="true"]');
+          const target = event.target as HTMLElement;
+          const isInsideEditor = view.dom.contains(target);
+          const isInsideMenu =
+            target.closest('[data-arkpad-menu="true"]') ||
+            target.closest('[data-arkpad-ignore="true"]');
 
-            if (!isInsideEditor && !isInsideMenu) {
-              // If we are clicked outside, we must ensure the editor loses focus
-              // so that isFocused() returns false and menus hide.
-              if (view.hasFocus()) {
-                (view.dom as HTMLElement).blur();
-              }
-
-              // Force the menu engine to recalculate immediately with forceHide=true
-              // We also emit a UI update to ensure React components re-render
-              this.menuEngine?.update(view, undefined, true, true);
-              this.editor?.emitUiUpdate();
+          if (!isInsideEditor && !isInsideMenu) {
+            if (view.hasFocus()) {
+              (view.dom as HTMLElement).blur();
             }
-          };
 
-          window.addEventListener("mousedown", handleOutsideClick, true);
+            this.menuEngine?.update(view, undefined, true, true);
+            this.editor?.emitUiUpdate();
+          }
+        };
 
-          return {
-            update: (view, prevState) => {
-              // Only trigger if selection changed WITHOUT a doc change (handled by editor.ts)
-              if (!prevState.selection.eq(view.state.selection)) {
-                this.menuEngine?.update(view, prevState);
+        window.addEventListener("mousedown", handleOutsideClick, true);
+
+        return {
+          update: (view, prevState) => {
+            if (!prevState.selection.eq(view.state.selection)) {
+              this.menuEngine?.update(view, prevState);
+            }
+          },
+          destroy: () => {
+            window.removeEventListener("mousedown", handleOutsideClick, true);
+          },
+        };
+      },
+      props: {
+        handleDOMEvents: {
+          focus: (view) => {
+            this.menuEngine?.update(view, undefined, true);
+            return false;
+          },
+          blur: (view) => {
+            setTimeout(() => {
+              if (!view.isDestroyed) {
+                this.menuEngine?.update(view, undefined, true);
               }
-            },
-            destroy: () => {
-              window.removeEventListener("mousedown", handleOutsideClick, true);
-            },
-          };
-        },
-        props: {
-          handleDOMEvents: {
-            focus: (view) => {
-              this.menuEngine?.update(view, undefined, true);
-              return false;
-            },
-            blur: (view) => {
-              // Delay update to let document.activeElement update
-              setTimeout(() => {
-                if (!view.isDestroyed) {
-                  this.menuEngine?.update(view, undefined, true);
-                }
-              }, 10);
-              return false;
-            },
+            }, 10);
+            return false;
           },
         },
-      })
-    );
+      },
+    });
+    this.proseMirrorPlugins.push(this.menuPlugin);
   }
 
   /**
@@ -207,7 +202,28 @@ export class ExtensionManager {
     this.inputRules = this.collectInputRules(this.schema);
     this.pasteRules = this.collectPasteRules(this.schema);
     this.proseMirrorPlugins = this.collectProseMirrorPlugins(this.schema);
+    if (this.menuPlugin) {
+      this.proseMirrorPlugins.push(this.menuPlugin);
+    }
     this.nodeViews = this.collectNodeViews();
+
+    if (this.menuEngine) {
+      this.menuEngine.clearExtensionMenus();
+      this.extensions.forEach((ext) => {
+        if (ext.addMenu) {
+          const configs = ext.addMenu();
+          if (configs) {
+            this.menuEngine!.registerExtensionMenus(ext.name, configs);
+          }
+        }
+      });
+
+      // Force an immediate menu update after rebuild
+      if (this.editor?.getView()) {
+        this.menuEngine.update(this.editor.getView(), undefined, true);
+        this.editor.emitUiUpdate();
+      }
+    }
   }
 
   /**
@@ -339,7 +355,7 @@ export class ExtensionManager {
             if (!rule) return;
 
             // 1. Duck-type check for standard ProseMirror InputRule instances
-            // We check for 'match' and 'handler' properties. 
+            // We check for 'match' and 'handler' properties.
             // Crucially, 'match' must have an 'exec' method to be used by prosemirror-inputrules 'run' function.
             if (rule.match && typeof rule.match.exec === "function" && rule.handler) {
               rules.push(rule);

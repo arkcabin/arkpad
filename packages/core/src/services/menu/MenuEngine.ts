@@ -42,6 +42,13 @@ export class MenuEngine {
   }
 
   /**
+   * Clears all registered menu configurations.
+   */
+  clearExtensionMenus() {
+    this.menuConfigs.clear();
+  }
+
+  /**
    * Locks the UI to suppress menus.
    */
   lock(name: string) {
@@ -201,29 +208,10 @@ export class MenuEngine {
       path.push($from.node(i).type.name);
     }
 
-    // 3. Fast Command Indexing (Lazy sweep for Performance)
-    const availableCommands: string[] = [];
-    
-    // Only perform expensive command checks if a menu is actually active or requested
-    // This prevents 93 shadow transactions from running on every keystroke.
-    const hasActiveMenu = Array.from(this.menuConfigs.values()).some(configs => configs.length > 0);
-    
-    if (hasActiveMenu) {
-      const commandNames = Object.keys(this.editor.extensionManager.commands);
-      const skipList = ["fixTables", "setCellAttr", "setCellBackground", "insertContent"];
-
-      for (const name of commandNames) {
-        if (skipList.includes(name)) continue;
-        if (this.editor.canRunCommand(name)) {
-          availableCommands.push(name);
-        }
-      }
-    }
-
     return {
       activeNode,
       attributes,
-      availableCommands,
+      availableCommands: [],
       path,
     };
   }
@@ -266,46 +254,55 @@ export class MenuEngine {
         }
       }
 
-      // Standard Fallback: Use DOM Range for standard text selections
+      // Standard Fallback: Use coordsAtPos for standard text selections
       if (type === "bubble" && !empty) {
-        const range = document.createRange();
-        const start = view.domAtPos(from);
-        const end = view.domAtPos(to);
+        try {
+          const startCoords = view.coordsAtPos(from);
+          const endCoords = view.coordsAtPos(to);
 
-        if (start.node && end.node) {
-          range.setStart(start.node, start.offset);
-          range.setEnd(end.node, end.offset);
-          const rect = range.getBoundingClientRect();
+          return {
+            top: Math.min(startCoords.top, endCoords.top) - editorRect.top + containerScrollTop,
+            left:
+              Math.min(startCoords.left, endCoords.left) - editorRect.left + containerScrollLeft,
+            bottom:
+              Math.max(startCoords.bottom, endCoords.bottom) - editorRect.top + containerScrollTop,
+            right:
+              Math.max(startCoords.right, endCoords.right) - editorRect.left + containerScrollLeft,
+          };
+        } catch (e) {
+          // Range fallback if coordsAtPos fails
+          try {
+            const range = document.createRange();
+            const start = view.domAtPos(from);
+            const end = view.domAtPos(to);
 
-          if (rect.width > 0) {
-            return {
-              top: rect.top - editorRect.top + containerScrollTop,
-              left: rect.left - editorRect.left + containerScrollLeft,
-              bottom: rect.bottom - editorRect.top + containerScrollTop,
-              right: rect.right - editorRect.left + containerScrollLeft,
-            };
+            if (start.node && end.node) {
+              range.setStart(start.node, start.offset);
+              range.setEnd(end.node, end.offset);
+              const rect = range.getBoundingClientRect();
+
+              if (rect.width > 0) {
+                return {
+                  top: rect.top - editorRect.top + containerScrollTop,
+                  left: rect.left - editorRect.left + containerScrollLeft,
+                  bottom: rect.bottom - editorRect.top + containerScrollTop,
+                  right: rect.right - editorRect.left + containerScrollLeft,
+                };
+              }
+            }
+          } catch (rangeError) {
+            // Silently fail range check
           }
         }
-
-        const startCoords = view.coordsAtPos(from);
-        const endCoords = view.coordsAtPos(to);
-        return {
-          top: Math.min(startCoords.top, endCoords.top) - editorRect.top + containerScrollTop,
-          left: Math.min(startCoords.left, endCoords.left) - editorRect.left + containerScrollLeft,
-          bottom:
-            Math.max(startCoords.bottom, endCoords.bottom) - editorRect.top + containerScrollTop,
-          right:
-            Math.max(startCoords.right, endCoords.right) - editorRect.left + containerScrollLeft,
-        };
-      } else {
-        const coords = view.coordsAtPos(from);
-        return {
-          top: coords.top - editorRect.top + containerScrollTop,
-          left: coords.left - editorRect.left + containerScrollLeft,
-          bottom: coords.bottom - editorRect.top + containerScrollTop,
-          right: coords.right - editorRect.left + containerScrollLeft,
-        };
       }
+
+      const coords = view.coordsAtPos(from);
+      return {
+        top: coords.top - editorRect.top + containerScrollTop,
+        left: coords.left - editorRect.left + containerScrollLeft,
+        bottom: coords.bottom - editorRect.top + containerScrollTop,
+        right: coords.right - editorRect.left + containerScrollLeft,
+      };
     } catch {
       return null;
     }
