@@ -1,5 +1,5 @@
 import React from "react";
-import { Bold, Italic, List, ListOrdered } from "lucide-react";
+import { Bold, Italic, List, ListOrdered, CheckSquare } from "lucide-react";
 
 import { useArkpadEditor, ArkpadEditorContent, ArkpadProvider, EditorButton } from "@arkpad/react";
 import { StarterKit } from "@arkpad/starter-kit";
@@ -65,6 +65,9 @@ export function App() {
                 </MenuButton>
                 <MenuButton command="toggleOrderedList" name="orderedList">
                   <ListOrdered className="w-3.5 h-3.5" />
+                </MenuButton>
+                <MenuButton command="toggleTaskList" name="taskList">
+                  <CheckSquare className="w-3.5 h-3.5" />
                 </MenuButton>
               </div>
               <div className="p-8 min-h-[500px]">
