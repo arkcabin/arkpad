@@ -105,7 +105,6 @@ export function useMenuPositioner({
         const floatingPadding = 4;
         x = viewportCoords.left - floatingPadding;
         y = viewportCoords.top;
-        side = "top";
       }
 
       const transformX = type === "bubble" ? (placement === "top-right" ? "-100%" : "-50%") : "0";

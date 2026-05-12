@@ -269,7 +269,7 @@ export class MenuEngine {
             right:
               Math.max(startCoords.right, endCoords.right) - editorRect.left + containerScrollLeft,
           };
-        } catch (e) {
+        } catch {
           // Range fallback if coordsAtPos fails
           try {
             const range = document.createRange();
@@ -290,7 +290,7 @@ export class MenuEngine {
                 };
               }
             }
-          } catch (rangeError) {
+          } catch {
             // Silently fail range check
           }
         }
