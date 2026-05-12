@@ -44,6 +44,9 @@ const TaskListDemo = lazy(() =>
 const BubbleMenuDemo = lazy(() =>
   import("./demos/BubbleMenuDemo").then((m) => ({ default: m.BubbleMenuDemo }))
 );
+const FloatingMenuDemo = lazy(() =>
+  import("./demos/FloatingMenuDemo").then((m) => ({ default: m.FloatingMenuDemo }))
+);
 const StandardEditor = lazy(() =>
   import("./demos/StandardEditor").then((m) => ({ default: m.StandardEditor }))
 );
@@ -75,6 +78,7 @@ const ROUTE_NAMES: Record<string, string> = {
   "/extensions/list": "List",
   "/extensions/task-list": "Task List",
   "/extensions/bubble-menu": "Bubble Menu",
+  "/extensions/floating-menu": "Floating Menu",
 };
 
 function TopBar({ onSidebarToggle }: { onSidebarToggle: () => void }) {
@@ -156,6 +160,7 @@ function AppShell() {
               <Route path="/extensions/list" element={<ListDemo />} />
               <Route path="/extensions/task-list" element={<TaskListDemo />} />
               <Route path="/extensions/bubble-menu" element={<BubbleMenuDemo />} />
+              <Route path="/extensions/floating-menu" element={<FloatingMenuDemo />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Suspense>

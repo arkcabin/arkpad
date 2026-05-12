@@ -48,7 +48,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
       title: "INTERACTION",
       items: [
         { name: "Bubble Menu", path: "/extensions/bubble-menu" },
-        { name: "Floating Menu 🚧", path: "#" },
+        { name: "Floating Menu", path: "/extensions/floating-menu" },
         { name: "Placeholder 🚧", path: "#" },
       ],
     },
