@@ -145,7 +145,7 @@ function DropdownContent({
       ref={contentRef}
       data-arkpad-ignore="true"
       style={{ position: "fixed", top: 0, left: 0, zIndex: 1001 }}
-      className={`bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-1 ${
+      className={`bg-[var(--menu-bg)] rounded-lg shadow-lg border border-[var(--menu-border)] p-1 ${
         layout === "vertical" ? "flex flex-col" : "flex flex-row items-center gap-0.5"
       } ${className}`}
     >
@@ -207,10 +207,10 @@ function DropdownItem({
       data-arkpad-ignore="true"
       className={`text-xs rounded transition-colors whitespace-nowrap ${
         layout === "vertical" ? "w-full text-left px-3 py-1.5" : "px-2 py-1"
-      } hover:bg-gray-100 dark:hover:bg-gray-700 ${
+      } hover:bg-[var(--menu-item-hover)] ${
         isActive
-          ? activeClassName || "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
-          : "text-gray-700 dark:text-gray-300"
+          ? activeClassName || "bg-[var(--menu-item-active-bg)] text-[var(--menu-item-active-text)]"
+          : "text-[var(--menu-item-text)]"
       } ${className}`}
       {...props}
     >
@@ -225,7 +225,7 @@ function DropdownSeparator({ className = "" }: { className?: string }) {
 
   return (
     <div
-      className={`bg-gray-200 dark:bg-gray-600 ${
+      className={`bg-[var(--menu-separator)] ${
         layout === "vertical" ? "h-px w-full my-1" : "w-px h-4 mx-1"
       } ${className}`}
     />

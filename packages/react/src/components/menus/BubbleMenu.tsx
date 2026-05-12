@@ -30,7 +30,7 @@ export interface BubbleMenuProps {
 
 function DefaultToolbar() {
   return (
-    <div className="flex items-center gap-0.5 px-2 py-1.5 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
+    <div className="flex items-center gap-0.5 px-2 py-1.5 bg-[var(--menu-bg)] rounded-lg shadow-lg border border-[var(--menu-border)]">
       <EditorButton
         command="toggleBold"
         name="bold"
@@ -113,7 +113,7 @@ function DefaultToolbar() {
           <line x1="4" x2="20" y1="12" y2="12" />
         </svg>
       </EditorButton>
-      <div className="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1" />
+      <div className="w-px h-4 bg-[var(--menu-separator)] mx-1" />
       <DropdownMenu layout="vertical">
         <DropdownMenu.Trigger className="toolbar-btn text-[10px] font-bold px-1 min-w-[20px] gap-0.5">
           H<span className="text-[8px] opacity-60">▾</span>
@@ -121,7 +121,7 @@ function DefaultToolbar() {
         <DropdownMenu.Content align="start" side="top" minWidth={140}>
           {[1, 2, 3, 4, 5, 6].map((level) => (
             <DropdownMenu.Item key={level} command="toggleHeading" name="heading" attrs={{ level }}>
-              <span className="font-semibold text-gray-400 dark:text-gray-500 mr-2 w-5 text-right">
+              <span className="font-semibold text-[var(--menu-dim-text)] mr-2 w-5 text-right">
                 H{level}
               </span>
               <span>Heading {level}</span>
@@ -129,14 +129,12 @@ function DefaultToolbar() {
           ))}
           <DropdownMenu.Separator />
           <DropdownMenu.Item command="setParagraph" name="paragraph">
-            <span className="text-gray-400 dark:text-gray-500 mr-2 w-5 text-right font-mono">
-              ¶
-            </span>
+            <span className="text-[var(--menu-dim-text)] mr-2 w-5 text-right font-mono">¶</span>
             <span>Paragraph</span>
           </DropdownMenu.Item>
         </DropdownMenu.Content>
       </DropdownMenu>
-      <div className="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1" />
+      <div className="w-px h-4 bg-[var(--menu-separator)] mx-1" />
       <EditorButton command="setLink" name="link" className="toolbar-btn" activeClassName="active">
         <svg
           width="14"
@@ -170,7 +168,7 @@ function DefaultToolbar() {
           <path d="M12.68 19.68a5.1 5.1 0 0 1-7.54-.54l-3-3a5 5 0 0 1 7.07-7.07l.68-.68" />
         </svg>
       </EditorButton>
-      <div className="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1" />
+      <div className="w-px h-4 bg-[var(--menu-separator)] mx-1" />
       <EditorButton
         command="toggleBulletList"
         name="bulletList"
@@ -219,7 +217,7 @@ function DefaultToolbar() {
           <path d="M6 18H4c0-1 .5-2 2-2 .7 0 1.3.3 1.3.7s-.3.7-1.3 1.3l-1.7.7" />
         </svg>
       </EditorButton>
-      <div className="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1" />
+      <div className="w-px h-4 bg-[var(--menu-separator)] mx-1" />
       <EditorButton
         command="toggleBlockquote"
         name="blockquote"
