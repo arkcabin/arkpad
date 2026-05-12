@@ -101,15 +101,17 @@ function DropdownContent({
   const ctx = useContext(DropdownContext);
   if (!ctx) throw new Error("DropdownContent must be used inside DropdownMenu");
   const { open, triggerRef, contentRef, layout } = ctx;
-  const [pos, setPos] = useState({ top: -9999, left: -9999 });
 
   useEffect(() => {
     if (!open || !triggerRef.current) return;
 
     const trigger = triggerRef.current;
+    const node = contentRef.current;
+    if (!node) return;
+
     const rect = trigger.getBoundingClientRect();
-    const contentW = contentRef.current?.offsetWidth || minWidth;
-    const contentH = contentRef.current?.offsetHeight || 0;
+    const contentW = node.offsetWidth || minWidth;
+    const contentH = node.offsetHeight || 0;
     const gap = 4;
 
     let top = side === "bottom" ? rect.bottom + gap : rect.top - contentH - gap;
@@ -125,8 +127,16 @@ function DropdownContent({
     const maxLeft = window.innerWidth - contentW - 4;
     if (left > maxLeft) left = Math.max(4, maxLeft);
 
-    setPos({ top, left });
+    node.style.top = `${top}px`;
+    node.style.left = `${left}px`;
   }, [open, align, side, triggerRef, contentRef, minWidth]);
+
+  useEffect(() => {
+    if (!open) return;
+    const close = () => ctx.setOpen(false);
+    window.addEventListener("scroll", close, true);
+    return () => window.removeEventListener("scroll", close, true);
+  }, [open, ctx]);
 
   if (typeof document === "undefined" || !open) return null;
 
@@ -134,7 +144,7 @@ function DropdownContent({
     <div
       ref={contentRef}
       data-arkpad-ignore="true"
-      style={{ position: "fixed", top: pos.top, left: pos.left, zIndex: 1001 }}
+      style={{ position: "fixed", top: 0, left: 0, zIndex: 1001 }}
       className={`bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-1 ${
         layout === "vertical" ? "flex flex-col" : "flex flex-row items-center gap-0.5"
       } ${className}`}
