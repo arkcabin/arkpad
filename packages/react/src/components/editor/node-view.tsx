@@ -1,7 +1,6 @@
 import * as React from "react";
 import { createRoot, type Root } from "react-dom/client";
-import type { Node as PMNode } from "prosemirror-model";
-import type { EditorView, NodeView } from "prosemirror-view";
+import type { PMNode, EditorView, PMNodeView } from "@arkpad/core";
 
 export interface ReactNodeViewProps {
   node: PMNode;
@@ -19,9 +18,9 @@ export interface ReactNodeViewOptions {
 }
 
 /**
- * A bridge class that connects ProseMirror's NodeView lifecycle to React.
+ * A bridge class that connects ProseMirror's PMNodeView lifecycle to React.
  */
-export class ReactNodeView implements NodeView {
+export class ReactNodeView implements PMNodeView {
   public dom: HTMLElement;
   public contentDOM?: HTMLElement;
   public node: PMNode;
@@ -155,10 +154,10 @@ export class ReactNodeView implements NodeView {
 }
 
 /**
- * Creates a NodeView constructor for a React component.
+ * Creates a PMNodeView constructor for a React component.
  */
 export function createReactNodeView(options: ReactNodeViewOptions) {
   return (node: PMNode, view: EditorView, getPos: () => number | undefined) => {
-    return new ReactNodeView(node, view, getPos, options) as NodeView;
+    return new ReactNodeView(node, view, getPos, options) as PMNodeView;
   };
 }

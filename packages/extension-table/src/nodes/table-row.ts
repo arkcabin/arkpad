@@ -1,4 +1,4 @@
-import type { NodeSpec } from "prosemirror-model";
+import type { NodeSpec } from "@arkpad/core";
 import { NodeRole } from "@arkpad/core";
 
 export const tableRowNode: NodeSpec = {

@@ -1,6 +1,6 @@
 import type { ArkpadCommandProps } from "@arkpad/core";
-import { TextSelection } from "prosemirror-state";
-import { deleteTable as pmDeleteTable, TableMap } from "prosemirror-tables";
+import { TextSelection } from "@arkpad/core";
+import { deleteTable as pmDeleteTable, TableMap } from "@arkpad/core";
 import type { InsertTableOptions, CommandFactory } from "../types";
 import { createTable } from "../nodes/utilities/createTable";
 

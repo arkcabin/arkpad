@@ -1,6 +1,6 @@
-import { Node as PMNode } from "prosemirror-model";
-import { EditorView, NodeView } from "prosemirror-view";
-import { NodeSelection } from "prosemirror-state";
+import { PMNode } from "@arkpad/core";
+import { EditorView, PMNodeView as NodeView } from "@arkpad/core";
+import { NodeSelection } from "@arkpad/core";
 
 export class ImageNodeView implements NodeView {
   public dom: HTMLElement;

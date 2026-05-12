@@ -7,7 +7,7 @@ import {
   toggleHeaderCell as pmToggleHeaderCell,
   setCellAttr as pmSetCellAttr,
   goToNextCell as pmGoToNextCell,
-} from "prosemirror-tables";
+} from "@arkpad/core";
 import type { CommandFactory } from "../types";
 
 export const mergeCells: CommandFactory =

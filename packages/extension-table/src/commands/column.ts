@@ -3,7 +3,7 @@ import {
   addColumnBefore as pmAddColumnBefore,
   addColumnAfter as pmAddColumnAfter,
   deleteColumn as pmDeleteColumn,
-} from "prosemirror-tables";
+} from "@arkpad/core";
 import type { CommandFactory } from "../types";
 
 export const addColumnBefore: CommandFactory =

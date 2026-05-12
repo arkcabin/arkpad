@@ -1,5 +1,5 @@
 import type { ArkpadCommandProps } from "@arkpad/core";
-import type { EditorState } from "prosemirror-state";
+import type { EditorState } from "@arkpad/core";
 import type { Dispatch } from "@arkpad/core";
 
 export interface TableCellAttrs {

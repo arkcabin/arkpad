@@ -74,6 +74,7 @@ export {
   DOMParser as PMDOMParser,
   DOMSerializer as PMDOMSerializer,
 } from "prosemirror-model";
+export type { NodeSpec, DOMOutputSpec, NodeType, MarkSpec, ContentMatch } from "prosemirror-model";
 export {
   EditorState,
   Transaction,
@@ -84,6 +85,7 @@ export {
   PluginKey,
 } from "prosemirror-state";
 export { EditorView, Decoration, DecorationSet } from "prosemirror-view";
+export type { NodeView as PMNodeView } from "prosemirror-view";
 
 // UI & Interaction Plugins
 export { dropCursor } from "prosemirror-dropcursor";
@@ -108,3 +110,22 @@ export {
   autoJoin,
   chainCommands,
 } from "prosemirror-commands";
+
+// Extension-facing ProseMirror re-exports (so extensions import @arkpad/core, not prosemirror-* directly)
+export { history, undo, redo, undoDepth, redoDepth, closeHistory } from "prosemirror-history";
+export {
+  inputRules,
+  InputRule,
+  wrappingInputRule,
+  textblockTypeInputRule,
+  undoInputRule,
+} from "prosemirror-inputrules";
+export {
+  addListNodes,
+  wrapInList,
+  splitListItem,
+  liftListItem,
+  sinkListItem,
+} from "prosemirror-schema-list";
+export { placeholder } from "prosemirror-placeholder";
+export * from "prosemirror-tables";

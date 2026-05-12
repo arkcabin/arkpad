@@ -1,5 +1,5 @@
 import { Node, ArkpadCommandProps, PMNode } from "@arkpad/core";
-import { NodeSelection } from "prosemirror-state";
+import { NodeSelection } from "@arkpad/core";
 import { ImageNodeView } from "./ImageView";
 
 declare module "@arkpad/core" {

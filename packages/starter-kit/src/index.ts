@@ -31,8 +31,8 @@ import { HighlighterTool } from "@arkpad/extension-highlighter";
 import { EraserTool } from "@arkpad/extension-eraser";
 import { createTextAlign } from "@arkpad/extension-alignment";
 import { createMarkdownPaste } from "@arkpad/extension-markdown";
-import { history, undo, redo } from "prosemirror-history";
-import { placeholder as createPlaceholderPlugin } from "prosemirror-placeholder";
+import { history, undo, redo } from "@arkpad/core";
+import { placeholder as createPlaceholderPlugin } from "@arkpad/core";
 
 export const History = Extension.create({
   name: "history",

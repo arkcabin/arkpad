@@ -1,7 +1,7 @@
-import type { EditorState } from "prosemirror-state";
-import { TextSelection } from "prosemirror-state";
-import type { EditorView } from "prosemirror-view";
-import { goToNextCell, isInTable } from "prosemirror-tables";
+import type { EditorState } from "@arkpad/core";
+import { TextSelection } from "@arkpad/core";
+import type { EditorView } from "@arkpad/core";
+import { goToNextCell, isInTable } from "@arkpad/core";
 import type { ArkpadEditor } from "@arkpad/core";
 import { findParentNode } from "@arkpad/core";
 

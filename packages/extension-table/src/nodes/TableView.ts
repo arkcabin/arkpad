@@ -1,6 +1,5 @@
-import type { Node as ProseMirrorNode } from "prosemirror-model";
-import type { NodeView } from "prosemirror-view";
-import { updateColumnsOnResize } from "prosemirror-tables";
+import type { PMNode as ProseMirrorNode, PMNodeView as NodeView } from "@arkpad/core";
+import { updateColumnsOnResize } from "@arkpad/core";
 
 /**
  * Custom TableView that is compatible with prosemirror-tables' columnResizing plugin.

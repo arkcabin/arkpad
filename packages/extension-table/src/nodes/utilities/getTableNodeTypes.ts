@@ -1,4 +1,4 @@
-import type { NodeType, Schema } from "prosemirror-model";
+import type { NodeType, Schema } from "@arkpad/core";
 
 export function getTableNodeTypes(schema: Schema): { [key: string]: NodeType } {
   if ((schema as any).cached.tableNodeTypes) {

@@ -2,8 +2,8 @@ import React, { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { ArkpadEditorAPI } from "@arkpad/core";
 import { FloatingMenu as FloatingMenuExtension } from "@arkpad/extension-floating-menu";
-import { EditorState } from "prosemirror-state";
-import { EditorView } from "prosemirror-view";
+import { EditorState } from "@arkpad/core";
+import { EditorView } from "@arkpad/core";
 import { useMenuPositioner } from "../../hooks/useMenuPositioner";
 
 export interface FloatingMenuProps {

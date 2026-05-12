@@ -1,4 +1,4 @@
-import { Node as PMNode, Fragment } from "prosemirror-model";
+import { PMNode, Fragment } from "@arkpad/core";
 
 /**
  * A custom serializer to convert ProseMirror nodes back to Markdown.

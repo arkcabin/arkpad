@@ -1,5 +1,5 @@
 import { Node, ArkpadCommandProps, PMNode, NodeRole } from "@arkpad/core";
-import { liftListItem, splitListItem } from "prosemirror-schema-list";
+import { liftListItem, splitListItem } from "@arkpad/core";
 
 declare module "@arkpad/core" {
   interface ArkpadCommands {

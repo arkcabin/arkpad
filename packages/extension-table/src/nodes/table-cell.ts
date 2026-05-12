@@ -1,4 +1,4 @@
-import type { NodeSpec, DOMOutputSpec } from "prosemirror-model";
+import type { NodeSpec, DOMOutputSpec } from "@arkpad/core";
 import { NodeRole } from "@arkpad/core";
 import type { TableCellAttrs } from "../types";
 

@@ -1,4 +1,4 @@
-import { Fragment, Schema, DOMParser as PMDOMParser } from "prosemirror-model";
+import { Fragment, Schema, PMDOMParser } from "@arkpad/core";
 
 /**
  * Parses an HTML table into a ProseMirror Fragment.
@@ -23,9 +23,9 @@ export function parseHTMLTable(html: string, schema: Schema): Fragment | null {
  */
 export function parseTableData(text: string): string[][] {
   const isTSV = text.includes("\t");
-  const rows = text.split(/\r?\n/).filter(row => row.trim().length > 0);
+  const rows = text.split(/\r?\n/).filter((row) => row.trim().length > 0);
 
-  return rows.map(row => {
+  return rows.map((row) => {
     if (isTSV) {
       return row.split("\t");
     }
@@ -43,8 +43,8 @@ export function createTableFromData(schema: Schema, data: string[][]): any {
     return null;
   }
 
-  const rows = data.map(rowData => {
-    const cells = rowData.map(cellData => {
+  const rows = data.map((rowData) => {
+    const cells = rowData.map((cellData) => {
       return table_cell.create(
         null,
         Fragment.from(paragraph.create(null, cellData ? schema.text(cellData) : []))

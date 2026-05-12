@@ -17,9 +17,7 @@
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
-  "dependencies": {
-    "prosemirror-tables": "^1.8.5"
-  },
+  "dependencies": {},
   "peerDependencies": {
     "@arkpad/core": "*"
   },

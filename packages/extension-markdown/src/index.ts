@@ -1,6 +1,5 @@
 import { Extension } from "@arkpad/core";
-import { Plugin, PluginKey } from "prosemirror-state";
-import { DOMParser, Slice } from "prosemirror-model";
+import { Plugin, PluginKey, PMDOMParser, Slice } from "@arkpad/core";
 import { markdownToHtml } from "./parser";
 export { MarkdownSerializer } from "./serializer";
 export { markdownToHtml as markdownToHtml };
@@ -37,7 +36,7 @@ export function createMarkdownPaste(): Extension {
             const convertedHtml = markdownToHtml(text);
 
             // Parse converted HTML and insert it
-            const parser = DOMParser.fromSchema(view.state.schema);
+            const parser = PMDOMParser.fromSchema(view.state.schema);
             const element = document.createElement("div");
             element.innerHTML = convertedHtml;
             const doc = parser.parse(element);

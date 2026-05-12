@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import type { ArkpadEditorAPI } from "@arkpad/core";
-import type { Node } from "prosemirror-model";
+import type { PMNode } from "@arkpad/core";
 
 interface EditorStoreHandlers {
   selection: () => void;
@@ -30,10 +30,10 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
     const handleSelection = () => {
       const selectedNode = editor.selectionService.getSelectedNode();
       const state = editor.getState();
-      
+
       let pos = -1;
       if (selectedNode) {
-        state.doc.descendants((node: Node, p: number) => {
+        state.doc.descendants((node: PMNode, p: number) => {
           if (node === selectedNode) {
             pos = p;
             return false;

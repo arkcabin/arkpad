@@ -1,7 +1,7 @@
 import { Extension } from "@arkpad/core";
-import { tableEditing, columnResizing, isInTable, CellSelection } from "prosemirror-tables";
-import { Plugin, Selection } from "prosemirror-state";
-import { Slice, Fragment } from "prosemirror-model";
+import { tableEditing, columnResizing, isInTable, CellSelection } from "@arkpad/core";
+import { Plugin, Selection } from "@arkpad/core";
+import { Slice, Fragment } from "@arkpad/core";
 
 // Nodes
 import { tableNode } from "./nodes/table";

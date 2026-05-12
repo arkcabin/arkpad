@@ -1,4 +1,4 @@
-import type { Fragment, Node as ProsemirrorNode, NodeType } from "prosemirror-model";
+import type { Fragment, PMNode as ProsemirrorNode, NodeType } from "@arkpad/core";
 
 export function createCell(
   cellType: NodeType,

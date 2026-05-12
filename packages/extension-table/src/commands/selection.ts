@@ -1,5 +1,5 @@
-import { CellSelection, TableMap } from "prosemirror-tables";
-import { Selection } from "prosemirror-state";
+import { CellSelection, TableMap } from "@arkpad/core";
+import { Selection } from "@arkpad/core";
 import type { ArkpadCommandProps } from "@arkpad/core";
 import type { CommandFactory } from "../types";
 

@@ -1,4 +1,4 @@
-import type { Fragment, Node as ProsemirrorNode, Schema } from "prosemirror-model";
+import type { Fragment, PMNode as ProsemirrorNode, Schema } from "@arkpad/core";
 import { createCell } from "./createCell";
 import { getTableNodeTypes } from "./getTableNodeTypes";
 
