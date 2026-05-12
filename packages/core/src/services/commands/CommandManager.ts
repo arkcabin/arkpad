@@ -414,7 +414,8 @@ class CommandManagerInstance {
     if (!this.allSuccessful) return this as unknown as ChainedCommands;
     const parsedDoc = parseContent(content, this.schema);
     // If we get a doc node, extract its content; otherwise use the node itself
-    const contentToInsert = parsedDoc.type.name === 'doc' ? parsedDoc.content : Fragment.from(parsedDoc);
+    const contentToInsert =
+      parsedDoc.type.name === "doc" ? parsedDoc.content : Fragment.from(parsedDoc);
     const slice = new Slice(contentToInsert, 0, 0);
     const localTr = this.virtualState.tr.replaceSelection(slice);
     this.merge(localTr);
@@ -548,9 +549,6 @@ class CommandManagerInstance {
     }
 
     if (!this.allSuccessful) {
-      if (this.shouldDispatch) {
-        console.warn("[Arkpad] Shadow Engine execution failed. Log:", this.executionLog);
-      }
       return false;
     }
 

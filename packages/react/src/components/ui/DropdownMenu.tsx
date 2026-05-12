@@ -192,6 +192,7 @@ function DropdownItem({
             dispatch: (tr: any) => editor.getView().dispatch(tr),
             view: editor.getView(),
             editor,
+            chain: () => editor.chain(),
           });
         }
       }

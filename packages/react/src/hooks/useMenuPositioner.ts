@@ -56,7 +56,6 @@ export function useMenuPositioner({
   const isActive = !!(menuState && menu && menu.active && menu.coords);
   const coords = menu?.coords;
   const isLocked = menuState?.isLocked ?? false;
-  const isFirstShow = menu?.isFirstShow ?? false;
 
   useEffect(() => {
     if (!editor || !menuRef.current || typeof window === "undefined" || !isActive || !coords) {
@@ -158,11 +157,7 @@ export function useMenuPositioner({
     visibility: isLocked ? "hidden" : "visible",
     opacity: isLocked ? 0 : 1,
     pointerEvents: isLocked ? "none" : "auto",
-    transition:
-      isFirstShow || isLocked
-        ? "none"
-        : "opacity 0.15s ease-out, transform 0.15s cubic-bezier(0.2, 0, 0, 1), visibility 0.15s",
-    willChange: "transform, opacity",
+    transition: "none",
     minWidth: type === "floating" ? "32px" : "auto",
   };
 

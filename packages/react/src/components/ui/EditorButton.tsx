@@ -66,7 +66,22 @@ export const EditorButton: React.FC<EditorButtonProps> = ({
     <button
       type="button"
       onMouseDown={(e) => e.preventDefault()}
-      onClick={() => editor?.runCommand(command, ...(args as any[]))}
+      onClick={() => {
+        if (!editor) return;
+        const cmd = editor.extensionManager.commands[command];
+        if (cmd) {
+          const fn = (cmd as any)(...(args as any[]));
+          if (typeof fn === "function") {
+            fn({
+              state: editor.getView().state,
+              dispatch: (tr: any) => editor.getView().dispatch(tr),
+              view: editor.getView(),
+              editor,
+              chain: () => editor.chain(),
+            });
+          }
+        }
+      }}
       disabled={!canRun || !!props.disabled || !editor}
       className={`${className} ${isActive ? activeClassName : ""}`.trim()}
       data-arkpad-ignore="true"
