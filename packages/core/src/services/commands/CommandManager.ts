@@ -570,6 +570,15 @@ class CommandManagerInstance {
 
     return true;
   }
+
+  /**
+   * Returns the final master transaction without dispatching it.
+   * Useful for input rules and other plugins that need to return a transaction.
+   */
+  public getTransaction(): Transaction | null {
+    if (!this.allSuccessful) return null;
+    return this.masterTransaction;
+  }
 }
 
 /**

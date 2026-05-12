@@ -169,7 +169,7 @@ export function createHardBreak(): Node {
     addCommands: () => ({
       setHardBreak: () => (props: any) => {
         const { state, dispatch } = props;
-        const node = state.schema.nodes.hard_break!.create();
+        const node = state.schema.nodes.hardBreak!.create();
         if (dispatch) dispatch(state.tr.replaceSelectionWith(node));
         return true;
       },
@@ -177,12 +177,12 @@ export function createHardBreak(): Node {
 
     addKeyboardShortcuts: () => ({
       "Mod-Enter": (state: any, dispatch: any) => {
-        const node = state.schema.nodes.hard_break!.create();
+        const node = state.schema.nodes.hardBreak!.create();
         if (dispatch) dispatch(state.tr.replaceSelectionWith(node));
         return true;
       },
       "Shift-Enter": (state: any, dispatch: any) => {
-        const node = state.schema.nodes.hard_break!.create();
+        const node = state.schema.nodes.hardBreak!.create();
         if (dispatch) dispatch(state.tr.replaceSelectionWith(node));
         return true;
       },

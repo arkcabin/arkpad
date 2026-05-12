@@ -1,9 +1,10 @@
-import { Node, ArkpadCommandProps, PMNode } from "@arkpad/core";
+import { Node, ArkpadCommandProps, PMNode, NodeRole } from "@arkpad/core";
 import { liftListItem, splitListItem } from "prosemirror-schema-list";
 
 declare module "@arkpad/core" {
   interface ArkpadCommands {
     toggleTaskItem: () => void;
+    splitTaskItem: () => void;
   }
 }
 
@@ -18,6 +19,7 @@ export const TaskItem = Node.create({
 
   content: "block+",
   group: "block",
+  role: NodeRole.LAYOUT,
   defining: true,
 
   addAttributes() {
@@ -50,6 +52,59 @@ export const TaskItem = Node.create({
 
   addCommands() {
     return {
+      splitTaskItem:
+        () =>
+        ({ state, dispatch }: ArkpadCommandProps) => {
+          const { selection, schema } = state;
+          const { $from } = selection;
+          const type = schema.nodes.taskItem;
+
+          if (!type) return false;
+
+          // Find the taskItem container
+          let depth = $from.depth;
+          let taskItemDepth = -1;
+          while (depth > 0) {
+            if ($from.node(depth).type === type) {
+              taskItemDepth = depth;
+              break;
+            }
+            depth--;
+          }
+
+          if (taskItemDepth === -1) return false;
+
+          const taskItemNode = $from.node(taskItemDepth);
+
+          // Smart Exit (Breakout): If the task item is empty, lift it
+          // We check textContent and child count to be robust.
+          const isEmpty = taskItemNode.textContent.trim().length === 0 && taskItemNode.childCount <= 1;
+
+          if (isEmpty) {
+            if (dispatch) {
+              return liftListItem(type)(state, dispatch);
+            }
+            return true;
+          }
+
+          if (dispatch) {
+            const { tr } = state;
+            // Force split at the taskItem level (depth of the taskItem node)
+            // tr.split(pos, depth) splits all nodes from current depth up to specified depth
+            try {
+              // The second argument to tr.split is the NUMBER OF LEVELS to split.
+              // To split up to the taskItem, we need: (current depth - taskItem parent depth)
+              const levelsToSplit = $from.depth - (taskItemDepth - 1);
+              tr.split($from.pos, levelsToSplit);
+              dispatch(tr);
+              return true;
+            } catch (e) {
+              // Fallback to standard split if manual split fails
+              return splitListItem(type)(state, dispatch);
+            }
+          }
+          return true;
+        },
       toggleTaskItem:
         () =>
         ({ state, dispatch }: ArkpadCommandProps) => {
@@ -88,41 +143,7 @@ export const TaskItem = Node.create({
 
   addKeyboardShortcuts() {
     return {
-      Enter:
-        () =>
-        ({ state, dispatch }: ArkpadCommandProps) => {
-          const { selection, schema } = state;
-          const { $from } = selection;
-          const type = schema.nodes.taskItem;
-
-          if (!type) return false;
-
-          // Find the taskItem container
-          let depth = $from.depth;
-          let taskItemDepth = -1;
-          while (depth > 0) {
-            if ($from.node(depth).type === type) {
-              taskItemDepth = depth;
-              break;
-            }
-            depth--;
-          }
-
-          if (taskItemDepth === -1) return false;
-
-          const taskNode = $from.node(taskItemDepth);
-
-          // Smart Exit (Breakout): If the task item is empty, lift it
-          const isEmpty = taskNode.textContent.trim().length === 0;
-
-          if (isEmpty) {
-            return liftListItem(type)(state, dispatch);
-          }
-
-          // High-Precision Split
-          // We use the native splitListItem which handles text selections and splitting nested blocks
-          return splitListItem(type)(state, dispatch);
-        },
+      Enter: () => this.editor!.runCommand("splitTaskItem"),
       Tab: () => this.editor!.runCommand("sinkListItem"),
       "Shift-Tab": () => this.editor!.runCommand("liftListItem"),
     };

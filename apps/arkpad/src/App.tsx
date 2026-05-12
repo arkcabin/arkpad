@@ -53,10 +53,10 @@ export function App() {
 
             <div className="border border-[var(--border)] rounded-none bg-[var(--bg-main)]">
               <div className="h-12 px-3 border-b border-[var(--border)] flex items-center gap-1">
-                <MenuButton command="toggleBold" name="strong">
+                <MenuButton command="toggleBold" name="bold">
                   <Bold className="w-3.5 h-3.5" />
                 </MenuButton>
-                <MenuButton command="toggleItalic" name="em">
+                <MenuButton command="toggleItalic" name="italic">
                   <Italic className="w-3.5 h-3.5" />
                 </MenuButton>
                 <div className="w-px h-4 bg-[var(--border)] mx-1" />

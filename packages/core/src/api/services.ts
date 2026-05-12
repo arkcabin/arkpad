@@ -56,6 +56,7 @@ export interface ChainedCommands {
   deleteRange(from: number, to: number): ChainedCommands;
   command(fn: (props: ArkpadCommandProps) => boolean, label?: string): ChainedCommands;
   run(): boolean;
+  getTransaction(): Transaction | null;
   [key: string]: any;
 }
 

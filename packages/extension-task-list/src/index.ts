@@ -1,4 +1,4 @@
-import { Node, ArkpadCommandProps, PMNode } from "@arkpad/core";
+import { Node, ArkpadCommandProps, PMNode, NodeRole } from "@arkpad/core";
 import { wrappingInputRule } from "prosemirror-inputrules";
 import { Schema } from "prosemirror-model";
 import TaskItem from "./TaskItem";
@@ -27,6 +27,7 @@ export const TaskList = Node.create<TaskListOptions>({
   },
 
   group: "block",
+  role: NodeRole.LAYOUT,
   content: "taskItem+",
   trailingNode: true,
 

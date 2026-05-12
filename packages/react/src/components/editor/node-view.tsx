@@ -109,7 +109,10 @@ export class ReactNodeView implements NodeView {
 
     this.node = node;
 
-    if (attrsChanged || contentChanged) {
+    // Only re-render React if attributes changed.
+    // If only content changed and we have a contentDOM, ProseMirror handles the update
+    // internally within that DOM element, so we don't need to trigger a React render.
+    if (attrsChanged || (contentChanged && !this.contentDOM)) {
       this.render();
     }
 

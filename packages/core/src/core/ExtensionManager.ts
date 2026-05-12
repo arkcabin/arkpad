@@ -2,12 +2,13 @@ import type { Schema, Node as PMNode } from "prosemirror-model";
 import { Plugin, EditorState, Transaction } from "prosemirror-state";
 import { keymap } from "prosemirror-keymap";
 import { baseKeymap } from "prosemirror-commands";
-import { inputRules } from "prosemirror-inputrules";
+import { inputRules, InputRule } from "prosemirror-inputrules";
 import { EditorView } from "prosemirror-view";
 import { SchemaBuilder } from "../services/schema/schema-builder";
 import { MenuEngine } from "../services/menu/MenuEngine";
 import type { GlobalMenuStorage } from "../services/menu/MenuEngine";
 import type { ArkpadExtension, ArkpadCommandRegistry, ArkpadCommand, IArkpadEditor } from "../api";
+import { CommandManager } from "../services/commands/CommandManager";
 
 /**
  * ExtensionManager coordinates all editor extensions, collecting their commands,
@@ -325,11 +326,74 @@ export class ExtensionManager {
   /**
    * Aggregates input rules from all registered extensions.
    */
-  private collectInputRules(schema: Schema): any[] {
-    const rules: any[] = [];
+  private collectInputRules(schema: Schema): InputRule[] {
+    const rules: InputRule[] = [];
+
     for (const ext of this.extensions) {
       if (ext.addInputRules) {
-        rules.push(...ext.addInputRules(schema));
+        try {
+          const extRules = ext.addInputRules(schema);
+          if (!extRules || !Array.isArray(extRules)) continue;
+
+          extRules.forEach((rule: any) => {
+            if (!rule) return;
+
+            // 1. Duck-type check for standard ProseMirror InputRule instances
+            // We check for 'match' and 'handler' properties. 
+            // Crucially, 'match' must have an 'exec' method to be used by prosemirror-inputrules 'run' function.
+            if (rule.match && typeof rule.match.exec === "function" && rule.handler) {
+              rules.push(rule);
+              return;
+            }
+
+            // 2. Handle Arkpad-style rule objects { find: RegExp, handler: Function }
+            // We ensure 'find' has an 'exec' method before wrapping it.
+            if (rule.find && typeof rule.find.exec === "function" && rule.handler) {
+              rules.push(
+                new InputRule(rule.find, (state, match, start, end) => {
+                  if (!this.editor) return null;
+
+                  const cm = new CommandManager({
+                    state,
+                    commands: this.commands,
+                    schema: this.schema,
+                    editor: this.editor!,
+                    shouldDispatch: false,
+                  });
+
+                  // Delete the matched text first (standard InputRule behavior)
+                  cm.deleteRange(start, end);
+
+                  const result = rule.handler({
+                    state,
+                    tr: cm.getTransaction() || state.tr,
+                    match,
+                    start,
+                    end,
+                    chain: () => cm,
+                    editor: this.editor,
+                  });
+
+                  if (result === false) return null;
+
+                  const tr = cm.getTransaction();
+                  if (tr && (tr.steps.length > 0 || tr.selectionSet)) {
+                    return tr;
+                  }
+
+                  return null;
+                })
+              );
+            } else if (rule.find || rule.match) {
+              console.warn(
+                `[Arkpad] Extension "${ext.name}" provided an input rule with missing/invalid properties.`,
+                rule
+              );
+            }
+          });
+        } catch (e) {
+          console.error(`[Arkpad] Failed to collect input rules from extension "${ext.name}":`, e);
+        }
       }
     }
     return rules;

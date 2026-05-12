@@ -131,23 +131,40 @@ export function useArkpadEditor(options: UseArkpadEditorOptions = {}) {
     };
   }, []);
 
+  const lastSentContent = useRef<string | ArkpadDocJSON | undefined>(undefined);
+
   // Sync content only if it changes from OUTSIDE and after initial boot
   useEffect(() => {
     if (!editor || !initialContentApplied.current || options.content === undefined) return;
+
+    // PERFORMANCE FIX: Only sync if the content prop itself has changed compared to what we last pushed.
+    // This prevents resets during typing when the editor content is transformed (e.g. by UniqueId)
+    // but the input prop remains the same literal string.
+    const contentString = typeof options.content === "string" ? options.content : JSON.stringify(options.content);
+    const lastContentString = typeof lastSentContent.current === "string" ? lastSentContent.current : JSON.stringify(lastSentContent.current);
+    
+    if (contentString === lastContentString) return;
 
     const isHtmlContent = typeof options.content === "string";
 
     if (isHtmlContent) {
       const currentHtml = editor.getHTML();
-      if (options.content === currentHtml) return;
+      if (options.content === currentHtml) {
+        lastSentContent.current = options.content;
+        return;
+      }
       editor.setContent(options.content, false);
     } else {
       const currentJson = editor.getJSON();
       const newJson = options.content as ArkpadDocJSON;
-      if (JSON.stringify(newJson) !== JSON.stringify(currentJson)) {
-        editor.setContent(options.content, false);
+      if (JSON.stringify(newJson) === JSON.stringify(currentJson)) {
+        lastSentContent.current = options.content;
+        return;
       }
+      editor.setContent(options.content, false);
     }
+    
+    lastSentContent.current = options.content;
   }, [editor, options.content]);
 
   // Sync editable state

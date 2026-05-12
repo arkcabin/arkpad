@@ -10,17 +10,17 @@
   --text-muted: #64748b;
   --border: #e2e8f0;
   --selection: rgba(59, 130, 246, 0.1);
-  --font-sans: system-ui, -apple-system, sans-serif;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 .dark {
   --bg-main: #020617;
   --bg-canvas: #0f172a;
   --bg-editor: #1e293b;
-  --text-main: #f1f5f9;
+  --text-main: #f8fafc;
   --text-muted: #94a3b8;
-  --border: #334155;
-  --selection: rgba(255, 255, 255, 0.1);
+  --border: #1e293b;
+  --selection: rgba(99, 102, 241, 0.15);
 }
 
 @layer base {
@@ -34,24 +34,26 @@
 
 .arkpad-container {
   outline: none !important;
-  min-height: 300px;
+  min-height: 400px;
   color: var(--text-main) !important;
+  font-size: 16px;
 }
 
 /* Simple flat toolbar */
 .toolbar-btn {
-  @apply p-2 rounded-none transition-colors;
+  @apply p-2 rounded-md transition-all duration-200;
   color: var(--text-muted);
 }
 
 .toolbar-btn:hover {
   color: var(--text-main);
   background-color: var(--selection);
+  transform: translateY(-1px);
 }
 
 .toolbar-btn.active {
-  color: #3b82f6;
-  background-color: rgba(59, 130, 246, 0.1);
+  color: #6366f1;
+  background-color: rgba(99, 102, 241, 0.1);
 }
 
 /* Hide scrollbars but keep functionality */
@@ -74,34 +76,48 @@
   clear: both;
 }
 
-.prose h1 { @apply text-4xl font-extrabold mt-8 mb-6; }
-.prose h2 { @apply text-3xl font-bold mt-7 mb-5; }
-.prose h3 { @apply text-2xl font-semibold mt-6 mb-4; }
-.prose h4 { @apply text-xl font-semibold mt-5 mb-3; }
-.prose h5 { @apply text-lg font-medium mt-4 mb-2; }
-.prose h6 { @apply text-base font-medium mt-4 mb-2; }
+.prose h1 { 
+  @apply text-3xl font-extrabold mt-10 mb-8 px-5 py-2.5 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800/50 inline-block; 
+  letter-spacing: -0.02em;
+}
+
+.prose h2 { 
+  @apply text-2xl font-bold mt-8 mb-4 border-b border-slate-100 dark:border-slate-800 pb-2; 
+  letter-spacing: -0.01em;
+}
+
+.prose h3 { @apply text-xl font-bold mt-7 mb-3 text-slate-800 dark:text-slate-200; }
+.prose h4 { @apply text-lg font-bold mt-6 mb-2 text-slate-700 dark:text-slate-300; }
+.prose h5 { @apply text-base font-bold mt-5 mb-2 text-slate-600 dark:text-slate-400; }
+.prose h6 { @apply text-sm font-bold mt-4 mb-2 uppercase tracking-wider text-slate-500; }
 
 .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
   color: var(--text-main) !important;
-  line-height: 1.2;
+  line-height: 1.3;
 }
 
 .prose strong,
 .prose b {
-  @apply font-bold;
-  color: inherit;
+  @apply font-bold text-slate-900 dark:text-slate-50;
 }
 
 .prose em,
 .prose i {
   @apply italic;
-  color: inherit;
 }
 
 .prose p,
 .prose li {
   @apply mb-4 leading-relaxed;
   color: var(--text-main) !important;
+}
+
+.prose ul, .prose ol {
+  @apply mb-6 pl-6;
+}
+
+.prose li p {
+  @apply mb-1;
 }
 
 /* Prose code cleanup */

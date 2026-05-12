@@ -13,7 +13,7 @@ export interface UniqueIdOptions {
 
 const pluginKey = new PluginKey("unique-id");
 
-const defaultTypes = ["paragraph", "heading", "blockquote", "code_block", "list_item", "task_item"];
+const defaultTypes = ["paragraph", "heading", "blockquote", "code_block", "listItem", "taskItem"];
 
 function ensureUniqueId(
   tr: Transaction,

@@ -52,7 +52,53 @@ export const ListItem = Node.create({
         const { state, dispatch } = props;
         const type = state.schema.nodes.listItem;
         if (!type) return false;
-        return splitListItem(type)(state, dispatch);
+
+        const { selection } = state;
+        const { $from } = selection;
+
+        // Find the listItem container
+        let depth = $from.depth;
+        let listItemDepth = -1;
+        while (depth > 0) {
+          if ($from.node(depth).type === type) {
+            listItemDepth = depth;
+            break;
+          }
+          depth--;
+        }
+
+        if (listItemDepth === -1) return false;
+
+        const listNode = $from.node(listItemDepth);
+
+        // Smart Exit (Breakout): If the list item is empty, lift it
+        // We check textContent and child count to be robust.
+        // A truly empty list item usually has one empty paragraph.
+        const isEmpty = listNode.textContent.trim().length === 0 && listNode.childCount <= 1;
+
+        if (isEmpty) {
+          if (dispatch) {
+            return liftListItem(type)(state, dispatch);
+          }
+          return true;
+        }
+
+        if (dispatch) {
+          const { tr } = state;
+          // Force split at the listItem level
+          try {
+            // The second argument to tr.split is the NUMBER OF LEVELS to split.
+            // To split up to the listItem, we need: (current depth - listItem parent depth)
+            const levelsToSplit = $from.depth - (listItemDepth - 1);
+            tr.split($from.pos, levelsToSplit);
+            dispatch(tr);
+            return true;
+          } catch (e) {
+            // Fallback to standard split if manual split fails
+            return splitListItem(type)(state, dispatch);
+          }
+        }
+        return true;
       },
       indentList: () => (props: ArkpadCommandProps) => props.editor.runCommand("sinkListItem"),
       outdentList: () => (props: ArkpadCommandProps) => props.editor.runCommand("liftListItem"),

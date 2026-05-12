@@ -540,7 +540,7 @@ export class ArkpadEditor implements IArkpadEditor {
     if (ext && ext.role !== undefined) targetRole = ext.role;
     else {
       if (name.toLowerCase().includes("heading")) targetRole = NodeRole.CONTENT;
-      if (name.toLowerCase().includes("list")) targetRole = NodeRole.LAYOUT;
+      if (name.toLowerCase().includes("list") || name.toLowerCase().includes("taskitem")) targetRole = NodeRole.LAYOUT;
       if (name.toLowerCase().includes("section")) targetRole = NodeRole.LAYOUT;
       if (name.toLowerCase().includes("image") || name.toLowerCase().includes("table"))
         targetRole = NodeRole.WIDGET;
