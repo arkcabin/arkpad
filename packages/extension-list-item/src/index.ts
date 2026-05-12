@@ -22,7 +22,7 @@ export const ListItem = Node.create({
 
   content: "block+",
   group: "block",
-  role: NodeRole.CONTENT,
+  role: NodeRole.LAYOUT,
   marks: "_",
   defining: true,
 

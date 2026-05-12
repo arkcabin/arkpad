@@ -25,7 +25,7 @@ export const OrderedList = Node.create<OrderedListOptions>({
   },
 
   group: "block",
-  role: NodeRole.CONTENT,
+  role: NodeRole.LAYOUT,
   content: "listItem+",
   trailingNode: true,
 

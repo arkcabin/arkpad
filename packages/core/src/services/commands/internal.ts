@@ -105,6 +105,22 @@ export const toggleList =
       return liftListItem(listItemType)(state, dispatch);
     }
 
+    // Direct Switching Logic:
+    // If we are inside a different list type, change the type of the wrapping list node
+    // instead of nesting it.
+    const { $from } = state.selection;
+    for (let depth = $from.depth; depth > 0; depth--) {
+      const node = $from.node(depth);
+      const isOtherList = (node.type.name === "bulletList" || node.type.name === "orderedList") && node.type !== listType;
+      
+      if (isOtherList) {
+        if (dispatch) {
+          dispatch(state.tr.setNodeMarkup($from.before(depth), listType));
+        }
+        return true;
+      }
+    }
+
     return wrapInList(listType)(state, dispatch);
   };
 

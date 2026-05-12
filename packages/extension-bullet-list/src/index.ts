@@ -25,7 +25,7 @@ export const BulletList = Node.create<BulletListOptions>({
   },
 
   group: "block",
-  role: NodeRole.CONTENT,
+  role: NodeRole.LAYOUT,
   content: "listItem+",
   trailingNode: true,
 
