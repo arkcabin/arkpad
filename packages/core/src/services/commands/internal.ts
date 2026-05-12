@@ -111,7 +111,7 @@ export const toggleList =
     const { $from } = state.selection;
     for (let depth = $from.depth; depth > 0; depth--) {
       const node = $from.node(depth);
-      const isOtherList = (node.type.name === "bulletList" || node.type.name === "orderedList") && node.type !== listType;
+      const isOtherList = (node.type.name === "bulletList" || node.type.name === "orderedList" || node.type.name === "taskList") && node.type !== listType;
       
       if (isOtherList) {
         if (dispatch) {

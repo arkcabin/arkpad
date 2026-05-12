@@ -98,7 +98,7 @@ export const TaskItem = Node.create({
               tr.split($from.pos, levelsToSplit);
               dispatch(tr);
               return true;
-            } catch (e) {
+            } catch {
               // Fallback to standard split if manual split fails
               return splitListItem(type)(state, dispatch);
             }

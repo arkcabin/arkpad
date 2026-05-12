@@ -96,7 +96,7 @@ export interface ExtensionConfig<Options = any, Storage = any> {
   onInit?: (this: ExtensionContext<Options, Storage>) => void;
   addMenu?: (this: ExtensionContext<Options, Storage>) => any;
   onDestroy?: (this: ExtensionContext<Options, Storage>) => void;
-  addNodeView?: (this: ExtensionContext<Options, Storage>) => any;
+  addNodeView?: (this: ExtensionContext<Options, Storage>) => NodeViewConstructor | undefined;
   [key: string]: any;
 }
 
@@ -194,7 +194,7 @@ export interface ArkpadExtension {
   storage?: any;
   options?: any;
   addAttributes?: () => Attributes;
-  addNodeView?: () => any;
+  addNodeView?: () => NodeViewConstructor | undefined;
   role?: number;
   extend?: (config: Partial<ExtensionConfig<any, any>>) => ArkpadExtension;
 }

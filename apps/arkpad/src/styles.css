@@ -116,6 +116,26 @@
   @apply mb-6 pl-6;
 }
 
+.prose ul.task-list {
+  @apply pl-0 list-none;
+}
+
+.prose li.task-item {
+  @apply flex items-start gap-3 mb-2;
+}
+
+.prose li.task-item > div:first-child {
+  @apply mt-1 shrink-0;
+}
+
+.prose li.task-item > div:last-child {
+  @apply flex-1 min-w-0;
+}
+
+.prose li.task-item.checked > div:last-child {
+  @apply line-through text-[var(--text-muted)] opacity-60;
+}
+
 .prose li p {
   @apply mb-1;
 }
