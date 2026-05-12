@@ -535,6 +535,7 @@ export class ArkpadEditor implements IArkpadEditor {
     const { state } = this.view;
     const ext = this.extensionManager.commandToExtension.get(name);
     if (state.schema.marks[name] || (ext && (ext as any).config?.addMarks)) return true;
+
     let targetRole = NodeRole.CONTENT;
     if (ext && ext.role !== undefined) targetRole = ext.role;
     else {
@@ -544,11 +545,23 @@ export class ArkpadEditor implements IArkpadEditor {
       if (name.toLowerCase().includes("image") || name.toLowerCase().includes("table"))
         targetRole = NodeRole.WIDGET;
     }
-    const parent = state.selection.$from.parent;
+
+    const { $from } = state.selection;
+    let container = $from.parent;
+
+    // CRITICAL: For block-level commands that replace or wrap the current block,
+    // we must check if the CONTAINER (grandparent) can accept the new role.
+    const isBlockCommand =
+      (targetRole & (NodeRole.CONTENT | NodeRole.LAYOUT | NodeRole.ISOLATED)) !== 0;
+
+    if (isBlockCommand && $from.depth > 0) {
+      container = $from.node($from.depth - 1);
+    }
+
     return Governance.canAccept(
-      Governance.resolveRole(parent),
+      Governance.resolveRole(container),
       targetRole,
-      (parent.type.spec as any).allowedRoles
+      (container.type.spec as any).allowedRoles
     );
   }
 

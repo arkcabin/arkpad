@@ -71,18 +71,18 @@ export function HeadingDemo() {
   const editor = useArkpadEditor({
     extensions: [Heading],
     content: `
-      <h1>Heading 1: Maximum Impact</h1>
-      <p>This is the primary heading for major sections.</p>
-      <h2>Heading 2: Section Overview</h2>
-      <p>Use this for main topics within a document.</p>
-      <h3>Heading 3: Sub-section Detail</h3>
-      <p>Perfect for nested information and categories.</p>
-      <h4>Heading 4: Small Detail</h4>
-      <p>A smaller heading for micro-sections.</p>
-      <h5>Heading 5: Accent Heading</h5>
-      <p>Detailed labels or metadata headers.</p>
-      <h6>Heading 6: Technical Label</h6>
-      <p>The smallest heading level, often used for captions or fine print headers.</p>
+      <h1>Project Arkpad: The Future of Editing</h1>
+      <p>Welcome to the next generation of content creation. Arkpad combines structural governance with a seamless user experience.</p>
+      <h2>Executive Summary</h2>
+      <p>Our goal is to provide a surgical editing interface that stays out of your way while enforcing clean document structures.</p>
+      <h3>Core Technologies</h3>
+      <p>Arkpad is built on top of ProseMirror and React, utilizing a modular extension system.</p>
+      <h4>Heading Transitions</h4>
+      <p>We've recently optimized how headings switch levels, ensuring that a single click is all it takes to reorganize your document.</p>
+      <h5>Detailed Specifications</h5>
+      <p>Headings H1 through H6 are fully supported with custom typography and distinct weights.</p>
+      <h6>Technical Notes v1.6.13</h6>
+      <p>This version includes refined governance rules for block-level transitions.</p>
     `,
     autofocus: true,
   });

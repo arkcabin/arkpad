@@ -77,20 +77,26 @@ export const Heading = Node.create<HeadingOptions>({
         },
       toggleHeading:
         (attrs: { level: number }) =>
-        ({ state, dispatch, editor }: ArkpadCommandProps) => {
-          const { schema } = state;
+        ({ state, dispatch }: ArkpadCommandProps) => {
+          const { schema, selection } = state;
+          const { $from } = selection;
           const type = schema.nodes.heading;
           if (!type) return false;
 
           const level = typeof attrs.level === "string" ? parseInt(attrs.level, 10) : attrs.level;
+          const node = $from.parent;
+          const isCurrentHeading = node.type.name === "heading" && node.attrs.level === level;
 
-          const isActive = editor.isActive("heading", { level });
-
-          if (isActive) {
-            return setBlockType(schema.nodes.paragraph!)(state, dispatch);
+          if (dispatch) {
+            const tr = state.tr;
+            if (isCurrentHeading) {
+              tr.setBlockType(selection.from, selection.to, schema.nodes.paragraph!);
+            } else {
+              tr.setBlockType(selection.from, selection.to, type, { level });
+            }
+            dispatch(tr);
           }
-
-          return setBlockType(type, { level })(state, dispatch);
+          return true;
         },
     };
   },

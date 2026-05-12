@@ -53,9 +53,9 @@ export class Governance {
       return (childRole & (NodeRole.LAYOUT | NodeRole.CONTENT | NodeRole.WIDGET | NodeRole.ISOLATED)) !== 0;
     }
 
-    // 3. CONTENT accepts ATOM, WIDGETS, and other CONTENT (unblocks Lists, Blockquotes, etc.)
+    // 3. CONTENT (Paragraph, Heading) accepts ATOM and WIDGETS
     if (this.hasRole(parentRole, NodeRole.CONTENT)) {
-      return (childRole & (NodeRole.ATOM | NodeRole.WIDGET | NodeRole.CONTENT)) !== 0;
+      return (childRole & (NodeRole.ATOM | NodeRole.WIDGET)) !== 0;
     }
 
     // 4. ISOLATED nodes (Tables, CodeBlocks) act as containers
