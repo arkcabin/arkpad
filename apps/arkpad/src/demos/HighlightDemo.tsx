@@ -8,7 +8,7 @@ export function HighlightDemo() {
   const editor = useArkpadEditor({
     extensions: [Engine, Highlight],
     content:
-      "<h1>Highlight Extension</h1><p>This editor supports <mark style='background-color: #ffff00'>highlights</mark>. Try selecting text and clicking the highlighter icon or pressing Mod+Shift+H.</p>",
+      "<h1>Highlights</h1><p>This editor supports <mark style='background-color: #ffff00'>highlights</mark>. Try selecting text and clicking the highlighter icon or pressing Mod+Shift+H.</p>",
   });
 
   if (!editor) return null;

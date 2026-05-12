@@ -9,7 +9,7 @@ export function SubscriptDemo() {
   const editor = useArkpadEditor({
     extensions: [Engine, Heading, SubscriptExtension],
     content:
-      "<h1>Subscript Extension</h1><p>Chemical formulas: H<sub>2</sub>O. Try Mod+,</p>",
+      "<h1>Subscript</h1><p>The subscript extension allows you to render text below the baseline, common in chemical formulas like H<sub>2</sub>O or mathematical notation.</p>",
   });
 
   if (!editor) return null;

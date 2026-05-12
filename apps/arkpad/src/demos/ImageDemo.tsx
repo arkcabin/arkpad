@@ -9,7 +9,7 @@ export function ImageDemo() {
   const editor = useArkpadEditor({
     extensions: [Engine, Heading, ImageExtension],
     content: `
-      <h1>Image Extension</h1>
+      <h1>Images</h1>
       <p>The image extension allows you to embed external images into your document with control over alignment and width.</p>
       <div class="ark-image-container ark-align-center" style="width: 100%; display: flex; justify-content: center; margin: 1.5rem auto;">
         <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80" style="max-width: 100%; height: auto; border-radius: 8px;" alt="Coding" />

@@ -9,7 +9,7 @@ export function BlockquoteDemo() {
   const editor = useArkpadEditor({
     extensions: [Engine, Heading, BlockquoteExtension],
     content: `
-      <h1>Blockquote Extension</h1>
+      <h1>Blockquotes</h1>
       <p>The blockquote extension allows you to wrap content in a quotation block.</p>
       <blockquote>
         <p>This is a blockquote. It can contain multiple paragraphs and other block elements.</p>

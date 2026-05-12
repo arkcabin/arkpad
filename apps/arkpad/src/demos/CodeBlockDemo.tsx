@@ -9,7 +9,7 @@ export function CodeBlockDemo() {
   const editor = useArkpadEditor({
     extensions: [Engine, Heading, CodeBlockExtension],
     content: `
-      <h1>CodeBlock Extension</h1>
+      <h1>Code Blocks</h1>
       <p>The code block extension allows you to embed source code with preserved whitespace and mono-spacing.</p>
       <pre><code class="language-javascript">function helloWorld() {
   console.log("Hello from Arkpad!");

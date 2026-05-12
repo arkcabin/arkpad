@@ -9,7 +9,7 @@ export function CodeDemo() {
   const editor = useArkpadEditor({
     extensions: [Engine, Heading, CodeExtension],
     content:
-      "<h1>Code Extension</h1><p>This editor handles <code>inline code</code>. Try selecting this text and pressing Mod+E.</p>",
+      "<h1>Inline Code</h1><p>The code extension allows you to mark inline text as <code>mono-spaced code</code>. This is perfect for technical documentation.</p>",
   });
 
   if (!editor) return null;

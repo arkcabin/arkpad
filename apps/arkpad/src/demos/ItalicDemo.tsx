@@ -10,7 +10,7 @@ export function ItalicDemo() {
   const editor = useArkpadEditor({
     extensions: [Engine, Heading, ItalicExtension],
     content:
-      "<h1>Italic Extension</h1><p>This editor <em>only</em> handles emphasis. <i>Italic text</i> helps highlight key points without changing the weight of the font.</p>",
+      "<h1>Italic</h1><p>This editor <em>only</em> handles emphasis. <i>Italic text</i> helps highlight key points without changing the weight of the font.</p>",
   });
 
   if (!editor) return null;

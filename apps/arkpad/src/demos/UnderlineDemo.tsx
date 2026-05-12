@@ -9,7 +9,7 @@ export function UnderlineDemo() {
   const editor = useArkpadEditor({
     extensions: [Engine, Heading, UnderlineExtension],
     content:
-      "<h1>Underline Extension</h1><p>This editor handles <u>underline</u> text. Try selecting this text and pressing Mod+U.</p>",
+      "<h1>Underline</h1><p>This editor handles <u>underline</u> text. Try selecting this text and pressing Mod+U.</p>",
   });
 
   if (!editor) return null;

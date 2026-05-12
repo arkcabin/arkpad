@@ -9,7 +9,7 @@ export function SuperscriptDemo() {
   const editor = useArkpadEditor({
     extensions: [Engine, Heading, SuperscriptExtension],
     content:
-      "<h1>Superscript Extension</h1><p>Mathematical formulas: x<sup>2</sup> + y<sup>2</sup> = z<sup>2</sup>. Try Mod+.</p>",
+      "<h1>Superscript</h1><p>The superscript extension allows you to render text above the baseline, useful for mathematical exponents like E=mc<sup>2</sup> or ordinal indicators like 1<sup>st</sup>.</p>",
   });
 
   if (!editor) return null;

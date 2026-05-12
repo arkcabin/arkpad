@@ -9,7 +9,7 @@ export function HorizontalRuleDemo() {
   const editor = useArkpadEditor({
     extensions: [Engine, Heading, HorizontalRuleExtension],
     content: `
-      <h1>Horizontal Rule Extension</h1>
+      <h1>Horizontal Rules</h1>
       <p>This extension allows you to insert a thematic break or horizontal rule between blocks of content.</p>
       <hr />
       <p>Try clicking the divider icon in the toolbar or typing <code>---</code> on a new line to insert a horizontal rule.</p>

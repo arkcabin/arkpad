@@ -98,7 +98,7 @@
 
 .prose strong,
 .prose b {
-  @apply font-bold text-slate-900 dark:text-slate-50;
+  @apply font-bold;
 }
 
 .prose em,

@@ -9,7 +9,7 @@ export function StrikeDemo() {
   const editor = useArkpadEditor({
     extensions: [Engine, Heading, StrikeExtension],
     content:
-      "<h1>Strike Extension</h1><p>This editor handles <del>strikethrough</del> text. Try selecting this text and pressing Mod+Shift+S.</p>",
+      "<h1>Strikethrough</h1><p>This editor handles <del>strikethrough</del> text. Try selecting this text and pressing Mod+Shift+S.</p>",
   });
 
   if (!editor) return null;

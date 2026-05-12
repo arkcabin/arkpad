@@ -9,7 +9,7 @@ export function BoldDemo() {
   const editor = useArkpadEditor({
     extensions: [Engine, Heading, BoldExtension],
     content:
-      "<h1>Bold Extension</h1><p>This editor <strong>only</strong> handles bold text. Try selecting this text and pressing Mod+B.</p>",
+      "<h1>Bold</h1><p>This editor <strong>only</strong> handles bold text. Try selecting this text and pressing Mod+B.</p>",
   });
 
   if (!editor) return null;
