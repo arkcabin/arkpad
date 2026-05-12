@@ -6,6 +6,7 @@ import { EditorState } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
 import { useMenuPositioner } from "../../hooks/useMenuPositioner";
 import { EditorButton } from "../ui/EditorButton";
+import { DropdownMenu } from "../ui/DropdownMenu";
 
 export interface BubbleMenuProps {
   editor: ArkpadEditorAPI | null;
@@ -113,28 +114,28 @@ function DefaultToolbar() {
         </svg>
       </EditorButton>
       <div className="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1" />
-      <EditorButton
-        command="toggleHeading"
-        name="heading"
-        className="toolbar-btn"
-        activeClassName="active"
-        attrs={{ level: 2 }}
-      >
-        <svg
-          width="14"
-          height="14"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M6 12h12" />
-          <path d="M6 4v16" />
-          <path d="M18 4v16" />
-        </svg>
-      </EditorButton>
+      <DropdownMenu layout="vertical">
+        <DropdownMenu.Trigger className="toolbar-btn text-[10px] font-bold px-1 min-w-[20px] gap-0.5">
+          H<span className="text-[8px] opacity-60">▾</span>
+        </DropdownMenu.Trigger>
+        <DropdownMenu.Content align="start" side="top" minWidth={140}>
+          {[1, 2, 3, 4, 5, 6].map((level) => (
+            <DropdownMenu.Item key={level} command="toggleHeading" name="heading" attrs={{ level }}>
+              <span className="font-semibold text-gray-400 dark:text-gray-500 mr-2 w-5 text-right">
+                H{level}
+              </span>
+              <span>Heading {level}</span>
+            </DropdownMenu.Item>
+          ))}
+          <DropdownMenu.Separator />
+          <DropdownMenu.Item command="setParagraph" name="paragraph">
+            <span className="text-gray-400 dark:text-gray-500 mr-2 w-5 text-right font-mono">
+              ¶
+            </span>
+            <span>Paragraph</span>
+          </DropdownMenu.Item>
+        </DropdownMenu.Content>
+      </DropdownMenu>
       <div className="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1" />
       <EditorButton command="setLink" name="link" className="toolbar-btn" activeClassName="active">
         <svg
