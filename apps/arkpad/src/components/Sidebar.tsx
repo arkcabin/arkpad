@@ -21,6 +21,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
         { name: "CodeBlock", path: "/extensions/codeblock" },
         { name: "Horizontal Rule", path: "/extensions/horizontal-rule" },
         { name: "Alignment", path: "/extensions/alignment" },
+        { name: "Typography", path: "/extensions/typography" },
       ],
     },
     {

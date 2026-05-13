@@ -67,6 +67,9 @@ const AIDemo = lazy(() => import("./demos/AIDemo").then((m) => ({ default: m.AID
 const PlaceholderDemo = lazy(() =>
   import("./demos/PlaceholderDemo").then((m) => ({ default: m.PlaceholderDemo }))
 );
+const TypographyDemo = lazy(() =>
+  import("./demos/TypographyDemo").then((m) => ({ default: m.TypographyDemo }))
+);
 
 function Loader() {
   return (
@@ -103,6 +106,7 @@ const ROUTE_NAMES: Record<string, string> = {
   "/extensions/markdown": "Markdown",
   "/extensions/ai": "AI",
   "/extensions/placeholder": "Placeholder",
+  "/extensions/typography": "Typography",
 };
 
 function TopBar({ onSidebarToggle }: { onSidebarToggle: () => void }) {
@@ -192,6 +196,7 @@ function AppShell() {
               <Route path="/extensions/markdown" element={<MarkdownDemo />} />
               <Route path="/extensions/ai" element={<AIDemo />} />
               <Route path="/extensions/placeholder" element={<PlaceholderDemo />} />
+              <Route path="/extensions/typography" element={<TypographyDemo />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Suspense>

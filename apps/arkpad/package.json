@@ -14,6 +14,7 @@
     "@arkpad/extension-ai": "*",
     "@arkpad/extension-highlight": "*",
     "@arkpad/extension-placeholder": "*",
+    "@arkpad/extension-typography": "*",
     "@arkpad/react": "*",
     "@arkpad/starter-kit": "*",
     "@tailwindcss/vite": "^4.1.13",
