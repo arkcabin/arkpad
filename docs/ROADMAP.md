@@ -160,6 +160,59 @@ column → block+
 
 ---
 
+## Tiptap Feature Parity
+
+Extensions and features that Arkpad is missing compared to Tiptap, ranked by priority.
+
+### ✅ Already Built (Arkpad Unique Advantages)
+
+| Feature                    | Notes                                                          |
+| -------------------------- | -------------------------------------------------------------- |
+| **Governance System**      | Bitmask node-role validation with auto-healing                 |
+| **Shadow Engine**          | Virtual state simulation for command chains with telemetry     |
+| **Interceptor Middleware** | Sync/async transaction pipeline (AI-aware)                     |
+| **Ghost Text**             | Built-in AI autocomplete decoration rendering                  |
+| **Painting Tools**         | Highlighter/Eraser mode for batch formatting                   |
+| **Virtual Selections**     | Remote cursor decorators for collaboration                     |
+| **AI Extension**           | Built-in `aiComplete` / `aiSummarize` with agentic interceptor |
+| **Menu Engine**            | Declarative bubble/floating menu positioning system            |
+| **Structural Healer**      | `appendTransaction` plugin that auto-fixes invalid nesting     |
+
+### 🔨 High Priority
+
+| Extension                      | Why It Matters                                                                                                                                            | Estimated Effort |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
+| **Placeholder**                | CSS `:empty::before` only works for truly empty docs. Need a proper ProseMirror decoration-based placeholder that shows when content is deleted/replaced. | 1-2 days         |
+| **Font Family / Size / Color** | Required for any document styling beyond basic bold/italic/alignment. Each is a mark with `style` attribute rendering.                                    | 2-3 days each    |
+| **Typography**                 | Smart quotes `" "` → `"""`, em-dash `--` → `—`, ellipsis `...` → `…`, copyright `(c)` → `©`. Simple input rules.                                          | 1 day            |
+
+### 🏗️ Medium Priority
+
+| Extension            | Why It Matters                                                                                                | Estimated Effort |
+| -------------------- | ------------------------------------------------------------------------------------------------------------- | ---------------- |
+| **Mention**          | @-mention autocomplete with filtered popover list. Requires `DecorationSet` + plugin for suggestion dropdown. | 3-4 days         |
+| **Emoji**            | `:smile:` autocomplete with emoji picker popover. Similar architecture to Mention.                            | 3-4 days         |
+| **YouTube / Iframe** | Embed media via URL paste or node insert. Needs `TrackUtils.parseHTML` and node view.                         | 1-2 days         |
+
+### 🔧 Low Priority
+
+| Extension                | Why It Matters                                                                     | Estimated Effort |
+| ------------------------ | ---------------------------------------------------------------------------------- | ---------------- |
+| **Details / Summary**    | Collapsible `<details>` / `<summary>` HTML node.                                   | 2 days           |
+| **Math (KaTeX)**         | LaTeX math rendering with `katex` library. Inline `$x^2$` and display `$$...$$`.   | 3-4 days         |
+| **Collaboration (Y.js)** | Real-time multi-cursor with Y.js sync. Requires `y-prosemirror` adapter.           | 5-7 days         |
+| **TOC**                  | Auto-generated table of contents from heading structure. Read-only node or plugin. | 1-2 days         |
+
+### 🏗️ Infrastructure Gaps
+
+| Item                  | Notes                                                                |
+| --------------------- | -------------------------------------------------------------------- |
+| **Test suite**        | Zero tests across the entire monorepo (no unit, integration, or E2E) |
+| **CI pipeline**       | No GitHub Actions or CI config found                                 |
+| **API documentation** | No generated TypeScript API docs                                     |
+
+---
+
 ## Related Documentation
 
 - `docs/PAGE_BUILDER_FULL_GRAPESJS.md` - Full specification
@@ -167,4 +220,4 @@ column → block+
 
 ---
 
-_Last Updated: May 8, 2026_
+_Last Updated: May 13, 2026_
