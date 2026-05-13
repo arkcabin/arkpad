@@ -20,6 +20,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
         { name: "Blockquote", path: "/extensions/blockquote" },
         { name: "CodeBlock", path: "/extensions/codeblock" },
         { name: "Horizontal Rule", path: "/extensions/horizontal-rule" },
+        { name: "Alignment", path: "/extensions/alignment" },
       ],
     },
     {
@@ -39,6 +40,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
         { name: "Underline", path: "/extensions/underline" },
         { name: "Strike", path: "/extensions/strike" },
         { name: "Code", path: "/extensions/code" },
+        { name: "Link", path: "/extensions/link" },
         { name: "Highlight", path: "/extensions/highlight" },
         { name: "Superscript", path: "/extensions/superscript" },
         { name: "Subscript", path: "/extensions/subscript" },
@@ -50,6 +52,15 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
         { name: "Bubble Menu", path: "/extensions/bubble-menu" },
         { name: "Floating Menu", path: "/extensions/floating-menu" },
         { name: "Placeholder 🚧", path: "#" },
+      ],
+    },
+    {
+      title: "TOOLS",
+      items: [
+        { name: "Highlighter Tool", path: "/extensions/highlighter-tool" },
+        { name: "Eraser Tool", path: "/extensions/eraser-tool" },
+        { name: "Markdown Paste", path: "/extensions/markdown" },
+        { name: "AI Assistant", path: "/extensions/ai" },
       ],
     },
   ];

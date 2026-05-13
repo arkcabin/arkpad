@@ -50,6 +50,20 @@ const FloatingMenuDemo = lazy(() =>
 const StandardEditor = lazy(() =>
   import("./demos/StandardEditor").then((m) => ({ default: m.StandardEditor }))
 );
+const AlignmentDemo = lazy(() =>
+  import("./demos/AlignmentDemo").then((m) => ({ default: m.AlignmentDemo }))
+);
+const LinkDemo = lazy(() => import("./demos/LinkDemo").then((m) => ({ default: m.LinkDemo })));
+const HighlighterToolDemo = lazy(() =>
+  import("./demos/HighlighterToolDemo").then((m) => ({ default: m.HighlighterToolDemo }))
+);
+const EraserToolDemo = lazy(() =>
+  import("./demos/EraserToolDemo").then((m) => ({ default: m.EraserToolDemo }))
+);
+const MarkdownDemo = lazy(() =>
+  import("./demos/MarkdownDemo").then((m) => ({ default: m.MarkdownDemo }))
+);
+const AIDemo = lazy(() => import("./demos/AIDemo").then((m) => ({ default: m.AIDemo })));
 
 function Loader() {
   return (
@@ -79,6 +93,12 @@ const ROUTE_NAMES: Record<string, string> = {
   "/extensions/task-list": "Task List",
   "/extensions/bubble-menu": "Bubble Menu",
   "/extensions/floating-menu": "Floating Menu",
+  "/extensions/alignment": "Alignment",
+  "/extensions/link": "Link",
+  "/extensions/highlighter-tool": "Highlighter Tool",
+  "/extensions/eraser-tool": "Eraser Tool",
+  "/extensions/markdown": "Markdown",
+  "/extensions/ai": "AI",
 };
 
 function TopBar({ onSidebarToggle }: { onSidebarToggle: () => void }) {
@@ -161,6 +181,12 @@ function AppShell() {
               <Route path="/extensions/task-list" element={<TaskListDemo />} />
               <Route path="/extensions/bubble-menu" element={<BubbleMenuDemo />} />
               <Route path="/extensions/floating-menu" element={<FloatingMenuDemo />} />
+              <Route path="/extensions/alignment" element={<AlignmentDemo />} />
+              <Route path="/extensions/link" element={<LinkDemo />} />
+              <Route path="/extensions/highlighter-tool" element={<HighlighterToolDemo />} />
+              <Route path="/extensions/eraser-tool" element={<EraserToolDemo />} />
+              <Route path="/extensions/markdown" element={<MarkdownDemo />} />
+              <Route path="/extensions/ai" element={<AIDemo />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Suspense>

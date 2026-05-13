@@ -49,7 +49,9 @@ export const toggleBlock =
   };
 
 export const setTextAlign = (align: string) => (props: any) => {
-  const { tr, dispatch, state } = props;
+  const state = props.state;
+  const tr = props.tr || state.tr;
+  const { dispatch } = props;
   const { selection } = state;
   const { from, to } = selection;
 
@@ -69,13 +71,17 @@ export const insertNode =
     if (!nodeType) return false;
     const node = nodeType.createAndFill(attrs);
     if (!node) return false;
-    props.tr.replaceSelectionWith(node);
+    const tr = props.tr || props.state.tr;
+    tr.replaceSelectionWith(node);
+    if (props.dispatch) props.dispatch(tr);
     return true;
   };
 
 export const updateAttributes =
   (typeOrName: string, attributes: Record<string, any>) => (props: any) => {
-    const { tr, state } = props;
+    const state = props.state;
+    const tr = props.tr || state.tr;
+    const { dispatch } = props;
     const { selection } = state;
     const { from, to } = selection;
 
@@ -88,6 +94,7 @@ export const updateAttributes =
         tr.setNodeMarkup(pos, undefined, { ...node.attrs, ...attributes });
       }
     });
+    if (dispatch) dispatch(tr);
     return true;
   };
 
@@ -111,8 +118,12 @@ export const toggleList =
     const { $from } = state.selection;
     for (let depth = $from.depth; depth > 0; depth--) {
       const node = $from.node(depth);
-      const isOtherList = (node.type.name === "bulletList" || node.type.name === "orderedList" || node.type.name === "taskList") && node.type !== listType;
-      
+      const isOtherList =
+        (node.type.name === "bulletList" ||
+          node.type.name === "orderedList" ||
+          node.type.name === "taskList") &&
+        node.type !== listType;
+
       if (isOtherList) {
         if (dispatch) {
           dispatch(state.tr.setNodeMarkup($from.before(depth), listType));
@@ -139,20 +150,22 @@ export const setNode = (type: string | NodeType, attrs?: Record<string, any>) =>
   if (props.dispatch) {
     const node = nodeType.createAndFill(attrs);
     if (node) {
-      props.tr.replaceSelectionWith(node);
+      const tr = props.tr || props.state.tr;
+      tr.replaceSelectionWith(node);
+      props.dispatch(tr);
     }
   }
   return true;
 };
 
 export const insertContent = (content: any) => (props: any) => {
-  const { tr, state } = props;
+  const state = props.state;
+  const tr = props.tr || state.tr;
+  const { dispatch } = props;
   const node = state.schema.nodeFromJSON(content);
 
   if (!node) return false;
 
-  // If the selection is at the doc root and invalid for text,
-  // insert at the end of the doc instead of replacing selection.
   if (
     state.selection.$from.parent.type.name === "doc" &&
     !state.selection.$from.parent.type.allowsContent(state.schema.nodes.text!)
@@ -162,30 +175,39 @@ export const insertContent = (content: any) => (props: any) => {
     tr.replaceSelectionWith(node);
   }
 
+  if (dispatch) dispatch(tr);
   return true;
 };
 
 export const deleteNode = (pos?: number) => (props: any) => {
-  const { tr, state } = props;
+  const state = props.state;
+  const tr = props.tr || state.tr;
+  const { dispatch } = props;
   const position = pos ?? state.selection.from;
   const node = state.doc.nodeAt(position);
   if (!node) return false;
   tr.delete(position, position + node.nodeSize);
+  if (dispatch) dispatch(tr);
   return true;
 };
 
 export const duplicateNode = (pos?: number) => (props: any) => {
-  const { tr, state } = props;
+  const state = props.state;
+  const tr = props.tr || state.tr;
+  const { dispatch } = props;
   const position = pos ?? state.selection.from;
   const node = state.doc.nodeAt(position);
   if (!node) return false;
   const newNode = node.copy(node.content);
   tr.insert(position + node.nodeSize, newNode);
+  if (dispatch) dispatch(tr);
   return true;
 };
 
 export const moveNodeUp = (pos?: number) => (props: any) => {
-  const { tr, state, dispatch } = props;
+  const state = props.state;
+  const tr = props.tr || state.tr;
+  const { dispatch } = props;
   const position = pos ?? state.selection.from;
   const node = state.doc.nodeAt(position);
   if (!node) return false;
@@ -206,7 +228,9 @@ export const moveNodeUp = (pos?: number) => (props: any) => {
 };
 
 export const moveNodeDown = (pos?: number) => (props: any) => {
-  const { tr, state, dispatch } = props;
+  const state = props.state;
+  const tr = props.tr || state.tr;
+  const { dispatch } = props;
   const position = pos ?? state.selection.from;
   const node = state.doc.nodeAt(position);
   if (!node) return false;
@@ -227,9 +251,12 @@ export const moveNodeDown = (pos?: number) => (props: any) => {
 };
 
 export const insertContentAt = (pos: number, content: any) => (props: any) => {
-  const { tr, state } = props;
+  const state = props.state;
+  const tr = props.tr || state.tr;
+  const { dispatch } = props;
   const node = state.schema.nodeFromJSON(content);
   if (!node) return false;
   tr.insert(pos, node);
+  if (dispatch) dispatch(tr);
   return true;
 };

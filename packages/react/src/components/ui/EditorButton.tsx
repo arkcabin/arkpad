@@ -72,10 +72,12 @@ export const EditorButton: React.FC<EditorButtonProps> = ({
         if (cmd) {
           const fn = (cmd as any)(...(args as any[]));
           if (typeof fn === "function") {
+            const view = editor.getView();
             fn({
-              state: editor.getView().state,
-              dispatch: (tr: any) => editor.getView().dispatch(tr),
-              view: editor.getView(),
+              state: view.state,
+              tr: view.state.tr,
+              dispatch: (tr: any) => view.dispatch(tr),
+              view,
               editor,
               chain: () => editor.chain(),
             });
