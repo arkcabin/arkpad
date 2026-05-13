@@ -11,7 +11,7 @@ export function AIDemo() {
       Engine,
       Heading,
       AI.configure({
-        onAIRequest: async ({ command, text }) => {
+        onAIRequest: async ({ command }) => {
           await new Promise((r) => setTimeout(r, 300));
           if (command === "complete") {
             return " This is AI-generated text. Configure a real AI handler to replace this mock.";
