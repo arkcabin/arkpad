@@ -64,6 +64,9 @@ const MarkdownDemo = lazy(() =>
   import("./demos/MarkdownDemo").then((m) => ({ default: m.MarkdownDemo }))
 );
 const AIDemo = lazy(() => import("./demos/AIDemo").then((m) => ({ default: m.AIDemo })));
+const PlaceholderDemo = lazy(() =>
+  import("./demos/PlaceholderDemo").then((m) => ({ default: m.PlaceholderDemo }))
+);
 
 function Loader() {
   return (
@@ -99,6 +102,7 @@ const ROUTE_NAMES: Record<string, string> = {
   "/extensions/eraser-tool": "Eraser Tool",
   "/extensions/markdown": "Markdown",
   "/extensions/ai": "AI",
+  "/extensions/placeholder": "Placeholder",
 };
 
 function TopBar({ onSidebarToggle }: { onSidebarToggle: () => void }) {
@@ -187,6 +191,7 @@ function AppShell() {
               <Route path="/extensions/eraser-tool" element={<EraserToolDemo />} />
               <Route path="/extensions/markdown" element={<MarkdownDemo />} />
               <Route path="/extensions/ai" element={<AIDemo />} />
+              <Route path="/extensions/placeholder" element={<PlaceholderDemo />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Suspense>
