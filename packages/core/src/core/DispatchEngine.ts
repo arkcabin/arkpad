@@ -235,7 +235,9 @@ export class DispatchEngine {
     }
 
     const nextState = view.state.apply(tr);
-    view.updateState(nextState);
+    if (!(view as any).isDestroyed) {
+      view.updateState(nextState);
+    }
     this.documentVersion++;
 
     this.hooks.triggerUpdate();

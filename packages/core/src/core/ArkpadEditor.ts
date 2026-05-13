@@ -394,6 +394,7 @@ export class ArkpadEditor implements IArkpadEditor {
     this.stateManager.saveSnapshot(name, this.view.state);
   }
   public restoreSnapshot(name: string): boolean {
+    if (this.destroyed) return false;
     const state = this.stateManager.restoreSnapshot(name);
     if (!state) return false;
     this.view.updateState(state);
@@ -462,6 +463,7 @@ export class ArkpadEditor implements IArkpadEditor {
   }
 
   public registerExtension(extension: ArkpadExtension) {
+    if (this.destroyed) return;
     this.extensionManager.registerExtension(extension);
     if (extension.init) extension.init(this);
     if (extension.storage) this.storage[extension.name] = extension.storage;
@@ -469,6 +471,12 @@ export class ArkpadEditor implements IArkpadEditor {
     this.extensionManager.rebuild();
     this.contentService.refreshSerializer();
     this.hookManager.indexHooks(this.extensionManager.extensions);
+
+    // Update view props to include new nodeViews
+    this.view.setProps({
+      nodeViews: { ...this.extensionManager.nodeViews, ...this.nodeViews },
+    });
+
     this.stateManager.refreshState(
       this.view.state.doc.toJSON(),
       this.extensionManager.schema,
@@ -477,6 +485,7 @@ export class ArkpadEditor implements IArkpadEditor {
   }
 
   public registerExtensions(extensions: ArkpadExtension[]) {
+    if (this.destroyed) return;
     this.extensionManager.registerExtensions(extensions);
     extensions.forEach((ext) => {
       if (ext.init) ext.init(this);
@@ -486,6 +495,12 @@ export class ArkpadEditor implements IArkpadEditor {
     this.extensionManager.rebuild();
     this.contentService.refreshSerializer();
     this.hookManager.indexHooks(this.extensionManager.extensions);
+
+    // Update view props to include new nodeViews
+    this.view.setProps({
+      nodeViews: { ...this.extensionManager.nodeViews, ...this.nodeViews },
+    });
+
     this.stateManager.refreshState(
       this.view.state.doc.toJSON(),
       this.extensionManager.schema,
@@ -494,10 +509,17 @@ export class ArkpadEditor implements IArkpadEditor {
   }
 
   public unregisterExtension(nameOrId: string) {
+    if (this.destroyed) return;
     this.extensionManager.unregisterExtension(nameOrId);
     this.extensionManager.rebuild();
     this.contentService.refreshSerializer();
     this.hookManager.indexHooks(this.extensionManager.extensions);
+
+    // Update view props (nodeViews might have been removed)
+    this.view.setProps({
+      nodeViews: { ...this.extensionManager.nodeViews, ...this.nodeViews },
+    });
+
     this.stateManager.refreshState(
       this.view.state.doc.toJSON(),
       this.extensionManager.schema,

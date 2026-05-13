@@ -33,12 +33,15 @@ export class StateManager {
   }
 
   public refreshState(content: ArkpadContent, schema: Schema, plugins: readonly Plugin[]) {
+    const view = this.editor.getView();
+    if (!view || (view as any).isDestroyed) return;
+
     const nextState = EditorState.create({
       schema,
       doc: parseContent(content, schema),
       plugins: [...plugins],
     });
-    this.editor.getView().updateState(nextState);
+    view.updateState(nextState);
     this.editor.emitUpdate(nextState);
     return nextState;
   }
