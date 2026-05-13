@@ -16,6 +16,7 @@ export * from "./components/editor/node-view";
 export * from "./components/menus/BubbleMenu";
 export * from "./components/menus/FloatingMenu";
 export * from "./components/menus/SmartBar";
+export * from "./components/menus/LinkBubble";
 
 // UI Components
 export * from "./components/ui/EditorButton";

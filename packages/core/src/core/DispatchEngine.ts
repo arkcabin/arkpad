@@ -166,23 +166,37 @@ export class DispatchEngine {
     this.isPending = true;
     this.editor.events.emit("dispatch:pending", { editor: this.editor, isPending: true });
 
+    let resolved = false;
+
     try {
       const middlewarePromise = (async () => {
         let currentTr = tr;
         for (const interceptor of this.asyncInterceptors) {
+          if (resolved) return null;
           const result = await interceptor({ editor: this.editor, transaction: currentTr });
           if (result === false || result === null) return null;
           if (result instanceof Transaction) currentTr = result;
         }
+        if (resolved) return null;
         return currentTr;
       })();
 
       const timeoutPromise = new Promise<null>((resolve) =>
-        setTimeout(() => resolve(null), this.dispatchTimeout)
+        setTimeout(() => {
+          resolved = true;
+          resolve(null);
+        }, this.dispatchTimeout)
       );
 
       const result = await Promise.race([middlewarePromise, timeoutPromise]);
-      if (result === null) console.warn("[Arkpad] Async middleware timed out or blocked.");
+      if (result === null && !resolved) {
+        // middlewarePromise returned null (blocked/interceptor rejected)
+        return null;
+      }
+      if (resolved) {
+        console.warn("[Arkpad] Async middleware timed out.");
+        return null;
+      }
       return result;
     } finally {
       this.isPending = false;

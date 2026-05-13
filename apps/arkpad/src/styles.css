@@ -20,6 +20,9 @@
   --menu-item-text: #374151;
   --menu-dim-text: #9ca3af;
   --menu-separator: #e5e7eb;
+  --hover-bg: #f1f5f9;
+  --accent: #6366f1;
+  --accent-foreground: #ffffff;
 }
 
 .dark {
@@ -39,6 +42,9 @@
   --menu-item-text: rgba(255, 255, 255, 0.8);
   --menu-dim-text: rgba(255, 255, 255, 0.4);
   --menu-separator: rgba(255, 255, 255, 0.1);
+  --hover-bg: rgba(255, 255, 255, 0.1);
+  --accent: #818cf8;
+  --accent-foreground: #ffffff;
 }
 
 @layer base {
@@ -72,6 +78,78 @@
 .toolbar-btn.active {
   color: #6366f1;
   background-color: rgba(99, 102, 241, 0.1);
+}
+
+/* Link Bubble — clean, borderless URL input */
+.ark-link-bubble {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: var(--menu-bg);
+  border: 1px solid var(--menu-border);
+  border-radius: 10px;
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.12),
+    0 1px 4px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.dark .ark-link-bubble {
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.4),
+    0 1px 4px rgba(0, 0, 0, 0.3);
+}
+.ark-link-bubble-input {
+  width: 200px;
+  font-size: 13px;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 4px 0;
+  color: var(--text-main);
+}
+.ark-link-bubble-input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+.ark-link-bubble-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+.ark-link-bubble-apply {
+  padding: 4px 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.ark-link-bubble-apply:hover {
+  background: var(--hover-bg);
+}
+.ark-link-bubble-apply:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+.ark-link-bubble-remove {
+  padding: 4px;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ark-link-bubble-remove:hover {
+  color: #ef4444;
+  background: var(--hover-bg);
 }
 
 /* Hide scrollbars but keep functionality */
@@ -135,6 +213,25 @@
 .prose em,
 .prose i {
   @apply italic;
+}
+
+.prose a,
+.ark-link {
+  color: #2563eb;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.dark .prose a,
+.dark .ark-link {
+  color: #60a5fa;
+}
+.prose a:hover,
+.ark-link:hover {
+  color: #1d4ed8;
+}
+.dark .prose a:hover,
+.dark .ark-link:hover {
+  color: #93c5fd;
 }
 
 .prose p,

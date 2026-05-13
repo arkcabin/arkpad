@@ -135,11 +135,13 @@ export class ArkpadEditor implements IArkpadEditor {
       this.selectionService.getVirtualSelections()
     );
 
-    // Create the content element with the specified tag (e.g. 'main')
-    // This will be our editor container
-    this.element = document.createElement(resolved.contentTag);
-    this.element.classList.add("arkpad-editor");
-    this.element.classList.add("arkpad-content");
+    // Create a content element inside the user-provided container
+    // The view mounts on this inner element, but we keep the original container as parent
+    const contentElement = document.createElement(resolved.contentTag);
+    contentElement.classList.add("arkpad-editor");
+    contentElement.classList.add("arkpad-content");
+    this.element.appendChild(contentElement);
+    this.element = contentElement;
 
     this.view = new EditorView(this.element, {
       state,
@@ -540,7 +542,8 @@ export class ArkpadEditor implements IArkpadEditor {
     if (ext && ext.role !== undefined) targetRole = ext.role;
     else {
       if (name.toLowerCase().includes("heading")) targetRole = NodeRole.CONTENT;
-      if (name.toLowerCase().includes("list") || name.toLowerCase().includes("taskitem")) targetRole = NodeRole.LAYOUT;
+      if (name.toLowerCase().includes("list") || name.toLowerCase().includes("taskitem"))
+        targetRole = NodeRole.LAYOUT;
       if (name.toLowerCase().includes("section")) targetRole = NodeRole.LAYOUT;
       if (name.toLowerCase().includes("image") || name.toLowerCase().includes("table"))
         targetRole = NodeRole.WIDGET;
