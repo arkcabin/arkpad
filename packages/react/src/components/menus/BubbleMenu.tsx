@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { ArkpadEditorAPI } from "@arkpad/core";
 import { BubbleMenu as BubbleMenuExtension } from "@arkpad/extension-bubble-menu";
@@ -31,11 +31,10 @@ export interface BubbleMenuProps {
 
 interface DefaultToolbarProps {
   onLinkClick: () => void;
-  hasLink: boolean;
   isOnlyLink: boolean;
 }
 
-const DefaultToolbar: React.FC<DefaultToolbarProps> = ({ onLinkClick, hasLink, isOnlyLink }) => {
+const DefaultToolbar: React.FC<DefaultToolbarProps> = ({ onLinkClick, isOnlyLink }) => {
   return (
     <div className="flex items-center gap-0.5 px-2 py-1.5 bg-[var(--menu-bg)] rounded-lg shadow-lg border border-[var(--menu-border)]">
       <EditorButton
@@ -313,21 +312,35 @@ interface LinkInputProps {
 
 const LinkInput: React.FC<LinkInputProps> = ({ initialValue, onApply, onCancel }) => {
   const [value, setValue] = React.useState(initialValue || "");
+  const inputRef = React.useRef<HTMLInputElement>(null);
+
+  React.useEffect(() => {
+    // Small timeout to ensure the menu is positioned and visible before focusing
+    const timer = setTimeout(() => {
+      inputRef.current?.focus();
+      inputRef.current?.select();
+    }, 50);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
-    <div className="flex items-center gap-2 px-2 py-1.5 bg-[var(--menu-bg)] rounded-lg shadow-lg border border-[var(--menu-border)] min-w-[320px]">
+    <div 
+      className="flex items-center gap-2 px-2 py-1.5 bg-[var(--menu-bg)] rounded-lg shadow-lg border border-[var(--menu-border)] min-w-[320px]"
+      onMouseDown={(e) => e.stopPropagation()} // Prevent editor blur
+    >
       <div className="flex-1 flex items-center gap-2 px-2 py-1 bg-[rgba(255,255,255,0.05)] rounded border border-[rgba(255,255,255,0.1)]">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="opacity-40">
           <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
           <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
         </svg>
         <input
-          autoFocus
+          ref={inputRef}
           className="bg-transparent border-none outline-none text-xs text-[var(--menu-text)] flex-1 placeholder:opacity-30"
           placeholder="Paste link or search..."
           value={value}
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={(e) => {
+            e.stopPropagation();
             if (e.key === "Enter") onApply(value);
             if (e.key === "Escape") onCancel();
           }}
@@ -367,9 +380,9 @@ export const BubbleMenu: React.FC<BubbleMenuProps> = ({
   defaultToolbar = false,
 }) => {
   const [showLinkInput, setShowLinkInput] = React.useState(false);
-  const { hasLink, isOnlyLink } = useEditorState(editor, (s: ArkpadEditorAPI) => {
+  const { isOnlyLink } = useEditorState(editor, (s: ArkpadEditorAPI) => {
     const active = s.isActive("link");
-    if (!active) return { hasLink: false, isOnlyLink: false };
+    if (!active) return { isOnlyLink: false };
 
     const { state } = s.getView();
     const { from, to, empty } = state.selection;
@@ -388,8 +401,8 @@ export const BubbleMenu: React.FC<BubbleMenuProps> = ({
       return true;
     });
 
-    return { hasLink: true, isOnlyLink: isFullCoverage };
-  }) || { hasLink: false, isOnlyLink: false };
+    return { isOnlyLink: isFullCoverage };
+  }) || { isOnlyLink: false };
 
   const { ref, style, active } = useMenuPositioner({
     editor,
@@ -406,24 +419,45 @@ export const BubbleMenu: React.FC<BubbleMenuProps> = ({
     }
   }, [active]);
 
+  // Track whether we've already registered the extension (schema-level, once only).
+  const registeredRef = useRef(false);
+
   useEffect(() => {
     if (!editor) return;
 
-    const extension = BubbleMenuExtension.configure({
-      shouldShow: shouldShow as any,
-    });
-
-    editor.registerExtension(extension);
-
-    return () => {
-      if (editor && extension.name) {
-        try {
-          editor.unregisterExtension(extension.name);
-        } catch (error) {
-          console.warn("BubbleMenu cleanup error:", error);
-        }
+    // Register the extension into the schema exactly once per editor instance.
+    // BubbleMenu only adds a menu config — no nodes or marks — so a single
+    // registration is sufficient and avoids repeated schema rebuilds.
+    if (!registeredRef.current) {
+      const alreadyRegistered = editor.extensionManager.extensions.some(
+        (e) => e.name === "bubbleMenu"
+      );
+      if (!alreadyRegistered) {
+        editor.registerExtension(BubbleMenuExtension);
       }
-    };
+      registeredRef.current = true;
+    }
+
+    // Update the shouldShow config live via the MenuEngine — no schema rebuild needed.
+    const menuEngine = (editor as any).extensionManager?.menuEngine;
+    if (menuEngine) {
+      const effectiveShouldShow =
+        shouldShow ??
+        (({ editor: e, empty }: any) => !empty && e.isFocused());
+
+      menuEngine.registerExtensionMenus("bubbleMenu", {
+        type: "bubble",
+        shouldShow: effectiveShouldShow,
+        priority: 100,
+      });
+
+      // Force a menu recalculation so the new shouldShow takes effect immediately.
+      const view = editor.getView();
+      if (view && !view.isDestroyed) {
+        menuEngine.update(view, undefined, true);
+        editor.emitUiUpdate();
+      }
+    }
   }, [editor, shouldShow]);
 
   if (typeof document === "undefined" || !active) return null;
@@ -456,7 +490,6 @@ export const BubbleMenu: React.FC<BubbleMenuProps> = ({
       return (
         <DefaultToolbar
           onLinkClick={() => setShowLinkInput(true)}
-          hasLink={hasLink}
           isOnlyLink={isOnlyLink}
         />
       );

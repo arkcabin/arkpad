@@ -23,9 +23,8 @@ export const CodeBlock = Node.create<CodeBlockOptions>({
   },
 
   content: "text*",
-  marks: "",
+  marks: "_",
   group: "block",
-  code: true,
   defining: true,
   trailingNode: true,
 

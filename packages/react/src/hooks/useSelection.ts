@@ -46,7 +46,7 @@ export function useSelection(editor: ArkpadEditorAPI | null): SelectionState {
         from,
         to,
         empty,
-        text: s.getText().slice(from, to), // Note: In PM this is slightly different, but good for snapshot
+        text: empty ? "" : s.getState().doc.textBetween(from, to, " "),
         coords,
         isBold: s.isActive("strong"),
         isItalic: s.isActive("em"),
