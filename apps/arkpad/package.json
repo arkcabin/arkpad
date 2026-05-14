@@ -12,6 +12,9 @@
   "dependencies": {
     "@arkpad/core": "*",
     "@arkpad/extension-ai": "*",
+    "@arkpad/extension-color": "*",
+    "@arkpad/extension-font-family": "*",
+    "@arkpad/extension-font-size": "*",
     "@arkpad/extension-highlight": "*",
     "@arkpad/extension-placeholder": "*",
     "@arkpad/extension-typography": "*",

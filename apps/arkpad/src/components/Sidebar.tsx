@@ -56,6 +56,14 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
       ],
     },
     {
+      title: "STYLE",
+      items: [
+        { name: "Color", path: "/extensions/color" },
+        { name: "Font Family", path: "/extensions/font-family" },
+        { name: "Font Size", path: "/extensions/font-size" },
+      ],
+    },
+    {
       title: "TOOLS",
       items: [
         { name: "Highlighter Tool", path: "/extensions/highlighter-tool" },

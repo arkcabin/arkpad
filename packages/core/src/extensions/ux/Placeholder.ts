@@ -77,32 +77,42 @@ export const Placeholder = Extension.create<PlaceholderOptions>({
 
             const decorations: Decoration[] = [];
 
-            if (doc.content.size === 0) {
+            // 1. Handle completely empty editor or editor with single empty paragraph
+            const isEditorEmpty =
+              doc.content.size === 0 ||
+              (doc.childCount === 1 && doc.firstChild.isBlock && doc.firstChild.content.size === 0);
+
+            if (isEditorEmpty && !opts.showOnlyCurrent) {
               const text = resolvePlaceholder(opts.placeholder, opts.types, doc, 0, editor);
               if (text) {
                 decorations.push(Decoration.widget(1, () => makeWidget(text, "ark-placeholder")));
               }
-              return DecorationSet.create(doc, decorations);
+              if (decorations.length > 0) return DecorationSet.create(doc, decorations);
             }
 
+            // 2. Handle block-level placeholders
             doc.descendants((node: any, pos: number) => {
               if (!node.isBlock) {
-                if (opts.includeChildren) return true;
                 return false;
               }
 
+              // If node has content, we don't show a placeholder here,
+              // but we might want to check its children if includeChildren is true
               if (node.content.size > 0) {
                 return opts.includeChildren;
               }
 
-              if (opts.showOnlyCurrent && pos + node.nodeSize <= from) return false;
+              // Check showOnlyCurrent logic: Only show if the selection is inside this node
+              if (opts.showOnlyCurrent) {
+                const { from, to } = selection;
+                const isCurrent = from > pos && to < pos + node.nodeSize;
+                if (!isCurrent) return false;
+              }
 
               const text = resolvePlaceholder(opts.placeholder, opts.types, node, pos, editor);
               if (!text) return false;
 
-              decorations.push(
-                Decoration.widget(pos + 1, () => makeWidget(text, "ark-placeholder"))
-              );
+              decorations.push(Decoration.widget(pos + 1, () => makeWidget(text, "ark-placeholder")));
 
               if (opts.emptyNodeClass) {
                 decorations.push(

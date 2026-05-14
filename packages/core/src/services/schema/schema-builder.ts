@@ -65,14 +65,22 @@ export class SchemaBuilder {
       // 1. Check for specialized Node/Mark classes
       if (ext instanceof Node) {
         const name = String(ext.name);
-        
+
         // SECURITY GATE: Prevent invalid node names from crashing the schema
-        if (!ext.name || typeof ext.name !== "string" || name === "[object Object]" || !/^[a-zA-Z0-9_-]+$/.test(name)) {
-          console.error(`🚨 [Arkpad] CRITICAL: Extension attempted to register invalid node name: "${name}"`, {
-            extension: ext,
-            nameField: ext.name,
-            stack: new Error().stack
-          });
+        if (
+          !ext.name ||
+          typeof ext.name !== "string" ||
+          name === "[object Object]" ||
+          !/^[a-zA-Z0-9_-]+$/.test(name)
+        ) {
+          console.error(
+            `🚨 [Arkpad] CRITICAL: Extension attempted to register invalid node name: "${name}"`,
+            {
+              extension: ext,
+              nameField: ext.name,
+              stack: new Error().stack,
+            }
+          );
           return;
         }
 
@@ -112,6 +120,7 @@ export class SchemaBuilder {
         if ((ext as any).config.parseHTML) {
           spec.parseDOM = (ext as any).parseHTML().map((p: any) => ({
             tag: p.tag,
+            style: p.style,
             getAttrs: (dom: HTMLElement) => {
               const attrs = p.getAttrs ? p.getAttrs(dom) : {};
               const parsedAttrs: Record<string, any> = { ...attrs };
@@ -133,18 +142,28 @@ export class SchemaBuilder {
       } else if (ext instanceof Mark) {
         const name = String(ext.name);
 
-        if (!ext.name || typeof ext.name !== "string" || name === "[object Object]" || !/^[a-zA-Z0-9_-]+$/.test(name)) {
-          console.error(`🚨 [Arkpad] CRITICAL: Extension attempted to register invalid mark name: "${name}"`, {
-            extension: ext,
-            nameField: ext.name,
-            stack: new Error().stack
-          });
+        if (
+          !ext.name ||
+          typeof ext.name !== "string" ||
+          name === "[object Object]" ||
+          !/^[a-zA-Z0-9_-]+$/.test(name)
+        ) {
+          console.error(
+            `🚨 [Arkpad] CRITICAL: Extension attempted to register invalid mark name: "${name}"`,
+            {
+              extension: ext,
+              nameField: ext.name,
+              stack: new Error().stack,
+            }
+          );
           return;
         }
 
         // COLLISION PREVENTION: Check if this mark name is already used as a node
         if (nodes.get(name)) {
-          console.error(`🚨 [Arkpad] Collision: "${name}" is already defined as a node. Skipping mark registration.`);
+          console.error(
+            `🚨 [Arkpad] Collision: "${name}" is already defined as a node. Skipping mark registration.`
+          );
           return;
         }
 
@@ -169,6 +188,7 @@ export class SchemaBuilder {
         if ((ext as any).config.parseHTML) {
           spec.parseDOM = (ext as any).parseHTML().map((p: any) => ({
             tag: p.tag,
+            style: p.style,
             getAttrs: (dom: HTMLElement) => {
               const attrs = p.getAttrs ? p.getAttrs(dom) : {};
               const parsedAttrs: Record<string, any> = { ...attrs };
@@ -196,23 +216,35 @@ export class SchemaBuilder {
           Object.entries(extNodes).forEach(([rawName, spec]) => {
             const name = String(rawName);
             // SECURITY GATE: Prevent invalid node names from crashing the schema
-            if (!rawName || typeof rawName !== "string" || name === "[object Object]" || !/^[a-zA-Z0-9_-]+$/.test(name)) {
-              console.error(`🚨 [Arkpad] CRITICAL: Extension attempted to register invalid legacy node name: "${name}"`, {
-                extension: ext,
-                rawName: rawName,
-                stack: new Error().stack
-              });
+            if (
+              !rawName ||
+              typeof rawName !== "string" ||
+              name === "[object Object]" ||
+              !/^[a-zA-Z0-9_-]+$/.test(name)
+            ) {
+              console.error(
+                `🚨 [Arkpad] CRITICAL: Extension attempted to register invalid legacy node name: "${name}"`,
+                {
+                  extension: ext,
+                  rawName: rawName,
+                  stack: new Error().stack,
+                }
+              );
               return;
             }
 
             // COLLISION PREVENTION: Check if this node name is already used as a mark
             if (marks.get(name)) {
-              console.error(`🚨 [Arkpad] Collision: "${name}" is already defined as a mark. Skipping legacy node registration.`);
+              console.error(
+                `🚨 [Arkpad] Collision: "${name}" is already defined as a mark. Skipping legacy node registration.`
+              );
               return;
             }
 
             const processedSpec = this.processNodeSpec(name, spec);
-            nodes = nodes.get(name) ? nodes.update(name, processedSpec) : nodes.addToEnd(name, processedSpec);
+            nodes = nodes.get(name)
+              ? nodes.update(name, processedSpec)
+              : nodes.addToEnd(name, processedSpec);
           });
         }
       }
@@ -223,18 +255,28 @@ export class SchemaBuilder {
           Object.entries(extMarks).forEach(([rawName, spec]) => {
             const name = String(rawName);
             // SECURITY GATE: Prevent invalid mark names from crashing the schema
-            if (!rawName || typeof rawName !== "string" || name === "[object Object]" || !/^[a-zA-Z0-9_-]+$/.test(name)) {
-              console.error(`🚨 [Arkpad] CRITICAL: Extension attempted to register invalid legacy mark name: "${name}"`, {
-                extension: ext,
-                rawName: rawName,
-                stack: new Error().stack
-              });
+            if (
+              !rawName ||
+              typeof rawName !== "string" ||
+              name === "[object Object]" ||
+              !/^[a-zA-Z0-9_-]+$/.test(name)
+            ) {
+              console.error(
+                `🚨 [Arkpad] CRITICAL: Extension attempted to register invalid legacy mark name: "${name}"`,
+                {
+                  extension: ext,
+                  rawName: rawName,
+                  stack: new Error().stack,
+                }
+              );
               return;
             }
 
             // COLLISION PREVENTION: Check if this mark name is already used as a node
             if (nodes.get(name)) {
-              console.error(`🚨 [Arkpad] Collision: "${name}" is already defined as a node. Skipping legacy mark registration.`);
+              console.error(
+                `🚨 [Arkpad] Collision: "${name}" is already defined as a node. Skipping legacy mark registration.`
+              );
               return;
             }
 
@@ -266,7 +308,7 @@ export class SchemaBuilder {
 
     // Phase 3: Global Attributes (The Tiptap "Power-Up")
     const globalAttributes = this.collectGlobalAttributes(allExtensions);
-    
+
     nodes = this.enhanceSchemaElements(nodes, globalAttributes, "node");
     marks = this.enhanceSchemaElements(marks, globalAttributes, "mark");
 
@@ -277,7 +319,7 @@ export class SchemaBuilder {
         name,
         inline: !!spec.inline,
         group: spec.group,
-        content: spec.content
+        content: spec.content,
       });
     });
 
@@ -291,7 +333,12 @@ export class SchemaBuilder {
       let result = map;
       const keys = getKeys(map);
       keys.forEach((key: string) => {
-        if (key === "[object Object]" || key === "undefined" || key === "null" || !/^[a-zA-Z0-9_-]+$/.test(key)) {
+        if (
+          key === "[object Object]" ||
+          key === "undefined" ||
+          key === "null" ||
+          !/^[a-zA-Z0-9_-]+$/.test(key)
+        ) {
           console.error(`☢️ [Arkpad] SANITIZER: Purging invalid ${label} key: "${key}"`);
           if (typeof result.remove === "function") {
             result = result.remove(key);
@@ -323,14 +370,15 @@ export class SchemaBuilder {
     } catch (error: any) {
       console.error("❌ PROSEMIRROR SCHEMA BUILD FAILED");
       console.error("Error:", error.message);
-      
+
       if (typeof window !== "undefined") {
         (window as any).ARKPAD_EDITOR_ERROR = error.message;
-        
+
         const errorDiv = document.createElement("div");
         errorDiv.id = "arkpad-critical-error";
-        errorDiv.style.cssText = "position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);color:#ff4d4d;padding:40px;z-index:9999;overflow:auto;font-family:monospace;line-height:1.5;font-size:14px;";
-        
+        errorDiv.style.cssText =
+          "position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);color:#ff4d4d;padding:40px;z-index:9999;overflow:auto;font-family:monospace;line-height:1.5;font-size:14px;";
+
         let nodesList = "";
         nodes.forEach((name: string, spec: any) => {
           nodesList += `- [${spec.inline ? "INLINE" : "BLOCK"}] ${name} (group: ${spec.group || "none"}) (content: ${spec.content || "none"})\n`;
@@ -349,7 +397,9 @@ export class SchemaBuilder {
       nodes.forEach((name: string, spec: any) => {
         const isInline = !!spec.inline;
         const groups = spec.group || "none";
-        console.error(`- [${isInline ? "INLINE" : "BLOCK"}] ${name} (group: ${groups}) (content: ${spec.content || "none"})`);
+        console.error(
+          `- [${isInline ? "INLINE" : "BLOCK"}] ${name} (group: ${groups}) (content: ${spec.content || "none"})`
+        );
       });
       throw error;
     }
@@ -363,20 +413,22 @@ export class SchemaBuilder {
     const processedSpec = { ...spec };
 
     // Resolve Effective Role
-    const effectiveRole = processedSpec.role || (processedSpec.isLayout ? 8 : (processedSpec.isWidget ? 4 : 0));
-    
+    const effectiveRole =
+      processedSpec.role || (processedSpec.isLayout ? 8 : processedSpec.isWidget ? 4 : 0);
+
     // Detect Block Status
     const groupList = processedSpec.group ? processedSpec.group.split(" ") : [];
-    const hasBlockGroup = groupList.includes("block") || groupList.includes("layout") || groupList.includes("widget");
+    const hasBlockGroup =
+      groupList.includes("block") || groupList.includes("layout") || groupList.includes("widget");
     const isBlockLevel = (effectiveRole & (2 | 4 | 8 | 16 | 32)) !== 0 || hasBlockGroup;
 
     if (isBlockLevel) {
       // PRO-TIP: ProseMirror crashes if a block-level node is marked as inline.
       processedSpec.inline = false;
-      
+
       const roles: string[] = ["block"];
-      if (effectiveRole & 8 || processedSpec.isLayout) roles.push("layout"); 
-      if (effectiveRole & 4 || processedSpec.isWidget) roles.push("widget"); 
+      if (effectiveRole & 8 || processedSpec.isLayout) roles.push("layout");
+      if (effectiveRole & 4 || processedSpec.isWidget) roles.push("widget");
 
       processedSpec.group = Array.from(new Set([...groupList, ...roles])).join(" ");
     }
@@ -411,10 +463,10 @@ export class SchemaBuilder {
     Object.entries(attributesByTypeName).forEach(([typeName, allAttrs]) => {
       const spec = enhancedElements.get(typeName);
       if (!spec || typeName === "text") return; // Do not modify the base text node!
-      
+
       // Let's copy it carefully
       const newSpec = { ...spec };
-      
+
       const renderMethod = "toDOM";
 
       enhancedElements = enhancedElements.update(typeName, {
@@ -495,7 +547,10 @@ export class SchemaBuilder {
 
         // Security: Skip objects that aren't actually extensions
         if (typeof ext.name !== "string" && !ext.addNodes && !ext.addMarks && !ext.addExtensions) {
-          console.warn("⚠️ [Arkpad] Skipping invalid extension object (no name or addNodes/Marks):", ext);
+          console.warn(
+            "⚠️ [Arkpad] Skipping invalid extension object (no name or addNodes/Marks):",
+            ext
+          );
           return;
         }
 

@@ -50,6 +50,13 @@ const FloatingMenuDemo = lazy(() =>
 const StandardEditor = lazy(() =>
   import("./demos/StandardEditor").then((m) => ({ default: m.StandardEditor }))
 );
+const ColorDemo = lazy(() => import("./demos/ColorDemo").then((m) => ({ default: m.ColorDemo })));
+const FontFamilyDemo = lazy(() =>
+  import("./demos/FontFamilyDemo").then((m) => ({ default: m.FontFamilyDemo }))
+);
+const FontSizeDemo = lazy(() =>
+  import("./demos/FontSizeDemo").then((m) => ({ default: m.FontSizeDemo }))
+);
 const AlignmentDemo = lazy(() =>
   import("./demos/AlignmentDemo").then((m) => ({ default: m.AlignmentDemo }))
 );
@@ -82,6 +89,9 @@ function Loader() {
 const ROUTE_NAMES: Record<string, string> = {
   "/": "Standard Editor",
   "/extensions/bold": "Bold",
+  "/extensions/color": "Color",
+  "/extensions/font-family": "Font Family",
+  "/extensions/font-size": "Font Size",
   "/extensions/italic": "Italic",
   "/extensions/underline": "Underline",
   "/extensions/strike": "Strike",
@@ -189,6 +199,9 @@ function AppShell() {
               <Route path="/extensions/task-list" element={<TaskListDemo />} />
               <Route path="/extensions/bubble-menu" element={<BubbleMenuDemo />} />
               <Route path="/extensions/floating-menu" element={<FloatingMenuDemo />} />
+              <Route path="/extensions/color" element={<ColorDemo />} />
+              <Route path="/extensions/font-family" element={<FontFamilyDemo />} />
+              <Route path="/extensions/font-size" element={<FontSizeDemo />} />
               <Route path="/extensions/alignment" element={<AlignmentDemo />} />
               <Route path="/extensions/link" element={<LinkDemo />} />
               <Route path="/extensions/highlighter-tool" element={<HighlighterToolDemo />} />
