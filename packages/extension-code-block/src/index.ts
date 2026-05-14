@@ -23,9 +23,12 @@ export const CodeBlock = Node.create<CodeBlockOptions>({
   },
 
   content: "text*",
-  marks: "_",
+  marks: "",
   group: "block",
+  code: true,
   defining: true,
+  isolating: true,
+  whitespace: "pre",
   trailingNode: true,
 
   addAttributes() {
@@ -34,15 +37,27 @@ export const CodeBlock = Node.create<CodeBlockOptions>({
         default: null,
         parseHTML: (element: HTMLElement) => {
           const { languageClassPrefix } = this.options;
-          const classNames = element.firstElementChild?.classList;
-
-          if (!classNames) return null;
-
-          const fullLanguageClass = Array.from(classNames).find((className) =>
+          const classList = Array.from(element.classList);
+          const languageClass = classList.find((className) =>
             className.startsWith(languageClassPrefix)
           );
 
-          return fullLanguageClass ? fullLanguageClass.replace(languageClassPrefix, "") : null;
+          if (languageClass) {
+            return languageClass.replace(languageClassPrefix, "");
+          }
+
+          const codeElement = element.querySelector("code");
+
+          if (!codeElement) {
+            return null;
+          }
+
+          const codeClassList = Array.from(codeElement.classList);
+          const codeLanguageClass = codeClassList.find((className) =>
+            className.startsWith(languageClassPrefix)
+          );
+
+          return codeLanguageClass ? codeLanguageClass.replace(languageClassPrefix, "") : null;
         },
         renderHTML: (attributes: Record<string, any>) => {
           if (!attributes.language) {

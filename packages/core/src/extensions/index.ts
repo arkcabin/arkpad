@@ -16,6 +16,23 @@ import { Gapcursor } from "./ux/gapcursor";
 import { GhostText } from "./ux/GhostText";
 import { BaseBlocks } from "./BaseBlocks";
 
+import {
+  newlineInCode,
+  exitCode,
+  selectNodeBackward,
+  selectNodeForward,
+  deleteSelection,
+  joinBackward,
+  joinForward,
+  selectParentNode,
+  selectAll,
+  createParagraphNear,
+  liftEmptyBlock,
+  splitBlock,
+  splitBlockKeepMarks,
+} from "prosemirror-commands";
+import { undoInputRule } from "prosemirror-inputrules";
+import { sinkListItem, liftListItem } from "prosemirror-schema-list";
 import { ArkpadExtension } from "../api/extensions";
 import {
   toggleMark,
@@ -72,6 +89,38 @@ export const BaseCommands = Extension.create({
     duplicateNode: (pos?: number) => (props: any) => {
       return duplicateNode(pos)(props);
     },
+
+    // --- Standard ProseMirror Commands ---
+    newlineInCode: () => (props: any) => newlineInCode(props.state, props.dispatch, props.view),
+    exitCode: () => (props: any) => exitCode(props.state, props.dispatch, props.view),
+    selectNodeBackward: () => (props: any) =>
+      selectNodeBackward(props.state, props.dispatch, props.view),
+    selectNodeForward: () => (props: any) =>
+      selectNodeForward(props.state, props.dispatch, props.view),
+    deleteSelection: () => (props: any) => deleteSelection(props.state, props.dispatch, props.view),
+    joinBackward: () => (props: any) => joinBackward(props.state, props.dispatch, props.view),
+    joinForward: () => (props: any) => joinForward(props.state, props.dispatch, props.view),
+    selectParentNode: () => (props: any) =>
+      selectParentNode(props.state, props.dispatch, props.view),
+    selectAll: () => (props: any) => selectAll(props.state, props.dispatch, props.view),
+    createParagraphNear: () => (props: any) =>
+      createParagraphNear(props.state, props.dispatch, props.view),
+    liftEmptyBlock: () => (props: any) => liftEmptyBlock(props.state, props.dispatch, props.view),
+    splitBlock: () => (props: any) => splitBlock(props.state, props.dispatch, props.view),
+    splitBlockKeepMarks: () => (props: any) =>
+      splitBlockKeepMarks(props.state, props.dispatch, props.view),
+    undoInputRule: () => (props: any) => undoInputRule(props.state, props.dispatch, props.view),
+
+    // --- List Related Commands ---
+    sinkListItem: (type: string | NodeType) => (props: any) => {
+      const nodeType = typeof type === "string" ? props.state.schema.nodes[type] : type;
+      return sinkListItem(nodeType)(props.state, props.dispatch, props.view);
+    },
+    liftListItem: (type: string | NodeType) => (props: any) => {
+      const nodeType = typeof type === "string" ? props.state.schema.nodes[type] : type;
+      return liftListItem(nodeType)(props.state, props.dispatch, props.view);
+    },
+
     first: (commands: any[]) => (props: any) => {
       for (const command of commands) {
         let result = typeof command === "function" ? command(props) : command;

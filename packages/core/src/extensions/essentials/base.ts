@@ -17,9 +17,16 @@ function trailingNodePlugin() {
       const paragraph = schema.nodes.paragraph;
       if (!paragraph) return null;
 
-      // If document is empty, insert a paragraph
+      // 1. If document is empty, insert a paragraph
       if (doc.content.size === 0) {
         return newState.tr.insert(0, paragraph.create()).scrollIntoView();
+      }
+
+      // 2. Handle trailingNode: true flag on the last node
+      // This ensures that nodes like CodeBlock or Table always have a paragraph after them if they are at the end.
+      const lastNode = doc.lastChild;
+      if (lastNode && (lastNode.type.spec as any).trailingNode === true) {
+        return newState.tr.insert(doc.content.size, paragraph.create());
       }
 
       return null;

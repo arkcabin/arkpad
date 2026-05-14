@@ -39,6 +39,22 @@ export type ArkpadCommandRegistry = Record<string, ArkpadCommand>;
 export interface ArkpadCommands {
   deleteNode: (pos?: number) => void;
   duplicateNode: (pos?: number) => void;
+  newlineInCode: () => void;
+  exitCode: () => void;
+  selectNodeBackward: () => void;
+  selectNodeForward: () => void;
+  deleteSelection: () => void;
+  joinBackward: () => void;
+  joinForward: () => void;
+  selectParentNode: () => void;
+  selectAll: () => void;
+  createParagraphNear: () => void;
+  liftEmptyBlock: () => void;
+  splitBlock: () => void;
+  splitBlockKeepMarks: () => void;
+  undoInputRule: () => void;
+  sinkListItem: (typeOrName: string) => void;
+  liftListItem: (typeOrName: string) => void;
   [key: string]: any;
 }
 
