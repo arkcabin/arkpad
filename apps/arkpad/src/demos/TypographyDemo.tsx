@@ -5,21 +5,34 @@ import { Heading } from "@arkpad/extension-heading";
 import { Engine } from "@arkpad/core";
 import { useArkpadEditor, ArkpadEditorContent, ArkpadProvider } from "@arkpad/react";
 import { ShowcaseLayout } from "../layouts/ShowcaseLayout";
-import { Ellipsis, Copyright, Minus } from "lucide-react";
+import { Ellipsis, Copyright, Minus, ArrowRight } from "lucide-react";
 
 const replacements = [
-  { icon: Minus, label: "-- → —", char: "—", title: "Em dash (-- → —)" },
-  { icon: Ellipsis, label: "... → …", char: "…", title: "Ellipsis (... → …)" },
-  { icon: Copyright, label: "(c) → ©", char: "©", title: "Copyright ((c) → ©)" },
-  { icon: null, label: "(r)", char: "®", title: "Registered" },
-  { icon: null, label: "(tm)", char: "™", title: "Trademark" },
+  {
+    icon: Minus,
+    label: "--\u2013/---\u2014",
+    char: "\u2014",
+    title: "En dash (--), Em dash (---)",
+  },
+  {
+    icon: Ellipsis,
+    label: "...\u2192\u2026",
+    char: "\u2026",
+    title: "Ellipsis (... \u2192 \u2026)",
+  },
+  { icon: ArrowRight, label: "->\u2192\u2192", char: "\u2192", title: "Arrow (-> \u2192 \u2192)" },
+  { icon: Copyright, label: "(c)\u2192\u00A9", char: "\u00A9", title: "Copyright" },
+  { icon: null, label: "+-\u2192\u00B1", char: "\u00B1", title: "Plus/minus" },
+  { icon: null, label: "(r)\u2192\u00AE", char: "\u00AE", title: "Registered" },
+  { icon: null, label: "(tm)\u2192\u2122", char: "\u2122", title: "Trademark" },
+  { icon: null, label: "1/2\u2192\u00BD", char: "\u00BD", title: "Fraction 1/2" },
 ];
 
 export function TypographyDemo() {
   const editor = useArkpadEditor({
     extensions: [Engine, Heading, Bold, Typography],
     content:
-      "<h1>Typography</h1><p>Type the following patterns to see automatic replacement:</p><p><strong>Em dash:</strong> word--word</p><p><strong>Ellipsis:</strong> continuing...</p><p><strong>Copyright:</strong> (c) 2024</p><p><strong>Registered:</strong> (r)</p><p><strong>Trademark:</strong> (tm)</p><p><br></p><p>Try it yourself above — type <code>--</code>, <code>...</code>, <code>(c)</code>, <code>(r)</code>, or <code>(tm)</code> directly in this paragraph.</p>",
+      "<h1>Typography</h1><p>Type these patterns to see auto-replacement:</p><p><strong>En dash:</strong> word--word</p><p><strong>Em dash:</strong> word---word</p><p><strong>Ellipsis:</strong> continuing...</p><p><strong>Arrows:</strong> type -> or <- or => or <=</p><p><strong>Smart quotes:</strong> type \"hello\" or 'world'</p><p><strong>Fractions:</strong> type 1/2, 1/4, 3/4</p><p><strong>Symbols:</strong> (c), (r), (tm), !=, +-</p><p><br></p><p>Try typing above \u2014 the replacements happen instantly as you type.</p>",
   });
 
   if (!editor) return null;
@@ -36,7 +49,7 @@ export function TypographyDemo() {
     <ShowcaseLayout
       category="Utility Extension"
       title="Typography"
-      description="Smart punctuation that auto-replaces as you type: em dashes, ellipsis, copyright, registered, and trademark symbols."
+      description="Smart punctuation and symbols: dashes, arrows, fractions, smart quotes, and more auto-replace as you type."
     >
       <ArkpadProvider editor={editor}>
         <div className="flex flex-col">
