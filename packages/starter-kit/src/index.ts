@@ -31,8 +31,7 @@ import { HighlighterTool } from "@arkpad/extension-highlighter";
 import { EraserTool } from "@arkpad/extension-eraser";
 import { createTextAlign } from "@arkpad/extension-alignment";
 import { createMarkdownPaste } from "@arkpad/extension-markdown";
-import { history, undo, redo } from "@arkpad/core";
-import { placeholder as createPlaceholderPlugin } from "@arkpad/core";
+import { history, undo, redo, Placeholder as CorePlaceholder } from "@arkpad/core";
 
 export const History = Extension.create({
   name: "history",
@@ -54,18 +53,6 @@ export const History = Extension.create({
   },
 });
 
-export const Placeholder = Extension.create({
-  name: "placeholder",
-  addOptions() {
-    return {
-      placeholder: "Start writing...",
-    };
-  },
-  addProseMirrorPlugins() {
-    return [createPlaceholderPlugin(this.options.placeholder)];
-  },
-});
-
 export const StarterKit = Extension.create({
   name: "starterKit",
   addOptions() {
@@ -82,7 +69,7 @@ export const StarterKit = Extension.create({
 
     if (this.options.history) extensions.push(History);
     if (this.options.placeholder)
-      extensions.push(Placeholder.configure({ placeholder: this.options.placeholder }));
+      extensions.push(CorePlaceholder.configure({ placeholder: this.options.placeholder }));
 
     // Solo Extensions
     extensions.push(Bold);
@@ -100,9 +87,11 @@ export const StarterKit = Extension.create({
     extensions.push(Superscript);
     extensions.push(Subscript);
     extensions.push(CodeBlock);
-    extensions.push(FloatingMenu.configure({
+    extensions.push(
+      FloatingMenu.configure({
         shouldShow: ({ state }) => state.selection.empty && state.doc.content.size > 0,
-      }));
+      })
+    );
     extensions.push(Image);
     extensions.push(HighlighterTool);
     extensions.push(EraserTool);
@@ -117,9 +106,7 @@ export const StarterKit = Extension.create({
 
     if (this.options.table) {
       extensions.push(
-        typeof this.options.table === "object"
-          ? Table.configure(this.options.table)
-          : Table
+        typeof this.options.table === "object" ? Table.configure(this.options.table) : Table
       );
     }
 

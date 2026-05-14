@@ -149,3 +149,4 @@ export * from "./infrastructure/textDirection";
 export * from "./ux/dropcursor";
 export * from "./ux/gapcursor";
 export { CharacterCount } from "./infrastructure/character-count";
+export { Placeholder } from "./ux/Placeholder";

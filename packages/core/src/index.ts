@@ -88,6 +88,7 @@ export { EditorView, Decoration, DecorationSet } from "prosemirror-view";
 export type { NodeView as PMNodeView } from "prosemirror-view";
 
 // UI & Interaction Plugins
+export { Placeholder } from "./extensions";
 export { dropCursor } from "prosemirror-dropcursor";
 export { gapCursor } from "prosemirror-gapcursor";
 export { keymap } from "prosemirror-keymap";
@@ -127,5 +128,5 @@ export {
   liftListItem,
   sinkListItem,
 } from "prosemirror-schema-list";
-export { placeholder } from "prosemirror-placeholder";
+
 export * from "prosemirror-tables";

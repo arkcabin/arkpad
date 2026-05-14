@@ -1,0 +1,8 @@
+.ark-placeholder {
+  color: var(--text-muted, #adb5bd);
+  opacity: 0.6;
+  pointer-events: none;
+  user-select: none;
+  display: inline;
+  line-height: inherit;
+}

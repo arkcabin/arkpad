@@ -1,5 +1,4 @@
 import { history, undo, redo } from "prosemirror-history";
-import { placeholder as createPlaceholderPlugin } from "prosemirror-placeholder";
 import { setBlockType } from "prosemirror-commands";
 import { Selection, TextSelection, Plugin } from "prosemirror-state";
 import { Node } from "../../sdk/Node";
@@ -203,14 +202,5 @@ export function createHistory(): Extension {
       "Mod-Shift-z": redo,
     }),
     addProseMirrorPlugins: () => [history()],
-  });
-}
-
-export function createPlaceholder(options: { placeholder?: string } = {}): Extension {
-  return Extension.create({
-    name: "placeholder",
-    addProseMirrorPlugins: () => [
-      createPlaceholderPlugin(options.placeholder || "Start writing..."),
-    ],
   });
 }

@@ -20,7 +20,7 @@ export const ListItem = Node.create({
     };
   },
 
-  content: "block+",
+  content: "paragraph block*",
   group: "block",
   role: NodeRole.LAYOUT,
   marks: "_",

@@ -16,3 +16,6 @@
 
 /* UI Blocks - Page Builder */
 @import "./ui-blocks.css";
+
+/* Placeholder */
+@import "./placeholder.css";
