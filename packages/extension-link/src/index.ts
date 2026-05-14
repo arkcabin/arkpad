@@ -42,9 +42,34 @@ export const Link = Extension.create({
           const markType = state.schema.marks.link as MarkType | undefined;
           if (!markType) return false;
           const { from, to, empty } = state.selection;
-          if (empty) return false;
+
+          let linkRange = { from, to };
+
+          if (empty) {
+            const cursorPos = state.selection.$from.pos;
+            let linkFrom = -1;
+            let linkTo = -1;
+            // Use nodesBetween to find the text node containing the cursor with the link mark
+            state.doc.nodesBetween(
+              Math.max(0, cursorPos - 1),
+              Math.min(state.doc.content.size, cursorPos + 1),
+              (node, pos) => {
+                if (node.isText && node.marks.some((m) => m.type === markType)) {
+                  if (pos <= cursorPos && cursorPos <= pos + node.nodeSize) {
+                    linkFrom = pos;
+                    linkTo = pos + node.nodeSize;
+                    return false;
+                  }
+                }
+              }
+            );
+
+            if (linkFrom < 0) return false;
+            linkRange = { from: linkFrom, to: linkTo };
+          }
+
           if (dispatch) {
-            dispatch(state.tr.addMark(from, to, markType.create({ href: url })));
+            dispatch(state.tr.addMark(linkRange.from, linkRange.to, markType.create({ href: url })));
           }
           return true;
         },
