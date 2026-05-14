@@ -64,8 +64,6 @@ export const Placeholder = Extension.create<PlaceholderOptions>({
         props: {
           decorations(state: any) {
             const { doc, selection } = state;
-            const { $from } = selection;
-            const from = $from.pos;
 
             if (opts.showOnlyWhenEditable && editor && !editor.isEditable()) {
               return DecorationSet.empty;
