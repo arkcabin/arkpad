@@ -57,6 +57,9 @@ const FontFamilyDemo = lazy(() =>
 const FontSizeDemo = lazy(() =>
   import("./demos/FontSizeDemo").then((m) => ({ default: m.FontSizeDemo }))
 );
+const YouTubeDemo = lazy(() =>
+  import("./demos/YouTubeDemo").then((m) => ({ default: m.YouTubeDemo }))
+);
 const AlignmentDemo = lazy(() =>
   import("./demos/AlignmentDemo").then((m) => ({ default: m.AlignmentDemo }))
 );
@@ -92,6 +95,7 @@ const ROUTE_NAMES: Record<string, string> = {
   "/extensions/color": "Color",
   "/extensions/font-family": "Font Family",
   "/extensions/font-size": "Font Size",
+  "/extensions/youtube": "YouTube",
   "/extensions/italic": "Italic",
   "/extensions/underline": "Underline",
   "/extensions/strike": "Strike",
@@ -210,6 +214,7 @@ function AppShell() {
               <Route path="/extensions/ai" element={<AIDemo />} />
               <Route path="/extensions/placeholder" element={<PlaceholderDemo />} />
               <Route path="/extensions/typography" element={<TypographyDemo />} />
+              <Route path="/extensions/youtube" element={<YouTubeDemo />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Suspense>

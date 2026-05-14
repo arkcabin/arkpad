@@ -31,6 +31,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
         { name: "Task List", path: "/extensions/task-list" },
         { name: "Table", path: "/extensions/table" },
         { name: "Image", path: "/extensions/image" },
+        { name: "YouTube", path: "/extensions/youtube" },
       ],
     },
     {
