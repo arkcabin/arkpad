@@ -126,11 +126,13 @@ export class SchemaBuilder {
               const parsedAttrs: Record<string, any> = { ...attrs };
 
               const localAttrs = ext.addAttributes?.() || {};
-              Object.entries(localAttrs).forEach(([key, config]) => {
-                if (config.parseHTML) {
-                  parsedAttrs[key] = config.parseHTML(dom);
-                }
-              });
+              if (typeof dom === "object" && dom instanceof HTMLElement) {
+                Object.entries(localAttrs).forEach(([key, config]) => {
+                  if (config.parseHTML) {
+                    parsedAttrs[key] = config.parseHTML(dom);
+                  }
+                });
+              }
 
               return parsedAttrs;
             },
@@ -194,11 +196,13 @@ export class SchemaBuilder {
               const parsedAttrs: Record<string, any> = { ...attrs };
 
               const localAttrs = ext.addAttributes?.() || {};
-              Object.entries(localAttrs).forEach(([key, config]) => {
-                if (config.parseHTML) {
-                  parsedAttrs[key] = config.parseHTML(dom);
-                }
-              });
+              if (typeof dom === "object" && dom instanceof HTMLElement) {
+                Object.entries(localAttrs).forEach(([key, config]) => {
+                  if (config.parseHTML) {
+                    parsedAttrs[key] = config.parseHTML(dom);
+                  }
+                });
+              }
 
               return parsedAttrs;
             },
