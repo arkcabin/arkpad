@@ -16,6 +16,9 @@ export class SchemaBuilder {
     this.extensions = extensions;
   }
 
+  public static clearCache() {
+    SchemaBuilder.schemaCache.clear();
+  }
   /**
    * Builds and returns the ProseMirror schema.
    */

@@ -9,6 +9,8 @@ npm run typecheck    # Build packages first, then --workspaces
 npm run lint        # ESLint
 npm run format      # Prettier write
 npm run check       # typecheck + lint + build
+npm run test        # Run core tests (112 tests)
+npm run test:all    # Run core + all 25 extension tests
 ```
 
 ## Architecture
