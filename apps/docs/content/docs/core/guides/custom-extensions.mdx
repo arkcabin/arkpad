@@ -1,0 +1,115 @@
+---
+title: Custom Extensions Guide
+description: Build your own features with Arkpad's extension system.
+---
+
+Arkpad is built on a "Headless + Extensions" architecture. This guide shows how to build your own features — from simple buttons to complex interactive nodes.
+
+## The Extension Template
+
+Every feature in Arkpad is an extension. Copy this template to start:
+
+```typescript
+import { Extension } from "@arkpad/core";
+
+export const MyCustomExtension = Extension.create({
+  name: "myCustomExtension",
+
+  addOptions() {
+    return { defaultColor: "red" };
+  },
+
+  addCommands() {
+    return {
+      setMyFeature: (value: string) => (state, dispatch) => {
+        console.log("Feature activated with:", value);
+        return true;
+      },
+    };
+  },
+
+  addKeyboardShortcuts() {
+    return {
+      "Mod-Shift-x": () => this.editor.runCommand("setMyFeature", "shortcut"),
+    };
+  },
+
+  addInputRules() {
+    return [
+      new InputRule(/\(c\)$/, (state, match, start, end) => {
+        return state.tr.replaceWith(start, end, state.schema.text("©"));
+      }),
+    ];
+  },
+});
+```
+
+## Building the UI
+
+Once your extension is registered, building a toolbar is simple:
+
+```tsx
+import { EditorButton } from "@arkpad/react";
+
+function Toolbar() {
+  return (
+    <div className="flex gap-2">
+      <EditorButton
+        command="toggleBold"
+        name="strong"
+        className="btn"
+        activeClassName="bg-blue-500 text-white"
+      >
+        Bold
+      </EditorButton>
+
+      <EditorButton command="insertTable" args={[{ rows: 5, cols: 5 }]} className="btn">
+        Insert 5x5 Table
+      </EditorButton>
+    </div>
+  );
+}
+```
+
+## Global Attributes
+
+Inject logic into all nodes of a certain type:
+
+```typescript
+addGlobalAttributes() {
+  return [
+    {
+      types: ["heading", "paragraph"],
+      attributes: {
+        id: {
+          default: null,
+          renderHTML: (attributes) => ({ "data-arkpad-id": attributes.id }),
+        },
+      },
+    },
+  ];
+}
+```
+
+## Middleware (Interceptors)
+
+Control data flow with `onInterceptor`:
+
+```tsx
+const editor = useArkpadEditor({
+  onInterceptor: ({ transaction, editor }) => {
+    if (myAppState.isLocked) {
+      return false;
+    }
+    return true;
+  },
+});
+```
+
+## Developer Checklist
+
+1. **Logic?** → Put it in `addCommands` or `addProseMirrorPlugins`
+2. **Shortcuts?** → Use `addKeyboardShortcuts`
+3. **UI?** → Use `EditorButton` and `useEditorState`
+4. **Permissions?** → Use `onInterceptor`
+5. **Data?** → Use `addStorage` and `this.storage`

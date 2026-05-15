@@ -1,0 +1,60 @@
+---
+title: Layer Management
+description: Visual hierarchy panel for managing document structure.
+---
+
+The Layer Management System provides a visual tree view of the document structure. It is essential for complex page building, dashboards, and nested layouts.
+
+## Concept
+
+While the main Canvas provides a WYSIWYG experience, the Layer Panel shows "What You See Is How It's Structured." Every node in the Arkpad JSON is represented as a Layer.
+
+## User Interactions
+
+### Drag & Drop
+
+- **Reordering** — Drag layers vertically to reorder within the same parent
+- **Nesting** — Drag a layer into a different container
+- **Target Indicators** — Visual highlight shows drop destination
+
+### Selection & Navigation
+
+- **Sync-selection** — Clicking a layer highlights the corresponding block in the editor
+- **Auto-scroll** — Selecting a layer scrolls the canvas to bring it into view
+
+### Block Actions
+
+- **Visibility Toggle** — Eye icon to hide/show blocks
+- **Locking** — Lock icon to prevent accidental edits
+- **Renaming** — Double-click to give layers custom names
+
+## Technical Implementation
+
+### State-to-Tree Hook
+
+A custom React hook `useEditorLayers`:
+
+1. Listens to `onTransaction` events in the Arkpad engine
+2. Traverses the current `doc` JSON
+3. Generates a tree data structure for rendering
+
+### Tree-Canvas Synchronization
+
+- **Metadata Mapping** — Each layer is linked to a unique `node-id`
+- **Commands** — Drag actions trigger ProseMirror transactions
+
+## UI Design (Shadcn/UI Based)
+
+Built using:
+
+- **`ScrollArea`** — For long pages with many layers
+- **`Accordion`** — To collapse/expand nested sections
+- **`ContextMenu`** — For quick actions like Duplicate, Delete, Wrap
+
+## JSON Integration Example
+
+When a user drags a `Heading` layer into a `Column` layer:
+
+1. The Layer Panel identifies the source `pos` and target `column-id`
+2. The engine runs `editor.commands.moveNode({ from: 12, to: 45 })`
+3. The editor updates instantly, and the JSON tree reflects the new hierarchy

@@ -1,0 +1,92 @@
+---
+title: Extension Overview
+description: The definitive map of the Arkpad extension system.
+---
+
+## Core File Map
+
+### The Foundation (`packages/core/src`)
+
+| File                | Purpose                                                             |
+| :------------------ | :------------------------------------------------------------------ |
+| `editor.ts`         | The brain of Arkpad — editor initialization and React communication |
+| `CommandManager.ts` | The command executor — command routing and interception             |
+| `schema-builder.ts` | The compiler — merges nodes and marks into the final schema         |
+| `types.ts`          | The contract — TypeScript types and interfaces                      |
+
+### The Logic Layer (`packages/core/src/commands`)
+
+| File                  | Logic Type         | Use Case                                      |
+| :-------------------- | :----------------- | :-------------------------------------------- |
+| `toggleBlock.ts`      | Structural changes | Convert paragraph to heading or blockquote    |
+| `toggleMark.ts`       | Inline styling     | Bold, Italic, Link, or any text-wrapper style |
+| `toggleList.ts`       | List management    | Nesting/un-nesting bullet and ordered lists   |
+| `updateAttributes.ts` | Data updates       | Update node metadata (image URL, table width) |
+
+### The Feature Layer (`packages/core/src/extensions`)
+
+| File           | Feature        | Use Case                                |
+| :------------- | :------------- | :-------------------------------------- |
+| `unique-id.ts` | Block Tracking | Snapshots, collaboration, AI ghost-text |
+| `base.ts`      | Core Defaults  | Trailing paragraph (`trailingNode`)     |
+| `Extension.ts` | The API        | Lifecycle hooks like `onTransaction`    |
+| `index.ts`     | The Bundle     | Add new extensions to the Engine        |
+
+## How to Build a New Extension
+
+### Step 1: Choose Your Type
+
+- **Node Extension** — For whole blocks (Tables, Images, AI Suggestions)
+- **Mark Extension** — For inline styles (Highlighter, Comment, Superscript)
+- **Functional Extension** — For logic without a node (Character Count, Telemetry)
+
+### Step 2: Use the Extension Template
+
+```typescript
+import { Extension } from "./Extension";
+
+export const Snapshots = Extension.create({
+  name: "snapshots",
+
+  addOptions() {
+    return { maxSnapshots: 10 };
+  },
+
+  addStorage() {
+    return { history: new Map() };
+  },
+
+  addCommands() {
+    return {
+      saveSnapshot:
+        (name: string) =>
+        ({ editor }) => {
+          const json = editor.getJSON();
+          this.storage.history.set(name, json);
+          return true;
+        },
+    };
+  },
+
+  onTransaction({ transaction }) {
+    if (transaction.docChanged) {
+      // Logic to run on every change
+    }
+  },
+});
+```
+
+## V1 Checklist
+
+When creating a new extension, ask yourself:
+
+1. **Does it have Telemetry?** — Does it log why it failed?
+2. **Does it use Unique IDs?** — Can we track nodes across snapshots?
+3. **Is it "Plugin-less"?** — Does it avoid raw ProseMirror boilerplate?
+
+## Quick Reference
+
+- **Need a new button?** → Add command in `/commands`, add button in `@arkpad/react`
+- **Need a new shortcut?** → Add mapping in `extensions/keymap.ts`
+- **Need a new block type?** → Create file in `extensions/` inheriting from `Node`
+- **Need to intercept data?** → Add interceptor in `ExtensionManager.ts`

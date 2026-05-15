@@ -1,0 +1,197 @@
+---
+title: Extension Factory
+description: Building extensions using Arkpad's modular class-based system.
+---
+
+Arkpad uses a modular, class-based extension system. Every feature — from basic formatting to complex logic — is an extension. The **Extension Factory** compiles these extensions into a working ProseMirror editor.
+
+## Creating an Extension
+
+Use `Extension.create()` for a clean, declarative API:
+
+```typescript
+import { Extension } from "@arkpad/core";
+
+export const MyExtension = Extension.create({
+  name: "myExtension",
+
+  addOptions() {
+    return { color: "blue" };
+  },
+
+  addStorage() {
+    return { counter: 0 };
+  },
+
+  addCommands() {
+    return {
+      increment:
+        () =>
+        ({ storage }) => {
+          storage.counter++;
+          return true;
+        },
+    };
+  },
+
+  addKeyboardShortcuts() {
+    return {
+      "Mod-i": () => this.editor.commands.increment(),
+    };
+  },
+});
+```
+
+## Inheritance with `.extend()`
+
+Modify existing extensions without touching source code:
+
+```typescript
+export const RedBold = Bold.extend({
+  renderHTML({ HTMLAttributes }) {
+    return [
+      "span",
+      {
+        ...HTMLAttributes,
+        style: "color: red; font-weight: bold;",
+      },
+      0,
+    ];
+  },
+});
+```
+
+### `this.parent()`
+
+Call the original implementation from an extended extension:
+
+```typescript
+const SuperUniqueId = UniqueId.extend({
+  addGlobalAttributes() {
+    return [
+      ...(this.parent?.() || []),
+      {
+        types: this.options.types,
+        attributes: {
+          timestamp: { default: Date.now() },
+        },
+      },
+    ];
+  },
+});
+```
+
+## The Extension Context (`this`)
+
+Inside extension methods, `this` provides:
+
+- **`this.editor`** — Main editor instance for commands and state
+- **`this.options`** — Merged options (defaults + user overrides)
+- **`this.storage`** — Private data store for this extension
+- **`this.name`** — Unique name of the extension
+
+## Internal Compilation
+
+When the editor starts, it:
+
+1. **Initializes Options** — Merges defaults with user configuration
+2. **Sets up Storage** — Creates private data stores
+3. **Compiles Schema** — Collects all node and mark definitions
+4. **Injects Plugins** — Collects ProseMirror plugins, input rules, and keymaps
+
+## Advanced Patterns
+
+### Priority Management
+
+Control execution order with the `priority` property:
+
+```typescript
+export const HighPriorityBold = Bold.extend({
+  priority: 1000,
+});
+```
+
+### Inter-Extension Communication
+
+Read another extension's storage:
+
+```typescript
+addCommands() {
+  return {
+    insertSecret: () => ({ editor }) => {
+      const charCount = editor.storage.characterCount.characters;
+      if (charCount > 1000) return false;
+    }
+  }
+}
+```
+
+### Schema Guards
+
+Restrict node placement:
+
+```typescript
+export const RestrictedHeading = Heading.extend({
+  group: "block",
+  content: "inline*",
+});
+```
+
+### Meta Extensions
+
+Create coordination logic without UI:
+
+```typescript
+export const AutoSave = Extension.create({
+  name: "autoSave",
+  onUpdate({ editor }) {
+    const json = editor.getJSON();
+    localStorage.setItem("arkpad-content", JSON.stringify(json));
+  },
+});
+```
+
+### V1 Lifecycle Hooks
+
+#### `onTransaction`
+
+Replace `appendTransaction` plugins with this clean hook:
+
+```typescript
+onTransaction({ transaction, editor }) {
+  if (transaction.docChanged) {
+    console.log('Document state changed!');
+  }
+}
+```
+
+#### `onInterceptor`
+
+Capture and modify transactions before they apply:
+
+```typescript
+onInterceptor({ transaction, editor }) {
+  if (editor.storage.lock.isLocked) {
+    return false; // Transaction cancelled
+  }
+  return transaction;
+}
+```
+
+#### Telemetry-Aware Commands
+
+Always return `true` or `false` accurately:
+
+```typescript
+addCommands() {
+  return {
+    safeInsert: (content: string) => ({ editor, dispatch }) => {
+      if (content.length > 100) return false;
+      if (dispatch) {
+        editor.state.tr.insertText(content);
+      }
+      return true;
+    }
+  }
+}
+```

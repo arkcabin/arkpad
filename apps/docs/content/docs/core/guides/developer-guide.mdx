@@ -1,0 +1,114 @@
+---
+title: Developer Guide
+description: Advanced architectural patterns for Arkpad development.
+---
+
+## Advanced Command Chaining
+
+Arkpad's command chaining is **State-Aware**. Unlike traditional editors that batch commands, Arkpad applies each command to a "temporary state" before running the next.
+
+```typescript
+editor.chain().focus("end").insertContent("Hello World").selectAll().toggleBold().run();
+```
+
+The `.selectAll()` correctly perceives the new text because the state was updated internally after `.insertContent()`.
+
+## Extension Storage API
+
+Extensions maintain their own reactive data store separate from the document:
+
+```typescript
+const CharacterCount = Extension.create({
+  name: "characterCount",
+  addStorage() {
+    return { characters: 0 };
+  },
+  onUpdate({ editor }) {
+    this.storage.characters = editor.getText().length;
+  },
+});
+```
+
+Accessing storage:
+
+- **Core**: `editor.storage.characterCount.characters`
+- **React**: `const chars = useEditorStorage(editor, 'characterCount', 'characters')`
+
+## Global Attributes
+
+Inject attributes into multiple node types at once:
+
+```typescript
+addGlobalAttributes() {
+  return [{
+    types: ['paragraph', 'heading'],
+    attributes: {
+      align: {
+        default: 'left',
+        parseHTML: element => element.style.textAlign || 'left',
+        renderHTML: attributes => ({ style: `text-align: ${attributes.align}` })
+      }
+    }
+  }]
+}
+```
+
+## React Integration
+
+### Global Context
+
+Wrap your app in `ArkpadProvider` to access the editor anywhere:
+
+```tsx
+function MyComponent() {
+  const { editor } = useArkpadContext();
+  return <button onClick={() => editor.commands.toggleBold()}>Bold</button>;
+}
+```
+
+## Dynamic Schema Generation
+
+Arkpad uses the `SchemaBuilder` to compile a schema at runtime based on provided extensions.
+
+### Benefits:
+
+- **Modular Nodes/Marks** — Extensions inject their own schema
+- **Global Injection** — Attributes are added during the build process
+
+## Cookbook: Common Patterns
+
+### Adding a Custom Class to Heading 4
+
+```typescript
+addGlobalAttributes() {
+  return [{
+    types: ['heading'],
+    attributes: {
+      class: {
+        default: null,
+        renderHTML: (attributes) => {
+          if (attributes.level === 4) {
+            return { class: 'my-custom-h4-styling' }
+          }
+          return null
+        }
+      }
+    }
+  }]
+}
+```
+
+### Implementing a Word Counter
+
+```typescript
+const WordCounter = Extension.create({
+  name: "wordCounter",
+  addStorage() {
+    return { count: 0 };
+  },
+  onUpdate({ editor }) {
+    const text = editor.getText();
+    this.storage.count = text.split(/\s+/).filter((s) => s.length > 0).length;
+  },
+});
+```

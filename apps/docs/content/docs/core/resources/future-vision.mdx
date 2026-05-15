@@ -1,0 +1,77 @@
+---
+title: Future Vision
+description: Upcoming UI components and agentic editing capabilities.
+---
+
+## Future UI Components
+
+While the current focus is headless, Arkpad plans to provide optional pre-built UI components for rapid development.
+
+### Proposed Components
+
+#### `ArkpadStandardToolbar`
+
+A fully-featured horizontal toolbar with buttons for formatting, headings, lists, and history.
+
+#### `ArkpadFloatingMenu`
+
+A context-aware menu that appears next to empty lines to suggest blocks.
+
+#### `ArkpadBubbleMenu`
+
+A refined popup for text selection with quick formatting and link tools.
+
+### Implementation Strategy
+
+- **Tailwind-First** — All components styled with Tailwind CSS
+- **Shadcn Integration** — Stencils using Shadcn UI primitives
+- **Opinionated Defaults** — A "Golden Path" for UI while keeping headless flexibility
+
+---
+
+## Agentic Editing Vision
+
+Arkpad is evolving into an **Agentic Editing Platform**.
+
+### Two-Layer Architecture
+
+- **UIEditor (Headless Engine)** — The foundational ProseMirror layer. Handles the "how" of editing — document state, schema, commands.
+- **AgentEdit (Agentic Wrapper)** — The intelligence layer. Handles the "what" and "why." Every request passes through this layer for AI validation and enhancement.
+
+### The Interception Layer
+
+Standard flow:
+
+```
+User Click -> runCommand('bold') -> Document Updated
+```
+
+AgentEdit flow:
+
+```
+User/System Request -> Interceptor -> Agent Analysis -> Execution/Modification -> Document Updated
+```
+
+### Key Benefits
+
+- **Validation** — Agent ensures changes follow specific style guides
+- **Automation** — "Make this a professional header" expands into multiple commands
+- **Context Awareness** — Agent suggests changes based on surrounding text
+
+### API Evolution
+
+```typescript
+editor.runCommand(name, args); // Low-level execution
+editor.request(prompt); // High-level intent (routes through agent)
+```
+
+```tsx
+const { editor, agentStatus } = useAgentEditor();
+// agentStatus: 'thinking' | 'executing' | 'idle'
+```
+
+### Proposed Package Structure
+
+- **`@agent-edit/core`** — Headless ProseMirror core
+- **`@agent-edit/react`** — React hooks for agentic experience
+- **`apps/agent-demo`** — Reference implementation

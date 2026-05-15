@@ -1,0 +1,74 @@
+---
+title: Headless Approach
+description: Arkpad's headless architecture and future advanced features.
+---
+
+Arkpad follows a **headless-first** approach. The core comes without any pre-built UI — just pure logic. This gives you complete control over how the editor looks and behaves while Arkpad handles the complexity.
+
+## Chained Commands (Fluent API)
+
+Batch multiple operations into a single execution:
+
+```ts
+editor.chain().focus().toggleBold().insertContent("Hello World").run();
+```
+
+## Transaction Interception
+
+Middleware-like hooks that allow AI or custom logic to intercept changes:
+
+```ts
+const editor = useArkpadEditor({
+  onBeforeTransaction: (transaction) => {
+    if (isUnprofessional(transaction.doc.text)) {
+      return false; // Veto the change
+    }
+    return true;
+  },
+});
+```
+
+## Selection-Specific React Hooks
+
+Fine-grained hooks that only re-render when specific conditions are met:
+
+```tsx
+function BoldButton({ editor }) {
+  const isBold = useEditorState(editor, (state) => state.isActive("strong"));
+
+  return <button className={isBold ? "active" : ""}>Bold</button>;
+}
+```
+
+## React-Based NodeViews
+
+Register plain React components as NodeViews with zero boilerplate:
+
+```tsx
+const AIPromptBlock = ({ node, updateAttributes }) => {
+  return (
+    <div className="bg-blue-50 p-4 rounded">
+      <input
+        value={node.attrs.prompt}
+        onChange={(e) => updateAttributes({ prompt: e.target.value })}
+      />
+    </div>
+  );
+};
+
+extensions: [createAIExtension({ component: AIPromptBlock })];
+```
+
+## Advanced Event System
+
+- **`onSelectionUpdate`** — Reactive updates for coordinates, active marks, and depth
+- **`onPaste`** — Intercept paste events for custom file types
+- **`onTransaction`** — Direct access to raw ProseMirror transactions
+
+## Table Management Engine
+
+```typescript
+editor.runCommand("insertTable", { rows: 3, cols: 3 });
+editor.runCommand("addColumnAfter");
+editor.runCommand("mergeCells");
+```

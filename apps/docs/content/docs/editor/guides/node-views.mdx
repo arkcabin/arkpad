@@ -1,0 +1,45 @@
+---
+title: React NodeViews Guide
+description: Create React components as ProseMirror NodeViews.
+---
+
+NodeViews are the bridge between ProseMirror's vanilla DOM and React's declarative components. Follow these golden rules when building NodeViews.
+
+## 1. Implement `stopEvent`
+
+If your NodeView contains interactive elements (Buttons, Checkboxes, Inputs), implement `stopEvent`. Without it, ProseMirror tries to move the text selection into your component, causing flickering.
+
+```typescript
+stopEvent(event: Event) {
+  return this.container.contains(event.target as Node);
+}
+```
+
+## 2. Proper Memory Management
+
+Always implement `destroy()`. React roots are not automatically cleaned up when ProseMirror removes a node.
+
+```typescript
+destroy() {
+  if (this.reactRoot) {
+    this.reactRoot.unmount();
+    this.reactRoot = null;
+  }
+}
+```
+
+## 3. Use Tailwind for Styling
+
+Avoid inline `style` objects. Use the `cn` utility and Tailwind classes:
+
+```typescript
+// Good
+this.dom.className = "flex items-start gap-2 py-1";
+
+// Bad
+this.dom.style.display = "flex";
+```
+
+## 4. Immediate Visual Feedback
+
+ProseMirror transactions are fast, but for an "ultra-fast" feel, update DOM styles immediately in your change handler before the transaction finishes.

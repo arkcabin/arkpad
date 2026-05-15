@@ -1,0 +1,92 @@
+---
+title: Quick Start
+description: Build your first editor in minutes.
+---
+
+## React Setup
+
+The fastest way to get started with Arkpad is using the React package.
+
+### 1. Install
+
+```bash
+npm install @arkpad/react @arkpad/core
+```
+
+### 2. Create an Editor
+
+```tsx
+import { useArkpadEditor, ArkpadEditorContent } from "@arkpad/react";
+import { Essentials } from "@arkpad/core";
+
+export function SimpleEditor() {
+  const editor = useArkpadEditor({
+    extensions: [Essentials],
+    content: "<p>Start your journey with Arkpad.</p>",
+  });
+
+  return <ArkpadEditorContent editor={editor} />;
+}
+```
+
+### 3. Add a Toolbar
+
+```tsx
+import { Toggle } from "@/components/ui/toggle";
+import { Bold, Italic, Heading2 } from "lucide-react";
+
+function Toolbar({ editor }) {
+  if (!editor) return null;
+
+  return (
+    <div className="flex items-center gap-1 p-2 border rounded-md">
+      <Toggle
+        size="sm"
+        pressed={editor.isActive("strong")}
+        onPressedChange={() => editor.runCommand("toggleBold")}
+      >
+        <Bold className="w-4 h-4" />
+      </Toggle>
+      <Toggle
+        size="sm"
+        pressed={editor.isActive("em")}
+        onPressedChange={() => editor.runCommand("toggleItalic")}
+      >
+        <Italic className="w-4 h-4" />
+      </Toggle>
+      <Toggle
+        size="sm"
+        pressed={editor.isActive("heading", { level: 2 })}
+        onPressedChange={() => editor.runCommand("toggleHeading", { level: 2 })}
+      >
+        <Heading2 className="w-4 h-4" />
+      </Toggle>
+    </div>
+  );
+}
+```
+
+## Vanilla JavaScript
+
+For non-React projects, use the core package directly:
+
+```ts
+import { ArkpadEditor, Essentials } from "@arkpad/core";
+
+const editor = new ArkpadEditor({
+  element: document.querySelector("#editor")!,
+  extensions: [Essentials],
+  content: "<h1>Pure Performance</h1>",
+});
+
+editor.focus();
+editor.runCommand("toggleItalic");
+console.log(editor.getHTML());
+```
+
+## Next Steps
+
+- Learn about the [architecture](/docs/core-concepts/architecture)
+- Explore the [extension system](/docs/extensions/overview)
+- Build a [custom extension](/docs/guides/custom-extensions)
+- Check the [API reference](/docs/api-reference/public-api)

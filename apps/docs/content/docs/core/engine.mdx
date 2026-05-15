@@ -1,0 +1,41 @@
+---
+title: Engine Internals
+description: Internal logic and state management of the Arkpad engine.
+---
+
+## The Recursive Node Lifecycle
+
+The engine handles "Deep Trees" without performance lag.
+
+- Every node has a `depth` and a `parentId`
+- The root `doc` node allows a `layout` attribute to define the "Editor Mode" (Canvas vs. Document)
+
+## Atomic Transaction Management
+
+For a perfect Undo/Redo experience:
+
+- **Grouping** — Commands that modify multiple nodes are wrapped in a single transaction step
+- **Validation** — After every transaction, the engine runs a "Sanity Check" to ensure no structural corruption
+
+## Scoped Command Execution
+
+The engine "knows" where the user is to prevent illegal actions.
+
+- **The Depth Filter** — If `selection.depth < 2`, the editor is in "Page Mode." Rich text commands are blocked.
+- **The Node Filter** — Commands are tagged with `type: "text"` or `type: "layout"`. Only matching commands execute.
+
+## Attribute Sanitization
+
+- **The Tailwind Cleaner** — When a node is updated, the engine validates the `className` string, preventing duplicate classes and removing "Dead" classes.
+- **Persistence** — Attributes are stored in JSON and can be "Mirrored" to the DOM for real-time CSS debugging.
+
+## Selection Boundaries
+
+In a Page Builder, "Empty Space" between blocks is dangerous.
+
+- **The Anti-Ghost Rule** — The selection must ALWAYS be inside a node. The engine "Snaps" the cursor to the nearest valid block if it detects a "Ghost" area between Sections.
+
+## Node-View Communication Protocol
+
+- **Event Bus** — The Core provides an `emit()` system. When a node is clicked, it emits `node:selected` with the node's attributes.
+- **Update Loop** — When the UI changes an attribute, it calls `editor.commands.updateAttributes()`, triggering a fresh render loop.

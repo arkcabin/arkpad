@@ -1,0 +1,89 @@
+---
+title: Architecture Plan
+description: Strategic architecture and modular package design.
+---
+
+Arkpad is engineered as a **high-performance, agent-ready ecosystem** following a decoupled, engine-first architecture.
+
+## Architectural Overview
+
+```
+@arkpad/core (The Brain)
+  ├── ArkpadEditor Instance
+  ├── Extension Manager
+  ├── Schema Builder
+  ├── Command Proxy
+  ├── Interceptor Layer
+  └── Utility Belt
+
+Feature Packages (Plugins)
+  ├── @arkpad/extension-table
+  ├── @arkpad/extension-marks
+  ├── @arkpad/extension-nodes
+  └── Custom User Extensions
+
+Framework Layers
+  ├── @arkpad/react
+  └── Vanilla JS / Others
+```
+
+## Repository Structure
+
+```
+/packages
+  ├── core/               # Feature-blind infrastructure
+  ├── starter-kit/        # Meta-package bundling essentials
+  ├── react/              # React hooks & UI context
+  ├── extension-table/    # Pro-data grid engine
+  ├── extension-marks/    # Core typography
+  └── extension-nodes/    # Structural blocks
+/apps
+  └── arkpad/             # Showcase application
+```
+
+## Solo Package Inventory
+
+| Package                   | Key Responsibilities                                                    |
+| :------------------------ | :---------------------------------------------------------------------- |
+| `@arkpad/core`            | Extension Factory, Command Proxy, Interceptor Layer, Schema Builder     |
+| `@arkpad/extension-marks` | Bold, Italic, Underline, Strike, Code, Link, Highlight, Sub/Superscript |
+| `@arkpad/extension-nodes` | Paragraph, Heading, Blockquote, Horizontal Rule, Hard Break             |
+| `@arkpad/extension-table` | Table, Resizing, Cell Merging                                           |
+| `@arkpad/extension-lists` | Bullet List, Ordered List, Task List                                    |
+| `@arkpad/extension-image` | Image node, Upload handling                                             |
+| `@arkpad/extension-ai`    | Agentic Interceptor, Smart-Summarize, Tone-Switcher                     |
+| `@arkpad/starter-kit`     | The "Essentials" meta-package                                           |
+
+## The 5 Core Engines
+
+1. **Schema Resolver** — Runtime compilation of ProseMirror schema
+2. **Command Orchestrator** — Proxy-based discovery of extension actions
+3. **Keymap & Shortcut Manager** — Ecosystem-wide collision resolution
+4. **Reactive Storage API** — Data synchronization for extension state
+5. **Interceptor Layer** — Transaction middleware for agentic validation
+
+## Evolution: Arkpad vs Tiptap
+
+| Feature      | Tiptap            | Arkpad                    |
+| :----------- | :---------------- | :------------------------ |
+| Philosophy   | Headless Library  | Agentic Platform          |
+| Middleware   | Plugin-based      | Native Interceptor Layer  |
+| Developer DX | External Utils    | Built-in Utility Belt     |
+| Modularity   | Mono-repo package | Solo Package Architecture |
+
+## Implementation Roadmap
+
+### Phase 1: Core Foundation
+
+- Refactor core with Utility Belt and Interceptor Layer
+- Standardize Extension base class with deep `.extend()` support
+
+### Phase 2: Solo Migration
+
+- Split codebase into solo packages
+- Create `@arkpad/starter-kit`
+
+### Phase 3: Agentic Ecosystem
+
+- Release `@arkpad/extension-ai`
+- Provide Scaffold CLI (`npx create-arkpad-extension`)

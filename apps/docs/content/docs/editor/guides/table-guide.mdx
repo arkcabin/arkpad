@@ -1,0 +1,83 @@
+---
+title: Table Extension Guide
+description: Complete guide to Arkpad's high-performance table system.
+---
+
+## Overview
+
+Arkpad Tables are **modular**, **performant**, and **headless**. Built using four main nodes: `Table`, `TableRow`, `TableHeader`, and `TableCell`.
+
+## Installation
+
+The Table extension is a bundle included the `Essentials` bundle by default.
+
+```typescript
+import { Table } from "@arkpad/core";
+
+const editor = new ArkpadEditor({
+  extensions: [Table.configure({ resizable: true })],
+});
+```
+
+## Markdown Shortcut
+
+Type `|||` followed by **Space** to instantly create a 3-column table.
+
+- `||` + Space = 2 columns
+- `|||` + Space = 3 columns
+- `||||` + Space = 4 columns
+
+## Commands API
+
+| Command                             | Usage                                               |
+| :---------------------------------- | :-------------------------------------------------- |
+| `insertTable({ rows, cols })`       | `editor.commands.insertTable({ rows: 3, cols: 3 })` |
+| `addColumnBefore()`                 | Insert column to the left                           |
+| `addColumnAfter()`                  | Insert column to the right                          |
+| `deleteColumn()`                    | Delete selected column                              |
+| `addRowBefore()`                    | Insert row above                                    |
+| `addRowAfter()`                     | Insert row below                                    |
+| `deleteRow()`                       | Delete selected row                                 |
+| `mergeCells()`                      | Merge selected cells                                |
+| `splitCell()`                       | Split merged cell                                   |
+| `toggleHeaderRow()`                 | Toggle header row                                   |
+| `toggleHeaderColumn()`              | Toggle header column                                |
+| `toggleHeaderCell()`                | Toggle header cell                                  |
+| `setCellAttribute({ name, value })` | Set cell attribute                                  |
+| `deleteTable()`                     | Remove entire table                                 |
+| `fixTables()`                       | Fix corrupted table structure                       |
+
+## Configuration Options
+
+```typescript
+Table.configure({
+  resizable: true, // Enable column resizing
+  handleWidth: 5, // Resize handle hit area (px)
+  cellMinWidth: 25, // Minimum cell width (px)
+  lastColumnResizable: true,
+});
+```
+
+## Styling
+
+```css
+.ark-editor table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+  margin: 1rem 0;
+  border: 1px solid #ccc;
+}
+
+.ark-editor td,
+.ark-editor th {
+  min-width: 100px;
+  border: 1px solid #ccc;
+  padding: 8px;
+  vertical-align: top;
+}
+```
+
+## Performance
+
+The extension uses **`TableMap`** for O(1) grid calculations. Even with thousands of cells and complex merges, actions remain instantaneous.

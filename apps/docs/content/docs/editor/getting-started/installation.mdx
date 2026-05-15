@@ -1,0 +1,66 @@
+---
+title: Installation
+description: Set up Arkpad in your project with minimal configuration.
+---
+
+## Prerequisites
+
+- Node.js LTS (v20 or higher)
+- npm, pnpm, or bun
+- Git
+
+## Installing the Packages
+
+### React (Recommended)
+
+```bash
+npm install @arkpad/react @arkpad/core
+```
+
+### Vanilla JavaScript
+
+```bash
+npm install @arkpad/core
+```
+
+## Project Setup
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/arkcabin/arkpad.git
+cd arkpad
+```
+
+### 2. Install Dependencies
+
+```bash
+npm install
+```
+
+### 3. Run Development Server
+
+```bash
+npm run dev
+```
+
+This starts the demo app at `http://localhost:5173`.
+
+## Available Scripts
+
+| Command             | Description                  |
+| :------------------ | :--------------------------- |
+| `npm run dev`       | Start local development app  |
+| `npm run build`     | Compile all packages and app |
+| `npm run test`      | Run automated tests          |
+| `npm run test:all`  | Run core + extension tests   |
+| `npm run lint`      | Run ESLint                   |
+| `npm run typecheck` | Run TypeScript checks        |
+| `npm run format`    | Format code with Prettier    |
+
+## Environment Checklist
+
+- [ ] Correct Node version installed (v20+)
+- [ ] Package manager available
+- [ ] Dependencies installed successfully
+- [ ] Tests pass locally (`npm run test`)

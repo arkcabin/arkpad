@@ -1,0 +1,6 @@
+{
+  "title": "Core",
+  "description": "Engine internals, extensions API, and reference",
+  "root": true,
+  "pages": ["index", "architecture", "engine", "extensions", "api-reference", "guides", "resources"]
+}

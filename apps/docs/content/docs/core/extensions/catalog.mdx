@@ -1,0 +1,91 @@
+---
+title: Extension Catalog
+description: Browse all available Arkpad packages.
+---
+
+Arkpad follows a **Solo Package Architecture**. Each feature is a standalone package, ensuring you only bundle what you use.
+
+## Foundation
+
+| Package               | Description                                                         | StarterKit |
+| :-------------------- | :------------------------------------------------------------------ | :--------: |
+| `@arkpad/core`        | Extension Factory, Command Proxy, Interceptor Layer, Schema Builder |     ✓      |
+| `@arkpad/react`       | React hooks, context, and components                                |     ✓      |
+| `@arkpad/starter-kit` | Meta-package bundling essential extensions                          |     —      |
+
+## Typography (Marks)
+
+| Package                         | Description                     | StarterKit |
+| :------------------------------ | :------------------------------ | :--------: |
+| `@arkpad/extension-bold`        | Bold text formatting (`strong`) |     ✓      |
+| `@arkpad/extension-italic`      | Italic text formatting (`em`)   |     ✓      |
+| `@arkpad/extension-underline`   | Underlined text                 |     ✓      |
+| `@arkpad/extension-strike`      | Strikethrough text              |     ✓      |
+| `@arkpad/extension-code`        | Inline code formatting          |     ✓      |
+| `@arkpad/extension-link`        | Hyperlinks with href attribute  |     ✓      |
+| `@arkpad/extension-highlight`   | Text highlight/marker           |     ✓      |
+| `@arkpad/extension-superscript` | Superscript text                |     ✓      |
+| `@arkpad/extension-subscript`   | Subscript text                  |     ✓      |
+| `@arkpad/extension-color`       | Text color customization        |            |
+| `@arkpad/extension-font-family` | Font family selection           |            |
+| `@arkpad/extension-font-size`   | Font size adjustment            |            |
+
+## Structure (Nodes)
+
+| Package                             | Description             | StarterKit |
+| :---------------------------------- | :---------------------- | :--------: |
+| `@arkpad/extension-heading`         | Headings H1-H6          |     ✓      |
+| `@arkpad/extension-blockquote`      | Blockquote node         |     ✓      |
+| `@arkpad/extension-code-block`      | Code block with syntax  |     ✓      |
+| `@arkpad/extension-horizontal-rule` | Horizontal rule/divider |     ✓      |
+| `@arkpad/extension-image`           | Image node with src/alt |     ✓      |
+
+## Lists
+
+| Package                          | Description               | StarterKit |
+| :------------------------------- | :------------------------ | :--------: |
+| `@arkpad/extension-bullet-list`  | Unordered bullet lists    |     ✓      |
+| `@arkpad/extension-ordered-list` | Ordered numbered lists    |     ✓      |
+| `@arkpad/extension-list-item`    | List item node            |     ✓      |
+| `@arkpad/extension-task-list`    | Task list with checkboxes |     ✓      |
+
+## Data
+
+| Package                      | Description                            | StarterKit |
+| :--------------------------- | :------------------------------------- | :--------: |
+| `@arkpad/extension-table`    | Tables with resizing, merging, headers |            |
+| `@arkpad/extension-markdown` | Markdown parser and serializer         |            |
+
+## Interaction
+
+| Package                           | Description                        | StarterKit |
+| :-------------------------------- | :--------------------------------- | :--------: |
+| `@arkpad/extension-bubble-menu`   | Bubble menu on text selection      |            |
+| `@arkpad/extension-floating-menu` | Floating menu on empty lines       |            |
+| `@arkpad/extension-placeholder`   | Placeholder text for empty content |            |
+
+## Alignment
+
+| Package                       | Description                                   | StarterKit |
+| :---------------------------- | :-------------------------------------------- | :--------: |
+| `@arkpad/extension-alignment` | Text alignment (left, center, right, justify) |     ✓      |
+
+## Tools
+
+| Package                         | Description                  | StarterKit |
+| :------------------------------ | :--------------------------- | :--------: |
+| `@arkpad/extension-highlighter` | Paint-style highlighter tool |            |
+| `@arkpad/extension-eraser`      | Paint-style eraser tool      |            |
+| `@arkpad/extension-ai`          | AI-powered editor features   |            |
+| `@arkpad/extension-typography`  | Typographic enhancements     |            |
+| `@arkpad/extension-youtube`     | YouTube embed node           |            |
+
+## Essentials
+
+The `@arkpad/starter-kit` (also available as `Essentials` bundle) includes:
+
+- Structure: Paragraphs, Headings (H1-H6), Horizontal Rules
+- Formatting: Bold, Italic, Underline, Strike, Code, Highlight, Sub/Superscript, Alignment
+- Lists: Bulleted, Ordered, Task Lists
+- Media: Images and Hyperlinks
+- System: History (Undo/Redo), Placeholder, Markdown, Text Direction

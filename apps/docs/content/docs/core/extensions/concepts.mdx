@@ -1,0 +1,96 @@
+---
+title: Extensions
+description: Understanding the core extensions included in Arkpad.
+---
+
+The Arkpad engine and StarterKit include several core functional extensions that provide baseline rich-text editing capabilities.
+
+## Extensions Overview
+
+| Extension               | Purpose                        | Included In                    |
+| :---------------------- | :----------------------------- | :----------------------------- |
+| FocusEvents             | Focus and blur lifecycle hooks | Engine, Essentials, StarterKit |
+| ClipboardTextSerializer | Plain-text clipboard handling  | Engine, Essentials, StarterKit |
+| Keymap                  | Enhanced keyboard shortcuts    | Engine, Essentials, StarterKit |
+| ListKeymap              | Smart list keyboard navigation | Engine, Essentials, StarterKit |
+| TextDirection           | RTL/LTR text direction support | StarterKit                     |
+| Dropcursor              | Visual drag-and-drop indicator | Essentials, StarterKit         |
+| Gapcursor               | Cursor in "impossible" spots   | Essentials, StarterKit         |
+
+## FocusEvents
+
+Dispatches `onFocus` and `onBlur` lifecycle hooks to all registered extensions.
+
+```typescript
+onFocus?: (this: ExtensionContext) => boolean | void;
+onBlur?: (this: ExtensionContext) => boolean | void;
+```
+
+## ClipboardTextSerializer
+
+Provides consistent plain-text copying across different block types.
+
+```typescript
+{
+  blockSeparator?: string; // Default: "\n\n"
+}
+```
+
+## Keymap
+
+Enhanced keyboard shortcut handling.
+
+| Key         | Command           | Description                            |
+| :---------- | :---------------- | :------------------------------------- |
+| `Enter`     | `splitBlock`      | Splits the current block or code block |
+| `Mod-Enter` | `exitCode`        | Exits a code block                     |
+| `Backspace` | `undoInputRule`   | Reverts last auto-conversion           |
+| `Mod-a`     | `selectAll`       | Selects all content                    |
+| `Delete`    | `deleteSelection` | Deletes selection or joins forward     |
+
+## ListKeymap
+
+Specialized keyboard shortcuts for lists.
+
+| Key         | Command        | Description                      |
+| :---------- | :------------- | :------------------------------- |
+| `Tab`       | `sinkListItem` | Indents list item (sub-list)     |
+| `Shift-Tab` | `liftListItem` | Outdents list item               |
+| `Backspace` | `liftListItem` | Outdents into paragraph at start |
+
+## TextDirection
+
+Commands for RTL/LTR text direction.
+
+```typescript
+editor.runCommand("setTextDirection", "rtl");
+editor.runCommand("setTextDirection", "ltr");
+editor.runCommand("unsetTextDirection");
+```
+
+## Dropcursor
+
+Visual indicator for drag-and-drop.
+
+```typescript
+{
+  width?: number;  // Default: 1
+  color?: string;  // Default: "currentColor"
+  class?: string;
+}
+```
+
+## Gapcursor
+
+Enables cursor placement between block nodes that otherwise wouldn't allow one (e.g., between two tables).
+
+## The `first` Utility Command
+
+Takes an array of commands and executes the first one that returns `true`.
+
+```typescript
+editor.runCommand("first", [
+  ({ editor }) => editor.commands.toggleBold(),
+  ({ editor }) => editor.commands.toggleItalic(),
+]);
+```

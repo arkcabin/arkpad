@@ -1,0 +1,33 @@
+---
+title: Menu Engine
+description: Centralized positioning service for floating UI.
+---
+
+The Menu Engine is the centralized positioning service for all floating UI in the Arkpad ecosystem. It resides in the Core package for maximum performance and cross-framework compatibility.
+
+## How it Works
+
+1. **Headless Math** — The engine calculates coordinates (DOMRects) for selections and insertion points
+2. **Reactive Storage** — These coordinates are stored in the editor's global storage
+3. **Atomic Updates** — Framework hooks (like `useMenuPositioner`) subscribe to these updates to position menus using GPU-accelerated CSS transforms
+
+## Benefits
+
+- **Zero Flicker** — Updates synced with `requestAnimationFrame`
+- **Zero Layout Thrashing** — Decouples editor rendering from menu rendering
+- **Unified Logic** — One engine handles tables, multi-line selections, and standard text blocks
+
+## Usage in Extensions
+
+Any extension can register a menu by implementing `addMenu`:
+
+```typescript
+export const MyExtension = Extension.create({
+  addMenu() {
+    return {
+      type: "bubble",
+      shouldShow: ({ state }) => !state.selection.empty,
+    };
+  },
+});
+```

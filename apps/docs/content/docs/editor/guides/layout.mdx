@@ -1,0 +1,52 @@
+---
+title: Layout & Responsive Engine
+description: How Arkpad handles layout, alignment, and responsiveness.
+---
+
+Arkpad uses a "Flex-First" approach for its Layout Kit. This ensures pages are fluid, light, and automatically responsive.
+
+## The Flexbox-First Philosophy
+
+- **Automatic Wrapping** — Blocks wrap to the next line without complex grid definitions
+- **Alignment Simplicity** — Vertical and horizontal centering with standard flex attributes
+- **Mobile-First** — Changing direction from `row` to `col` handles mobile stacking
+
+## Layout Attributes & Tailwind Mapping
+
+The `Section` and `Columns` nodes use attributes mapped to Tailwind:
+
+| Attribute   | Logic                 | Tailwind Mapping                                     |
+| :---------- | :-------------------- | :--------------------------------------------------- |
+| `direction` | Row or Column         | `flex-row`, `flex-col`                               |
+| `justify`   | Horizontal spacing    | `justify-start`, `justify-center`, `justify-between` |
+| `align`     | Vertical alignment    | `items-start`, `items-center`, `items-end`           |
+| `gap`       | Spacing between items | `gap-2`, `gap-4`, `gap-8`                            |
+| `wrap`      | Multi-line support    | `flex-wrap`, `flex-nowrap`                           |
+
+## Responsive Breakpoints
+
+Arkpad supports "Breakpoint Overrides" for different screens:
+
+```json
+{
+  "type": "columns",
+  "attrs": {
+    "direction": "row",
+    "responsive": {
+      "sm": { "direction": "col" },
+      "lg": { "direction": "row" }
+    }
+  }
+}
+```
+
+## Spacing System
+
+Every block inherits a "Spacing Attribute":
+
+- **Standard Scale** — Follows the Tailwind spacing scale (0 to 96)
+- **Visual UI** — Handle or Slider updates attributes in real-time
+
+## Grid Fallback (Dashboard Mode)
+
+For complex, fixed-grid layouts (like Bento Grids), use the optional `Grid` extension with CSS Grid instead of Flexbox.

@@ -1,0 +1,47 @@
+---
+title: Architecture
+description: The 3-layer architecture powering Arkpad.
+---
+
+Arkpad is a high-performance, lightweight platform designed to serve as both a **Rich Text Editor** and a **Visual Page Builder** using a single "Unified Core."
+
+## The 3-Layer System
+
+### Layer 0: The Unified Core (`@arkpad/core`)
+
+The "Brain" of the system, completely headless and shared across all implementations.
+
+- **Transaction Manager** — Handles Undo/Redo and history lifecycle
+- **Command Proxy** — Superior DX for calling commands (`editor.commands.*`)
+- **Recursive Schema** — Dynamic schema builder that allows nodes to contain other nodes
+- **Menu Engine** — Logic to position floating/bubble menus relative to the selection
+
+### Layer 1: Modular Extensions
+
+Functional building blocks that are "Plug-and-Play."
+
+- **Text Kit** — Standard rich-text features (Bold, Italic, Lists, Headings)
+- **Layout Kit** — Structural nodes (Section, Columns, Grid)
+- **Component Kit** — Specialized UI blocks (Button, Card, Hero, Image)
+
+### Layer 2: Framework Integration
+
+The React layer (and others) that turns JSON into interactive UI.
+
+- **React Package** (`@arkpad/react`) — Hooks, context, and components
+- **NodeViews** — Each block is a real React component
+- **Tailwind Mapping** — Directly maps block attributes to Tailwind CSS classes
+
+## Key Interaction Patterns
+
+### Dual-Mode Editing
+
+The editor intelligently switches behavior based on context:
+
+1. **Design Mode** — Triggered when selecting structural nodes. Allows reordering, layout adjustment, and background attribute changes.
+2. **Edit Mode** — Triggered when clicking inside a text block. Activates the full rich-text engine.
+
+### Command Access
+
+- **Slash Commands (`/`)** — Quick-access menu to insert any modular block
+- **Floating Toolbar** — Contextual actions above the active selection

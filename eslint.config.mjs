@@ -10,7 +10,7 @@ const tsconfigRootDir = dirname(fileURLToPath(import.meta.url));
 
 export default [
   {
-    ignores: ["**/dist/**", "**/node_modules/**", "**/*.d.ts", "**/.agents/**"],
+    ignores: ["**/dist/**", "**/node_modules/**", "**/*.d.ts", "**/.agents/**", "**/.next/**", "**/.source/**"],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
