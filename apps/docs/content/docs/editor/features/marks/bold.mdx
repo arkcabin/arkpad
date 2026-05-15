@@ -3,8 +3,6 @@ title: Bold
 description: Make text bold with `toggleBold`.
 ---
 
-
-
 Type: **Mark**
 
 Bold emphasizes text by making it thicker and darker. Renders as `<strong>` in HTML output.
@@ -27,9 +25,8 @@ const isActive = editor.isActive("strong");
 
 ## Demo
 
-<FeatureDemo
-  feature="bold"
-  content="<p>Try the <strong>bold</strong> feature here</p>"
-  commands={[{ label: "B", command: "toggleBold", isActive: "strong" }]}
-  code='editor.runCommand("toggleBold")'
-/>
+import { BoldDemo, boldCode } from "@/demos/bold-demo";
+
+<DemoViewer code={boldCode}>
+  <BoldDemo />
+</DemoViewer>

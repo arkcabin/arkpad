@@ -2,6 +2,7 @@ import defaultMdxComponents from "fumadocs-ui/mdx";
 import type { MDXComponents } from "mdx/types";
 import { Playground } from "./playground";
 import { FeatureDemo } from "./feature-demo";
+import { DemoViewer } from "./demo-viewer";
 import type { ReactNode } from "react";
 import {
   Bold,
@@ -98,6 +99,7 @@ export function getMDXComponents(components?: MDXComponents) {
   return {
     ...defaultMdxComponents,
     FeatureDemo,
+    DemoViewer,
     Card,
     Playground,
     ...components,

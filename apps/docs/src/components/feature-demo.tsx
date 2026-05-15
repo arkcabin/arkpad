@@ -80,7 +80,7 @@ interface FeatureDemoProps {
 }
 
 export function FeatureDemo({ feature, content, commands, code }: FeatureDemoProps) {
-  const extensions = extensionMap[feature];
+  const extensions = (extensionMap[feature] || [Engine]) as unknown[];
   const editor = useArkpadEditor({ extensions, content });
 
   return (
