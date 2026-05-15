@@ -1,0 +1,24 @@
+---
+title: Bold
+description: Make text bold with `toggleBold`.
+---
+
+Type: **Mark**
+
+Bold emphasizes text by making it thicker and darker. Renders as `<strong>` in HTML output.
+
+## Commands
+
+```ts
+editor.runCommand("toggleBold");
+```
+
+## Keyboard Shortcut
+
+**Mod + B**
+
+## Active State
+
+```ts
+const isActive = editor.isActive("strong");
+```

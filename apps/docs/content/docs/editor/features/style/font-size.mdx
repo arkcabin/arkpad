@@ -1,0 +1,24 @@
+---
+title: Font Size
+description: Change the font size of selected text.
+---
+
+Type: **Mark** · Category: **Style**
+
+Font Size allows users to resize text with precise numeric values.
+
+## Commands
+
+```ts
+editor.runCommand("setFontSize", "16px");
+editor.runCommand("setFontSize", "1.5rem");
+editor.runCommand("unsetFontSize"); // Reset to default
+```
+
+## Configuration
+
+```ts
+FontSize.configure({
+  sizes: ["12px", "14px", "16px", "18px", "24px", "32px", "48px"],
+});
+```

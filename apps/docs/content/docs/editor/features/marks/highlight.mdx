@@ -1,0 +1,28 @@
+---
+title: Highlight
+description: Highlight text with background color.
+---
+
+Type: **Mark**
+
+Highlight applies a background color to text, like a marker pen. Supports single and multi-color modes.
+
+## Commands
+
+```ts
+editor.runCommand("toggleHighlight");
+```
+
+## Active State
+
+```ts
+const isActive = editor.isActive("highlight");
+```
+
+## Configuration
+
+```ts
+Highlight.configure({
+  multicolor: true, // Enable multiple highlight colors
+});
+```

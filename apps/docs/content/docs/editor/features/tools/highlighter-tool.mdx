@@ -1,0 +1,25 @@
+---
+title: Highlighter Tool
+description: Apply highlight marks by drawing over text.
+---
+
+Type: **Tool** · Category: **Tools**
+
+The Highlighter Tool is a "paint" mode. When active, clicking and dragging over text applies the highlight mark — like using a marker pen.
+
+## Commands
+
+```ts
+editor.runCommand("toggleHighlighter"); // Toggle paint mode on/off
+```
+
+When the tool is active:
+
+- Any text you click and drag over gets highlighted
+- Click the tool button again to turn it off
+
+## Active State
+
+```ts
+const isActive = editor.isActive("highlighter");
+```

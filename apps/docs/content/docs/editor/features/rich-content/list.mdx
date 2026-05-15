@@ -1,0 +1,42 @@
+---
+title: List
+description: Create bullet and ordered lists.
+---
+
+Type: **Node** · Category: **Rich Content**
+
+Lists organize content into sequential items. Supports both bullet (unordered) and numbered (ordered) lists.
+
+## Commands
+
+```ts
+editor.runCommand("toggleBulletList"); // Bullet list
+editor.runCommand("toggleOrderedList"); // Numbered list
+```
+
+## Keyboard Shortcuts
+
+| List Type    | Shortcut        |
+| :----------- | :-------------- |
+| Bullet List  | Mod + Shift + 8 |
+| Ordered List | Mod + Shift + 7 |
+
+## Active State
+
+```ts
+const isBullet = editor.isActive("bulletList");
+const isOrdered = editor.isActive("orderedList");
+```
+
+## Markdown Shortcuts
+
+- Type `-` or `*` + space → bullet list
+- Type `1.` + space → ordered list
+
+## List Navigation
+
+| Key                          | Action       |
+| :--------------------------- | :----------- |
+| Tab                          | Indent item  |
+| Shift + Tab                  | Outdent item |
+| Enter at start of empty item | Exit list    |

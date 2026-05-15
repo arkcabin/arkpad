@@ -1,0 +1,31 @@
+---
+title: Placeholder
+description: Show placeholder text when the editor is empty.
+---
+
+Type: **Functionality**
+
+Placeholder displays a hint when the editor content is empty. The hint disappears as soon as the user starts typing.
+
+## Configuration
+
+```ts
+const editor = useArkpadEditor({
+  extensions: [
+    StarterKit.configure({
+      placeholder: "Start writing...",
+    }),
+  ],
+});
+```
+
+## Per-Block Placeholders
+
+```ts
+Placeholder.configure({
+  placeholder: ({ node }) => {
+    if (node.type.name === "heading") return "Enter a heading...";
+    return "Type here...";
+  },
+});
+```

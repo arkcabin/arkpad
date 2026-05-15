@@ -1,0 +1,25 @@
+---
+title: Eraser Tool
+description: Remove all formatting by drawing over text.
+---
+
+Type: **Tool** · Category: **Tools**
+
+The Eraser Tool is a "remove formatting" mode. When active, clicking and dragging over text strips all marks — bold, italic, highlight, links, and more.
+
+## Commands
+
+```ts
+editor.runCommand("toggleEraser"); // Toggle eraser mode on/off
+```
+
+When the tool is active:
+
+- Any text you click and drag over gets all marks removed
+- Click the tool button again to turn it off
+
+## Active State
+
+```ts
+const isActive = editor.isActive("eraser");
+```

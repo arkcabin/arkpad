@@ -1,0 +1,33 @@
+---
+title: AI Assistant
+description: AI-powered editing features.
+---
+
+Type: **Functionality** · Category: **Tools**
+
+The AI Assistant brings intelligent editing capabilities to Arkpad, enabling features like smart summarization, tone switching, and content generation.
+
+## Features
+
+- **Smart Summarize** — Condense long content into key points
+- **Tone Switcher** — Rewrite content to be professional, casual, or formal
+- **AI Prompt Node** — Inline AI-powered content generation
+
+## Usage
+
+```ts
+// Request AI-powered content transformation
+editor.runCommand("aiSummarize");
+editor.runCommand("aiChangeTone", { tone: "professional" });
+editor.runCommand("aiGenerate", { prompt: "Write a paragraph about..." });
+```
+
+## Configuration
+
+```ts
+AI.configure({
+  provider: "openai", // AI provider
+  apiKey: process.env.AI_API_KEY,
+  model: "gpt-4",
+});
+```

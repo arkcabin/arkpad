@@ -1,0 +1,24 @@
+---
+title: Italic
+description: Make text italic with `toggleItalic`.
+---
+
+Type: **Mark**
+
+Italic slants text to the right for emphasis. Renders as `<em>` in HTML output.
+
+## Commands
+
+```ts
+editor.runCommand("toggleItalic");
+```
+
+## Keyboard Shortcut
+
+**Mod + I**
+
+## Active State
+
+```ts
+const isActive = editor.isActive("em");
+```

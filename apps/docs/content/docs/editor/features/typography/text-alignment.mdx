@@ -1,0 +1,27 @@
+---
+title: Text Alignment
+description: Control horizontal text alignment with `setTextAlign`.
+---
+
+Type: **Functionality**
+
+Text Alignment controls how text is horizontally positioned within its block. Supports left, center, right, and justify.
+
+## Commands
+
+```ts
+editor.runCommand("setTextAlign", "left");
+editor.runCommand("setTextAlign", "center");
+editor.runCommand("setTextAlign", "right");
+editor.runCommand("setTextAlign", "justify");
+```
+
+## Active State
+
+```ts
+const isActive = editor.isActive("textAlign", { align: "center" });
+```
+
+## Notes
+
+- Alignment is suppressed inside lists to maintain readability (Notion-style behavior)

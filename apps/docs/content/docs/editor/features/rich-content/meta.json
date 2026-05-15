@@ -1,0 +1,4 @@
+{
+  "title": "Rich Content",
+  "pages": ["list", "task-list", "table", "image", "youtube"]
+}

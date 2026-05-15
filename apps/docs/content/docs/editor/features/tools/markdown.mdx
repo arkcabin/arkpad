@@ -1,0 +1,37 @@
+---
+title: Markdown
+description: Write in Markdown and see it rendered in real-time.
+---
+
+Type: **Functionality** · Category: **Tools**
+
+Markdown allows users to type Markdown syntax and see it automatically converted to rich text. The editor also supports exporting content as Markdown.
+
+## Input Shortcuts
+
+| Shortcut            | Result          |
+| :------------------ | :-------------- | --- | --------- | -------------- |
+| `# ` + text         | H1              |
+| `## ` + text        | H2              |
+| `### ` + text       | H3              |
+| `> ` + text         | Blockquote      |
+| `- ` or `* ` + text | Bullet List     |
+| `1. ` + text        | Ordered List    |
+| `[] ` + text        | Task List       |
+| `---` + Enter       | Horizontal Rule |
+| `                   |                 |     | ` + space | 3-column Table |
+| `**text**`          | Bold            |
+| `*text*`            | Italic          |
+| `` `code` ``        | Inline Code     |
+
+## Export
+
+```ts
+const md = editor.getMarkdown(); // Export as Markdown string
+```
+
+## Import
+
+```ts
+editor.setContent("# Hello\n\nWorld", "markdown"); // Import Markdown
+```

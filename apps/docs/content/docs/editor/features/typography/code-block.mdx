@@ -1,0 +1,32 @@
+---
+title: Code Block
+description: Add code blocks with `toggleCodeBlock`.
+---
+
+Type: **Node**
+
+Code Block displays multi-line code in a monospace block. Renders as `<pre><code>` in HTML output.
+
+## Commands
+
+```ts
+editor.runCommand("toggleCodeBlock");
+```
+
+## Keyboard Shortcut
+
+**Mod + Alt + C**
+
+## Active State
+
+```ts
+const isActive = editor.isActive("codeBlock");
+```
+
+## Keyboard Navigation
+
+| Key         | Action          |
+| :---------- | :-------------- |
+| Mod + Enter | Exit code block |
+| Tab         | Indent line     |
+| Shift + Tab | Outdent line    |

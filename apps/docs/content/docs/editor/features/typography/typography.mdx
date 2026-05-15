@@ -1,0 +1,29 @@
+---
+title: Typography
+description: Smart typographic replacements for special characters.
+---
+
+Type: **Node** · Category: **Typography**
+
+Typography automatically replaces plain text with typographically correct characters, like converting `--` to an em dash or (c) to ©.
+
+## Features
+
+| Input      | Output         |
+| :--------- | :------------- |
+| `--`       | — (em dash)    |
+| `(c)`      | ©              |
+| `(r)`      | ®              |
+| `(tm)`     | ™              |
+| `...`      | … (ellipsis)   |
+| `"quotes"` | “smart quotes” |
+
+## Configuration
+
+```ts
+Typography.configure({
+  ellipsis: true, // Convert ... to …
+  emDash: true, // Convert -- to —
+  smartQuotes: true, // Convert " to “”
+});
+```

@@ -1,0 +1,24 @@
+---
+title: Font Family
+description: Change the font family of selected text.
+---
+
+Type: **Mark** · Category: **Style**
+
+Font Family allows users to apply different typefaces to selected content.
+
+## Commands
+
+```ts
+editor.runCommand("setFontFamily", "Inter");
+editor.runCommand("setFontFamily", "Georgia, serif");
+editor.runCommand("unsetFontFamily"); // Reset to default
+```
+
+## Configuration
+
+```ts
+FontFamily.configure({
+  fonts: ["Inter", "Georgia, serif", "Courier New, monospace", "Arial, sans-serif"],
+});
+```

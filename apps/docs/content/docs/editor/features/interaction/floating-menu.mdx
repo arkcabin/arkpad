@@ -1,0 +1,35 @@
+---
+title: Floating Menu
+description: A toolbar that appears at empty lines to suggest blocks.
+---
+
+Type: **Functionality** · Category: **Interaction**
+
+The Floating Menu appears next to empty lines in the editor, offering quick access to insert headings, lists, and other block elements.
+
+## Usage
+
+```tsx
+import { FloatingMenu } from "@arkpad/react";
+
+function MyEditor({ editor }) {
+  return (
+    <div>
+      <FloatingMenu editor={editor}>
+        <button onClick={() => editor.runCommand("toggleHeading", { level: 2 })}>H2</button>
+        <button onClick={() => editor.runCommand("toggleBulletList")}>List</button>
+        <button onClick={() => editor.runCommand("insertTable", { rows: 3, cols: 3 })}>
+          Table
+        </button>
+      </FloatingMenu>
+      <ArkpadEditorContent editor={editor} />
+    </div>
+  );
+}
+```
+
+The menu automatically:
+
+- Appears on empty paragraph lines
+- Hides when content is present
+- Positions itself at the start of the line

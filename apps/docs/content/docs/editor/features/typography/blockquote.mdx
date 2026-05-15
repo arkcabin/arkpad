@@ -1,0 +1,28 @@
+---
+title: Blockquote
+description: Display quoted text with `toggleBlockquote`.
+---
+
+Type: **Node**
+
+Blockquote displays quoted text in an indented block. Renders as `<blockquote>` in HTML output.
+
+## Commands
+
+```ts
+editor.runCommand("toggleBlockquote");
+```
+
+## Keyboard Shortcut
+
+**Mod + Shift + B**
+
+## Active State
+
+```ts
+const isActive = editor.isActive("blockquote");
+```
+
+## Markdown Shortcut
+
+Type `>` followed by space to start a blockquote.

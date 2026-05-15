@@ -1,0 +1,24 @@
+---
+title: YouTube
+description: Embed YouTube videos in your content.
+---
+
+Type: **Node** · Category: **Rich Content**
+
+YouTube embeds a video player directly in the document. Users can watch videos without leaving the editor.
+
+## Commands
+
+```ts
+editor.runCommand("setYouTubeVideo", {
+  src: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+  width: 640,
+  height: 480,
+});
+```
+
+## Active State
+
+```ts
+const isActive = editor.isActive("youtube");
+```

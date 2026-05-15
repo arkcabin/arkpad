@@ -1,0 +1,42 @@
+---
+title: Bubble Menu
+description: A contextual menu that appears when text is selected.
+---
+
+Type: **Functionality** · Category: **Interaction**
+
+The Bubble Menu appears above selected text and provides quick access to formatting commands like bold, italic, and links.
+
+## Usage
+
+```tsx
+import { BubbleMenu } from "@arkpad/react";
+
+function MyEditor({ editor }) {
+  return (
+    <div>
+      <BubbleMenu editor={editor}>
+        <button onClick={() => editor.runCommand("toggleBold")}>Bold</button>
+        <button onClick={() => editor.runCommand("toggleItalic")}>Italic</button>
+      </BubbleMenu>
+      <ArkpadEditorContent editor={editor} />
+    </div>
+  );
+}
+```
+
+The menu automatically:
+
+- Shows when text is selected
+- Hides when selection is empty
+- Positions itself above the selection
+
+## Configuration
+
+```ts
+BubbleMenu.configure({
+  shouldShow: ({ editor, state }) => {
+    return !state.selection.empty;
+  },
+});
+```

@@ -1,0 +1,30 @@
+---
+title: Link
+description: Add hyperlinks with `toggleLink`.
+---
+
+Type: **Mark**
+
+Link creates clickable hyperlinks in text. Renders as `<a href="...">` in HTML output.
+
+## Commands
+
+```ts
+editor.runCommand("toggleLink", { href: "https://example.com" });
+```
+
+## Active State
+
+```ts
+const isActive = editor.isActive("link");
+const attrs = editor.getAttributes("link"); // { href: "https://..." }
+```
+
+## Configuration
+
+```ts
+Link.configure({
+  openOnClick: false, // Prevent links from opening on click
+  autolink: true, // Auto-detect and convert URLs to links
+});
+```

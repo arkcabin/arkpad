@@ -1,0 +1,41 @@
+---
+title: Heading
+description: Structure content with headings using `toggleHeading`.
+---
+
+Type: **Node**
+
+Headings organize content into sections. Supports levels 1 through 6, rendering as `<h1>` through `<h6>` in HTML output.
+
+## Commands
+
+```ts
+editor.runCommand("toggleHeading", { level: 1 });
+editor.runCommand("toggleHeading", { level: 2 });
+editor.runCommand("toggleHeading", { level: 3 });
+editor.runCommand("toggleHeading", { level: 4 });
+editor.runCommand("toggleHeading", { level: 5 });
+editor.runCommand("toggleHeading", { level: 6 });
+```
+
+## Keyboard Shortcuts
+
+| Heading | Shortcut      |
+| :------ | :------------ |
+| H1      | Mod + Alt + 1 |
+| H2      | Mod + Alt + 2 |
+| H3      | Mod + Alt + 3 |
+
+## Active State
+
+```ts
+const isActive = editor.isActive("heading", { level: 2 });
+```
+
+## Configuration
+
+```ts
+Heading.configure({
+  levels: [1, 2, 3, 4, 5, 6],
+});
+```
