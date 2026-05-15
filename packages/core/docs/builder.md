@@ -1,6 +1,6 @@
-# Page Builder: Hybrid Architecture Guide
+# Builder: Hybrid Architecture Guide
 
-This document explains the **Page Builder** system built on top of Arkpad Core. It uses a hybrid architecture: **Zustand** for page structure (JSON array of components) and **ArkpadEditor (ProseMirror)** for rich text inside blocks. This approach gives you the flexibility of Puck JS with the power of ProseMirror.
+This document explains the **Builder** system built on top of Arkpad Core. It uses a hybrid architecture: **Zustand** for page structure (JSON array of components) and **ArkpadEditor (ProseMirror)** for rich text inside blocks. This approach gives you the flexibility of Puck JS with the power of ProseMirror.
 
 ---
 
@@ -20,12 +20,12 @@ The hybrid gives you both: layout flexibility + ProseMirror richness.
 
 ---
 
-## 2. Data Model (`PageData`)
+## 2. Data Model (`BuilderData`)
 
 The entire page is a plain JSON object managed by Zustand:
 
 ```typescript
-type PageData = {
+type BuilderData = {
   content: ComponentInstance[];
   root: { props: Record<string, any> };
 };
@@ -75,12 +75,12 @@ type ComponentInstance = {
 
 ---
 
-## 3. Component Config (`PageConfig`)
+## 3. Component Config (`BuilderConfig`)
 
 Users define available components in a plain config object:
 
 ```typescript
-type PageConfig = {
+type BuilderConfig = {
   components: Record<string, ComponentDefinition>;
 };
 
@@ -98,7 +98,7 @@ type ComponentDefinition<Props = any> = {
 ### Built-in Components Example
 
 ```typescript
-const config: PageConfig = {
+const config: BuilderConfig = {
   components: {
     HeadingBlock: {
       label: "Heading",
@@ -150,7 +150,7 @@ const config: PageConfig = {
 
 ```typescript
 // @arkpad/component-hero
-import type { ComponentDefinition } from "@arkpad/page-builder"
+import type { ComponentDefinition } from "@arkpad/builder"
 
 export const HeroBlock: ComponentDefinition = {
   label: "Hero Section",
@@ -177,7 +177,7 @@ export const HeroBlock: ComponentDefinition = {
 ```tsx
 import { HeadingBlock, RichTextBlock, ImageBlock } from "@arkpad/components"
 import { HeroBlock } from "@arkpad/component-hero"
-import { PageBuilder } from "@arkpad/page-builder"
+import { Builder } from "@arkpad/builder"
 
 const config = {
   components: {
@@ -188,7 +188,7 @@ const config = {
   },
 }
 
-<PageBuilder config={config} data={initialData} onPublish={saveToDB} />
+<Builder config={config} data={initialData} onPublish={saveToDB} />
 ```
 
 **No schema changes, no registration API, no ProseMirror node types.** Just import + add to config.
@@ -482,9 +482,9 @@ The block's `render` function receives `styles` and applies it via `style={style
 ## 6. Zustand Store API
 
 ```typescript
-interface PageStore {
+interface BuilderStore {
   // Data
-  data: PageData;
+  data: BuilderData;
 
   // Actions
   addComponent: (type: string, index?: number, zone?: string) => void;
@@ -493,11 +493,11 @@ interface PageStore {
   duplicateComponent: (id: string) => void;
   updateProps: (id: string, props: Record<string, any>) => void;
   updateStyles: (id: string, styles: Record<string, any>) => void;
-  setData: (data: PageData) => void;
+  setData: (data: BuilderData) => void;
   reset: () => void;
 
   // Serialization
-  getPageJSON: () => PageData;
+  getBuilderJSON: () => BuilderData;
 
   // Selectors
   useComponent: (id: string) => ComponentInstance | undefined;
@@ -571,10 +571,10 @@ User changes padding in StylePanel
 
 ## 7. Rendering Pipeline
 
-### Production Render (`<RenderPage>`)
+### Production Render (`<Render>`)
 
 ```tsx
-function RenderPage({ config, data }) {
+function Render({ config, data }) {
   return (
     <div className="page">
       {data.content.map((item) => {
@@ -587,14 +587,14 @@ function RenderPage({ config, data }) {
 }
 ```
 
-### Visual Editor (`<PageBuilder>`)
+### Visual Editor (`<Builder>`)
 
 ```tsx
-function PageBuilder({ config, data, onPublish }) {
+function Builder({ config, data, onPublish }) {
   const selectedId = useSelectedId();
 
   return (
-    <div className="page-builder">
+    <div className="builder">
       <Palette config={config} /> {/* draggable component list */}
       <Canvas config={config} /> {/* drop zone with DnD + selection */}
       <div className="right-panel">
@@ -650,7 +650,7 @@ The Canvas component:
    → Only this block re-renders with new inline styles
 
 8. User clicks Publish
-   → onPublish(store.getPageJSON())
+   → onPublish(store.getBuilderJSON())
    → DB saves full JSON including both props + styles
 ```
 
@@ -664,8 +664,8 @@ import { SortableContext, useSortable } from "@dnd-kit/sortable";
 
 // Canvas
 function Canvas({ config }) {
-  const items = usePageStore((s) => s.data.content);
-  const moveComponent = usePageStore((s) => s.moveComponent);
+  const items = useBuilderStore((s) => s.data.content);
+  const moveComponent = useBuilderStore((s) => s.moveComponent);
 
   return (
     <DndContext onDragEnd={(event) => moveComponent(event.active.id, event.over?.id)}>
@@ -734,7 +734,7 @@ HeadingBlock: {
 A built-in utility maps style values to Tailwind classes automatically:
 
 ```tsx
-import { stylesToTailwind } from "@arkpad/page-builder"
+import { stylesToTailwind } from "@arkpad/builder"
 
 HeadingBlock: {
   render: ({ text, level, styles }) => {
@@ -935,7 +935,7 @@ PropsPanel
 
 - **Selective re-renders** — `useStore((s) => s.data.content[2])` only re-renders when that specific component changes. Context re-renders ALL consumers.
 - **DevTools** — Zustand devtools gives time-travel debugging out of the box.
-- **External access** — `pageStore.getState()` works outside React (sagas, timers, WebSocket listeners).
+- **External access** — `builderStore.getState()` works outside React (sagas, timers, WebSocket listeners).
 
 ### Why plain JSON over PM doc for page structure?
 
@@ -974,7 +974,7 @@ type ComponentInstance = {
 ### Store Actions
 
 ```typescript
-interface PageStore {
+interface BuilderStore {
   // ... existing actions
   currentBreakpoint: Breakpoint;
 
@@ -989,8 +989,8 @@ interface PageStore {
 ```tsx
 function StylePanel({ selectedId, componentDef, currentBreakpoint }) {
   const styles = useStyles(selectedId, currentBreakpoint);
-  const updateStyles = usePageStore((s) => s.updateStyles);
-  const setBreakpoint = usePageStore((s) => s.setBreakpoint);
+  const updateStyles = useBuilderStore((s) => s.updateStyles);
+  const setBreakpoint = useBuilderStore((s) => s.setBreakpoint);
 
   return (
     <div>
@@ -1080,7 +1080,7 @@ type Theme = {
   boxShadow: string;
 };
 
-type PageData = {
+type BuilderData = {
   content: ComponentInstance[];
   root: { props: Record<string, any> };
   theme: Theme; // ← global design system
@@ -1128,7 +1128,7 @@ Design System Panel
 ```typescript
 type SiteData = {
   pages: {
-    [slug: string]: PageData; // home, about, blog, pricing, etc.
+    [slug: string]: BuilderData; // home, about, blog, pricing, etc.
   };
   navigation: {
     primary: NavItem[]; // header menu
@@ -1184,11 +1184,11 @@ function SiteRenderer({ siteData }) {
                 <meta property="og:image" content={pageData.settings.ogImage} />
               </Helmet>
               {siteData.globalComponents.header && (
-                <RenderPage config={config} data={{ content: siteData.globalComponents.header }} />
+                <Render config={config} data={{ content: siteData.globalComponents.header }} />
               )}
-              <RenderPage config={config} data={pageData} />
+              <Render config={config} data={pageData} />
               {siteData.globalComponents.footer && (
-                <RenderPage config={config} data={{ content: siteData.globalComponents.footer }} />
+                <Render config={config} data={{ content: siteData.globalComponents.footer }} />
               )}
             </>
           }
@@ -1323,17 +1323,17 @@ Zustand + config.components pattern. No architecture change needed.
 ## 17. Package Structure
 
 ```
-@arkpad/page-builder           ← Core engine (Zustand store, renderer, editor, field types)
+@arkpad/builder           ← Core engine (Zustand store, renderer, editor, field types)
   └── dependencies: @arkpad/core, @arkpad/react, zustand, @dnd-kit
 
 @arkpad/components             ← Optional built-in blocks (Heading, RichText, Image, Button, Divider)
-  └── dependencies: @arkpad/page-builder (types only)
+  └── dependencies: @arkpad/builder (types only)
 
 @arkpad/component-hero         ← Third-party component (published on npm)
-  └── dependencies: @arkpad/page-builder (types only), react
+  └── dependencies: @arkpad/builder (types only), react
 
 any-user-published-package     ← Anyone can publish their own blocks
-  └── dependencies: @arkpad/page-builder (types only)
+  └── dependencies: @arkpad/builder (types only)
 ```
 
 Example `package.json` for a third-party component:
@@ -1344,7 +1344,7 @@ Example `package.json` for a third-party component:
   "version": "1.0.0",
   "main": "dist/index.js",
   "peerDependencies": {
-    "@arkpad/page-builder": "^1.0.0",
+    "@arkpad/builder": "^1.0.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
   },
