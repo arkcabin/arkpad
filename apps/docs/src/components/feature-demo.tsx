@@ -1,7 +1,6 @@
 "use client";
 
-import { useArkpadEditor, ArkpadEditorContent } from "@arkpad/react";
-import { cn } from "@/lib/cn";
+import { useArkpadEditor, ArkpadEditorContent, ArkpadProvider, EditorButton } from "@arkpad/react";
 import { Engine } from "@arkpad/core";
 import { Bold } from "@arkpad/extension-bold";
 import { Italic } from "@arkpad/extension-italic";
@@ -31,7 +30,7 @@ import { Typography } from "@arkpad/extension-typography";
 import { EraserTool } from "@arkpad/extension-eraser";
 import { HighlighterTool } from "@arkpad/extension-highlighter";
 
-const extensionMap: Record<string, any[]> = {
+const extensionMap: Record<string, unknown[]> = {
   bold: [Engine, Bold],
   italic: [Engine, Italic],
   underline: [Engine, Underline],
@@ -69,8 +68,8 @@ const extensionMap: Record<string, any[]> = {
 interface DemoCommand {
   label: string;
   command: string;
-  args?: any;
-  isActive?: string | [string, any];
+  args?: unknown;
+  isActive?: string | [string, Record<string, unknown>];
 }
 
 interface FeatureDemoProps {
@@ -87,34 +86,29 @@ export function FeatureDemo({ feature, content, commands, code }: FeatureDemoPro
   return (
     <div className="rounded-xl border overflow-hidden my-6 not-prose">
       {commands && commands.length > 0 && editor && (
-        <div className="flex flex-wrap gap-1 p-2 border-b bg-fd-secondary/50">
-          {commands.map((cmd) => {
-            const [activeName, activeArgs] = Array.isArray(cmd.isActive)
-              ? cmd.isActive
-              : [cmd.isActive, undefined];
-            const active = activeName ? editor.isActive(activeName, activeArgs) : false;
-            return (
-              <button
-                key={cmd.label}
-                type="button"
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  editor.runCommand(cmd.command, cmd.args);
-                }}
-                className={cn(
-                  "px-2.5 py-1 text-xs rounded-md font-medium transition-colors",
-                  active
-                    ? "bg-fd-primary text-fd-primary-foreground"
-                    : "hover:bg-fd-accent text-fd-muted-foreground"
-                )}
-              >
-                {cmd.label}
-              </button>
-            );
-          })}
-        </div>
+        <ArkpadProvider editor={editor}>
+          <div className="flex flex-wrap gap-1 p-2 border-b bg-fd-secondary/50">
+            {commands.map((cmd) => {
+              const activeName = Array.isArray(cmd.isActive) ? cmd.isActive[0] : cmd.isActive;
+              const activeAttrs = Array.isArray(cmd.isActive) ? cmd.isActive[1] : undefined;
+              return (
+                <EditorButton
+                  key={cmd.label}
+                  command={cmd.command}
+                  args={cmd.args !== undefined ? [cmd.args] : undefined}
+                  name={activeName}
+                  attrs={activeAttrs}
+                  className="px-2.5 py-1 text-xs rounded-md font-medium hover:bg-fd-accent text-fd-muted-foreground [&.active]:bg-fd-primary [&.active]:text-fd-primary-foreground"
+                  activeClassName="active"
+                >
+                  {cmd.label}
+                </EditorButton>
+              );
+            })}
+          </div>
+        </ArkpadProvider>
       )}
-      <div className="p-4 min-h-[120px] bg-fd-card prose-sm max-w-none">
+      <div className="p-4 min-h-[120px] bg-fd-card">
         {editor && <ArkpadEditorContent editor={editor} />}
       </div>
       {code && (
