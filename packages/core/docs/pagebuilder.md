@@ -34,6 +34,7 @@ type ComponentInstance = {
   id: string; // auto-generated nanoid
   type: string; // matches config.components key
   props: Record<string, any>; // field values (user-editable)
+  styles?: Record<string, any>; // Figma-like style properties (padding, margin, bgColor, etc.)
 };
 ```
 
@@ -45,7 +46,8 @@ type ComponentInstance = {
     {
       "id": "abc123",
       "type": "HeadingBlock",
-      "props": { "text": "Welcome", "level": "h2" }
+      "props": { "text": "Welcome", "level": "h2" },
+      "styles": { "padding": "16px", "backgroundColor": "#f5f5f5", "textAlign": "center" }
     },
     {
       "id": "def456",
@@ -89,6 +91,7 @@ type ComponentDefinition<Props = any> = {
   defaultProps: Props;
   fields: Record<string, FieldDefinition>;
   render: (props: Props) => ReactNode;
+  styleConfig?: StyleConfig; // which style controls to show in the StylePanel (like Figma)
 };
 ```
 
@@ -244,7 +247,239 @@ The full page JSON contains ProseMirror JSON nested inside the `content` prop of
 
 ---
 
-## 5. Zustand Store API
+## 5. Style System (Figma-like Design Panel)
+
+Every block has a universal `styles` prop that controls its visual appearance — like Figma's right-side design panel. The `styleConfig` on the component definition controls which style controls are shown.
+
+### StyleConfig
+
+```typescript
+type StyleConfig = {
+  // Dimensions
+  width?: boolean;
+  height?: boolean;
+  minHeight?: boolean;
+
+  // Spacing
+  padding?: boolean | { top?: boolean; right?: boolean; bottom?: boolean; left?: boolean };
+  margin?: boolean | { top?: boolean; right?: boolean; bottom?: boolean; left?: boolean };
+
+  // Typography (for text-containing blocks)
+  textAlign?: boolean;
+  fontSize?: boolean;
+  fontWeight?: boolean;
+  lineHeight?: boolean;
+  color?: boolean;
+
+  // Background
+  backgroundColor?: boolean;
+  backgroundImage?: boolean;
+
+  // Border
+  border?: boolean | { width?: boolean; color?: boolean; style?: boolean };
+  borderRadius?: boolean;
+
+  // Effects
+  boxShadow?: boolean;
+  opacity?: boolean;
+
+  // Transform
+  rotate?: boolean;
+  scale?: boolean;
+};
+```
+
+### How It Works
+
+Each `ComponentInstance` can optionally have a `styles` object:
+
+```json
+{
+  "id": "abc123",
+  "type": "HeadingBlock",
+  "props": { "text": "Welcome", "level": "h2" },
+  "styles": {
+    "paddingTop": "16px",
+    "paddingRight": "24px",
+    "paddingBottom": "16px",
+    "paddingLeft": "24px",
+    "backgroundColor": "#1a1a2e",
+    "color": "#ffffff",
+    "textAlign": "center",
+    "borderRadius": "8px",
+    "boxShadow": "0 4px 6px rgba(0,0,0,0.1)"
+  }
+}
+```
+
+### Component Example with styleConfig
+
+```tsx
+const config = {
+  components: {
+    HeadingBlock: {
+      label: "Heading",
+      category: "typography",
+      defaultProps: { text: "New Heading", level: "h2" },
+      styleConfig: {
+        padding: true, // all sides
+        margin: true,
+        backgroundColor: true,
+        textAlign: true,
+        color: true,
+        fontSize: true,
+        borderRadius: true,
+        border: true,
+      },
+      fields: {
+        text: { type: "text", label: "Content" },
+        level: { type: "select", label: "Level", options: ["h1", "h2", "h3"] },
+      },
+      render: ({ text, level, styles }) => {
+        const Tag = level || "h2";
+        return <Tag style={styles}>{text}</Tag>;
+      },
+    },
+
+    ImageBlock: {
+      label: "Image",
+      category: "media",
+      defaultProps: { src: "", alt: "" },
+      styleConfig: {
+        width: true,
+        height: true,
+        borderRadius: true,
+        border: true,
+        boxShadow: true,
+        opacity: true,
+      },
+      fields: {
+        src: { type: "image", label: "Image URL" },
+        alt: { type: "text", label: "Alt text" },
+      },
+      render: ({ src, alt, styles }) => <img src={src} alt={alt} style={styles} />,
+    },
+  },
+};
+```
+
+### StylePanel Component
+
+The `<StylePanel>` reads `styleConfig` from the selected block's definition and renders the appropriate controls:
+
+```tsx
+function StylePanel({ componentDef, selectedId, styles, onUpdateStyles }) {
+  const config = componentDef.styleConfig;
+  if (!config) return null;
+
+  return (
+    <div className="style-panel">
+      {config.padding && (
+        <Section label="Padding">
+          <Grid4>
+            <Field label="T">
+              <NumberInput
+                value={styles.paddingTop}
+                onChange={(v) => onUpdateStyles(selectedId, { paddingTop: v + "px" })}
+              />
+            </Field>
+            <Field label="R">
+              <NumberInput
+                value={styles.paddingRight}
+                onChange={(v) => onUpdateStyles(selectedId, { paddingRight: v + "px" })}
+              />
+            </Field>
+            <Field label="B">
+              <NumberInput
+                value={styles.paddingBottom}
+                onChange={(v) => onUpdateStyles(selectedId, { paddingBottom: v + "px" })}
+              />
+            </Field>
+            <Field label="L">
+              <NumberInput
+                value={styles.paddingLeft}
+                onChange={(v) => onUpdateStyles(selectedId, { paddingLeft: v + "px" })}
+              />
+            </Field>
+          </Grid4>
+        </Section>
+      )}
+
+      {config.backgroundColor && (
+        <Section label="Background">
+          <ColorInput
+            value={styles.backgroundColor}
+            onChange={(v) => onUpdateStyles(selectedId, { backgroundColor: v })}
+          />
+        </Section>
+      )}
+
+      {config.borderRadius && (
+        <Section label="Border Radius">
+          <NumberInput
+            value={styles.borderRadius}
+            onChange={(v) => onUpdateStyles(selectedId, { borderRadius: v + "px" })}
+          />
+        </Section>
+      )}
+
+      {config.boxShadow && (
+        <Section label="Shadow">
+          <Select
+            value={styles.boxShadow}
+            options={[
+              { label: "None", value: "" },
+              { label: "Small", value: "0 2px 4px rgba(0,0,0,0.1)" },
+              { label: "Medium", value: "0 4px 6px rgba(0,0,0,0.1)" },
+              { label: "Large", value: "0 10px 20px rgba(0,0,0,0.15)" },
+            ]}
+            onChange={(v) => onUpdateStyles(selectedId, { boxShadow: v })}
+          />
+        </Section>
+      )}
+
+      {config.opacity && (
+        <Section label="Opacity">
+          <Slider
+            min={0}
+            max={1}
+            step={0.1}
+            value={styles.opacity ?? 1}
+            onChange={(v) => onUpdateStyles(selectedId, { opacity: v })}
+          />
+        </Section>
+      )}
+
+      {/* ... more style controls ... */}
+    </div>
+  );
+}
+```
+
+### Rendering Styles
+
+During render, styles are applied as inline CSS:
+
+```tsx
+function BlockRenderer({ config, item }) {
+  const componentDef = config.components[item.type];
+  if (!componentDef) return null;
+
+  // Merge styles into the component's render props
+  const mergedProps = {
+    ...item.props,
+    styles: item.styles || {},
+  };
+
+  return <componentDef.render key={item.id} {...mergedProps} />;
+}
+```
+
+The block's `render` function receives `styles` and applies it via `style={styles}` on its root element. This keeps the style system universal — every block gets Figma-like design controls regardless of what the block renders.
+
+---
+
+## 6. Zustand Store API
 
 ```typescript
 interface PageStore {
@@ -257,6 +492,7 @@ interface PageStore {
   moveComponent: (id: string, toIndex: number) => void;
   duplicateComponent: (id: string) => void;
   updateProps: (id: string, props: Record<string, any>) => void;
+  updateStyles: (id: string, styles: Record<string, any>) => void;
   setData: (data: PageData) => void;
   reset: () => void;
 
@@ -267,6 +503,7 @@ interface PageStore {
   useComponent: (id: string) => ComponentInstance | undefined;
   useComponentAt: (index: number) => ComponentInstance | undefined;
   useContentLength: () => number;
+  useStyles: (id: string) => Record<string, any> | undefined;
 }
 ```
 
@@ -283,6 +520,7 @@ User drags "HeadingBlock" from palette to position 2
      id: nanoid(),
      type: "HeadingBlock",
      props: { ...defaults },
+     styles: {},  // empty styles — user fills in via StylePanel
    }
 
 3. data.content.splice(2, 0, newItem)
@@ -305,6 +543,20 @@ User changes "title" field in PropsPanel
    (Zustand selector with shallow equality)
 ```
 
+### updateStyles Flow
+
+```
+User changes padding in StylePanel
+
+1. store.updateStyles("abc123", { paddingTop: "16px", paddingBottom: "16px" })
+
+2. Internally:
+   const item = data.content.find(i => i.id === "abc123")
+   item.styles = { ...item.styles, ...partialStyles }
+
+3. Only "abc123" re-renders with new inline styles applied
+```
+
 ### Why Zustand over Context/Redux
 
 |                     | Zustand                            | Context + useReducer                     |
@@ -317,7 +569,7 @@ User changes "title" field in PropsPanel
 
 ---
 
-## 6. Rendering Pipeline
+## 7. Rendering Pipeline
 
 ### Production Render (`<RenderPage>`)
 
@@ -339,11 +591,16 @@ function RenderPage({ config, data }) {
 
 ```tsx
 function PageBuilder({ config, data, onPublish }) {
+  const selectedId = useSelectedId();
+
   return (
     <div className="page-builder">
       <Palette config={config} /> {/* draggable component list */}
       <Canvas config={config} /> {/* drop zone with DnD + selection */}
-      <PropsPanel config={config} /> {/* field editors for selected block */}
+      <div className="right-panel">
+        <PropsPanel config={config} /> {/* content fields for selected block */}
+        <StylePanel config={config} /> {/* Figma-like style controls for selected block */}
+      </div>
     </div>
   );
 }
@@ -358,7 +615,7 @@ The Canvas component:
 
 ---
 
-## 7. Adding a Component — Full Flow
+## 8. Adding a Component — Full Flow
 
 ```
 1. User sees Palette sidebar
@@ -387,14 +644,19 @@ The Canvas component:
    → User edits "title" → store.updateProps("hero_x1k2", { title: "Big Hero" })
    → Only this block re-renders
 
-7. User clicks Publish
+7. User opens StylePanel → StyleConfig shows enabled controls
+   → User adds padding, changes background color, sets text alignment
+   → store.updateStyles("hero_x1k2", { padding: "24px", backgroundColor: "#1a1a2e", textAlign: "center" })
+   → Only this block re-renders with new inline styles
+
+8. User clicks Publish
    → onPublish(store.getPageJSON())
-   → Save to DB
+   → DB saves full JSON including both props + styles
 ```
 
 ---
 
-## 8. DnD Integration (`@dnd-kit`)
+## 9. DnD Integration (`@dnd-kit`)
 
 ```tsx
 import { DndContext, DragOverlay } from "@dnd-kit/core";
@@ -432,7 +694,232 @@ function SortableBlock({ config, item }) {
 
 ---
 
-## 9. Key Design Decisions
+## 10. Tailwind CSS Support
+
+StyleConfig can output **either inline CSS or Tailwind classes** — the render function decides:
+
+### Option 1: Inline Styles (Default)
+
+```tsx
+HeadingBlock: {
+  render: ({ text, level, styles }) => {
+    const Tag = level || "h2"
+    return <Tag style={styles}>{text}</Tag>
+  },
+}
+// styles = { padding: "16px", backgroundColor: "#1a1a2e" }
+// → <h2 style="padding:16px;background-color:#1a1a2e">Hello</h2>
+```
+
+### Option 2: Tailwind Classes
+
+The component's `render` function maps styles to Tailwind classes:
+
+```tsx
+HeadingBlock: {
+  render: ({ text, level, styles }) => {
+    const Tag = level || "h2"
+    const classes = cx(
+      styles.padding && `p-${styles.padding}`,     // "p-4"
+      styles.backgroundColor === "#1a1a2e" && "bg-[#1a1a2e]",
+      styles.textAlign === "center" && "text-center",
+    )
+    return <Tag className={classes}>{text}</Tag>
+  },
+}
+```
+
+### Option 3: Auto-generate Tailwind from StyleConfig
+
+A built-in utility maps style values to Tailwind classes automatically:
+
+```tsx
+import { stylesToTailwind } from "@arkpad/page-builder"
+
+HeadingBlock: {
+  render: ({ text, level, styles }) => {
+    const Tag = level || "h2"
+    return <Tag className={stylesToTailwind(styles)}>{text}</Tag>
+  },
+}
+// styles = { padding: { top: 4, right: 6, bottom: 4, left: 6 } }
+// → "pt-4 pr-6 pb-4 pl-6"
+// styles = { backgroundColor: "#1a1a2e" }
+// → "bg-[#1a1a2e]"
+```
+
+**Key:** The page builder stores pure JSON (`styles` object). The render function decides how to apply it — inline CSS or Tailwind. Same JSON, different output styles.
+
+---
+
+## 11. Dynamic Data & API Binding
+
+Components can fetch data from APIs at runtime. This makes the page builder a **real dynamic data system** — not just static content.
+
+### The Data Model
+
+Each component can optionally declare a `dataSource`:
+
+```typescript
+type ComponentInstance = {
+  id: string;
+  type: string;
+  props: Record<string, any>;
+  styles?: Record<string, any>;
+  dataSource?: DataSourceConfig; // ← NEW: API binding
+};
+
+type DataSourceConfig = {
+  type: "static" | "api" | "context";
+  // For API data
+  url?: string; // e.g. "/api/products"
+  method?: "GET" | "POST";
+  headers?: Record<string, string>;
+  body?: any;
+  refreshInterval?: number; // auto-refresh in ms
+  // For mapping API response to props
+  mapping?: Record<string, string>; // { "title": "data.name", "image": "data.thumbnail" }
+};
+```
+
+### How It Works at Render Time
+
+```tsx
+function BlockRenderer({ config, item }) {
+  const componentDef = config.components[item.type];
+
+  // If block has an API data source, fetch + merge
+  const apiData = useDataSource(item.dataSource);
+  // apiData = { title: "Product 1", image: "/img/1.jpg" }
+
+  const mergedProps = {
+    ...item.props,
+    ...apiData, // API data overrides default props
+    styles: item.styles,
+  };
+
+  return <componentDef.render {...mergedProps} />;
+}
+```
+
+### Data Source Hook
+
+```tsx
+function useDataSource(dataSource: DataSourceConfig | undefined) {
+  const [data, setData] = useState({});
+
+  useEffect(() => {
+    if (!dataSource || dataSource.type !== "api") return;
+
+    const fetchData = async () => {
+      const res = await fetch(dataSource.url, {
+        method: dataSource.method || "GET",
+        headers: dataSource.headers,
+        body: dataSource.body ? JSON.stringify(dataSource.body) : undefined,
+      });
+      const json = await res.json();
+      // Apply mapping: { "title": "data.name" } → { title: json.data.name }
+      const mapped = mapData(json, dataSource.mapping);
+      setData(mapped);
+    };
+
+    fetchData();
+
+    // Auto-refresh
+    if (dataSource.refreshInterval) {
+      const interval = setInterval(fetchData, dataSource.refreshInterval);
+      return () => clearInterval(interval);
+    }
+  }, [dataSource]);
+
+  return data;
+}
+```
+
+### Example: Product List Block
+
+```tsx
+const ProductListBlock: ComponentDefinition = {
+  label: "Product List",
+  category: "components",
+  defaultProps: { title: "Products" },
+  fields: {
+    title: { type: "text", label: "Title" },
+    // Data source fields appear in a "Data" section of the panel
+    apiUrl: { type: "text", label: "API URL", dataSource: true },
+    mapping: { type: "mapping", label: "Field Mapping", dataSource: true },
+  },
+  render: ({ title, products }) => (
+    <div>
+      <h2>{title}</h2>
+      <div className="grid">
+        {products?.map((p) => (
+          <div key={p.id}>
+            <img src={p.image} />
+            <h3>{p.name}</h3>
+            <p>{p.price}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  ),
+};
+```
+
+### Data Flow
+
+```
+User adds "ProductList" block
+  → Stores in Zustand: { type: "ProductList", props: { title: "Products" } }
+
+User configures API in PropsPanel
+  → Sets apiUrl: "/api/products"
+  → Sets mapping: { "products": "data.items" }
+
+At render time:
+  → useDataSource("/api/products") → fetches
+  → Maps response.data.items → products
+  → Merges into props: { title: "Products", products: [...] }
+  → componentDef.render({ title: "Products", products: [...] })
+  → Renders the list
+
+On save:
+  → JSON stores: { type: "ProductList", props: { title: "Products", apiUrl: "/api/products", mapping: {...} } }
+  → No data cached in JSON — fetched live at render time
+```
+
+### Builder UI For Data Binding
+
+The PropsPanel shows a **"Data" tab** when a component has data source fields:
+
+```
+PropsPanel
+  ├── Content Tab    ← props edit karo
+  ├── Style Tab      ← Figma-like style panel
+  └── Data Tab       ← API binding
+        ├── Source: [API | Static | Context]
+        ├── URL: /api/products
+        ├── Method: GET
+        ├── Mapping:
+        │   title → data.name
+        │   image → data.thumbnail
+        └── [Test Fetch] button
+```
+
+### What This Makes Possible
+
+| Feature               | How                                                 |
+| --------------------- | --------------------------------------------------- |
+| Fetch from CMS API    | Component binds to `/api/cms/pages`                 |
+| Fetch from e-commerce | Product grid binds to `/api/products`               |
+| User adds custom API  | Any REST endpoint, any mapping                      |
+| Auto-refresh          | Dashboard with live data updates                    |
+| Static override       | Props override API data when user manually edits    |
+| SSR/SSG               | Data fetched at build time too (Next.js compatible) |
+
+**This makes the page builder a full dynamic data system** — not just drag-drop UI but actual data-driven pages like Webflow or Builder.io.
+
+---
 
 ### Why not full ProseMirror?
 
@@ -462,7 +949,378 @@ Trying to force this into a ProseMirror document tree fights the tool. Instead, 
 
 ---
 
-## 10. Package Structure
+## 12. Responsive Design — Per-Breakpoint Editing
+
+For a full site builder, every style must work per breakpoint (desktop, tablet, mobile) — like Webflow.
+
+### Breakpoint Data Model
+
+```typescript
+type Breakpoint = "desktop" | "tablet" | "mobile";
+
+type ComponentInstance = {
+  id: string;
+  type: string;
+  props: Record<string, any>;
+  styles?: Record<string, any>;
+  stylesByBreakpoint?: {
+    desktop?: Record<string, any>;
+    tablet?: Record<string, any>;
+    mobile?: Record<string, any>;
+  };
+};
+```
+
+### Store Actions
+
+```typescript
+interface PageStore {
+  // ... existing actions
+  currentBreakpoint: Breakpoint;
+
+  setBreakpoint: (bp: Breakpoint) => void;
+  updateStyles: (id: string, styles: Record<string, any>, breakpoint?: Breakpoint) => void;
+  // If no breakpoint given, applies to current breakpoint
+}
+```
+
+### How It Works
+
+```tsx
+function StylePanel({ selectedId, componentDef, currentBreakpoint }) {
+  const styles = useStyles(selectedId, currentBreakpoint);
+  const updateStyles = usePageStore((s) => s.updateStyles);
+  const setBreakpoint = usePageStore((s) => s.setBreakpoint);
+
+  return (
+    <div>
+      {/* Breakpoint switcher */}
+      <div className="breakpoints">
+        <button onClick={() => setBreakpoint("desktop")}>🖥</button>
+        <button onClick={() => setBreakpoint("tablet")}>📱</button>
+        <button onClick={() => setBreakpoint("mobile")}>📲</button>
+      </div>
+
+      {/* Style controls — same Figma-like panel, but data goes to correct breakpoint */}
+      <PaddingControl
+        value={styles.padding}
+        onChange={(v) => updateStyles(selectedId, { padding: v })}
+      />
+      <BackgroundControl
+        value={styles.backgroundColor}
+        onChange={(v) => updateStyles(selectedId, { backgroundColor: v })}
+      />
+    </div>
+  );
+}
+```
+
+### Render-Time Merging
+
+```tsx
+function BlockRenderer({ config, item, breakpoint }) {
+  const desktopStyles = item.stylesByBreakpoint?.desktop || {};
+  const tabletStyles = item.stylesByBreakpoint?.tablet || {};
+  const mobileStyles = item.stylesByBreakpoint?.mobile || {};
+
+  return (
+    <componentDef.render
+      {...item.props}
+      styles={{
+        ...desktopStyles, // base
+        ...tabletStyles, // override for tablet
+        ...mobileStyles, // override for mobile
+      }}
+    />
+  );
+}
+```
+
+Applied via CSS media queries or a runtime breakpoint observer.
+
+---
+
+## 13. Design System & Global Theme
+
+A proper site builder needs a central design system — colors, fonts, spacing — that all blocks inherit.
+
+### Theme Data Model
+
+```typescript
+type Theme = {
+  colors: {
+    primary: string;
+    secondary: string;
+    accent: string;
+    background: string;
+    text: string;
+    // ... user-defined
+  };
+  typography: {
+    fonts: {
+      heading: string; // font family
+      body: string;
+    };
+    sizes: {
+      h1: string;
+      h2: string;
+      h3: string;
+      body: string;
+      small: string;
+    };
+  };
+  spacing: {
+    xs: string;
+    sm: string;
+    md: string;
+    lg: string;
+    xl: string;
+  };
+  borderRadius: string;
+  boxShadow: string;
+};
+
+type PageData = {
+  content: ComponentInstance[];
+  root: { props: Record<string, any> };
+  theme: Theme; // ← global design system
+};
+```
+
+### How Blocks Use It
+
+```tsx
+function BlockRenderer({ config, item, theme }) {
+  return (
+    <componentDef.render
+      {...item.props}
+      styles={item.styles}
+      theme={theme} // ← every block gets the design system
+    />
+  );
+}
+```
+
+### Theme Editor UI
+
+```
+Design System Panel
+  ├── Colors
+  │   ├── Primary:    [#picker]
+  │   ├── Secondary:  [#picker]
+  │   ├── Background: [#picker]
+  │   └── Text:       [#picker]
+  ├── Typography
+  │   ├── Heading Font: [select: Inter, Roboto, ...]
+  │   ├── Body Font:    [select: Inter, Roboto, ...]
+  │   └── Base Size:    [16px]
+  └── Spacing
+      ├── Container Width: [1200px]
+      └── Gap:             [24px]
+```
+
+---
+
+## 14. Pages & Navigation
+
+### Multi-Page Model
+
+```typescript
+type SiteData = {
+  pages: {
+    [slug: string]: PageData; // home, about, blog, pricing, etc.
+  };
+  navigation: {
+    primary: NavItem[]; // header menu
+    footer: NavItem[]; // footer links
+  };
+  theme: Theme;
+  globalComponents: {
+    header?: ComponentInstance[];
+    footer?: ComponentInstance[];
+  };
+};
+
+type NavItem = {
+  label: string;
+  link: string;
+  children?: NavItem[];
+};
+```
+
+### Page Settings
+
+Each page has SEO settings:
+
+```typescript
+type PageSettings = {
+  slug: string;
+  title: string; // <title>
+  metaDescription: string;
+  ogImage?: string;
+  ogTitle?: string;
+  canonical?: string;
+  noIndex?: boolean;
+  structuredData?: Record<string, any>;
+};
+```
+
+### Router Integration
+
+```tsx
+// In Next.js / React Router
+function SiteRenderer({ siteData }) {
+  return (
+    <Routes>
+      {Object.entries(siteData.pages).map(([slug, pageData]) => (
+        <Route
+          key={slug}
+          path={slug === "home" ? "/" : `/${slug}`}
+          element={
+            <>
+              <Helmet>
+                <title>{pageData.settings.title}</title>
+                <meta name="description" content={pageData.settings.metaDescription} />
+                <meta property="og:image" content={pageData.settings.ogImage} />
+              </Helmet>
+              {siteData.globalComponents.header && (
+                <RenderPage config={config} data={{ content: siteData.globalComponents.header }} />
+              )}
+              <RenderPage config={config} data={pageData} />
+              {siteData.globalComponents.footer && (
+                <RenderPage config={config} data={{ content: siteData.globalComponents.footer }} />
+              )}
+            </>
+          }
+        />
+      ))}
+    </Routes>
+  );
+}
+```
+
+---
+
+## 15. Complete SAAS Site Builder — Feature Matrix
+
+### Legend
+
+| Icon | Meaning                                       |
+| ---- | --------------------------------------------- |
+| ✅   | Built-in (arkpad core or covered in this doc) |
+| ⚠️   | Partial — exists but needs more               |
+| ⬜   | Need to build                                 |
+
+### Editor
+
+| Feature                  | Status | Notes                              |
+| ------------------------ | ------ | ---------------------------------- |
+| Drag-drop editor         | ✅     | @dnd-kit + Canvas                  |
+| Component system         | ✅     | config.components                  |
+| Custom React components  | ✅     | Just add to config                 |
+| Block palette            | ✅     | Palette component                  |
+| Inline editing           | ✅     | Richtext via ProseMirror           |
+| Props panel              | ✅     | Auto-generated from fields         |
+| Style panel (Figma-like) | ✅     | Section 5 of this doc              |
+| Responsive breakpoints   | ⬜     | Section 12 — per-breakpoint styles |
+| History / undo-redo      | ⬜     | Zustand temporal or custom         |
+| Keyboard shortcuts       | ⬜     | copy/paste, delete, duplicate      |
+
+### Design System
+
+| Feature                      | Status | Notes                |
+| ---------------------------- | ------ | -------------------- |
+| Global theme (colors, fonts) | ⬜     | Section 13           |
+| Typography management        | ⬜     | Font picker, sizes   |
+| Spacing scale                | ⬜     | xs/sm/md/lg/xl       |
+| Dark/light mode              | ⬜     | Theme toggle         |
+| Reusable design tokens       | ⬜     | CSS variables output |
+
+### Pages
+
+| Feature                    | Status | Notes            |
+| -------------------------- | ------ | ---------------- |
+| Multi-page management      | ⬜     | Section 14       |
+| Page settings (slug, meta) | ⬜     |                  |
+| Page templates             | ⬜     | Template library |
+| Dynamic pages (from CMS)   | ⬜     |                  |
+| Global header/footer       | ⬜     | Section 14       |
+| Navigation builder         | ⬜     | Menu editor      |
+
+### CMS & Data
+
+| Feature                      | Status | Notes                 |
+| ---------------------------- | ------ | --------------------- |
+| Rich text (ProseMirror)      | ✅     | ArkpadEditor          |
+| API binding / dynamic data   | ✅     | Section 11            |
+| Collections (content models) | ⬜     | Like Webflow CMS      |
+| Media library                | ⬜     | Upload, CDN, optimize |
+| Image optimization           | ⬜     | WebP, AVIF, resize    |
+
+### SEO
+
+| Feature                      | Status | Notes          |
+| ---------------------------- | ------ | -------------- |
+| Per-page meta title/desc     | ⬜     |                |
+| Open Graph tags              | ⬜     |                |
+| Canonical URLs               | ⬜     |                |
+| 301 redirects                | ⬜     |                |
+| XML sitemap                  | ⬜     | Auto-generated |
+| Structured data (Schema.org) | ⬜     | JSON-LD        |
+| Robots.txt                   | ⬜     |                |
+
+### Publishing
+
+| Feature                | Status | Notes |
+| ---------------------- | ------ | ----- |
+| Draft/publish workflow | ⬜     |       |
+| Version history        | ⬜     |       |
+| Scheduled publishing   | ⬜     |       |
+| Audit log              | ⬜     |       |
+
+### Business
+
+| Feature                    | Status | Notes                 |
+| -------------------------- | ------ | --------------------- |
+| Multi-tenant / white-label | ⬜     | SAAS ready            |
+| Team collaboration         | ⬜     | Roles, permissions    |
+| Custom domains             | ⬜     |                       |
+| Analytics (GA4, Plausible) | ⬜     |                       |
+| Form builder               | ⬜     | Contact, lead capture |
+| Subscriptions / billing    | ⬜     | Stripe integration    |
+
+### Technical
+
+| Feature                | Status | Notes              |
+| ---------------------- | ------ | ------------------ |
+| Code export (HTML/CSS) | ⬜     |                    |
+| Next.js export         | ⬜     | SSR/SSG            |
+| Custom code (CSS/JS)   | ⬜     | Per-page or global |
+| CDN hosting            | ⬜     |                    |
+| Image CDN              | ⬜     |                    |
+| SSL                    | ⬜     |                    |
+
+### AI
+
+| Feature               | Status | Notes                 |
+| --------------------- | ------ | --------------------- |
+| AI content generation | ⬜     |                       |
+| AI layout generation  | ⬜     | "Make a landing page" |
+| AI image generation   | ⬜     |                       |
+
+### Current Coverage
+
+```
+✅ Editor core (component system, DnD, styles, dynamic data) = ~15%
+⬜ Design system + responsive + pages + SEO + CMS + publishing + business + AI = ~85%
+
+We have the FOUNDATION — everything else is built ON TOP of the same
+Zustand + config.components pattern. No architecture change needed.
+```
+
+---
+
+## 17. Package Structure
 
 ```
 @arkpad/page-builder           ← Core engine (Zustand store, renderer, editor, field types)
@@ -498,13 +1356,22 @@ Example `package.json` for a third-party component:
 ## Summary
 
 ```
-User components     → config.components (plain object, no schema)
-Page data           → Zustand JSON array (content: ComponentInstance[])
-Rich text           → ArkpadEditor (ProseMirror JSON inside "richtext" field props)
-Rendering           → config.components[type].render(props)
-DnD                 → @dnd-kit (sortable array)
-Serialization       → JSON.stringify(pageStore.getPageJSON())
-Third-party         → import + add to config.components — that's it
+Editor              → Arkpad Core (ProseMirror for richtext)
+State               → Zustand (selective re-renders, devtools, external access)
+Page structure      → Zustand JSON array (content: ComponentInstance[])
+Component config    → config.components plain object — no schema needed
+Third-party         → import + add to config.components key — done
+Styles              → Figma-like StylePanel per block (inline CSS or Tailwind)
+Responsive          → Per-breakpoint styles (desktop, tablet, mobile)
+Dynamic data        → API binding (fetch + mapping + auto-refresh)
+Design system       → Global theme (colors, fonts, spacing tokens)
+Multi-page          → Full site with pages, navigation, global header/footer
+Rendering           → config.components[type].render(props + styles + apiData + theme)
+DnD                 → @dnd-kit (sortable array + palette drag-to-add)
+SEO                 → Per-page meta, OG, sitemap, schema
+Publishing          → Draft/publish, version history, rollback
+SAAS                → Multi-tenant, white-label, teams, custom domains
+Serialization       → JSON.stringify(siteStore.getSiteJSON())
 Model inspiration   → Puck JS (data.content[] + config.components pattern)
-Editor engine       → Arkpad Core
+Full scope          → Webflow / Builder.io / Framer level
 ```
