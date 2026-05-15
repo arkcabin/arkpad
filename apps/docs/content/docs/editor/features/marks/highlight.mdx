@@ -3,6 +3,8 @@ title: Highlight
 description: Highlight text with background color.
 ---
 
+
+
 Type: **Mark**
 
 Highlight applies a background color to text, like a marker pen. Supports single and multi-color modes.
@@ -26,3 +28,12 @@ Highlight.configure({
   multicolor: true, // Enable multiple highlight colors
 });
 ```
+
+## Demo
+
+<FeatureDemo
+  feature="highlight"
+  content="<p>Try the <mark>highlight</mark> feature here</p>"
+  commands={[{ label: "H", command: "toggleHighlight", isActive: "highlight" }]}
+  code='editor.runCommand("toggleHighlight")'
+/>

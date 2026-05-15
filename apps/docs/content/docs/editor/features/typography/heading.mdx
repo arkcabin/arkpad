@@ -3,6 +3,8 @@ title: Heading
 description: Structure content with headings using `toggleHeading`.
 ---
 
+
+
 Type: **Node**
 
 Headings organize content into sections. Supports levels 1 through 6, rendering as `<h1>` through `<h6>` in HTML output.
@@ -39,3 +41,12 @@ Heading.configure({
   levels: [1, 2, 3, 4, 5, 6],
 });
 ```
+
+## Demo
+
+<FeatureDemo
+  feature="heading"
+  content="<p>Try different heading levels</p>"
+  commands={[{ label: "H1", command: "toggleHeading", isActive: "heading" }]}
+  code='editor.runCommand("toggleHeading", { level: 1 })'
+/>

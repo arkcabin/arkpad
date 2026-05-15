@@ -3,6 +3,8 @@ title: Table
 description: Create data tables with Arkpad's table system.
 ---
 
+
+
 Type: **Node**
 
 Table inserts a grid of rows and columns for structured data. Supports column resizing, cell merging, and header rows.
@@ -46,3 +48,12 @@ Table.configure({
 ## Markdown Shortcut
 
 Type `|||` followed by space for a 3-column table.
+
+## Demo
+
+<FeatureDemo
+  feature="table"
+  content="<p>Try the table feature here</p>"
+  commands={[{ label: "\u229e", command: "insertTable", isActive: "table" }]}
+  code='editor.runCommand("insertTable", { rows: 3, cols: 3 })'
+/>

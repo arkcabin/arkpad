@@ -3,6 +3,8 @@ title: Highlighter Tool
 description: Apply highlight marks by drawing over text.
 ---
 
+
+
 Type: **Tool** · Category: **Tools**
 
 The Highlighter Tool is a "paint" mode. When active, clicking and dragging over text applies the highlight mark — like using a marker pen.
@@ -23,3 +25,12 @@ When the tool is active:
 ```ts
 const isActive = editor.isActive("highlighter");
 ```
+
+## Demo
+
+<FeatureDemo
+  feature="highlighter-tool"
+  content="<p>Try the highlighter tool here</p>"
+  commands={[{ label: "\U0001f58d", command: "toggleHighlighter", isActive: "highlighter" }]}
+  code='editor.runCommand("toggleHighlighter")'
+/>

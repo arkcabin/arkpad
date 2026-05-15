@@ -3,6 +3,8 @@ title: Strike
 description: Strikethrough text with `toggleStrike`.
 ---
 
+
+
 Type: **Mark**
 
 Strike draws a line through text to indicate deletion. Renders as `<s>` in HTML output.
@@ -22,3 +24,12 @@ editor.runCommand("toggleStrike");
 ```ts
 const isActive = editor.isActive("strike");
 ```
+
+## Demo
+
+<FeatureDemo
+  feature="strike"
+  content="<p>Try the <s>strike</s> feature here</p>"
+  commands={[{ label: "S", command: "toggleStrike", isActive: "strike" }]}
+  code='editor.runCommand("toggleStrike")'
+/>

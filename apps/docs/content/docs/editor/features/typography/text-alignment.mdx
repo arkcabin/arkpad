@@ -3,6 +3,8 @@ title: Text Alignment
 description: Control horizontal text alignment with `setTextAlign`.
 ---
 
+
+
 Type: **Functionality**
 
 Text Alignment controls how text is horizontally positioned within its block. Supports left, center, right, and justify.
@@ -25,3 +27,12 @@ const isActive = editor.isActive("textAlign", { align: "center" });
 ## Notes
 
 - Alignment is suppressed inside lists to maintain readability (Notion-style behavior)
+
+## Demo
+
+<FeatureDemo
+  feature="text-alignment"
+  content="<p>Try changing text alignment</p>"
+  commands={[{ label: "\u2194", command: "setTextAlign", isActive: "textAlign" }]}
+  code='editor.runCommand("setTextAlign", "center")'
+/>

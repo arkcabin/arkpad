@@ -3,6 +3,8 @@ title: Link
 description: Add hyperlinks with `toggleLink`.
 ---
 
+
+
 Type: **Mark**
 
 Link creates clickable hyperlinks in text. Renders as `<a href="...">` in HTML output.
@@ -28,3 +30,12 @@ Link.configure({
   autolink: true, // Auto-detect and convert URLs to links
 });
 ```
+
+## Demo
+
+<FeatureDemo
+  feature="link"
+  content='<p>Try the <a href="https://example.com">link</a> feature here</p>'
+  commands={[{ label: "🔗", command: "toggleLink", isActive: "link" }]}
+  code='editor.runCommand("toggleLink", { href: "https://example.com" })'
+/>

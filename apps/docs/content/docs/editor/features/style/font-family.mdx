@@ -3,6 +3,8 @@ title: Font Family
 description: Change the font family of selected text.
 ---
 
+
+
 Type: **Mark** · Category: **Style**
 
 Font Family allows users to apply different typefaces to selected content.
@@ -22,3 +24,12 @@ FontFamily.configure({
   fonts: ["Inter", "Georgia, serif", "Courier New, monospace", "Arial, sans-serif"],
 });
 ```
+
+## Demo
+
+<FeatureDemo
+  feature="font-family"
+  content="<p>Try changing font family</p>"
+  commands={[{ label: "F", command: "setFontFamily", isActive: "textStyle" }]}
+  code='editor.runCommand("setFontFamily", "Inter")'
+/>

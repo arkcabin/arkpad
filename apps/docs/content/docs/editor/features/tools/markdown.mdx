@@ -3,6 +3,8 @@ title: Markdown
 description: Write in Markdown and see it rendered in real-time.
 ---
 
+
+
 Type: **Functionality** · Category: **Tools**
 
 Markdown allows users to type Markdown syntax and see it automatically converted to rich text. The editor also supports exporting content as Markdown.
@@ -35,3 +37,12 @@ const md = editor.getMarkdown(); // Export as Markdown string
 ```ts
 editor.setContent("# Hello\n\nWorld", "markdown"); // Import Markdown
 ```
+
+## Demo
+
+<FeatureDemo
+  feature="markdown"
+  content="<p>Try **markdown** features here</p>"
+  commands={[{ label: "MD", command: "", isActive: "" }]}
+  code='editor.getMarkdown()'
+/>

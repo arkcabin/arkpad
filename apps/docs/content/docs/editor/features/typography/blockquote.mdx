@@ -3,6 +3,8 @@ title: Blockquote
 description: Display quoted text with `toggleBlockquote`.
 ---
 
+
+
 Type: **Node**
 
 Blockquote displays quoted text in an indented block. Renders as `<blockquote>` in HTML output.
@@ -26,3 +28,12 @@ const isActive = editor.isActive("blockquote");
 ## Markdown Shortcut
 
 Type `>` followed by space to start a blockquote.
+
+## Demo
+
+<FeatureDemo
+  feature="blockquote"
+  content="<p>Try the blockquote feature here</p>"
+  commands={[{ label: "\u201c\u201d", command: "toggleBlockquote", isActive: "blockquote" }]}
+  code='editor.runCommand("toggleBlockquote")'
+/>

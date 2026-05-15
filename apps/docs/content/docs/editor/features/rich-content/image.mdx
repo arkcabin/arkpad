@@ -3,6 +3,8 @@ title: Image
 description: Embed images with `setImage`.
 ---
 
+
+
 Type: **Node**
 
 Image embeds an image into the document. Renders as `<img src="..." alt="...">` in HTML output.
@@ -21,3 +23,12 @@ editor.runCommand("setImage", {
 ```ts
 const isActive = editor.isActive("image");
 ```
+
+## Demo
+
+<FeatureDemo
+  feature="image"
+  content="<p>Try the image feature here</p>"
+  commands={[{ label: "\U0001f5bc", command: "setImage", isActive: "image" }]}
+  code='editor.runCommand("setImage", { src: "https://example.com/photo.jpg" })'
+/>

@@ -3,6 +3,8 @@ title: Typography
 description: Smart typographic replacements for special characters.
 ---
 
+
+
 Type: **Node** · Category: **Typography**
 
 Typography automatically replaces plain text with typographically correct characters, like converting `--` to an em dash or (c) to ©.
@@ -27,3 +29,12 @@ Typography.configure({
   smartQuotes: true, // Convert " to “”
 });
 ```
+
+## Demo
+
+<FeatureDemo
+  feature="typography"
+  content="<p>Try -- the typography feature ... (c)</p>"
+  commands={[{ label: "\u2122", command: "", isActive: "" }]}
+  code='// Typography replaces characters automatically'
+/>

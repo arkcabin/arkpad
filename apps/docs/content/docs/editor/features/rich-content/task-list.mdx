@@ -3,6 +3,8 @@ title: Task List
 description: Create interactive checklists with `toggleTaskList`.
 ---
 
+
+
 Type: **Node**
 
 Task List creates a checklist with interactive checkboxes. Each item can be checked or unchecked.
@@ -23,3 +25,12 @@ editor.runCommand("toggleTaskList");
 const isActive = editor.isActive("taskList");
 const isChecked = editor.isActive("taskItem", { checked: true });
 ```
+
+## Demo
+
+<FeatureDemo
+  feature="task-list"
+  content="<p>Try the task list feature here</p>"
+  commands={[{ label: "\u2610", command: "toggleTaskList", isActive: "taskList" }]}
+  code='editor.runCommand("toggleTaskList")'
+/>

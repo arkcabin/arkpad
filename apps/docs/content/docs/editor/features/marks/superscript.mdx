@@ -3,6 +3,8 @@ title: Superscript
 description: Make text superscript with `toggleSuperscript`.
 ---
 
+
+
 Type: **Mark**
 
 Superscript renders text smaller and above the baseline. Useful for footnotes and mathematical exponents.
@@ -18,3 +20,12 @@ editor.runCommand("toggleSuperscript");
 ```ts
 const isActive = editor.isActive("superscript");
 ```
+
+## Demo
+
+<FeatureDemo
+  feature="superscript"
+  content="<p>Try the <sup>superscript</sup> feature here</p>"
+  commands={[{ label: "X²", command: "toggleSuperscript", isActive: "superscript" }]}
+  code='editor.runCommand("toggleSuperscript")'
+/>

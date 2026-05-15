@@ -3,6 +3,8 @@ title: Underline
 description: Underline text with `toggleUnderline`.
 ---
 
+
+
 Type: **Mark**
 
 Underline adds a line below text. Renders as `<u>` in HTML output.
@@ -22,3 +24,12 @@ editor.runCommand("toggleUnderline");
 ```ts
 const isActive = editor.isActive("underline");
 ```
+
+## Demo
+
+<FeatureDemo
+  feature="underline"
+  content="<p>Try the <u>underline</u> feature here</p>"
+  commands={[{ label: "U", command: "toggleUnderline", isActive: "underline" }]}
+  code='editor.runCommand("toggleUnderline")'
+/>

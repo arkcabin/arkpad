@@ -1,6 +1,7 @@
 import defaultMdxComponents from "fumadocs-ui/mdx";
 import type { MDXComponents } from "mdx/types";
 import { Playground } from "./playground";
+import { FeatureDemo } from "./feature-demo";
 import type { ReactNode } from "react";
 import {
   Bold,
@@ -96,6 +97,7 @@ function Card({ icon, title, children, href, ...props }: Record<string, unknown>
 export function getMDXComponents(components?: MDXComponents) {
   return {
     ...defaultMdxComponents,
+    FeatureDemo,
     Card,
     Playground,
     ...components,

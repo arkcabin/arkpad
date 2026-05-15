@@ -3,6 +3,8 @@ title: Code Block
 description: Add code blocks with `toggleCodeBlock`.
 ---
 
+
+
 Type: **Node**
 
 Code Block displays multi-line code in a monospace block. Renders as `<pre><code>` in HTML output.
@@ -30,3 +32,12 @@ const isActive = editor.isActive("codeBlock");
 | Mod + Enter | Exit code block |
 | Tab         | Indent line     |
 | Shift + Tab | Outdent line    |
+
+## Demo
+
+<FeatureDemo
+  feature="code-block"
+  content="<p>Try the code block feature here</p>"
+  commands={[{ label: "{}", command: "toggleCodeBlock", isActive: "codeBlock" }]}
+  code='editor.runCommand("toggleCodeBlock")'
+/>

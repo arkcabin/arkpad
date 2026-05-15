@@ -3,6 +3,8 @@ title: Font Size
 description: Change the font size of selected text.
 ---
 
+
+
 Type: **Mark** · Category: **Style**
 
 Font Size allows users to resize text with precise numeric values.
@@ -22,3 +24,12 @@ FontSize.configure({
   sizes: ["12px", "14px", "16px", "18px", "24px", "32px", "48px"],
 });
 ```
+
+## Demo
+
+<FeatureDemo
+  feature="font-size"
+  content="<p>Try changing font size</p>"
+  commands={[{ label: "T", command: "setFontSize", isActive: "textStyle" }]}
+  code='editor.runCommand("setFontSize", "18px")'
+/>

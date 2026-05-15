@@ -3,6 +3,8 @@ title: Horizontal Rule
 description: Insert a thematic break with `insertHorizontalRule`.
 ---
 
+
+
 Type: **Node**
 
 Horizontal Rule inserts a divider between sections. Renders as `<hr>` in HTML output.
@@ -16,3 +18,12 @@ editor.runCommand("insertHorizontalRule");
 ## Markdown Shortcut
 
 Type `---` followed by Enter.
+
+## Demo
+
+<FeatureDemo
+  feature="horizontal-rule"
+  content="<p>Try the horizontal rule feature here</p>"
+  commands={[{ label: "\u2014", command: "insertHorizontalRule", isActive: "horizontalRule" }]}
+  code='editor.runCommand("insertHorizontalRule")'
+/>

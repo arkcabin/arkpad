@@ -3,6 +3,8 @@ title: List
 description: Create bullet and ordered lists.
 ---
 
+
+
 Type: **Node** · Category: **Rich Content**
 
 Lists organize content into sequential items. Supports both bullet (unordered) and numbered (ordered) lists.
@@ -40,3 +42,12 @@ const isOrdered = editor.isActive("orderedList");
 | Tab                          | Indent item  |
 | Shift + Tab                  | Outdent item |
 | Enter at start of empty item | Exit list    |
+
+## Demo
+
+<FeatureDemo
+  feature="list"
+  content="<p>Try the list feature here</p>"
+  commands={[{ label: "\u2022", command: "toggleBulletList", isActive: "bulletList" }, { label: "1.", command: "toggleOrderedList", isActive: "orderedList" }]}
+  code='editor.runCommand("toggleBulletList")'
+/>

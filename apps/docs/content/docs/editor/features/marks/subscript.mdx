@@ -3,6 +3,8 @@ title: Subscript
 description: Make text subscript with `toggleSubscript`.
 ---
 
+
+
 Type: **Mark**
 
 Subscript renders text smaller and below the baseline. Useful for chemical formulas.
@@ -18,3 +20,12 @@ editor.runCommand("toggleSubscript");
 ```ts
 const isActive = editor.isActive("subscript");
 ```
+
+## Demo
+
+<FeatureDemo
+  feature="subscript"
+  content="<p>Try the <sub>subscript</sub> feature here</p>"
+  commands={[{ label: "X₂", command: "toggleSubscript", isActive: "subscript" }]}
+  code='editor.runCommand("toggleSubscript")'
+/>
