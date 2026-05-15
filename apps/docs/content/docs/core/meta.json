@@ -1,6 +1,14 @@
 {
   "title": "Core",
-  "description": "Engine internals, extensions API, and reference",
+  "description": "Usage reference for @arkpad/core — API, commands, and extensions",
   "root": true,
-  "pages": ["index", "architecture", "engine", "extensions", "api-reference", "guides", "resources"]
+  "pages": [
+    "index",
+    "quick-start",
+    "core-api",
+    "extensions",
+    "api-reference",
+    "guides",
+    "resources"
+  ]
 }

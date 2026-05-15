@@ -1,27 +1,38 @@
 ---
 title: Core
-description: Deep-dive into Arkpad's engine, extension system, and API.
+description: Reference for every function and feature in the @arkpad/core package.
 ---
 
-The Core section contains the technical reference for Arkpad — architecture, engine internals, extension system, API documentation, and development resources.
+`@arkpad/core` is the headless engine. It provides the `ArkpadEditor` class, extension system, and all commands — zero UI. Use it to build rich text editing into any application.
+
+## What's in the Core
+
+| What              | Description                                                                    | Where to go                                            |
+| :---------------- | :----------------------------------------------------------------------------- | :----------------------------------------------------- |
+| **Quick Start**   | Initialize the editor, run commands, get output                                | [Quick Start →](/docs/core/quick-start)                |
+| **Core API**      | Every method on the editor: `runCommand`, `chain`, `isActive`, `getHTML`, etc. | [Core API →](/docs/core/core-api)                      |
+| **Extensions**    | How to use and create extensions                                               | [Extensions →](/docs/core/extensions/overview)         |
+| **API Reference** | Method tables, command tables, menu engine                                     | [API Reference →](/docs/core/api-reference/public-api) |
+| **Guides**        | Building custom extensions step by step                                        | [Guides →](/docs/core/guides/custom-extensions)        |
+| **Resources**     | Migration, contributing, architecture plans                                    | [Resources →](/docs/core/resources/architecture-plan)  |
 
 <Cards>
-  <Card title="Architecture" href="/docs/core/architecture" icon="compass">
-    The 3-layer architecture powering Arkpad.
+  <Card title="Quick Start" href="/docs/core/quick-start" icon="rocket">
+    Init editor, run commands, get output — start here.
   </Card>
-  <Card title="Engine Internals" href="/docs/core/engine" icon="cog">
-    Internal logic, state management, and transaction system.
+  <Card title="Core API" href="/docs/core/core-api" icon="code">
+    Every function explained with purpose and example.
   </Card>
   <Card title="Extensions" href="/docs/core/extensions/overview" icon="puzzle">
-    Extension system, catalog, and factory patterns.
+    Use and create extensions for the core.
   </Card>
-  <Card title="API Reference" href="/docs/core/api-reference/public-api" icon="code">
-    Complete API documentation for the editor.
+  <Card title="API Reference" href="/docs/core/api-reference/public-api" icon="book-open">
+    Full method and command tables.
   </Card>
-  <Card title="Guides" href="/docs/core/guides/custom-extensions" icon="book-open">
-    Advanced developer guides for custom extensions.
+  <Card title="Guides" href="/docs/core/guides/custom-extensions" icon="compass">
+    Step-by-step patterns for custom extensions.
   </Card>
   <Card title="Resources" href="/docs/core/resources/architecture-plan" icon="folder">
-    Architecture plans, migration guide, and contributing.
+    Migration guide, contributing, and plans.
   </Card>
 </Cards>

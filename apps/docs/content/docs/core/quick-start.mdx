@@ -1,0 +1,85 @@
+---
+title: Quick Start
+description: Initialize the editor, run commands, and get output.
+---
+
+This page shows you how to use the core package — the minimum you need to start building.
+
+## Initialize
+
+### Vanilla JS
+
+```ts
+import { ArkpadEditor } from "@arkpad/core";
+
+const editor = new ArkpadEditor({
+  element: document.querySelector("#editor")!,
+  content: "<p>Hello World</p>",
+  autofocus: true,
+});
+```
+
+### React
+
+```tsx
+import { useArkpadEditor, ArkpadEditorContent } from "@arkpad/react";
+import { StarterKit } from "@arkpad/starter-kit";
+
+function App() {
+  const editor = useArkpadEditor({
+    extensions: [StarterKit],
+    content: "<p>Hello World</p>",
+  });
+
+  return <ArkpadEditorContent editor={editor} />;
+}
+```
+
+## Run Commands
+
+```ts
+editor.runCommand("toggleBold");
+editor.runCommand("toggleHeading", { level: 2 });
+editor.runCommand("insertTable", { rows: 3, cols: 3 });
+```
+
+## Check State
+
+```ts
+const isBold = editor.isActive("strong");
+const isH2 = editor.isActive("heading", { level: 2 });
+const html = editor.getHTML();
+const json = editor.getJSON();
+const text = editor.getText();
+```
+
+## Chain Commands
+
+```ts
+editor.chain().focus("end").insertContent("Hello ").toggleBold().insertContent("World").run();
+```
+
+## Get Output
+
+| Method          | Returns  | Use case                         |
+| :-------------- | :------- | :------------------------------- |
+| `getHTML()`     | `string` | Save to database, render preview |
+| `getJSON()`     | `object` | Portable document storage        |
+| `getText()`     | `string` | Word count, search index         |
+| `getMarkdown()` | `string` | Blog posts, export               |
+
+## Control Editor
+
+```ts
+editor.focus(); // Focus
+editor.focus("end"); // Focus at end
+editor.setEditable(false); // Read-only
+editor.clearContent(); // Reset to empty
+editor.destroy(); // Cleanup
+```
+
+## Next Steps
+
+- See every function with examples: [Core API →](/docs/core/core-api)
+- Build custom extensions: [Extensions →](/docs/core/extensions/overview)
+- Full command reference: [API Reference →](/docs/core/api-reference/public-api)
