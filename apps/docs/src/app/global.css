@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import "@tailwindcss/typography";
 @import 'fumadocs-ui/css/black.css';
 @import 'fumadocs-ui/css/preset.css';
 

@@ -80,7 +80,7 @@ const extensionMap: Record<string, ArkpadExtension[]> = {
   subscript: [Engine, Subscript],
 };
 
-const iconMap: Record<string, any> = {
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Bold: BoldIcon,
   Italic: ItalicIcon,
   Underline: UnderlineIcon,
@@ -112,8 +112,8 @@ interface FeatureDemoProps {
     label: string;
     command: string;
     icon: string;
-    args?: any;
-    isActive?: string | [string, any];
+    args?: unknown;
+    isActive?: string | [string, Record<string, unknown>];
   }[];
 }
 
