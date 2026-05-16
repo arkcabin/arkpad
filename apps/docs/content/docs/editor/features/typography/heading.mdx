@@ -3,8 +3,6 @@ title: Heading
 description: Structure content with headings using `toggleHeading`.
 ---
 
-
-
 Type: **Node**
 
 Headings organize content into sections. Supports levels 1 through 6, rendering as `<h1>` through `<h6>` in HTML output.
@@ -44,9 +42,48 @@ Heading.configure({
 
 ## Demo
 
-<FeatureDemo
+<FeatureDemo 
   feature="heading"
-  content="<p>Try different heading levels</p>"
-  commands={[{ label: "H1", command: "toggleHeading", isActive: "heading" }]}
-  code='editor.runCommand("toggleHeading", { level: 1 })'
+  content="<h1>Heading 1</h1><h2>Heading 2</h2><h3>Heading 3</h3>"
+  commands={[
+    { label: 'H1', command: 'toggleHeading', args: { level: 1 }, isActive: ['heading', { level: 1 }] },
+    { label: 'H2', command: 'toggleHeading', args: { level: 2 }, isActive: ['heading', { level: 2 }] },
+    { label: 'H3', command: 'toggleHeading', args: { level: 3 }, isActive: ['heading', { level: 3 }] },
+  ]}
+  fullCode={`import React from "react";
+import { useArkpadEditor, ArkpadEditorContent, ArkpadProvider, EditorButton } from "@arkpad/react";
+import { Engine } from "@arkpad/core";
+import { Heading } from "@arkpad/extension-heading";
+
+const extensions = [Engine, Heading];
+const content = "<h1>Heading 1</h1><h2>Heading 2</h2><h3>Heading 3</h3>";
+
+export default function HeadingDemo() {
+  const editor = useArkpadEditor({ extensions, content });
+
+  return (
+    <ArkpadProvider editor={editor}>
+      <div className="flex flex-col border rounded-lg overflow-hidden">
+        <div className="flex items-center gap-1 bg-fd-secondary p-1 border-b">
+          {[1, 2, 3, 4, 5, 6].map((level) => (
+            <EditorButton
+              key={level}
+              command="toggleHeading"
+              args={{ level }}
+              name="heading"
+              attrs={{ level }}
+              className="px-3 py-1.5 rounded hover:bg-fd-accent"
+              activeClassName="active"
+            >
+              H{level}
+            </EditorButton>
+          ))}
+        </div>
+        <div className="p-8">
+          <ArkpadEditorContent editor={editor} className="prose max-w-none" />
+        </div>
+      </div>
+    </ArkpadProvider>
+  );
+}`}
 />
