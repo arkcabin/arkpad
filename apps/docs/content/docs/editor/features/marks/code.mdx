@@ -29,7 +29,6 @@ const isActive = editor.isActive("code");
 
 <FeatureDemo
   feature="code"
-  content="<p>Try the <code>code</code> feature here</p>"
-  commands={[{ label: "<>", command: "toggleCode", isActive: "code" }]}
-  code='editor.runCommand("toggleCode")'
+  content="<p>Use <code>inline code</code> for snippets, variable names, or technical terms within a sentence.</p>"
+  commands={[{ label: "Code", command: "toggleCode", isActive: "code", icon: "Code" }]}
 />

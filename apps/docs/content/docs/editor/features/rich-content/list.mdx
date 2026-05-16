@@ -45,9 +45,11 @@ const isOrdered = editor.isActive("orderedList");
 
 ## Demo
 
-<FeatureDemo
-  feature="list"
-  content="<p>Try the list feature here</p>"
-  commands={[{ label: "\u2022", command: "toggleBulletList", isActive: "bulletList" }, { label: "1.", command: "toggleOrderedList", isActive: "orderedList" }]}
-  code='editor.runCommand("toggleBulletList")'
+<FeatureDemo 
+  feature="list" 
+  content="<ul><li>Bullet list item 1</li><li>Bullet list item 2</li></ul><ol><li>Ordered list item 1</li><li>Ordered list item 2</li></ol>" 
+  commands={[
+    { label: 'Bullet List', command: 'toggleBulletList', icon: 'List', isActive: 'bulletList' },
+    { label: 'Ordered List', command: 'toggleOrderedList', icon: 'ListOrdered', isActive: 'orderedList' }
+  ]} 
 />

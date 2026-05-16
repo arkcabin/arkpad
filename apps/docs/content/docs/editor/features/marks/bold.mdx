@@ -20,13 +20,13 @@ editor.runCommand("toggleBold");
 ## Active State
 
 ```ts
-const isActive = editor.isActive("strong");
+const isActive = editor.isActive("bold");
 ```
 
 ## Demo
 
-import { BoldDemo, boldCode } from "@/demos/bold-demo";
-
-<DemoViewer code={boldCode}>
-  <BoldDemo />
-</DemoViewer>
+<FeatureDemo
+  feature="bold"
+  content="<p>Arkpad provides <strong>structural governance</strong> with a seamless user experience. You can easily toggle <strong>bold</strong> text to emphasize key points.</p>"
+  commands={[{ label: "Bold", command: "toggleBold", isActive: "bold", icon: "Bold" }]}
+/>

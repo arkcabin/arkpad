@@ -25,7 +25,7 @@ const isActive = editor.isActive("subscript");
 
 <FeatureDemo
   feature="subscript"
-  content="<p>Try the <sub>subscript</sub> feature here</p>"
-  commands={[{ label: "X₂", command: "toggleSubscript", isActive: "subscript" }]}
+  content="<p>Chemical formulas like H<sub>2</sub>O use subscripts.</p>"
+  commands={[{ label: "Subscript", command: "toggleSubscript", isActive: "subscript", icon: "Subscript" }]}
   code='editor.runCommand("toggleSubscript")'
 />

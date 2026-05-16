@@ -35,7 +35,6 @@ Link.configure({
 
 <FeatureDemo
   feature="link"
-  content='<p>Try the <a href="https://example.com">link</a> feature here</p>'
-  commands={[{ label: "🔗", command: "toggleLink", isActive: "link" }]}
-  code='editor.runCommand("toggleLink", { href: "https://example.com" })'
+  content='<p>Visit the <a href="https://github.com/arkpad">Arkpad GitHub</a> to explore the source code.</p>'
+  commands={[{ label: "Link", command: "toggleLink", isActive: "link", icon: "Link" }]}
 />

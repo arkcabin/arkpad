@@ -51,9 +51,12 @@ Type `|||` followed by space for a 3-column table.
 
 ## Demo
 
-<FeatureDemo
-  feature="table"
-  content="<p>Try the table feature here</p>"
-  commands={[{ label: "\u229e", command: "insertTable", isActive: "table" }]}
-  code='editor.runCommand("insertTable", { rows: 3, cols: 3 })'
+<FeatureDemo 
+  feature="table" 
+  content="<table><tr><th>Header 1</th><th>Header 2</th></tr><tr><td>Cell 1</td><td>Cell 2</td></tr></table>" 
+  commands={[
+    { label: 'Insert Table', command: 'insertTable', icon: 'Table', isActive: 'table' },
+    { label: 'Add Row', command: 'addRowBefore', icon: 'AddRowBefore' },
+    { label: 'Delete Table', command: 'deleteTable', icon: 'DeleteTable' }
+  ]} 
 />

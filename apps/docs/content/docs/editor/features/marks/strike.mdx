@@ -29,7 +29,6 @@ const isActive = editor.isActive("strike");
 
 <FeatureDemo
   feature="strike"
-  content="<p>Try the <s>strike</s> feature here</p>"
-  commands={[{ label: "S", command: "toggleStrike", isActive: "strike" }]}
-  code='editor.runCommand("toggleStrike")'
+  content="<p>Sometimes you need to <s>strike through</s> text to show corrections or outdated information.</p>"
+  commands={[{ label: "Strike", command: "toggleStrike", isActive: "strike", icon: "Strike" }]}
 />

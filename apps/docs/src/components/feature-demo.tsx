@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo } from "react";
 import { useArkpadEditor, ArkpadEditorContent, ArkpadProvider, EditorButton } from "@arkpad/react";
 import { Engine, ArkpadExtension } from "@arkpad/core";
 import { Bold } from "@arkpad/extension-bold";
@@ -19,130 +19,187 @@ import { OrderedList } from "@arkpad/extension-ordered-list";
 import { TaskList } from "@arkpad/extension-task-list";
 import { Table } from "@arkpad/extension-table";
 import { Image } from "@arkpad/extension-image";
+import { 
+  Bold as BoldIcon, 
+  Italic as ItalicIcon, 
+  Underline as UnderlineIcon, 
+  Strikethrough as StrikeIcon,
+  Heading1, 
+  Heading2, 
+  Heading3, 
+  Quote, 
+  List, 
+  ListOrdered, 
+  CheckSquare,
+  Table as TableIcon,
+  Highlighter,
+  Code as CodeIcon,
+  Plus,
+  Trash2,
+  ChevronUp,
+  ChevronDown,
+  Layout,
+  Link as LinkIcon
+} from "lucide-react";
+import { Tab, Tabs } from "fumadocs-ui/components/tabs";
 
+// Custom Heading Icons for H4-H6 (matching lucide style)
+const Heading4 = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M4 12h8" /><path d="M4 18V6" /><path d="M12 18V6" /><path d="M17 10l3 5v2h-3" /><path d="M21 15h-4" />
+  </svg>
+);
 
+const Heading5 = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M4 12h8" /><path d="M4 18V6" /><path d="M12 18V6" /><path d="M17 13v-3h4" /><path d="M17 17a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2h-3" />
+  </svg>
+);
 
+const Heading6 = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M4 12h8" /><path d="M4 18V6" /><path d="M12 18V6" /><circle cx="19" cy="16" r="3" /><path d="M22 13a3 3 0 0 0-3-3 3 3 0 0 0-3 3" />
+  </svg>
+);
 
 const extensionMap: Record<string, ArkpadExtension[]> = {
   bold: [Engine, Bold],
   italic: [Engine, Italic],
   underline: [Engine, Underline],
   strike: [Engine, Strike],
-  code: [Engine, Code],
-  highlight: [Engine, Highlight],
-  superscript: [Engine, Superscript],
-  subscript: [Engine, Subscript],
-  link: [Engine, Link],
   heading: [Engine, Heading],
   blockquote: [Engine, Blockquote],
-  list: [Engine, BulletList, OrderedList],
-  "bullet-list": [Engine, BulletList],
-  "ordered-list": [Engine, OrderedList],
-  "task-list": [Engine, TaskList],
+  list: [Engine, BulletList, OrderedList, TaskList],
+  taskList: [Engine, TaskList],
   table: [Engine, Table],
+  highlight: [Engine, Highlight],
+  code: [Engine, Code],
+  link: [Engine, Link],
   image: [Engine, Image],
+  superscript: [Engine, Superscript],
+  subscript: [Engine, Subscript],
 };
 
-
-
-interface DemoCommand {
-  label: string;
-  command: string;
-  args?: unknown;
-  isActive?: string | [string, Record<string, unknown>];
-}
+const iconMap: Record<string, any> = {
+  Bold: BoldIcon,
+  Italic: ItalicIcon,
+  Underline: UnderlineIcon,
+  Strike: StrikeIcon,
+  Heading1,
+  Heading2,
+  Heading3,
+  Heading4,
+  Heading5,
+  Heading6,
+  Quote,
+  List,
+  ListOrdered,
+  CheckSquare,
+  Table: TableIcon,
+  Highlighter,
+  Code: CodeIcon,
+  Link: LinkIcon,
+  AddRowBefore: Plus,
+  DeleteTable: Trash2,
+  MoveRowUp: ChevronUp,
+  MoveRowDown: ChevronDown,
+};
 
 interface FeatureDemoProps {
   feature: string;
   content: string;
-  commands?: DemoCommand[];
-  code?: string;
-  fullCode?: string;
+  commands: {
+    label: string;
+    command: string;
+    icon: string;
+    args?: any;
+    isActive?: string | [string, any];
+  }[];
 }
 
-export function FeatureDemo({ feature, content, commands, code, fullCode }: FeatureDemoProps) {
-  const [view, setView] = useState<"preview" | "code">("preview");
-  const extensions = (extensionMap[feature] || [Engine]) as ArkpadExtension[];
-  const editor = useArkpadEditor({ extensions, content });
+export function FeatureDemo({ feature, content, commands }: FeatureDemoProps) {
+  const extensions = useMemo(() => (extensionMap[feature] || [Engine]) as ArkpadExtension[], [feature]);
 
-  const displayCode = fullCode || code || "";
+  const editor = useArkpadEditor({
+    extensions,
+    content,
+    autofocus: true,
+  });
+
+  const sourceCode = useMemo(() => {
+    const extNames = extensions
+      .filter((e) => e.name !== "engine")
+      .map((e) => e.name.charAt(0).toUpperCase() + e.name.slice(1))
+      .join(", ");
+
+    return `import { useArkpadEditor, ArkpadEditorContent } from '@arkpad/react';
+import { Engine } from '@arkpad/core';
+import { ${extNames} } from '@arkpad/extension-${feature}';
+
+export default function Demo() {
+  const editor = useArkpadEditor({
+    extensions: [Engine, ${extNames}],
+    content: \`${content}\`,
+  });
+
+  return <ArkpadEditorContent editor={editor} />;
+}`;
+  }, [feature, content, extensions]);
+
+  if (!editor) return null;
 
   return (
-    <div className="rounded-xl border bg-fd-card my-6 overflow-hidden not-prose shadow-sm flex flex-col">
-      <div className="flex border-b bg-fd-muted/30">
-        <button
-          onClick={() => setView("preview")}
-          className={`px-4 py-2 text-sm font-medium transition-colors ${
-            view === "preview"
-              ? "text-fd-primary border-b-2 border-fd-primary -mb-[1px]"
-              : "text-fd-muted-foreground hover:text-fd-foreground"
-          }`}
-        >
-          Preview
-        </button>
-        <button
-          onClick={() => setView("code")}
-          className={`px-4 py-2 text-sm font-medium transition-colors ${
-            view === "code"
-              ? "text-fd-primary border-b-2 border-fd-primary -mb-[1px]"
-              : "text-fd-muted-foreground hover:text-fd-foreground"
-          }`}
-        >
-          Code
-        </button>
-      </div>
+    <div className="my-8 overflow-hidden rounded-xl border border-fd-border bg-fd-card shadow-lg not-prose">
+      <Tabs items={["Preview", "Code"]}>
+        <Tab value="Preview">
+          <ArkpadProvider editor={editor}>
+            <div className="flex flex-col min-h-[400px] bg-fd-secondary/30">
+              {/* Premium Toolbar */}
+              <div className="flex items-center gap-1 p-2 border-b bg-fd-background/50 backdrop-blur-sm sticky top-0 z-10 overflow-x-auto no-scrollbar">
+                {commands.map((cmd) => {
+                  const Icon = iconMap[cmd.icon] || Layout;
+                  const activeName = Array.isArray(cmd.isActive) ? cmd.isActive[0] : cmd.isActive;
+                  const activeAttrs = Array.isArray(cmd.isActive) ? cmd.isActive[1] : undefined;
 
-      <div className="flex-1">
-        {view === "preview" ? (
-          <div className="flex flex-col w-full h-full">
-            {commands && commands.length > 0 && editor && (
-              <ArkpadProvider editor={editor}>
-                <div className="flex flex-wrap gap-1 p-2 border-b bg-fd-secondary/50">
-                  {commands.map((cmd) => {
-                    const activeName = Array.isArray(cmd.isActive) ? cmd.isActive[0] : cmd.isActive;
-                    const activeAttrs = Array.isArray(cmd.isActive) ? cmd.isActive[1] : undefined;
-                    return (
-                      <EditorButton
-                        key={cmd.label}
-                        command={cmd.command}
-                        args={cmd.args !== undefined ? [cmd.args] : undefined}
-                        name={activeName}
-                        attrs={activeAttrs}
-                        className="px-2.5 py-1 text-xs rounded-md font-medium hover:bg-fd-accent text-fd-muted-foreground [&.active]:bg-fd-primary [&.active]:text-fd-primary-foreground"
-                        activeClassName="active"
-                      >
-                        {cmd.label}
-                      </EditorButton>
-                    );
-                  })}
+                  return (
+                    <EditorButton
+                      key={cmd.label}
+                      command={cmd.command}
+                      args={cmd.args !== undefined ? [cmd.args] : undefined}
+                      name={activeName}
+                      attrs={activeAttrs}
+                      title={cmd.label}
+                      className="p-2 rounded-md transition-all hover:bg-fd-accent text-fd-muted-foreground [&.active]:bg-fd-primary/20 [&.active]:text-fd-primary [&.active]:shadow-sm disabled:opacity-30 disabled:cursor-not-allowed"
+                      activeClassName="active"
+                    >
+                      <Icon className="size-4" />
+                    </EditorButton>
+                  );
+                })}
+              </div>
+
+              {/* Canvas Viewport */}
+              <div className="flex-1 p-4 sm:p-12 flex justify-center items-start overflow-auto">
+                <div className="w-full max-w-2xl bg-fd-background border border-fd-border shadow-2xl rounded-sm min-h-[300px]">
+                  <div className="p-8 sm:p-12">
+                    <ArkpadEditorContent
+                      editor={editor}
+                      className="prose dark:prose-invert max-w-none focus:outline-none arkpad-editor"
+                    />
+                  </div>
                 </div>
-              </ArkpadProvider>
-            )}
-            <div className="p-6 md:p-10 min-h-[200px] bg-fd-background/50 flex justify-center">
-              <div className="w-full max-w-[700px] border shadow-sm rounded-lg bg-fd-background p-6">
-                {editor && (
-                  <ArkpadEditorContent
-                    editor={editor}
-                    className="prose dark:prose-invert max-w-none focus:outline-none"
-                  />
-                )}
-
               </div>
             </div>
-          </div>
-        ) : (
-          <div className="p-4 bg-fd-muted overflow-auto max-h-[600px]">
-            <pre className="text-xs font-mono whitespace-pre">
-              <code>{displayCode}</code>
+          </ArkpadProvider>
+        </Tab>
+        <Tab value="Code">
+          <div className="p-0 overflow-auto max-h-[500px]">
+            <pre className="p-4 text-sm font-mono bg-fd-secondary/50 rounded-md">
+              <code>{sourceCode}</code>
             </pre>
           </div>
-        )}
-
-      </div>
+        </Tab>
+      </Tabs>
     </div>
   );
 }
-
-
-
-

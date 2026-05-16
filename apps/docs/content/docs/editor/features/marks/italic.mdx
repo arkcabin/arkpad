@@ -3,8 +3,6 @@ title: Italic
 description: Make text italic with `toggleItalic`.
 ---
 
-
-
 Type: **Mark**
 
 Italic slants text to the right for emphasis. Renders as `<em>` in HTML output.
@@ -22,14 +20,13 @@ editor.runCommand("toggleItalic");
 ## Active State
 
 ```ts
-const isActive = editor.isActive("em");
+const isActive = editor.isActive("italic");
 ```
 
 ## Demo
 
 <FeatureDemo
   feature="italic"
-  content="<p>Try the <em>italic</em> feature here</p>"
-  commands={[{ label: "I", command: "toggleItalic", isActive: "em" }]}
-  code='editor.runCommand("toggleItalic")'
+  content="<p>Add <em>emphasis</em> to your text with the <em>italic</em> mark. Perfect for highlighting nuances or foreign phrases.</p>"
+  commands={[{ label: "Italic", command: "toggleItalic", isActive: "italic", icon: "Italic" }]}
 />

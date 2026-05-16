@@ -25,7 +25,7 @@ const isActive = editor.isActive("superscript");
 
 <FeatureDemo
   feature="superscript"
-  content="<p>Try the <sup>superscript</sup> feature here</p>"
-  commands={[{ label: "X²", command: "toggleSuperscript", isActive: "superscript" }]}
+  content="<p>Mathematical expressions like E = mc<sup>2</sup> use superscripts.</p>"
+  commands={[{ label: "Superscript", command: "toggleSuperscript", isActive: "superscript", icon: "Superscript" }]}
   code='editor.runCommand("toggleSuperscript")'
 />
