@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useInsertionEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { ArkpadEditorAPI } from "@arkpad/core";
 
 export interface ArkpadEditorContentProps {

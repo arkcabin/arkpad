@@ -207,13 +207,12 @@ export default function Demo() {
     <div className="my-12 overflow-hidden">
       <Tabs items={["Preview", "Code"]}>
         <Tab value="Preview">
-          <div className="overflow-hidden rounded-xl border border-fd-border bg-fd-background">
+          <div className="bg-fd-background">
             <ArkpadProvider editor={editor}>
               <div className="flex flex-col min-h-[400px]">
-                {/* Minimalist Toolbar */}
-                <div className="flex items-center gap-1.5 p-2.5 border-b border-fd-border sticky top-0 z-10 bg-fd-background">
+                {/* Minimalist Toolbar - Just a bottom line */}
+                <div className="flex items-center gap-1.5 py-3 border-b border-fd-border sticky top-0 z-10 bg-fd-background">
                   <div className="flex items-center gap-0.5">
-
                     {commands.map((cmd) => {
                       const Icon = iconMap[cmd.icon] || Layout;
                       const activeName = Array.isArray(cmd.isActive) ? cmd.isActive[0] : cmd.isActive;
@@ -237,16 +236,15 @@ export default function Demo() {
                   </div>
                 </div>
 
-                {/* Full-width Canvas */}
+                {/* Flat Canvas Viewport */}
                 <div className="flex-1">
                   <ArkpadEditorContent editor={editor} />
                 </div>
-
-
               </div>
             </ArkpadProvider>
           </div>
         </Tab>
+
         <Tab value="Code">
           <div className="rounded-xl border border-fd-border overflow-hidden bg-fd-background">
             <div className="p-0 overflow-auto max-h-[600px]">

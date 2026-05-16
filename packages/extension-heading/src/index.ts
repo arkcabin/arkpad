@@ -42,7 +42,6 @@ export const Heading = Node.create<HeadingOptions>({
       level: {
         default: 1,
         rendered: false,
-        // Ensure the attribute value is strictly checked as a number for active state matching
         keepOnSplit: true,
       },
     };
@@ -58,7 +57,6 @@ export const Heading = Node.create<HeadingOptions>({
   renderHTML({ node, HTMLAttributes }: { node: PMNode; HTMLAttributes: Record<string, any> }) {
     const hasLevel = this.options.levels.includes(node.attrs.level);
     const level = hasLevel ? node.attrs.level : this.options.levels[0];
-
     return [`h${level}`, { ...this.options.HTMLAttributes, ...HTMLAttributes }, 0];
   },
 
@@ -72,6 +70,7 @@ export const Heading = Node.create<HeadingOptions>({
           if (!type) return false;
 
           const level = typeof attrs.level === "string" ? parseInt(attrs.level, 10) : attrs.level;
+          if (!this.options.levels.includes(level)) return false;
 
           return setBlockType(type, { level })(state, dispatch);
         },
@@ -84,19 +83,15 @@ export const Heading = Node.create<HeadingOptions>({
           if (!type) return false;
 
           const level = typeof attrs.level === "string" ? parseInt(attrs.level, 10) : attrs.level;
+          if (!this.options.levels.includes(level)) return false;
+
           const node = $from.parent;
           const isCurrentHeading = node.type.name === "heading" && node.attrs.level === level;
 
-          if (dispatch) {
-            const tr = state.tr;
-            if (isCurrentHeading) {
-              tr.setBlockType(selection.from, selection.to, schema.nodes.paragraph!);
-            } else {
-              tr.setBlockType(selection.from, selection.to, type, { level });
-            }
-            dispatch(tr);
+          if (isCurrentHeading) {
+            return setBlockType(schema.nodes.paragraph!, {})(state, dispatch);
           }
-          return true;
+          return setBlockType(type, { level })(state, dispatch);
         },
     };
   },
@@ -109,6 +104,20 @@ export const Heading = Node.create<HeadingOptions>({
       }),
       {}
     );
+  },
+
+  addInputRules() {
+    const rules: any[] = [];
+    for (const level of this.options.levels) {
+      const hashes = "#".repeat(level);
+      rules.push({
+        find: new RegExp(`^(?:${hashes})\\s$`),
+        handler: ({ chain }: any) => {
+          chain().toggleHeading({ level }).run();
+        },
+      });
+    }
+    return rules;
   },
 });
 

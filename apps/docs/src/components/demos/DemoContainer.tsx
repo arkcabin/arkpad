@@ -19,23 +19,20 @@ export function DemoContainer({ editor, children }: DemoContainerProps) {
 
   return (
     <ArkpadProvider editor={editor}>
-      <div className="my-10 flex flex-col w-full border rounded-xl overflow-hidden bg-fd-background">
-        {/* Minimalist Toolbar */}
-        <div className="flex items-center border-b border-fd-border sticky top-0 z-10 bg-fd-background">
+      <div className="my-10 flex flex-col w-full bg-fd-background">
+        {/* Minimalist Toolbar - Just a bottom line */}
+        <div className="flex items-center py-2 border-b border-fd-border sticky top-0 z-10 bg-fd-background">
           {children}
         </div>
 
-
-        {/* Full-width Editor */}
+        {/* Flat Editor Canvas */}
         <div className="flex-1">
-          <ArkpadEditorContent
-            editor={editor}
-          />
+          <ArkpadEditorContent editor={editor} />
         </div>
       </div>
-
     </ArkpadProvider>
   );
 }
+
 
 
