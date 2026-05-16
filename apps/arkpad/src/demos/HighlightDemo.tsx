@@ -1,4 +1,5 @@
 import { Highlight } from "@arkpad/extension-highlight";
+import { Heading } from "@arkpad/extension-heading";
 import { Engine } from "@arkpad/core";
 import { useArkpadEditor, ArkpadEditorContent, ArkpadProvider, EditorButton } from "@arkpad/react";
 import { Highlighter } from "lucide-react";
@@ -6,10 +7,11 @@ import { ShowcaseLayout } from "../layouts/ShowcaseLayout";
 
 export function HighlightDemo() {
   const editor = useArkpadEditor({
-    extensions: [Engine, Highlight],
+    extensions: [Engine, Heading, Highlight],
     content:
       "<h1>Highlights</h1><p>This editor supports <mark style='background-color: #ffff00'>highlights</mark>. Try selecting text and clicking the highlighter icon or pressing Mod+Shift+H.</p>",
   });
+
 
   if (!editor) return null;
 

@@ -43,13 +43,13 @@
     "husky": "^9.1.7",
     "jiti": "^2.6.1",
     "prettier": "^3.8.3",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
     "typescript-eslint": "^8.59.0"
   },
   "overrides": {
-    "react": "$react",
-    "react-dom": "$react-dom"
+    "react": "19.2.6",
+    "react-dom": "19.2.6"
   },
   "dependencies": {
     "@radix-ui/primitive": "1.1.3",

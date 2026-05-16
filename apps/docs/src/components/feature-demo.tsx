@@ -19,6 +19,10 @@ import { OrderedList } from "@arkpad/extension-ordered-list";
 import { TaskList } from "@arkpad/extension-task-list";
 import { Table } from "@arkpad/extension-table";
 import { Image } from "@arkpad/extension-image";
+import { EraserTool } from "@arkpad/extension-eraser";
+import { HighlighterTool } from "@arkpad/extension-highlighter";
+import { AI } from "@arkpad/extension-ai";
+
 import { 
   Bold as BoldIcon, 
   Italic as ItalicIcon, 
@@ -63,6 +67,7 @@ const Heading6 = ({ className }: { className?: string }) => (
 );
 
 const extensionMap: Record<string, ArkpadExtension[]> = {
+
   bold: [Engine, Bold],
   italic: [Engine, Italic],
   underline: [Engine, Underline],
@@ -71,14 +76,18 @@ const extensionMap: Record<string, ArkpadExtension[]> = {
   blockquote: [Engine, Blockquote],
   list: [Engine, BulletList, OrderedList, TaskList],
   taskList: [Engine, TaskList],
-  table: [Engine, Table],
+  table: [Engine, Heading, Table],
   highlight: [Engine, Highlight],
   code: [Engine, Code],
-  link: [Engine, Link],
-  image: [Engine, Image],
+  link: [Engine, Heading, Link],
+  image: [Engine, Heading, Image],
   superscript: [Engine, Superscript],
   subscript: [Engine, Subscript],
+  ai: [Engine, Heading, AI],
+  "eraser-tool": [Engine, Heading, Highlight, EraserTool],
+  "highlighter-tool": [Engine, Heading, Highlight, HighlighterTool],
 };
+
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Bold: BoldIcon,
