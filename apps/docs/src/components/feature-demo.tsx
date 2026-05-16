@@ -204,57 +204,62 @@ export default function Demo() {
   if (!editor) return null;
 
   return (
-    <div className="my-8 overflow-hidden rounded-xl border border-fd-border bg-fd-card shadow-lg">
+    <div className="my-12 overflow-hidden">
       <Tabs items={["Preview", "Code"]}>
         <Tab value="Preview">
-          <ArkpadProvider editor={editor}>
-            <div className="flex flex-col min-h-[400px] bg-fd-secondary/30">
-              {/* Premium Toolbar */}
-              <div className="flex items-center gap-1 p-2 border-b bg-fd-background/50 backdrop-blur-sm sticky top-0 z-10 overflow-x-auto no-scrollbar">
-                {commands.map((cmd) => {
-                  const Icon = iconMap[cmd.icon] || Layout;
-                  const activeName = Array.isArray(cmd.isActive) ? cmd.isActive[0] : cmd.isActive;
-                  const activeAttrs = Array.isArray(cmd.isActive) ? cmd.isActive[1] : undefined;
+          <div className="overflow-hidden rounded-xl border border-fd-border bg-fd-background">
+            <ArkpadProvider editor={editor}>
+              <div className="flex flex-col min-h-[400px]">
+                {/* Minimalist Toolbar */}
+                <div className="flex items-center gap-1.5 p-2.5 border-b border-fd-border sticky top-0 z-10 bg-fd-background">
+                  <div className="flex items-center gap-0.5">
 
-                  return (
-                    <EditorButton
-                      key={cmd.label}
-                      command={cmd.command}
-                      args={cmd.args !== undefined ? [cmd.args] : undefined}
-                      name={activeName}
-                      attrs={activeAttrs}
-                      title={cmd.label}
-                      className="p-2 rounded-md transition-all hover:bg-fd-accent text-fd-muted-foreground [&.active]:bg-fd-primary/20 [&.active]:text-fd-primary [&.active]:shadow-sm disabled:opacity-30 disabled:cursor-not-allowed"
-                      activeClassName="active"
-                    >
-                      <Icon className="size-4" />
-                    </EditorButton>
-                  );
-                })}
-              </div>
+                    {commands.map((cmd) => {
+                      const Icon = iconMap[cmd.icon] || Layout;
+                      const activeName = Array.isArray(cmd.isActive) ? cmd.isActive[0] : cmd.isActive;
+                      const activeAttrs = Array.isArray(cmd.isActive) ? cmd.isActive[1] : undefined;
 
-              {/* Canvas Viewport */}
-              <div className="flex-1 p-4 sm:p-12 flex justify-center items-start overflow-auto">
-                <div className="w-full max-w-2xl bg-fd-background border border-fd-border shadow-2xl rounded-sm min-h-[300px]">
-                  <div className="p-8 sm:p-12">
-                    <ArkpadEditorContent
-                      editor={editor}
-                      className="prose dark:prose-invert max-w-none focus:outline-none arkpad-editor"
-                    />
+                      return (
+                        <EditorButton
+                          key={cmd.label}
+                          command={cmd.command}
+                          args={cmd.args !== undefined ? [cmd.args] : undefined}
+                          name={activeName}
+                          attrs={activeAttrs}
+                          title={cmd.label}
+                          className="p-2 rounded-md transition-all hover:bg-fd-secondary text-fd-muted-foreground [&.active]:bg-fd-primary/10 [&.active]:text-fd-primary disabled:opacity-30 disabled:cursor-not-allowed"
+                          activeClassName="active"
+                        >
+                          <Icon className="size-4" />
+                        </EditorButton>
+                      );
+                    })}
                   </div>
                 </div>
+
+                {/* Full-width Canvas */}
+                <div className="flex-1">
+                  <ArkpadEditorContent editor={editor} />
+                </div>
+
+
               </div>
-            </div>
-          </ArkpadProvider>
+            </ArkpadProvider>
+          </div>
         </Tab>
         <Tab value="Code">
-          <div className="p-0 overflow-auto max-h-[500px]">
-            <pre className="p-4 text-sm font-mono bg-fd-secondary/50 rounded-md">
-              <code>{sourceCode}</code>
-            </pre>
+          <div className="rounded-xl border border-fd-border overflow-hidden bg-fd-background">
+            <div className="p-0 overflow-auto max-h-[600px]">
+              <pre className="p-6 text-[13px] leading-relaxed font-mono text-fd-foreground/70">
+                <code>{sourceCode}</code>
+              </pre>
+            </div>
           </div>
         </Tab>
       </Tabs>
     </div>
   );
 }
+
+
+

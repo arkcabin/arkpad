@@ -19,17 +19,23 @@ export function DemoContainer({ editor, children }: DemoContainerProps) {
 
   return (
     <ArkpadProvider editor={editor}>
-      <div className="flex flex-col w-full border rounded-xl overflow-hidden bg-fd-background shadow-sm transition-all duration-300 hover:shadow-md border-fd-border/50">
-        <div className="flex items-center gap-1.5 p-2.5 border-b bg-fd-secondary/20 border-fd-border/50">
+      <div className="my-10 flex flex-col w-full border rounded-xl overflow-hidden bg-fd-background">
+        {/* Minimalist Toolbar */}
+        <div className="flex items-center border-b border-fd-border sticky top-0 z-10 bg-fd-background">
           {children}
         </div>
-        <div className="p-8 min-h-[180px] bg-fd-card/10">
-          <ArkpadEditorContent 
-            editor={editor} 
-            className="prose dark:prose-invert max-w-none focus:outline-none arkpad-container" 
+
+
+        {/* Full-width Editor */}
+        <div className="flex-1">
+          <ArkpadEditorContent
+            editor={editor}
           />
         </div>
       </div>
+
     </ArkpadProvider>
   );
 }
+
+

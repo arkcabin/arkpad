@@ -3,7 +3,9 @@
 @import "./tokens.css";
 
 /* Base Elements */
+@import "./headings.css";
 @import "./list.css";
+
 @import "./blockquote.css";
 @import "./code-block.css";
 
@@ -19,3 +21,21 @@
 
 /* Placeholder */
 @import "./placeholder.css";
+
+/* --- Core Editor Styling --- */
+.arkpad-content-area {
+    display: block;
+    width: 100%;
+}
+
+/* Standard Editor Canvas */
+.arkpad-editor-canvas {
+    padding: 1rem 2rem;
+    /* Default p-8 sm:p-12 equivalent */
+}
+
+/* Remove default ProseMirror focus outline */
+.ProseMirror {
+    outline: none !important;
+    min-height: inherit;
+}
