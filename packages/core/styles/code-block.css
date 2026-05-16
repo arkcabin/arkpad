@@ -1,24 +1,23 @@
 /* Code Block Styles - Scoped to Arkpad Content Area */
-.arkpad-content-area {
-  & pre {
-    background: var(--ark-border);
-    color: var(--ark-text);
-    font-family: 'JetBrains Mono', monospace;
-    padding: 0.75rem 1rem;
-    border-radius: 0.5rem;
-    margin: 1.5rem 0;
-    overflow-x: auto;
+.arkpad-content-area pre {
+  background: var(--ark-border);
+  color: var(--ark-text);
+  font-family: "JetBrains Mono", monospace;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  margin: 1.5rem 0;
+  overflow-x: auto;
+}
 
-    & code {
-      color: inherit;
-      padding: 0;
-      background: none;
-      font-size: 0.8rem;
-    }
-  }
+.arkpad-content-area pre code {
+  color: inherit;
+  padding: 0;
+  background: none;
+  font-size: 0.8rem;
+}
 
-  /* Dark Mode Adjustments (Scoped) */
-  &.dark pre, .dark & pre {
-    background: rgba(255, 255, 255, 0.05);
-  }
+/* Dark Mode Adjustments (Scoped) */
+.arkpad-content-area.dark pre,
+.dark .arkpad-content-area pre {
+  background: rgba(255, 255, 255, 0.05);
 }

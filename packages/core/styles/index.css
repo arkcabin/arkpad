@@ -20,29 +20,34 @@
 
 /* 4. Strictly Scoped Core Logic & Library Styles */
 .arkpad-content-area {
-    /* ProseMirror Core Styles - Isolated to our namespace */
-    & .ProseMirror {
-        @import "prosemirror-view/style/prosemirror.css";
-        outline: none !important;
-        min-height: inherit;
-        color: inherit;
-        font-family: inherit;
-    }
+  /* ProseMirror Core Styles - Isolated to our namespace */
+  & .ProseMirror {
+    /* Handled by direct injection or top-level import to avoid leak */
+    outline: none !important;
+    min-height: inherit;
+    color: inherit;
+    font-family: inherit;
+  }
 
-    display: block;
-    width: 100%;
+  display: block;
+  width: 100%;
 
-    & .arkpad-editor-canvas {
-        padding: 1rem 2rem;
-    }
+  & .arkpad-editor-canvas {
+    padding: 1rem 2rem;
+  }
 
-    /* Scrollbar Utilities */
-    & .no-scrollbar::-webkit-scrollbar { display: none; }
-    & .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  /* Scrollbar Utilities */
+  & .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  & .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 
-    /* Code Wrapping Utility */
-    & .arkpad-code-pre {
-        white-space: pre-wrap;
-        word-break: break-all;
-    }
+  /* Code Wrapping Utility */
+  & .arkpad-code-pre {
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
 }

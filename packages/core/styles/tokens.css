@@ -1,5 +1,5 @@
-/* Arkpad Design Tokens */
-:root {
+/* Arkpad Design Tokens - Scoped to Editor Container */
+[data-arkpad-content] {
   /* Colors */
   --ark-primary: #7c3aed; /* Notion-like Purple */
   --ark-border: #eeeeee;
@@ -23,8 +23,9 @@
   --ark-table-margin-bottom: 1.5rem;
 }
 
-/* Dark Mode Tokens */
-.dark {
+/* Dark Mode Tokens - Scoped to Editor Only */
+[data-arkpad-content].dark,
+.dark [data-arkpad-content] {
   --ark-border: #222222;
   --ark-text: #ffffff;
   --ark-text-muted: #888888;

@@ -41,7 +41,7 @@ export function YouTubeDemo() {
         <div className="p-6 min-h-[150px]">
           <ArkpadEditorContent
             editor={editor}
-            className="prose dark:prose-invert focus:outline-none max-w-none"
+            className="arkpad-content-area focus:outline-none max-w-none"
           />
         </div>
         <div className="px-6 pb-4 text-xs text-fd-muted-foreground">

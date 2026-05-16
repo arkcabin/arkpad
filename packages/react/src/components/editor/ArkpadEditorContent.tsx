@@ -13,7 +13,7 @@ export function ArkpadEditorContent({ editor, className }: ArkpadEditorContentPr
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Use standardized Arkpad styling classes
-  const combinedClassName = className || "prose dark:prose-invert max-w-none arkpad-content-area arkpad-editor-canvas";
+  const combinedClassName = className || "max-w-none arkpad-content-area arkpad-editor-canvas";
 
   useEffect(() => {
     if (!editor || !containerRef.current) return;
@@ -27,13 +27,5 @@ export function ArkpadEditorContent({ editor, className }: ArkpadEditorContentPr
     }
   }, [editor]);
 
-  return (
-    <div
-      ref={containerRef}
-      className={combinedClassName}
-      data-arkpad-content
-    />
-  );
+  return <div ref={containerRef} className={combinedClassName} data-arkpad-content />;
 }
-
-

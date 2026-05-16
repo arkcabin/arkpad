@@ -1,40 +1,48 @@
-/* Task List Styles */
-.prose ul[data-type="taskList"] {
+.arkpad-content-area ul[data-type="taskList"] {
   list-style: none;
   padding: 0;
   margin: 1.5rem 0;
+}
 
-  & li[data-type="taskItem"] {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.75rem;
-    margin-bottom: 0.5rem;
+.arkpad-content-area ul[data-type="taskList"] li[data-type="taskItem"] {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
 
-    /* React NodeView container */
-    & > [data-react-container] {
-      flex-shrink: 0;
-      margin-top: 0.25rem;
-    }
+.arkpad-content-area ul[data-type="taskList"] li[data-type="taskItem"] > [data-react-container] {
+  flex-shrink: 0;
+  margin-top: 0.25rem;
+}
 
-    /* Content container */
-    & > [data-node-view-content] {
-      flex: 1;
-      min-width: 0;
+.arkpad-content-area ul[data-type="taskList"] li[data-type="taskItem"] > [data-node-view-content] {
+  flex: 1;
+  min-width: 0;
+}
 
-      & > p {
-        margin: 0;
-      }
-    }
+.arkpad-content-area
+  ul[data-type="taskList"]
+  li[data-type="taskItem"]
+  > [data-node-view-content]
+  > p {
+  margin: 0;
+}
 
-    &[data-checked="true"] > [data-node-view-content] {
-      text-decoration: line-through;
-      opacity: 0.5;
-    }
-  }
+.arkpad-content-area
+  ul[data-type="taskList"]
+  li[data-type="taskItem"][data-checked="true"]
+  > [data-node-view-content] {
+  text-decoration: line-through;
+  opacity: 0.5;
 }
 
 .dark
-  .prose
+  .arkpad-content-area
+  ul[data-type="taskList"]
+  li[data-type="taskItem"][data-checked="true"]
+  > [data-node-view-content],
+.arkpad-content-area.dark
   ul[data-type="taskList"]
   li[data-type="taskItem"][data-checked="true"]
   > [data-node-view-content] {

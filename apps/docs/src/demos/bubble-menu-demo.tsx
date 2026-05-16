@@ -48,7 +48,7 @@ export function BubbleMenuDemo() {
         <div className="p-6 min-h-[200px]">
           <ArkpadEditorContent
             editor={editor}
-            className="prose dark:prose-invert focus:outline-none max-w-none"
+            className="arkpad-content-area focus:outline-none max-w-none"
           />
         </div>
         <BubbleMenu editor={editor} defaultToolbar />

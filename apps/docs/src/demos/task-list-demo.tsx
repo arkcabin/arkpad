@@ -37,7 +37,7 @@ export function TaskListDemo() {
         <div className="p-6 min-h-[150px]">
           <ArkpadEditorContent
             editor={editor}
-            className="prose dark:prose-invert focus:outline-none max-w-none"
+            className="arkpad-content-area focus:outline-none max-w-none"
           />
         </div>
       </div>

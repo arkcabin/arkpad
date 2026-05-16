@@ -1,4 +1,4 @@
-.ark-ghost-text {
+.arkpad-content-area .ark-ghost-text {
   color: var(--ark-color-text-muted, #94a3b8);
   opacity: 0.6;
   font-style: italic;
@@ -7,7 +7,6 @@
   white-space: pre;
 }
 
-/* Ensure ghost text doesn't interfere with line height */
-.ark-ghost-text::before {
+.arkpad-content-area .ark-ghost-text::before {
   content: "";
 }

@@ -1,6 +1,4 @@
-/* UI Blocks - Page Builder Elements */
-
-.ark-button {
+[data-arkpad-content] .ark-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -15,18 +13,18 @@
   border: none;
 }
 
-.ark-button:hover {
+[data-arkpad-content] .ark-button:hover {
   background: #2563eb;
   transform: translateY(-1px);
 }
 
-.ark-button.ark-button-secondary {
+[data-arkpad-content] .ark-button.ark-button-secondary {
   background: transparent;
   color: #3b82f6;
   border: 2px solid #3b82f6;
 }
 
-.ark-card {
+[data-arkpad-content] .ark-card {
   background: white;
   border: 1px solid #e5e7eb;
   border-radius: 12px;
@@ -34,14 +32,14 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.ark-card-title {
+[data-arkpad-content] .ark-card-title {
   font-size: 18px;
   font-weight: 600;
   margin-bottom: 8px;
   color: #111827;
 }
 
-.ark-spacer {
+[data-arkpad-content] .ark-spacer {
   width: 100%;
   background: repeating-linear-gradient(
     45deg,
@@ -53,35 +51,35 @@
   opacity: 0.5;
 }
 
-.ark-divider {
+[data-arkpad-content] .ark-divider {
   border: none;
   border-top: 1px solid #e5e7eb;
   margin: 16px 0;
 }
 
-.ark-container {
+[data-arkpad-content] .ark-container {
   width: 100%;
   margin: 0 auto;
 }
 
-.ark-grid {
+[data-arkpad-content] .ark-grid {
   display: grid;
   width: 100%;
 }
 
-.ark-video {
+[data-arkpad-content] .ark-video {
   width: 100%;
   border-radius: 8px;
   background: #000;
 }
 
-.ark-icon {
+[data-arkpad-content] .ark-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 
-.ark-badge {
+[data-arkpad-content] .ark-badge {
   display: inline-flex;
   align-items: center;
   padding: 4px 12px;
@@ -92,62 +90,62 @@
   color: #374151;
 }
 
-.ark-badge.ark-badge-success {
+[data-arkpad-content] .ark-badge.ark-badge-success {
   background: #d1fae5;
   color: #065f46;
 }
 
-.ark-badge.ark-badge-warning {
+[data-arkpad-content] .ark-badge.ark-badge-warning {
   background: #fef3c7;
   color: #92400e;
 }
 
-.ark-badge.ark-badge-error {
+[data-arkpad-content] .ark-badge.ark-badge-error {
   background: #fee2e2;
   color: #991b1b;
 }
 
-.ark-alert {
+[data-arkpad-content] .ark-alert {
   padding: 16px;
   border-radius: 8px;
   border: 1px solid;
 }
 
-.ark-alert-info {
+[data-arkpad-content] .ark-alert-info {
   background: #eff6ff;
   border-color: #bfdbfe;
   color: #1e40af;
 }
 
-.ark-alert-success {
+[data-arkpad-content] .ark-alert-success {
   background: #ecfdf5;
   border-color: #a7f3d0;
   color: #065f46;
 }
 
-.ark-alert-warning {
+[data-arkpad-content] .ark-alert-warning {
   background: #fffbeb;
   border-color: #fde68a;
   color: #92400e;
 }
 
-.ark-alert-error {
+[data-arkpad-content] .ark-alert-error {
   background: #fef2f2;
   border-color: #fecaca;
   color: #991b1b;
 }
 
-.ark-tabs {
+[data-arkpad-content] .ark-tabs {
   width: 100%;
 }
 
-.ark-tabs-header {
+[data-arkpad-content] .ark-tabs-header {
   display: flex;
   border-bottom: 1px solid #e5e7eb;
   gap: 8px;
 }
 
-.ark-tab {
+[data-arkpad-content] .ark-tab {
   padding: 12px 24px;
   cursor: pointer;
   border: none;
@@ -159,27 +157,27 @@
   transition: all 0.2s;
 }
 
-.ark-tab:hover {
+[data-arkpad-content] .ark-tab:hover {
   color: #111827;
 }
 
-.ark-tab.ark-tab-active {
+[data-arkpad-content] .ark-tab.ark-tab-active {
   color: #3b82f6;
   border-bottom-color: #3b82f6;
 }
 
-.ark-accordion {
+[data-arkpad-content] .ark-accordion {
   width: 100%;
 }
 
-.ark-accordion-item {
+[data-arkpad-content] .ark-accordion-item {
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   margin-bottom: 8px;
   overflow: hidden;
 }
 
-.ark-accordion-header {
+[data-arkpad-content] .ark-accordion-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -188,18 +186,16 @@
   background: #f9fafb;
 }
 
-.ark-accordion-content {
+[data-arkpad-content] .ark-accordion-content {
   padding: 16px;
 }
 
-/* Block Selection Styles */
-.ark-block-selected {
+[data-arkpad-content] .ark-block-selected {
   outline: 2px solid #3b82f6;
   outline-offset: 2px;
 }
 
-/* Block Drag Handle */
-.ark-block-drag-handle {
+[data-arkpad-content] .ark-block-drag-handle {
   position: absolute;
   left: -24px;
   top: 50%;
@@ -214,10 +210,10 @@
   transition: opacity 0.2s;
 }
 
-.ark-block:hover .ark-block-drag-handle {
+[data-arkpad-content] .ark-block:hover .ark-block-drag-handle {
   opacity: 1;
 }
 
-.ark-block-drag-handle:active {
+[data-arkpad-content] .ark-block-drag-handle:active {
   cursor: grabbing;
 }

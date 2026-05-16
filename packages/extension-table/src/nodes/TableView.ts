@@ -21,7 +21,7 @@ export class TableView implements NodeView {
     this.cellMinWidth = cellMinWidth;
 
     this.dom = document.createElement("div");
-    this.dom.className = "tableWrapper";
+    this.dom.className = "ark-table-wrapper";
 
     this.table = this.dom.appendChild(document.createElement("table"));
     this.table.className = "ark-table";

@@ -1,4 +1,4 @@
-.ark-placeholder {
+.arkpad-content-area .ark-placeholder {
   color: var(--text-muted, #adb5bd);
   opacity: 0.6;
   pointer-events: none;
