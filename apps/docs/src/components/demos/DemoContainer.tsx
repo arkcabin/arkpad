@@ -19,11 +19,12 @@ export function DemoContainer({ editor, children }: DemoContainerProps) {
 
   return (
     <ArkpadProvider editor={editor}>
-      <div className="my-10 flex flex-col w-full bg-fd-background">
-        {/* Minimalist Toolbar - Just a bottom line */}
-        <div className="flex items-center py-2 border-b border-fd-border sticky top-0 z-10 bg-fd-background">
+      <div className="my-10 flex flex-col w-full bg-fd-background -mx-6 sm:-mx-8">
+        {/* Minimalist Edge-to-Edge Toolbar */}
+        <div className="flex items-center px-6 sm:px-8 py-1.5 border-b border-fd-border sticky top-0 z-10 bg-fd-background">
           {children}
         </div>
+
 
         {/* Flat Editor Canvas */}
         <div className="flex-1">

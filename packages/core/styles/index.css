@@ -1,41 +1,48 @@
-/* Arkpad Core Extension Styles */
-@import "prosemirror-view/style/prosemirror.css";
+/* Arkpad Core Editor Styling - Production Isolation */
+
+/* 1. Global Tokens (Safe - Namespace Prefixed) */
 @import "./tokens.css";
 
-/* Base Elements */
+/* 2. Self-Scoped Base Elements (Safe to import at top level) */
 @import "./headings.css";
 @import "./list.css";
-
 @import "./blockquote.css";
 @import "./code-block.css";
 
-/* Advanced Extensions */
+/* 3. Self-Scoped Extensions */
 @import "./table.css";
 @import "./table-grips.css";
 @import "./task-list.css";
 @import "./ghost-text.css";
 @import "./block-handle.css";
-
-/* UI Blocks - Page Builder */
 @import "./ui-blocks.css";
-
-/* Placeholder */
 @import "./placeholder.css";
 
-/* --- Core Editor Styling --- */
+/* 4. Strictly Scoped Core Logic & Library Styles */
 .arkpad-content-area {
+    /* ProseMirror Core Styles - Isolated to our namespace */
+    & .ProseMirror {
+        @import "prosemirror-view/style/prosemirror.css";
+        outline: none !important;
+        min-height: inherit;
+        color: inherit;
+        font-family: inherit;
+    }
+
     display: block;
     width: 100%;
-}
 
-/* Standard Editor Canvas */
-.arkpad-editor-canvas {
-    padding: 1rem 2rem;
-    /* Default p-8 sm:p-12 equivalent */
-}
+    & .arkpad-editor-canvas {
+        padding: 1rem 2rem;
+    }
 
-/* Remove default ProseMirror focus outline */
-.ProseMirror {
-    outline: none !important;
-    min-height: inherit;
+    /* Scrollbar Utilities */
+    & .no-scrollbar::-webkit-scrollbar { display: none; }
+    & .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Code Wrapping Utility */
+    & .arkpad-code-pre {
+        white-space: pre-wrap;
+        word-break: break-all;
+    }
 }

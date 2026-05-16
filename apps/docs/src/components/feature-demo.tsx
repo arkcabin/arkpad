@@ -160,6 +160,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 interface FeatureDemoProps {
   feature: string;
   content: string;
+  fullCode?: string;
   commands: {
     label: string;
     command: string;
@@ -169,7 +170,7 @@ interface FeatureDemoProps {
   }[];
 }
 
-export function FeatureDemo({ feature, content, commands }: FeatureDemoProps) {
+export function FeatureDemo({ feature, content, fullCode, commands }: FeatureDemoProps) {
   const extensions = useMemo(
     () => (extensionMap[feature] || [Engine]) as ArkpadExtension[],
     [feature]
@@ -182,6 +183,8 @@ export function FeatureDemo({ feature, content, commands }: FeatureDemoProps) {
   });
 
   const sourceCode = useMemo(() => {
+    if (fullCode) return fullCode;
+
     const extNames = extensions
       .filter((e) => e.name !== "engine")
       .map((e) => e.name.charAt(0).toUpperCase() + e.name.slice(1))
@@ -199,41 +202,41 @@ export default function Demo() {
 
   return <ArkpadEditorContent editor={editor} />;
 }`;
-  }, [feature, content, extensions]);
+  }, [feature, content, extensions, fullCode]);
 
   if (!editor) return null;
 
   return (
-    <div className="my-12 overflow-hidden">
+    <div className="my-12">
       <Tabs items={["Preview", "Code"]}>
         <Tab value="Preview">
-          <div className="bg-fd-background">
+          <div className="bg-fd-background -mx-6 sm:-mx-8">
+            {" "}
+            {/* Negative margin to go full width of tab pane */}
             <ArkpadProvider editor={editor}>
               <div className="flex flex-col min-h-[400px]">
-                {/* Minimalist Toolbar - Just a bottom line */}
-                <div className="flex items-center gap-1.5 py-3 border-b border-fd-border sticky top-0 z-10 bg-fd-background">
-                  <div className="flex items-center gap-0.5">
-                    {commands.map((cmd) => {
-                      const Icon = iconMap[cmd.icon] || Layout;
-                      const activeName = Array.isArray(cmd.isActive) ? cmd.isActive[0] : cmd.isActive;
-                      const activeAttrs = Array.isArray(cmd.isActive) ? cmd.isActive[1] : undefined;
+                {/* Minimalist Edge-to-Edge Toolbar */}
+                <div className="flex items-center gap-0.5 px-6 sm:px-8 py-2 border-b border-fd-border sticky top-0 z-10 bg-fd-background">
+                  {commands.map((cmd) => {
+                    const Icon = iconMap[cmd.icon] || Layout;
+                    const activeName = Array.isArray(cmd.isActive) ? cmd.isActive[0] : cmd.isActive;
+                    const activeAttrs = Array.isArray(cmd.isActive) ? cmd.isActive[1] : undefined;
 
-                      return (
-                        <EditorButton
-                          key={cmd.label}
-                          command={cmd.command}
-                          args={cmd.args !== undefined ? [cmd.args] : undefined}
-                          name={activeName}
-                          attrs={activeAttrs}
-                          title={cmd.label}
-                          className="p-2 rounded-md transition-all hover:bg-fd-secondary text-fd-muted-foreground [&.active]:bg-fd-primary/10 [&.active]:text-fd-primary disabled:opacity-30 disabled:cursor-not-allowed"
-                          activeClassName="active"
-                        >
-                          <Icon className="size-4" />
-                        </EditorButton>
-                      );
-                    })}
-                  </div>
+                    return (
+                      <EditorButton
+                        key={cmd.label}
+                        command={cmd.command}
+                        args={cmd.args !== undefined ? [cmd.args] : undefined}
+                        name={activeName}
+                        attrs={activeAttrs}
+                        title={cmd.label}
+                        className="p-1.5 rounded-md transition-all hover:bg-fd-secondary text-fd-muted-foreground [&.active]:bg-fd-primary/10 [&.active]:text-fd-primary disabled:opacity-30 disabled:cursor-not-allowed"
+                        activeClassName="active"
+                      >
+                        <Icon className="size-4" />
+                      </EditorButton>
+                    );
+                  })}
                 </div>
 
                 {/* Flat Canvas Viewport */}
@@ -246,18 +249,31 @@ export default function Demo() {
         </Tab>
 
         <Tab value="Code">
-          <div className="rounded-xl border border-fd-border overflow-hidden bg-fd-background">
-            <div className="p-0 overflow-auto max-h-[600px]">
-              <pre className="p-6 text-[13px] leading-relaxed font-mono text-fd-foreground/70">
-                <code>{sourceCode}</code>
-              </pre>
-            </div>
-          </div>
+          <pre className="overflow-x-auto p-4 text-sm leading-relaxed whitespace-pre-wrap break-words font-mono bg-fd-background border rounded-lg relative text-fd-foreground">
+            <button
+              onClick={() => navigator.clipboard.writeText(sourceCode)}
+              className="absolute top-2 right-2 p-1.5 rounded-md hover:bg-fd-accent text-fd-muted-foreground transition-colors"
+              aria-label="Copy code"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <rect width="8" height="4" x="8" y="2" rx="1" ry="1" />
+                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+              </svg>
+            </button>
+            <code className="text-fd-foreground">{sourceCode}</code>
+          </pre>
         </Tab>
       </Tabs>
     </div>
   );
 }
-
-
-

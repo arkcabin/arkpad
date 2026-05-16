@@ -46,6 +46,7 @@ bash ${SKILL_DIR}/scripts/setup-token.sh fill
 ```
 
 Status codes:
+
 - `FORM_READY:<username>` — form is filled in Chrome, proceed to tell user
 - `NOT_LOGGED_IN` — tell user: "Sign in to npmjs.com in Chrome, then I'll retry"
 - `FORM_NOT_FOUND` — tell user: "Could not find the token form. The page may have changed."
@@ -63,6 +64,7 @@ bash ${SKILL_DIR}/scripts/setup-token.sh capture
 This polls until the token appears on the page, clicks the Copy button, reads from clipboard, writes to `~/.npmrc`, and clears clipboard. The token never appears in terminal output.
 
 Status codes:
+
 - `TOKEN_SAVED` — success, retry publish
 - `CAPTURE_TIMEOUT` — tell user: "Could not capture token. Copy it from Chrome and I'll write it to ~/.npmrc"
 

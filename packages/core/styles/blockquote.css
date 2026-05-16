@@ -1,12 +1,14 @@
-/* Blockquote Styles */
-.prose blockquote {
-  padding-left: 1rem;
-  border-left: 3px solid var(--ark-border);
-  font-style: italic;
-  color: var(--ark-text-muted);
-  margin: 1.5rem 0;
+/* Blockquote Styles - Scoped to Arkpad Content Area */
+.arkpad-content-area {
+  & blockquote {
+    padding-left: 1rem;
+    border-left: 3px solid var(--ark-border);
+    font-style: italic;
+    color: var(--ark-text-muted);
+    margin: 1.5rem 0;
 
-  & p {
-    margin: 0;
+    & p {
+      margin: 0;
+    }
   }
 }

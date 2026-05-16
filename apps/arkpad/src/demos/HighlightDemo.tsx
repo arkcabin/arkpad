@@ -12,7 +12,6 @@ export function HighlightDemo() {
       "<h1>Highlights</h1><p>This editor supports <mark style='background-color: #ffff00'>highlights</mark>. Try selecting text and clicking the highlighter icon or pressing Mod+Shift+H.</p>",
   });
 
-
   if (!editor) return null;
 
   return (

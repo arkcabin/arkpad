@@ -85,23 +85,23 @@ jobs:
 
           # 2. Bump versions locally based on changesets
           npx changeset version
-          
+
           # 2. Commit and push version bumps back to main (if any)
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          
+
           if [[ -n "$(git status --porcelain)" ]]; then
             git add .
             git commit -m "release: version packages [skip ci]"
             git push
           fi
-          
+
       - name: Publish to NPM
         run: |
           # Use native NPM workspaces publishing with explicit registry and provenance
           # We use --if-present and we'll let npm handle the version check
           # To avoid errors on existing versions, we can wrap it in a check
-          
+
           # Only attempt to publish if the version is NOT on npm yet
           for pkg_dir in packages/*; do
             if [ -d "$pkg_dir" ] && [ -f "$pkg_dir/package.json" ]; then
@@ -116,11 +116,11 @@ jobs:
               fi
             fi
           done
-          
+
           # Create and push git tags (only if they don't exist)
           npx changeset tag || echo "Tags already exist"
           git push --tags || echo "Tags already synced"
-          
+
           # Convert the new tags into official GitHub Releases
           for tag in $(git tag --points-at HEAD); do
             gh release create "$tag" --title "$tag" --generate-notes || echo "Release for $tag already exists"

@@ -1,5 +1,5 @@
-/* Heading Styles */
-.prose {
+/* Heading Styles - Scoped to Arkpad Content Area */
+.arkpad-content-area {
   & h1 {
     font-size: 2.875rem;
     font-weight: 800;

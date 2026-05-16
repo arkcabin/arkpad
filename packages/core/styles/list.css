@@ -1,5 +1,5 @@
-/* List Styles (Bullet & Ordered) */
-.prose {
+/* List Styles (Bullet & Ordered) - Scoped to Arkpad Content Area */
+.arkpad-content-area {
   & ul,
   & ol {
     padding: 0 1rem;
