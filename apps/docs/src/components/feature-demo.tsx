@@ -1,7 +1,8 @@
 "use client";
 
+import React, { useState } from "react";
 import { useArkpadEditor, ArkpadEditorContent, ArkpadProvider, EditorButton } from "@arkpad/react";
-import { Engine } from "@arkpad/core";
+import { Engine, ArkpadExtension } from "@arkpad/core";
 import { Bold } from "@arkpad/extension-bold";
 import { Italic } from "@arkpad/extension-italic";
 import { Underline } from "@arkpad/extension-underline";
@@ -13,24 +14,16 @@ import { Subscript } from "@arkpad/extension-subscript";
 import { Link } from "@arkpad/extension-link";
 import { Heading } from "@arkpad/extension-heading";
 import { Blockquote } from "@arkpad/extension-blockquote";
-import { CodeBlock } from "@arkpad/extension-code-block";
-import { HorizontalRule } from "@arkpad/extension-horizontal-rule";
 import { BulletList } from "@arkpad/extension-bullet-list";
 import { OrderedList } from "@arkpad/extension-ordered-list";
 import { TaskList } from "@arkpad/extension-task-list";
 import { Table } from "@arkpad/extension-table";
 import { Image } from "@arkpad/extension-image";
-import { BubbleMenu } from "@arkpad/extension-bubble-menu";
-import { FloatingMenu } from "@arkpad/extension-floating-menu";
-import { Placeholder } from "@arkpad/extension-placeholder";
-import { Color } from "@arkpad/extension-color";
-import { FontFamily } from "@arkpad/extension-font-family";
-import { FontSize } from "@arkpad/extension-font-size";
-import { Typography } from "@arkpad/extension-typography";
-import { EraserTool } from "@arkpad/extension-eraser";
-import { HighlighterTool } from "@arkpad/extension-highlighter";
 
-const extensionMap: Record<string, unknown[]> = {
+
+
+
+const extensionMap: Record<string, ArkpadExtension[]> = {
   bold: [Engine, Bold],
   italic: [Engine, Italic],
   underline: [Engine, Underline],
@@ -42,28 +35,15 @@ const extensionMap: Record<string, unknown[]> = {
   link: [Engine, Link],
   heading: [Engine, Heading],
   blockquote: [Engine, Blockquote],
-  "code-block": [Engine, CodeBlock],
-  "horizontal-rule": [Engine, HorizontalRule],
+  list: [Engine, BulletList, OrderedList],
   "bullet-list": [Engine, BulletList],
   "ordered-list": [Engine, OrderedList],
   "task-list": [Engine, TaskList],
   table: [Engine, Table],
   image: [Engine, Image],
-  "bubble-menu": [Engine, BubbleMenu],
-  "floating-menu": [Engine, FloatingMenu],
-  placeholder: [Engine, Placeholder],
-  color: [Engine, Color],
-  "font-family": [Engine, FontFamily],
-  "font-size": [Engine, FontSize],
-  list: [Engine, BulletList, OrderedList],
-  typography: [Engine, Typography],
-  "text-alignment": [Engine],
-  "eraser-tool": [Engine, EraserTool],
-  "highlighter-tool": [Engine, HighlighterTool],
-  markdown: [Engine],
-  ai: [Engine],
-  youtube: [Engine],
 };
+
+
 
 interface DemoCommand {
   label: string;
@@ -77,50 +57,92 @@ interface FeatureDemoProps {
   content: string;
   commands?: DemoCommand[];
   code?: string;
+  fullCode?: string;
 }
 
-export function FeatureDemo({ feature, content, commands, code }: FeatureDemoProps) {
-  const extensions = (extensionMap[feature] || [Engine]) as unknown[];
+export function FeatureDemo({ feature, content, commands, code, fullCode }: FeatureDemoProps) {
+  const [view, setView] = useState<"preview" | "code">("preview");
+  const extensions = (extensionMap[feature] || [Engine]) as ArkpadExtension[];
   const editor = useArkpadEditor({ extensions, content });
 
+  const displayCode = fullCode || code || "";
+
   return (
-    <div className="rounded-xl border overflow-hidden my-6 not-prose">
-      {commands && commands.length > 0 && editor && (
-        <ArkpadProvider editor={editor}>
-          <div className="flex flex-wrap gap-1 p-2 border-b bg-fd-secondary/50">
-            {commands.map((cmd) => {
-              const activeName = Array.isArray(cmd.isActive) ? cmd.isActive[0] : cmd.isActive;
-              const activeAttrs = Array.isArray(cmd.isActive) ? cmd.isActive[1] : undefined;
-              return (
-                <EditorButton
-                  key={cmd.label}
-                  command={cmd.command}
-                  args={cmd.args !== undefined ? [cmd.args] : undefined}
-                  name={activeName}
-                  attrs={activeAttrs}
-                  className="px-2.5 py-1 text-xs rounded-md font-medium hover:bg-fd-accent text-fd-muted-foreground [&.active]:bg-fd-primary [&.active]:text-fd-primary-foreground"
-                  activeClassName="active"
-                >
-                  {cmd.label}
-                </EditorButton>
-              );
-            })}
-          </div>
-        </ArkpadProvider>
-      )}
-      <div className="p-4 min-h-[120px] bg-fd-card">
-        {editor && <ArkpadEditorContent editor={editor} />}
+    <div className="rounded-xl border bg-fd-card my-6 overflow-hidden not-prose shadow-sm flex flex-col">
+      <div className="flex border-b bg-fd-muted/30">
+        <button
+          onClick={() => setView("preview")}
+          className={`px-4 py-2 text-sm font-medium transition-colors ${
+            view === "preview"
+              ? "text-fd-primary border-b-2 border-fd-primary -mb-[1px]"
+              : "text-fd-muted-foreground hover:text-fd-foreground"
+          }`}
+        >
+          Preview
+        </button>
+        <button
+          onClick={() => setView("code")}
+          className={`px-4 py-2 text-sm font-medium transition-colors ${
+            view === "code"
+              ? "text-fd-primary border-b-2 border-fd-primary -mb-[1px]"
+              : "text-fd-muted-foreground hover:text-fd-foreground"
+          }`}
+        >
+          Code
+        </button>
       </div>
-      {code && (
-        <details className="border-t group">
-          <summary className="px-4 py-2 text-xs text-fd-muted-foreground cursor-pointer hover:text-fd-foreground font-mono select-none">
-            Show code
-          </summary>
-          <pre className="p-4 m-0 text-xs bg-fd-secondary/30 overflow-x-auto border-t">
-            <code>{code}</code>
-          </pre>
-        </details>
-      )}
+
+      <div className="flex-1">
+        {view === "preview" ? (
+          <div className="flex flex-col w-full h-full">
+            {commands && commands.length > 0 && editor && (
+              <ArkpadProvider editor={editor}>
+                <div className="flex flex-wrap gap-1 p-2 border-b bg-fd-secondary/50">
+                  {commands.map((cmd) => {
+                    const activeName = Array.isArray(cmd.isActive) ? cmd.isActive[0] : cmd.isActive;
+                    const activeAttrs = Array.isArray(cmd.isActive) ? cmd.isActive[1] : undefined;
+                    return (
+                      <EditorButton
+                        key={cmd.label}
+                        command={cmd.command}
+                        args={cmd.args !== undefined ? [cmd.args] : undefined}
+                        name={activeName}
+                        attrs={activeAttrs}
+                        className="px-2.5 py-1 text-xs rounded-md font-medium hover:bg-fd-accent text-fd-muted-foreground [&.active]:bg-fd-primary [&.active]:text-fd-primary-foreground"
+                        activeClassName="active"
+                      >
+                        {cmd.label}
+                      </EditorButton>
+                    );
+                  })}
+                </div>
+              </ArkpadProvider>
+            )}
+            <div className="p-6 md:p-10 min-h-[200px] bg-fd-background/50 flex justify-center">
+              <div className="w-full max-w-[700px] border shadow-sm rounded-lg bg-fd-background p-6">
+                {editor && (
+                  <ArkpadEditorContent
+                    editor={editor}
+                    className="prose dark:prose-invert max-w-none focus:outline-none"
+                  />
+                )}
+
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="p-4 bg-fd-muted overflow-auto max-h-[600px]">
+            <pre className="text-xs font-mono whitespace-pre">
+              <code>{displayCode}</code>
+            </pre>
+          </div>
+        )}
+
+      </div>
     </div>
   );
 }
+
+
+
+
