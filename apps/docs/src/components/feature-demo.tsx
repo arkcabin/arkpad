@@ -240,7 +240,7 @@ export default function Demo() {
                 </div>
 
                 {/* Flat Canvas Viewport */}
-                <div className="flex-1">
+                <div className="flex-1 px-6 sm:px-8 py-6">
                   <ArkpadEditorContent editor={editor} />
                 </div>
               </div>
