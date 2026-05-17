@@ -1,6 +1,6 @@
 @import "tailwindcss";
 @source "../../../../packages/react/src";
-@plugin "@tailwindcss/typography";
+@plugin "@tailwindcss/typography/src/index.js";
 @import "fumadocs-ui/css/black.css";
 @import "fumadocs-ui/css/preset.css";
 
@@ -54,11 +54,44 @@
     --color-fd-ring: hsl(153, 60%, 65%);
   }
 
-  /* Explicit fix for any remaining leaks */
-  .prose h1,
-  .prose h2,
-  .prose h3 {
-    color: var(--color-fd-foreground) !important;
+  .prose {
+    --tw-prose-body: var(--color-fd-foreground);
+    --tw-prose-headings: var(--color-fd-foreground);
+    --tw-prose-lead: var(--color-fd-muted-foreground);
+    --tw-prose-links: var(--color-fd-primary);
+    --tw-prose-bold: var(--color-fd-foreground);
+    --tw-prose-counters: var(--color-fd-muted-foreground);
+    --tw-prose-bullets: var(--color-fd-muted-foreground);
+    --tw-prose-hr: var(--color-fd-border);
+    --tw-prose-quotes: var(--color-fd-foreground);
+    --tw-prose-quote-borders: var(--color-fd-border);
+    --tw-prose-captions: var(--color-fd-muted-foreground);
+    --tw-prose-kbd: var(--color-fd-foreground);
+    --tw-prose-kbd-shadows: var(--color-fd-border);
+    --tw-prose-code: var(--color-fd-foreground);
+    --tw-prose-pre-code: var(--color-fd-foreground);
+    --tw-prose-pre-bg: var(--color-fd-muted);
+    --tw-prose-th-borders: var(--color-fd-border);
+    --tw-prose-td-borders: var(--color-fd-border);
+
+    --tw-prose-invert-body: var(--color-fd-foreground);
+    --tw-prose-invert-headings: var(--color-fd-foreground);
+    --tw-prose-invert-lead: var(--color-fd-muted-foreground);
+    --tw-prose-invert-links: var(--color-fd-primary);
+    --tw-prose-invert-bold: var(--color-fd-foreground);
+    --tw-prose-invert-counters: var(--color-fd-muted-foreground);
+    --tw-prose-invert-bullets: var(--color-fd-muted-foreground);
+    --tw-prose-invert-hr: var(--color-fd-border);
+    --tw-prose-invert-quotes: var(--color-fd-foreground);
+    --tw-prose-invert-quote-borders: var(--color-fd-border);
+    --tw-prose-invert-captions: var(--color-fd-muted-foreground);
+    --tw-prose-invert-kbd: var(--color-fd-foreground);
+    --tw-prose-invert-kbd-shadows: var(--color-fd-border);
+    --tw-prose-invert-code: var(--color-fd-foreground);
+    --tw-prose-invert-pre-code: var(--color-fd-foreground);
+    --tw-prose-invert-pre-bg: var(--color-fd-muted);
+    --tw-prose-invert-th-borders: var(--color-fd-border);
+    --tw-prose-invert-td-borders: var(--color-fd-border);
   }
 }
 
@@ -68,5 +101,6 @@ html {
 
 html > body[data-scroll-locked] {
   margin-right: 0px !important;
+  
   --removed-body-scroll-bar-size: 0px !important;
 }

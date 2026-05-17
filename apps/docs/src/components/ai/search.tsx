@@ -283,7 +283,7 @@ function Message({ message, ...props }: { message: ChatUIMessage } & ComponentPr
       >
         {roleName[message.role] ?? 'unknown'}
       </p>
-      <div className="prose text-sm">
+      <div className="text-sm">
         <Markdown text={markdown} />
       </div>
 

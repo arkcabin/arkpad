@@ -73,7 +73,7 @@ export function App() {
               <div className="p-8 min-h-[500px]">
                 <ArkpadEditorContent
                   editor={editor}
-                  className="prose dark:prose-invert max-w-none focus:outline-none arkpad-container"
+                  // className="prose dark:prose-invert max-w-none focus:outline-none arkpad-container"
                 />
               </div>
             </div>
