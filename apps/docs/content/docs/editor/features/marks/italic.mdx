@@ -3,25 +3,9 @@ title: Italic
 description: Make text italic with `toggleItalic`.
 ---
 
-Type: **Mark**
+Type: **Mark** · Category: **Marks**
 
 Italic slants text to the right for emphasis. Renders as `<em>` in HTML output.
-
-## Commands
-
-```ts
-editor.runCommand("toggleItalic");
-```
-
-## Keyboard Shortcut
-
-**Mod + I**
-
-## Active State
-
-```ts
-const isActive = editor.isActive("italic");
-```
 
 ## Demo
 
@@ -30,3 +14,67 @@ const isActive = editor.isActive("italic");
   content="<p>Add <em>emphasis</em> to your text with the <em>italic</em> mark. Perfect for highlighting nuances or foreign phrases.</p>"
   commands={[{ label: "Italic", command: "toggleItalic", isActive: "italic", icon: "Italic" }]}
 />
+
+## Installation
+
+```ts
+import { Italic } from "@arkpad/extension-italic";
+```
+
+## Commands
+
+The extension registers three commands for managing italic styling:
+
+```ts
+// Toggles italic styling on and off for the active selection
+editor.runCommand("toggleItalic");
+
+// Explicitly applies italic styling to the selection
+editor.runCommand("setItalic");
+
+// Explicitly removes italic styling from the selection
+editor.runCommand("unsetItalic");
+```
+
+### Chaining Commands
+
+You can chain commands to toggle italic styling and immediately focus the editor:
+
+```ts
+editor.chain().focus().toggleItalic().run();
+```
+
+## Keyboard Shortcuts
+
+| Shortcut           | Action                 |
+| :----------------- | :--------------------- |
+| `Mod-i` or `Mod-I` | Toggles italic styling |
+
+## Markdown Input Rules
+
+Type these patterns at both ends of a word or phrase to quickly make it italic:
+
+- `*italic*`
+- `_italic_`
+
+## Active State
+
+```ts
+const isActive = editor.isActive("italic");
+```
+
+## Configuration
+
+### Options
+
+| Name             | Type                  | Default | Description                                                             |
+| :--------------- | :-------------------- | :------ | :---------------------------------------------------------------------- |
+| `HTMLAttributes` | `Record<string, any>` | `{}`    | Key-value pairs of attributes to be rendered on the `<em>` DOM element. |
+
+```ts
+Italic.configure({
+  HTMLAttributes: {
+    class: "custom-italic-styling",
+  },
+});
+```
