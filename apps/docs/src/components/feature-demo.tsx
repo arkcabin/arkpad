@@ -25,6 +25,7 @@ import { AI } from "@arkpad/extension-ai";
 import { CodeBlock } from "@arkpad/extension-code-block";
 import { HorizontalRule } from "@arkpad/extension-horizontal-rule";
 import { Typography } from "@arkpad/extension-typography";
+import { createTextAlign } from "@arkpad/extension-alignment";
 
 import {
   Bold as BoldIcon,
@@ -47,6 +48,10 @@ import {
   ChevronDown,
   Layout,
   Link as LinkIcon,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  AlignJustify,
 } from "lucide-react";
 import { Tab, Tabs } from "fumadocs-ui/components/tabs";
 
@@ -141,6 +146,7 @@ const extensionMap: Record<string, ArkpadExtension[]> = {
   blockquote: [Engine, Blockquote],
   "code-block": [Engine, CodeBlock],
   "horizontal-rule": [Engine, HorizontalRule],
+  "text-alignment": [Engine, createTextAlign()],
   typography: [Engine, Typography],
   list: [Engine, BulletList, OrderedList, TaskList],
   taskList: [Engine, TaskList],
@@ -180,6 +186,10 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   MoveRowUp: ChevronUp,
   MoveRowDown: ChevronDown,
   "horizontal-rule": HorizontalRuleIcon,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  AlignJustify,
 };
 
 interface FeatureDemoProps {
