@@ -52,6 +52,14 @@ import {
   AlignCenter,
   AlignRight,
   AlignJustify,
+  BetweenHorizontalStart,
+  BetweenHorizontalEnd,
+  BetweenVerticalStart,
+  BetweenVerticalEnd,
+  Combine,
+  Split,
+  Palette,
+  TableProperties,
 } from "lucide-react";
 import { Tab, Tabs } from "fumadocs-ui/components/tabs";
 
@@ -190,6 +198,14 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   AlignCenter,
   AlignRight,
   AlignJustify,
+  BetweenHorizontalStart,
+  BetweenHorizontalEnd,
+  BetweenVerticalStart,
+  BetweenVerticalEnd,
+  Combine,
+  Split,
+  Palette,
+  TableProperties,
 };
 
 interface FeatureDemoProps {
