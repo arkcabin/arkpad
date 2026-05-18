@@ -3,17 +3,59 @@ title: Superscript
 description: Make text superscript with `toggleSuperscript`.
 ---
 
+Type: **Mark** · Category: **Marks**
 
+Superscript renders text smaller and above the baseline. Useful for footnotes, chemical notations, and mathematical exponents. Renders as `<sup>` in HTML output.
 
-Type: **Mark**
+## Demo
 
-Superscript renders text smaller and above the baseline. Useful for footnotes and mathematical exponents.
+<FeatureDemo
+  feature="superscript"
+  content="<p>Mathematical expressions like E = mc<sup>2</sup> use superscripts.</p>"
+  commands={[
+    {
+      label: "Superscript",
+      command: "toggleSuperscript",
+      isActive: "superscript",
+      icon: "Superscript",
+    },
+  ]}
+/>
+
+## Installation
+
+```ts
+import { Superscript } from "@arkpad/extension-superscript";
+```
 
 ## Commands
 
+The extension registers three commands for managing superscript styling:
+
 ```ts
+// Toggles superscript styling on and off for the active selection
 editor.runCommand("toggleSuperscript");
+
+// Explicitly applies superscript styling to the selection
+editor.runCommand("setSuperscript");
+
+// Explicitly removes superscript styling from the selection
+editor.runCommand("unsetSuperscript");
 ```
+
+### Chaining Commands
+
+You can chain commands to toggle superscript styling and immediately focus the editor:
+
+```ts
+editor.chain().focus().toggleSuperscript().run();
+```
+
+## Keyboard Shortcuts
+
+| Shortcut                    | Action                      |
+| :-------------------------- | :-------------------------- |
+| `Mod-.` (Cmd/Ctrl + Period) | Toggles superscript styling |
 
 ## Active State
 
@@ -21,11 +63,18 @@ editor.runCommand("toggleSuperscript");
 const isActive = editor.isActive("superscript");
 ```
 
-## Demo
+## Configuration
 
-<FeatureDemo
-  feature="superscript"
-  content="<p>Mathematical expressions like E = mc<sup>2</sup> use superscripts.</p>"
-  commands={[{ label: "Superscript", command: "toggleSuperscript", isActive: "superscript", icon: "Superscript" }]}
-  code='editor.runCommand("toggleSuperscript")'
-/>
+### Options
+
+| Name             | Type                  | Default | Description                                                         |
+| :--------------- | :-------------------- | :------ | :------------------------------------------------------------------ |
+| `HTMLAttributes` | `Record<string, any>` | `{}`    | Key-value pairs of attributes to render on the `<sup>` DOM element. |
+
+```ts
+Superscript.configure({
+  HTMLAttributes: {
+    class: "custom-super-styling",
+  },
+});
+```

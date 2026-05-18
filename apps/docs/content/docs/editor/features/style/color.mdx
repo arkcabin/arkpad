@@ -3,32 +3,76 @@ title: Color
 description: Change text color in the editor.
 ---
 
-
-
 Type: **Mark** · Category: **Style**
 
-Color allows users to apply custom text colors to selected content.
-
-## Commands
-
-```ts
-editor.runCommand("setColor", "#ff0000"); // Red text
-editor.runCommand("unsetColor"); // Remove color
-```
-
-## Configuration
-
-```ts
-Color.configure({
-  colors: ["#000000", "#ff0000", "#00ff00", "#0000ff"],
-});
-```
+Color allows users to apply custom text colors to selected content. Renders as a `<span>` element with an inline `color` CSS style in HTML output.
 
 ## Demo
 
 <FeatureDemo
   feature="color"
-  content="<p>Try changing text color</p>"
-  commands={[{ label: "A", command: "setColor", isActive: "textStyle" }]}
-  code='editor.runCommand("setColor", "#ff0000")'
+  content="<p>Try selecting text in the editor below and clicking the palette icon to apply a vibrant red text color!</p>"
+  commands={[
+    {
+      label: "Red",
+      command: "setColor",
+      args: "#ff0000",
+      isActive: ["color", { color: "#ff0000" }],
+      icon: "Palette",
+    },
+  ]}
 />
+
+## Installation
+
+```ts
+import { Color } from "@arkpad/extension-color";
+```
+
+## Commands
+
+The extension registers three commands for managing text color:
+
+```ts
+// Applies the specified color value (e.g. HEX, RGB, HSL) to the selected text range
+editor.runCommand("setColor", "#e11d48");
+editor.runCommand("setColor", "rgb(37, 99, 235)");
+
+// Toggles the color on the selection
+editor.runCommand("toggleColor", "#16a34a");
+
+// Resets the text color of the selection back to the editor default
+editor.runCommand("unsetColor");
+```
+
+### Chaining Commands
+
+You can chain commands to apply a color and immediately focus the editor:
+
+```ts
+editor.chain().focus().setColor("#ef4444").run();
+```
+
+## Active State
+
+Check if a specific color is active on the selection:
+
+```ts
+const isRedActive = editor.isActive("color", { color: "#ff0000" });
+```
+
+## Configuration
+
+### Options
+
+| Name             | Type                  | Default | Description                                                                        |
+| :--------------- | :-------------------- | :------ | :--------------------------------------------------------------------------------- |
+| `HTMLAttributes` | `Record<string, any>` | `{}`    | Key-value pairs of attributes to render on the generated `<span>` wrapper element. |
+
+```ts
+Color.configure({
+  HTMLAttributes: {
+    class: "custom-color-wrapper",
+  },
+});
+```

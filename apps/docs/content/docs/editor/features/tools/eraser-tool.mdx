@@ -1,36 +1,75 @@
 ---
 title: Eraser Tool
-description: Remove all formatting by drawing over text.
+description: Strips formatting and highlight marks interactively by drawing over text.
 ---
-
-
 
 Type: **Tool** · Category: **Tools**
 
-The Eraser Tool is a "remove formatting" mode. When active, clicking and dragging over text strips all marks — bold, italic, highlight, links, and more.
-
-## Commands
-
-```ts
-editor.runCommand("toggleEraser"); // Toggle eraser mode on/off
-```
-
-When the tool is active:
-
-- Any text you click and drag over gets all marks removed
-- Click the tool button again to turn it off
-
-## Active State
-
-```ts
-const isActive = editor.isActive("eraser");
-```
+The Eraser Tool is a powerful "remove formatting" painting mode. When active, clicking and dragging to select text automatically strips styling and highlight marks instantly.
 
 ## Demo
 
 <FeatureDemo
   feature="eraser-tool"
-  content="<p>Try the eraser tool here</p>"
-  commands={[{ label: "\u232b", command: "toggleEraser", isActive: "eraser" }]}
-  code='editor.runCommand("toggleEraser")'
+  content="<p>Click the eraser icon below to activate the eraser tool, then select any highlighted text to erase the highlights in real-time!</p>"
+  commands={[
+    { label: "Eraser Mode", command: "toggleEraserTool", isActive: "eraserTool", icon: "Palette" },
+  ]}
 />
+
+## Installation
+
+```ts
+import { EraserTool } from "@arkpad/extension-eraser";
+```
+
+## Commands
+
+The extension registers two commands for controlling the eraser drawing brush:
+
+```ts
+// Toggles the eraser mode active state on and off
+editor.runCommand("toggleEraserTool");
+
+// Explicitly sets the eraser mode active state
+editor.runCommand("setEraserTool", { active: true });
+```
+
+### Chaining Commands
+
+You can chain commands to activate the eraser mode and focus the editor:
+
+```ts
+editor.chain().focus().toggleEraserTool().run();
+```
+
+## Interaction & Appended Transactions
+
+When the eraser tool is activated, the editor is decorated with unique attributes and visual indicators:
+
+- **Classes:** The editor container is appended with the `ark-eraser-mode` class.
+- **Attributes:** The editor view element is set with `data-ark-mode="eraser"`.
+- **Appended Transactions:** A custom ProseMirror plugin monitors selection changes. Any non-empty selection made by the user while the tool is active immediately triggers an appended transaction that strips all highlight marks (or formatting marks) within the selected range, providing a smooth "drawing" feel.
+
+## Storage (Reactivity)
+
+You can reactively query or bind UI elements to the tool's active state:
+
+```ts
+// Check if the eraser tool is currently active
+const isEraserActive = editor.storage.eraserTool.active; // returns boolean
+```
+
+## Configuration
+
+### Options
+
+| Name          | Type     | Default             | Description                                                               |
+| :------------ | :------- | :------------------ | :------------------------------------------------------------------------ |
+| `activeClass` | `string` | `"ark-eraser-mode"` | The CSS class name applied to the editor element when the tool is active. |
+
+```ts
+EraserTool.configure({
+  activeClass: "custom-eraser-active",
+});
+```

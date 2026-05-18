@@ -3,38 +3,75 @@ title: Link
 description: Add hyperlinks with `toggleLink`.
 ---
 
+Type: **Mark** · Category: **Marks**
 
-
-Type: **Mark**
-
-Link creates clickable hyperlinks in text. Renders as `<a href="...">` in HTML output.
-
-## Commands
-
-```ts
-editor.runCommand("toggleLink", { href: "https://example.com" });
-```
-
-## Active State
-
-```ts
-const isActive = editor.isActive("link");
-const attrs = editor.getAttributes("link"); // { href: "https://..." }
-```
-
-## Configuration
-
-```ts
-Link.configure({
-  openOnClick: false, // Prevent links from opening on click
-  autolink: true, // Auto-detect and convert URLs to links
-});
-```
+Link creates clickable hyperlinks in text. Renders as `<a>` in HTML output.
 
 ## Demo
 
 <FeatureDemo
   feature="link"
-  content='<p>Visit the <a href="https://github.com/arkpad">Arkpad GitHub</a> to explore the source code.</p>'
-  commands={[{ label: "Link", command: "toggleLink", isActive: "link", icon: "Link" }]}
+  content='<p>Visit the <a href="https://github.com/arkpad" class="ark-link">Arkpad GitHub</a> to explore the source code.</p>'
+  commands={[
+    {
+      label: "Link",
+      command: "toggleLink",
+      args: "https://github.com/arkpad",
+      isActive: "link",
+      icon: "Link",
+    },
+  ]}
 />
+
+## Installation
+
+```ts
+import { Link } from "@arkpad/extension-link";
+```
+
+## Commands
+
+The extension registers three commands for managing hyperlinks:
+
+```ts
+// Toggles a link on the active selection (requires url)
+editor.runCommand("toggleLink", "https://example.com");
+
+// Explicitly sets a hyperlink on the active selection
+editor.runCommand("setLink", "https://example.com");
+
+// Explicitly removes a hyperlink from the selection
+editor.runCommand("unsetLink");
+```
+
+### Chaining Commands
+
+You can chain commands to toggle a link and immediately focus the editor:
+
+```ts
+editor.chain().focus().toggleLink("https://example.com").run();
+```
+
+## Keyboard Shortcuts
+
+The keyboard shortcut is highly interactive:
+
+| Shortcut | Action                                                                                                                                                                                                                            |
+| :------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Mod-k`  | Toggles standard links. If the selection does not have a link, it will trigger a native browser prompt requesting the URL, pre-populated with any selected text starting with `http`. If the selection has a link, it removes it. |
+
+## Active State & Attributes
+
+```ts
+const isActive = editor.isActive("link");
+
+// Get the attributes of the active link (e.g. href)
+const attrs = editor.getAttributes("link"); // returns { href: "https://..." }
+```
+
+## Configuration
+
+The extension automatically appends security classes and security relations to rendered DOM nodes, preventing cross-site scripting (XSS) and tab-nabbing vulnerabilities:
+
+- **Classes:** Adds the `ark-link` class to all links.
+- **Security Attributes:** Adds `rel="noopener noreferrer nofollow"` to the output `<a>` DOM tag.

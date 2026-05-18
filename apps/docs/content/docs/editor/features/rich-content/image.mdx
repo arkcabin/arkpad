@@ -1,22 +1,77 @@
 ---
 title: Image
-description: Embed images with `setImage`.
+description: Embed and resize images with `setImage`.
 ---
 
+Type: **Node** · Category: **Rich Content**
 
+Image embeds an image block into the document. Renders as a wrapper `<div>` container around an `<img>` tag in HTML output for responsive alignment and scaling.
 
-Type: **Node**
+## Demo
 
-Image embeds an image into the document. Renders as `<img src="..." alt="...">` in HTML output.
+<FeatureDemo
+  feature="image"
+  content="<div class='ark-image-container ark-align-center' style='width: 100%; display: flex; justify-content: center; margin: 1.5rem auto;'><img src='https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=640' style='max-width: 100%; height: auto; border-radius: 8px;' /></div>"
+  commands={[
+    {
+      label: "Insert Image",
+      command: "setImage",
+      args: {
+        src: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=640",
+        alt: "Vibrant gradient backdrop",
+        title: "Arkpad Gradient",
+        align: "center",
+        width: "80%",
+      },
+      isActive: "image",
+    },
+  ]}
+/>
+
+## Installation
+
+```ts
+import { Image } from "@arkpad/extension-image";
+```
 
 ## Commands
 
+The extension registers two commands for inserting and modifying image blocks:
+
 ```ts
+// Inserts a new image block at the current selection
 editor.runCommand("setImage", {
   src: "https://example.com/photo.jpg",
-  alt: "Description of image",
+  alt: "An aesthetic landscape backdrop",
+  title: "Nature Landscape",
+  width: "80%",
+  align: "center", // Options: 'left' | 'center' | 'right'
+});
+
+// Updates attributes of the currently selected image (requires image selection)
+editor.runCommand("updateImage", {
+  width: "50%",
+  align: "left",
 });
 ```
+
+### Chaining Commands
+
+You can chain commands to insert an image and focus the editor:
+
+```ts
+editor.chain().focus().setImage({ src: "https://example.com/photo.jpg" }).run();
+```
+
+## Attributes
+
+| Name    | Type     | Default    | Description                                                             |
+| :------ | :------- | :--------- | :---------------------------------------------------------------------- |
+| `src`   | `string` | `null`     | The URL source of the image (required).                                 |
+| `alt`   | `string` | `null`     | Alternate text description for accessibility.                           |
+| `title` | `string` | `null`     | Mouse hover tooltip title.                                              |
+| `width` | `string` | `"100%"`   | The width of the image wrapper (e.g. `50%`, `300px`, `100vw`).          |
+| `align` | `string` | `"center"` | Horizontal alignment of the image block (`left`, `center`, or `right`). |
 
 ## Active State
 
@@ -24,11 +79,19 @@ editor.runCommand("setImage", {
 const isActive = editor.isActive("image");
 ```
 
-## Demo
+## Configuration
 
-<FeatureDemo
-  feature="image"
-  content="<p>Try the image feature here</p>"
-  commands={[{ label: "\U0001f5bc", command: "setImage", isActive: "image" }]}
-  code='editor.runCommand("setImage", { src: "https://example.com/photo.jpg" })'
-/>
+### Options
+
+| Name             | Type                  | Default | Description                                                                        |
+| :--------------- | :-------------------- | :------ | :--------------------------------------------------------------------------------- |
+| `HTMLAttributes` | `Record<string, any>` | `{}`    | Key-value pairs of attributes to render directly on the inner `<img>` DOM element. |
+
+```ts
+Image.configure({
+  HTMLAttributes: {
+    loading: "lazy",
+    class: "arkpad-rendered-image",
+  },
+});
+```

@@ -3,33 +3,72 @@ title: Font Family
 description: Change the font family of selected text.
 ---
 
-
-
 Type: **Mark** · Category: **Style**
 
-Font Family allows users to apply different typefaces to selected content.
-
-## Commands
-
-```ts
-editor.runCommand("setFontFamily", "Inter");
-editor.runCommand("setFontFamily", "Georgia, serif");
-editor.runCommand("unsetFontFamily"); // Reset to default
-```
-
-## Configuration
-
-```ts
-FontFamily.configure({
-  fonts: ["Inter", "Georgia, serif", "Courier New, monospace", "Arial, sans-serif"],
-});
-```
+Font Family allows users to apply different typefaces to selected content. Renders as a `<span>` element with an inline `font-family` CSS style in HTML output.
 
 ## Demo
 
 <FeatureDemo
   feature="font-family"
-  content="<p>Try changing font family</p>"
-  commands={[{ label: "F", command: "setFontFamily", isActive: "textStyle" }]}
-  code='editor.runCommand("setFontFamily", "Inter")'
+  content="<p>Try selecting text in the editor below and clicking the button to apply a beautiful Georgia serif typeface!</p>"
+  commands={[
+    {
+      label: "Georgia Serif",
+      command: "setFontFamily",
+      args: "Georgia, serif",
+      isActive: ["fontFamily", { fontFamily: "Georgia, serif" }],
+    },
+  ]}
 />
+
+## Installation
+
+```ts
+import { FontFamily } from "@arkpad/extension-font-family";
+```
+
+## Commands
+
+The extension registers two commands for managing font families:
+
+```ts
+// Applies the specified font family typeface to the selected text range
+editor.runCommand("setFontFamily", "Inter");
+editor.runCommand("setFontFamily", "Courier New, monospace");
+
+// Resets the font family of the selection back to the editor default
+editor.runCommand("unsetFontFamily");
+```
+
+### Chaining Commands
+
+You can chain commands to set a font family and immediately focus the editor:
+
+```ts
+editor.chain().focus().setFontFamily("Arial, sans-serif").run();
+```
+
+## Active State
+
+Check if a specific font family is active on the selection:
+
+```ts
+const isSerifActive = editor.isActive("fontFamily", { fontFamily: "Georgia, serif" });
+```
+
+## Configuration
+
+### Options
+
+| Name             | Type                  | Default | Description                                                                        |
+| :--------------- | :-------------------- | :------ | :--------------------------------------------------------------------------------- |
+| `HTMLAttributes` | `Record<string, any>` | `{}`    | Key-value pairs of attributes to render on the generated `<span>` wrapper element. |
+
+```ts
+FontFamily.configure({
+  HTMLAttributes: {
+    class: "custom-font-wrapper",
+  },
+});
+```

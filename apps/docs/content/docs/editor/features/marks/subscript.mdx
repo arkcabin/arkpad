@@ -3,17 +3,54 @@ title: Subscript
 description: Make text subscript with `toggleSubscript`.
 ---
 
+Type: **Mark** · Category: **Marks**
 
+Subscript renders text smaller and below the baseline. Useful for footnotes and chemical formulas. Renders as `<sub>` in HTML output.
 
-Type: **Mark**
+## Demo
 
-Subscript renders text smaller and below the baseline. Useful for chemical formulas.
+<FeatureDemo
+  feature="subscript"
+  content="<p>Chemical formulas like H<sub>2</sub>O use subscripts.</p>"
+  commands={[
+    { label: "Subscript", command: "toggleSubscript", isActive: "subscript", icon: "Subscript" },
+  ]}
+/>
+
+## Installation
+
+```ts
+import { Subscript } from "@arkpad/extension-subscript";
+```
 
 ## Commands
 
+The extension registers three commands for managing subscript styling:
+
 ```ts
+// Toggles subscript styling on and off for the active selection
 editor.runCommand("toggleSubscript");
+
+// Explicitly applies subscript styling to the selection
+editor.runCommand("setSubscript");
+
+// Explicitly removes subscript styling from the selection
+editor.runCommand("unsetSubscript");
 ```
+
+### Chaining Commands
+
+You can chain commands to toggle subscript styling and immediately focus the editor:
+
+```ts
+editor.chain().focus().toggleSubscript().run();
+```
+
+## Keyboard Shortcuts
+
+| Shortcut                   | Action                    |
+| :------------------------- | :------------------------ |
+| `Mod-,` (Cmd/Ctrl + Comma) | Toggles subscript styling |
 
 ## Active State
 
@@ -21,11 +58,18 @@ editor.runCommand("toggleSubscript");
 const isActive = editor.isActive("subscript");
 ```
 
-## Demo
+## Configuration
 
-<FeatureDemo
-  feature="subscript"
-  content="<p>Chemical formulas like H<sub>2</sub>O use subscripts.</p>"
-  commands={[{ label: "Subscript", command: "toggleSubscript", isActive: "subscript", icon: "Subscript" }]}
-  code='editor.runCommand("toggleSubscript")'
-/>
+### Options
+
+| Name             | Type                  | Default | Description                                                         |
+| :--------------- | :-------------------- | :------ | :------------------------------------------------------------------ |
+| `HTMLAttributes` | `Record<string, any>` | `{}`    | Key-value pairs of attributes to render on the `<sub>` DOM element. |
+
+```ts
+Subscript.configure({
+  HTMLAttributes: {
+    class: "custom-sub-styling",
+  },
+});
+```

@@ -3,36 +3,84 @@ title: Highlight
 description: Highlight text with background color.
 ---
 
+Type: **Mark** · Category: **Marks**
 
-
-Type: **Mark**
-
-Highlight applies a background color to text, like a marker pen. Supports single and multi-color modes.
-
-## Commands
-
-```ts
-editor.runCommand("toggleHighlight");
-```
-
-## Active State
-
-```ts
-const isActive = editor.isActive("highlight");
-```
-
-## Configuration
-
-```ts
-Highlight.configure({
-  multicolor: true, // Enable multiple highlight colors
-});
-```
+Highlight applies a background color to text, like a marker pen. Renders as `<mark>` in HTML output.
 
 ## Demo
 
 <FeatureDemo
   feature="highlight"
-  content="<p>Use <mark>highlights</mark> to make important information stand out from the rest of the text.</p>"
-  commands={[{ label: "Highlight", command: "toggleHighlight", isActive: "highlight", icon: "Highlighter" }]}
+  content="<p>Use <mark data-color='#ffff00' style='background-color: #ffff00;'>highlights</mark> to make important information stand out from the rest of the text.</p>"
+  commands={[
+    { label: "Highlight", command: "toggleHighlight", isActive: "highlight", icon: "Highlighter" },
+  ]}
 />
+
+## Installation
+
+```ts
+import { Highlight } from "@arkpad/extension-highlight";
+```
+
+## Commands
+
+The extension registers three commands for managing text highlights:
+
+```ts
+// Toggles the default highlight color on and off
+editor.runCommand("toggleHighlight");
+
+// Toggles a specific highlight color on the selection
+editor.runCommand("toggleHighlight", { color: "#38bdf8" });
+
+// Explicitly sets a specific highlight color
+editor.runCommand("setHighlight", { color: "#f472b6" });
+
+// Explicitly removes highlighting from the selection
+editor.runCommand("unsetHighlight");
+```
+
+### Chaining Commands
+
+You can chain commands to apply a highlight and focus the editor:
+
+```ts
+editor.chain().focus().toggleHighlight({ color: "#4ade80" }).run();
+```
+
+## Keyboard Shortcuts
+
+| Shortcut      | Action                            |
+| :------------ | :-------------------------------- |
+| `Mod-Shift-h` | Toggles default highlight styling |
+
+## Active State
+
+Use active states with the color attribute to check highlighting:
+
+```ts
+// Check if any highlight is active
+const isActive = editor.isActive("highlight");
+
+// Check if a specific highlight color is active
+const isYellow = editor.isActive("highlight", { color: "#ffff00" });
+```
+
+## Configuration
+
+### Options
+
+| Name             | Type                  | Default     | Description                                                                      |
+| :--------------- | :-------------------- | :---------- | :------------------------------------------------------------------------------- |
+| `color`          | `string`              | `"#ffff00"` | The default highlight color used when no color is explicitly passed to commands. |
+| `HTMLAttributes` | `Record<string, any>` | `{}`        | Key-value pairs of attributes to render on the `<mark>` DOM element.             |
+
+```ts
+Highlight.configure({
+  color: "#fde047", // Custom default yellow color
+  HTMLAttributes: {
+    class: "custom-mark-styling",
+  },
+});
+```

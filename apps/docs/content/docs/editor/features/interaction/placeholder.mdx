@@ -1,42 +1,81 @@
 ---
 title: Placeholder
-description: Show placeholder text when the editor is empty.
+description: Show placeholder text when the editor or block is empty.
 ---
 
+Type: **Extension** · Category: **Interaction**
 
+Placeholder displays a hint when the editor content or block is empty, which disappears automatically as soon as the user starts typing.
 
-Type: **Functionality**
+## Demo
 
-Placeholder displays a hint when the editor content is empty. The hint disappears as soon as the user starts typing.
+<FeatureDemo feature="placeholder" content="<p></p>" commands={[]} />
+
+## Installation
+
+```ts
+import { Placeholder } from "@arkpad/extension-placeholder";
+```
 
 ## Configuration
 
-```ts
-const editor = useArkpadEditor({
-  extensions: [
-    StarterKit.configure({
-      placeholder: "Start writing...",
-    }),
-  ],
-});
-```
+### Options
 
-## Per-Block Placeholders
+| Name                   | Type                                 | Default              | Description                                                                                           |
+| :--------------------- | :----------------------------------- | :------------------- | :---------------------------------------------------------------------------------------------------- |
+| `placeholder`          | `string \| Function`                 | `"Start writing..."` | The hint text to display. Can be a string or a callback function `({ node, pos, editor }) => string`. |
+| `types`                | `Record<string, string \| Function>` | `{}`                 | Per-node-type custom placeholders (e.g. `{ heading: "Enter heading..." }`).                           |
+| `showOnlyWhenEditable` | `boolean`                            | `true`               | Hide placeholders when the editor is in read-only mode.                                               |
+| `showOnlyCurrent`      | `boolean`                            | `true`               | Only show placeholder on the currently active / focused line.                                         |
+| `showOnlyWhenFocused`  | `boolean`                            | `false`              | Hide placeholders when the editor loses focus completely.                                             |
+| `emptyNodeClass`       | `string`                             | `"is-empty"`         | CSS class appended to empty blocks for custom style selectors.                                        |
+| `emptyEditorClass`     | `string`                             | `"is-editor-empty"`  | CSS class appended to the editor container when the entire document is empty.                         |
+
+### Basic Setup
 
 ```ts
 Placeholder.configure({
+  placeholder: "Start typing your content here...",
+  showOnlyWhenFocused: true,
+});
+```
+
+### Advanced Per-Block Placeholders
+
+You can dynamically render different placeholders based on the block type:
+
+```ts
+Placeholder.configure({
+  // Using the types option
+  types: {
+    heading: "Enter a section heading...",
+    codeBlock: "Write your code snippet...",
+  },
+
+  // Or using a custom callback function
   placeholder: ({ node }) => {
-    if (node.type.name === "heading") return "Enter a heading...";
-    return "Type here...";
+    if (node.type.name === "blockquote") {
+      return "Enter a quotation...";
+    }
+    return "Type '/' for commands...";
   },
 });
 ```
 
-## Demo
+## Styling
 
-<FeatureDemo
-  feature="placeholder"
-  content="<p></p>"
-  commands={[]}
-  code='// Configured via extensions'
-/>
+Placeholders are rendered as custom widgets with the class `ark-placeholder`. You can style them in your CSS:
+
+```css
+/* Placeholder styling */
+.ark-placeholder {
+  color: var(--color-fd-muted-foreground);
+  pointer-events: none;
+  font-style: italic;
+}
+
+/* Empty editor outer selector */
+.is-editor-empty::before {
+  /* custom borders or background helpers */
+}
+```

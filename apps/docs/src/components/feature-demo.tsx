@@ -18,6 +18,9 @@ import { BulletList } from "@arkpad/extension-bullet-list";
 import { OrderedList } from "@arkpad/extension-ordered-list";
 import { TaskList } from "@arkpad/extension-task-list";
 import { Table } from "@arkpad/extension-table";
+import { FontFamily } from "@arkpad/extension-font-family";
+import { FontSize } from "@arkpad/extension-font-size";
+import { Color } from "@arkpad/extension-color";
 import { Image } from "@arkpad/extension-image";
 import { EraserTool } from "@arkpad/extension-eraser";
 import { HighlighterTool } from "@arkpad/extension-highlighter";
@@ -159,6 +162,9 @@ const extensionMap: Record<string, ArkpadExtension[]> = {
   list: [Engine, BulletList, OrderedList, TaskList],
   taskList: [Engine, TaskList],
   table: [Engine, Heading, Table],
+  "font-family": [Engine, FontFamily],
+  "font-size": [Engine, FontSize],
+  color: [Engine, Color],
   highlight: [Engine, Highlight],
   code: [Engine, Code],
   link: [Engine, Heading, Link],
