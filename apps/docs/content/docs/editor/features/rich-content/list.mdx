@@ -1,27 +1,69 @@
 ---
 title: List
-description: Create bullet and ordered lists.
+description: Organize content into bulleted or ordered lists.
 ---
-
-
 
 Type: **Node** · Category: **Rich Content**
 
 Lists organize content into sequential items. Supports both bullet (unordered) and numbered (ordered) lists.
 
+## Demo
+
+<FeatureDemo
+  feature="list"
+  content="<ul><li>Bullet list item 1</li><li>Bullet list item 2</li></ul><ol><li>Ordered list item 1</li><li>Ordered list item 2</li></ol>"
+  commands={[
+    { label: "Bullet List", command: "toggleBulletList", icon: "List", isActive: "bulletList" },
+    {
+      label: "Ordered List",
+      command: "toggleOrderedList",
+      icon: "ListOrdered",
+      isActive: "orderedList",
+    },
+  ]}
+/>
+
+## Installation
+
+```ts
+import { BulletList } from "@arkpad/extension-bullet-list";
+import { OrderedList } from "@arkpad/extension-ordered-list";
+// Note: ListItem is loaded automatically by lists, but can be imported explicitly:
+import { ListItem } from "@arkpad/extension-list-item";
+```
+
 ## Commands
 
 ```ts
-editor.runCommand("toggleBulletList"); // Bullet list
-editor.runCommand("toggleOrderedList"); // Numbered list
+// Toggles the current block between a bullet list and a paragraph
+editor.runCommand("toggleBulletList");
+
+// Toggles the current block between an ordered list and a paragraph
+editor.runCommand("toggleOrderedList");
+
+// Alignment & indent navigation
+editor.runCommand("sinkListItem"); // Indent / Nest list item
+editor.runCommand("liftListItem"); // Outdent / Unnest list item
 ```
 
-## Keyboard Shortcuts
+## Keyboard Shortcuts & Navigation
 
-| List Type    | Shortcut        |
-| :----------- | :-------------- |
-| Bullet List  | Mod + Shift + 8 |
-| Ordered List | Mod + Shift + 7 |
+| Key           | Action                                 |
+| :------------ | :------------------------------------- |
+| `Mod-Shift-8` | Toggles bullet list                    |
+| `Mod-Shift-7` | Toggles ordered list                   |
+| `Enter`       | Splits list item / exits list if empty |
+| `Tab`         | Indents current list item (nesting)    |
+| `Shift-Tab`   | Outdents current list item (unnesting) |
+
+## Markdown Input Rules
+
+Type these patterns at the beginning of a line followed by a space ` ` to quickly build lists:
+
+| Pattern                      | Result       |
+| :--------------------------- | :----------- |
+| `- ` or `+ ` or `* `         | Bullet List  |
+| `1. ` (or any number + `. `) | Ordered List |
 
 ## Active State
 
@@ -29,27 +71,3 @@ editor.runCommand("toggleOrderedList"); // Numbered list
 const isBullet = editor.isActive("bulletList");
 const isOrdered = editor.isActive("orderedList");
 ```
-
-## Markdown Shortcuts
-
-- Type `-` or `*` + space → bullet list
-- Type `1.` + space → ordered list
-
-## List Navigation
-
-| Key                          | Action       |
-| :--------------------------- | :----------- |
-| Tab                          | Indent item  |
-| Shift + Tab                  | Outdent item |
-| Enter at start of empty item | Exit list    |
-
-## Demo
-
-<FeatureDemo 
-  feature="list" 
-  content="<ul><li>Bullet list item 1</li><li>Bullet list item 2</li></ul><ol><li>Ordered list item 1</li><li>Ordered list item 2</li></ol>" 
-  commands={[
-    { label: 'Bullet List', command: 'toggleBulletList', icon: 'List', isActive: 'bulletList' },
-    { label: 'Ordered List', command: 'toggleOrderedList', icon: 'ListOrdered', isActive: 'orderedList' }
-  ]} 
-/>

@@ -3,33 +3,60 @@ title: Task List
 description: Create interactive checklists with `toggleTaskList`.
 ---
 
-
-
-Type: **Node**
+Type: **Node** · Category: **Rich Content**
 
 Task List creates a checklist with interactive checkboxes. Each item can be checked or unchecked.
-
-## Commands
-
-```ts
-editor.runCommand("toggleTaskList");
-```
-
-## Keyboard Shortcut
-
-**Mod + Shift + 9**
-
-## Active State
-
-```ts
-const isActive = editor.isActive("taskList");
-const isChecked = editor.isActive("taskItem", { checked: true });
-```
 
 ## Demo
 
 <FeatureDemo
   feature="taskList"
-  content='<ul class="task-list"><li class="task-item" data-checked="true"><div></div><div>Completed task</div></li><li class="task-item" data-checked="false"><div></div><div>Pending task</div></li></ul>'
-  commands={[{ label: "Checklist", command: "toggleTaskList", isActive: "taskList", icon: "CheckSquare" }]}
+  content='<ul data-type="taskList"><li data-type="taskItem" data-checked="true">Completed task</li><li data-type="taskItem" data-checked="false">Pending task</li></ul>'
+  commands={[
+    { label: "Checklist", command: "toggleTaskList", isActive: "taskList", icon: "CheckSquare" },
+  ]}
 />
+
+## Installation
+
+```ts
+import { TaskList } from "@arkpad/extension-task-list";
+// Note: TaskItem is loaded automatically by TaskList
+```
+
+## Commands
+
+```ts
+// Toggles the current block between a task list and a paragraph
+editor.runCommand("toggleTaskList");
+
+// Toggles the checkbox state of the current active task item
+editor.runCommand("toggleTaskItem");
+```
+
+## Keyboard Shortcuts & Navigation
+
+| Key           | Action                                      |
+| :------------ | :------------------------------------------ |
+| `Mod-Shift-9` | Toggles checklist                           |
+| `Enter`       | Splits task item / exits checklist if empty |
+| `Tab`         | Indents current task item                   |
+| `Shift-Tab`   | Outdents current task item                  |
+
+## Markdown Input Rules
+
+Type these patterns at the beginning of a line followed by a space ` ` to build checklists:
+
+| Pattern | Result                 |
+| :------ | :--------------------- |
+| `[ ] `  | Empty Task List item   |
+| `[x] `  | Checked Task List item |
+
+## Active State
+
+```ts
+const isTaskList = editor.isActive("taskList");
+
+// Check if a task item is checked
+const isChecked = editor.isActive("taskItem", { checked: true });
+```
