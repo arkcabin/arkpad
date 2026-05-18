@@ -249,7 +249,7 @@ export default function Demo() {
         </Tab>
 
         <Tab value="Code">
-          <pre className="overflow-x-auto p-4 text-sm leading-relaxed whitespace-pre-wrap break-words font-mono bg-fd-background border rounded-lg relative text-fd-foreground">
+          <pre className="overflow-x-auto p-4 text-sm leading-relaxed whitespace-pre-wrap break-words font-mono bg-fd-background rounded-lg relative text-fd-foreground">
             <button
               onClick={() => navigator.clipboard.writeText(sourceCode)}
               className="absolute top-2 right-2 p-1.5 rounded-md hover:bg-fd-accent text-fd-muted-foreground transition-colors"

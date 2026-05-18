@@ -9,14 +9,31 @@ Headings organize content into sections. Supports levels 1 through 6, rendering 
 
 ## Commands
 
+The extension provides two primary commands for managing headings:
+
 ```ts
+// Toggles the current block between the specified heading level and a paragraph
 editor.runCommand("toggleHeading", { level: 1 });
-editor.runCommand("toggleHeading", { level: 2 });
-editor.runCommand("toggleHeading", { level: 3 });
-editor.runCommand("toggleHeading", { level: 4 });
-editor.runCommand("toggleHeading", { level: 5 });
-editor.runCommand("toggleHeading", { level: 6 });
+
+// Strictly sets the current block to the specified heading level
+editor.runCommand("setHeading", { level: 2 });
 ```
+
+### Chaining Commands
+
+You can execute commands immediately using `runCommand`, but Tiptap/Arkpad also natively supports **chaining**. Chaining allows you to combine multiple commands into a single, atomic transaction that counts as a single step in the undo/redo history. 
+
+This is highly recommended when you need to perform multiple actions at once (e.g., focusing the editor, then applying a heading):
+
+```ts
+editor
+  .chain()
+  .focus()
+  .toggleHeading({ level: 3 })
+  .run(); // .run() executes the entire chain
+```
+
+*Note: Always remember to call `.run()` at the end of your chain, otherwise the transaction will not be dispatched to the editor!*
 
 ## Keyboard Shortcuts
 
@@ -25,6 +42,9 @@ editor.runCommand("toggleHeading", { level: 6 });
 | H1      | Mod + Alt + 1 |
 | H2      | Mod + Alt + 2 |
 | H3      | Mod + Alt + 3 |
+| H4      | Mod + Alt + 4 |
+| H5      | Mod + Alt + 5 |
+| H6      | Mod + Alt + 6 |
 
 ## Active State
 
@@ -32,11 +52,30 @@ editor.runCommand("toggleHeading", { level: 6 });
 const isActive = editor.isActive("heading", { level: 2 });
 ```
 
+## Markdown Input Rules
+
+You can quickly create headings by typing markdown shortcuts at the beginning of a line followed by a space:
+
+| Shortcut  | Result |
+| :-------- | :----- |
+| `# `      | H1     |
+| `## `     | H2     |
+| `### `    | H3     |
+| `#### `   | H4     |
+| `##### `  | H5     |
+| `###### ` | H6     |
+
 ## Configuration
 
 ```ts
 Heading.configure({
+  // Define which heading levels are supported
   levels: [1, 2, 3, 4, 5, 6],
+  
+  // Add custom HTML attributes to all rendered headings
+  HTMLAttributes: {
+    class: 'my-custom-heading',
+  },
 });
 ```
 
@@ -77,7 +116,7 @@ const editor = useArkpadEditor({ extensions, content });
 return (
 
   <ArkpadProvider editor={editor}>
-    <div className="flex flex-col border rounded-lg overflow-hidden">
+    <div className="flex flex-col overflow-hidden">
       <div className="flex items-center gap-1 bg-fd-secondary p-1 border-b">
         {[1, 2, 3, 4, 5, 6].map((level) => (
           <EditorButton

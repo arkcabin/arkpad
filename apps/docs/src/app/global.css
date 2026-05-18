@@ -96,6 +96,20 @@
   --tw-prose-invert-td-borders: var(--color-fd-border) !important;
 }
 
+/* Add left padding to the first column of all Markdown tables */
+th:first-child,
+td:first-child,
+.prose th:first-child,
+.prose td:first-child {
+  padding-left: 1rem !important;
+}
+
+/* Remove underlines from headings and their anchor links */
+.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6,
+.prose h1 a, .prose h2 a, .prose h3 a, .prose h4 a, .prose h5 a, .prose h6 a {
+  text-decoration: none !important;
+}
+
 html {
   scrollbar-gutter: stable;
 }
