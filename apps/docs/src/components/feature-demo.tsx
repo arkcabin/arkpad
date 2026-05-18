@@ -22,6 +22,7 @@ import { Image } from "@arkpad/extension-image";
 import { EraserTool } from "@arkpad/extension-eraser";
 import { HighlighterTool } from "@arkpad/extension-highlighter";
 import { AI } from "@arkpad/extension-ai";
+import { CodeBlock } from "@arkpad/extension-code-block";
 
 import {
   Bold as BoldIcon,
@@ -118,6 +119,7 @@ const extensionMap: Record<string, ArkpadExtension[]> = {
   strike: [Engine, Strike],
   heading: [Engine, Heading],
   blockquote: [Engine, Blockquote],
+  "code-block": [Engine, CodeBlock],
   list: [Engine, BulletList, OrderedList, TaskList],
   taskList: [Engine, TaskList],
   table: [Engine, Heading, Table],
