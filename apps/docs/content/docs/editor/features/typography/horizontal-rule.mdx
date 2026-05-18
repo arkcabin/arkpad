@@ -1,29 +1,82 @@
 ---
 title: Horizontal Rule
-description: Insert a thematic break with `insertHorizontalRule`.
+description: Insert a thematic break with `setHorizontalRule`.
 ---
-
-
 
 Type: **Node**
 
 Horizontal Rule inserts a divider between sections. Renders as `<hr>` in HTML output.
 
-## Commands
-
-```ts
-editor.runCommand("insertHorizontalRule");
-```
-
-## Markdown Shortcut
-
-Type `---` followed by Enter.
-
 ## Demo
 
 <FeatureDemo
   feature="horizontal-rule"
-  content="<p>Try the horizontal rule feature here</p>"
-  commands={[{ label: "\u2014", command: "insertHorizontalRule", isActive: "horizontalRule" }]}
-  code='editor.runCommand("insertHorizontalRule")'
+  content="<p>Try inserting a divider below this line.</p><hr><p>Dividers make structuring long documents simple and clean.</p>"
+  commands={[
+    {
+      label: "—",
+      command: "setHorizontalRule",
+      isActive: "horizontalRule",
+      icon: "horizontal-rule",
+    },
+  ]}
 />
+
+## Installation
+
+```ts
+import { HorizontalRule } from "@arkpad/extension-horizontal-rule";
+```
+
+## Commands
+
+The extension registers one primary command for inserting dividers:
+
+```ts
+// Inserts a horizontal rule at the current selection
+editor.runCommand("setHorizontalRule");
+```
+
+### Chaining Commands
+
+You can chain commands to insert a horizontal rule and immediately focus the editor:
+
+```ts
+editor.chain().focus().setHorizontalRule().run();
+```
+
+## Keyboard Shortcuts
+
+| Shortcut      | Action                    |
+| :------------ | :------------------------ |
+| `Mod-Shift-h` | Inserts a horizontal rule |
+
+## Markdown Input Rules
+
+Type any of the following shortcuts on a new line to quickly convert it to a divider:
+
+- `---`
+- `——`
+- `___`
+
+## Active State
+
+```ts
+const isActive = editor.isActive("horizontalRule");
+```
+
+## Configuration
+
+### Options
+
+| Name             | Type                  | Default | Description                                                        |
+| :--------------- | :-------------------- | :------ | :----------------------------------------------------------------- |
+| `HTMLAttributes` | `Record<string, any>` | `{}`    | Key-value pairs of attributes to render on the `<hr>` DOM element. |
+
+```ts
+HorizontalRule.configure({
+  HTMLAttributes: {
+    class: "custom-divider-styling",
+  },
+});
+```

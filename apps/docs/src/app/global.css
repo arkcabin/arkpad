@@ -57,6 +57,7 @@
 }
 
 .prose {
+  max-width: none !important;
   --tw-prose-body: var(--color-fd-foreground) !important;
   --tw-prose-headings: var(--color-fd-primary) !important;
   --tw-prose-lead: var(--color-fd-muted-foreground) !important;
