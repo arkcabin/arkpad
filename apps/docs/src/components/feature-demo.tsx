@@ -23,6 +23,8 @@ import { EraserTool } from "@arkpad/extension-eraser";
 import { HighlighterTool } from "@arkpad/extension-highlighter";
 import { AI } from "@arkpad/extension-ai";
 import { CodeBlock } from "@arkpad/extension-code-block";
+import { HorizontalRule } from "@arkpad/extension-horizontal-rule";
+import { Typography } from "@arkpad/extension-typography";
 
 import {
   Bold as BoldIcon,
@@ -47,6 +49,24 @@ import {
   Link as LinkIcon,
 } from "lucide-react";
 import { Tab, Tabs } from "fumadocs-ui/components/tabs";
+
+// Custom Icons
+const HorizontalRuleIcon = ({ className }: { className?: string }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M5 12h14" />
+  </svg>
+);
 
 // Custom Heading Icons for H4-H6 (matching lucide style)
 const Heading4 = ({ className }: { className?: string }) => (
@@ -120,6 +140,8 @@ const extensionMap: Record<string, ArkpadExtension[]> = {
   heading: [Engine, Heading],
   blockquote: [Engine, Blockquote],
   "code-block": [Engine, CodeBlock],
+  "horizontal-rule": [Engine, HorizontalRule],
+  typography: [Engine, Typography],
   list: [Engine, BulletList, OrderedList, TaskList],
   taskList: [Engine, TaskList],
   table: [Engine, Heading, Table],
@@ -157,6 +179,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   DeleteTable: Trash2,
   MoveRowUp: ChevronUp,
   MoveRowDown: ChevronDown,
+  "horizontal-rule": HorizontalRuleIcon,
 };
 
 interface FeatureDemoProps {
