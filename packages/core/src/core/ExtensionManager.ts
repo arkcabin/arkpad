@@ -357,7 +357,10 @@ export class ExtensionManager {
             // 1. Duck-type check for standard ProseMirror InputRule instances
             // We check for 'match' and 'handler' properties.
             // Crucially, 'match' must have an 'exec' method to be used by prosemirror-inputrules 'run' function.
-            if (rule.match && typeof rule.match.exec === "function" && rule.handler) {
+            if (
+              (rule.match && typeof rule.match.exec === "function" && rule.handler) ||
+              rule instanceof InputRule
+            ) {
               rules.push(rule);
               return;
             }

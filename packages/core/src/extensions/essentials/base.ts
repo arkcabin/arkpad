@@ -139,6 +139,10 @@ export function createParagraph(): Node {
       return ["p", HTMLAttributes, 0];
     },
 
+    parseHTML() {
+      return [{ tag: "p" }];
+    },
+
     addCommands: () => ({
       setParagraph: () => (props: any) => {
         return setBlockType(props.state.schema.nodes.paragraph!, {
