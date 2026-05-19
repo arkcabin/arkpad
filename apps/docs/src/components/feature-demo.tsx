@@ -1,7 +1,13 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { useArkpadEditor, ArkpadEditorContent, ArkpadProvider, EditorButton } from "@arkpad/react";
+import {
+  useArkpadEditor,
+  ArkpadEditorContent,
+  ArkpadProvider,
+  EditorButton,
+  BubbleMenu,
+} from "@arkpad/react";
 import { Engine, ArkpadExtension } from "@arkpad/core";
 import { Bold } from "@arkpad/extension-bold";
 import { Italic } from "@arkpad/extension-italic";
@@ -23,6 +29,7 @@ import { FontSize } from "@arkpad/extension-font-size";
 import { Color } from "@arkpad/extension-color";
 import { Image } from "@arkpad/extension-image";
 import { Youtube } from "@arkpad/extension-youtube";
+import { BubbleMenu as BubbleMenuExtension } from "@arkpad/extension-bubble-menu";
 import { EraserTool } from "@arkpad/extension-eraser";
 import { HighlighterTool } from "@arkpad/extension-highlighter";
 import { AI } from "@arkpad/extension-ai";
@@ -171,6 +178,17 @@ const extensionMap: Record<string, ArkpadExtension[]> = {
   link: [Engine, Heading, Link],
   image: [Engine, Heading, Image],
   youtube: [Engine, Youtube],
+  "bubble-menu": [
+    Engine,
+    Bold,
+    Italic,
+    Underline,
+    Strike,
+    Code,
+    Highlight,
+    Link,
+    BubbleMenuExtension,
+  ],
   superscript: [Engine, Superscript],
   subscript: [Engine, Subscript],
   ai: [Engine, Heading, AI],
@@ -302,6 +320,7 @@ export default function Demo() {
                 <div className="flex-1 px-6 sm:px-8 py-6">
                   <ArkpadEditorContent editor={editor} />
                 </div>
+                {feature === "bubble-menu" && <BubbleMenu editor={editor} defaultToolbar />}
               </div>
             </ArkpadProvider>
           </div>
