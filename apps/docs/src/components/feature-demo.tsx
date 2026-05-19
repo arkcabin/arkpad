@@ -40,6 +40,7 @@ import { CodeBlock } from "@arkpad/extension-code-block";
 import { HorizontalRule } from "@arkpad/extension-horizontal-rule";
 import { Typography } from "@arkpad/extension-typography";
 import { createTextAlign } from "@arkpad/extension-alignment";
+import { createMarkdownPaste } from "@arkpad/extension-markdown";
 
 import {
   Bold as BoldIcon,
@@ -224,6 +225,20 @@ const extensionMap: Record<string, ArkpadExtension[]> = {
   ai: [Engine, Heading, AI],
   "eraser-tool": [Engine, Heading, Highlight, EraserTool],
   "highlighter-tool": [Engine, Heading, Highlight, HighlighterTool],
+  markdown: [
+    Engine,
+    Heading,
+    Bold,
+    Italic,
+    Code,
+    CodeBlock,
+    BulletList,
+    OrderedList,
+    ListItem,
+    Blockquote,
+    HorizontalRule,
+    createMarkdownPaste(),
+  ],
 };
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
