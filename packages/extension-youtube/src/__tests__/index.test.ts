@@ -26,7 +26,7 @@ describe("Youtube", () => {
   });
 
   it("creates a ProseMirror plugin for paste handling", () => {
-    const plugins = Youtube.addProseMirrorPlugins?.();
+    const plugins = (Youtube as any).addProseMirrorPlugins?.();
     expect(plugins).toBeDefined();
     expect(plugins!.length).toBe(1);
   });
@@ -35,6 +35,14 @@ describe("Youtube", () => {
     const attrs = Youtube.addAttributes?.();
     expect(attrs).toBeDefined();
     expect((attrs as any).src.default).toBeNull();
+  });
+
+  it("registers custom node view constructor", () => {
+    expect((Youtube as any).config.addNodeView).toBeDefined();
+  });
+
+  it("assigns layout role as WIDGET", () => {
+    expect((Youtube as any).config.role).toBe(4); // NodeRole.WIDGET is 4
   });
 });
 

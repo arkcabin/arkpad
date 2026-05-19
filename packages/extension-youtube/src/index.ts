@@ -1,4 +1,5 @@
 import { Node, ArkpadCommandProps, PMNode, Plugin, NodeRole } from "@arkpad/core";
+import { YoutubeNodeView } from "./YoutubeView";
 
 declare module "@arkpad/core" {
   interface ArkpadCommands {
@@ -63,6 +64,9 @@ export const Youtube = Node.create<YoutubeOptions>({
       height: {
         default: this.options.height,
       },
+      align: {
+        default: "center", // left, center, right
+      },
     };
   },
 
@@ -74,6 +78,7 @@ export const Youtube = Node.create<YoutubeOptions>({
           src: dom.getAttribute("data-src"),
           width: dom.getAttribute("data-width") || this.options.width,
           height: dom.getAttribute("data-height") || this.options.height,
+          align: dom.getAttribute("data-align") || "center",
         }),
       },
       {
@@ -82,13 +87,14 @@ export const Youtube = Node.create<YoutubeOptions>({
           src: dom.getAttribute("src"),
           width: dom.getAttribute("width") || this.options.width,
           height: dom.getAttribute("height") || this.options.height,
+          align: "center",
         }),
       },
     ];
   },
 
   renderHTML({ HTMLAttributes }: { node: PMNode; HTMLAttributes: Record<string, any> }) {
-    const { src, width, height } = HTMLAttributes;
+    const { src, width, height, align } = HTMLAttributes;
     const embedUrl = getYoutubeEmbedUrl(src) || src;
 
     return [
@@ -98,25 +104,39 @@ export const Youtube = Node.create<YoutubeOptions>({
         "data-src": src,
         "data-width": width,
         "data-height": height,
-        class: "ark-youtube-wrapper",
-        style: "position: relative; width: 100%; padding-bottom: 56.25%; margin: 1.5rem 0;",
+        "data-align": align,
+        class: `ark-youtube-container ark-align-${align}`,
+        style: `width: ${width}; display: flex; justify-content: ${
+          align === "center" ? "center" : align === "right" ? "flex-end" : "flex-start"
+        }; margin: 1.5rem auto;`,
       },
       [
-        "iframe",
+        "div",
         {
-          src: embedUrl,
-          width,
-          height,
-          frameborder: "0",
-          allowfullscreen: "true",
-          allow:
-            "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture",
-          style:
-            "position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 8px;",
-          ...this.options.HTMLAttributes,
+          class: "ark-youtube-wrapper",
+          style: "position: relative; width: 100%; padding-bottom: 56.25%;",
         },
+        [
+          "iframe",
+          {
+            src: embedUrl,
+            width: "100%",
+            height: "100%",
+            frameborder: "0",
+            allowfullscreen: "true",
+            allow:
+              "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture",
+            style:
+              "position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 8px;",
+            ...this.options.HTMLAttributes,
+          },
+        ],
       ],
     ];
+  },
+
+  addNodeView() {
+    return (props: any) => new YoutubeNodeView(props.node, props.view, props.getPos);
   },
 
   addCommands() {
