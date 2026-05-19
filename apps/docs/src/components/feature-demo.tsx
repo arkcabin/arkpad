@@ -10,7 +10,7 @@ import {
   FloatingMenu,
   DropdownMenu,
 } from "@arkpad/react";
-import { Engine, ArkpadExtension } from "@arkpad/core";
+import { Engine, ArkpadExtension, Placeholder } from "@arkpad/core";
 import { Bold } from "@arkpad/extension-bold";
 import { Italic } from "@arkpad/extension-italic";
 import { Underline } from "@arkpad/extension-underline";
@@ -40,8 +40,6 @@ import { CodeBlock } from "@arkpad/extension-code-block";
 import { HorizontalRule } from "@arkpad/extension-horizontal-rule";
 import { Typography } from "@arkpad/extension-typography";
 import { createTextAlign } from "@arkpad/extension-alignment";
-import { PlaceholderDemo } from "../demos/placeholder-demo";
-import { ColorDemo } from "../demos/color-demo";
 
 import {
   Bold as BoldIcon,
@@ -210,6 +208,18 @@ const extensionMap: Record<string, ArkpadExtension[]> = {
   ],
   superscript: [Engine, Superscript],
   subscript: [Engine, Subscript],
+  placeholder: [
+    Engine,
+    Heading,
+    Blockquote,
+    BulletList,
+    Placeholder.configure({
+      placeholder: "Start writing...",
+      emptyEditorClass: "is-editor-empty",
+      emptyNodeClass: "is-empty",
+      showOnlyCurrent: true,
+    }),
+  ],
   ai: [Engine, Heading, AI],
   "eraser-tool": [Engine, Heading, Highlight, EraserTool],
   "highlighter-tool": [Engine, Heading, Highlight, HighlighterTool],
@@ -267,13 +277,6 @@ interface FeatureDemoProps {
 }
 
 export function FeatureDemo({ feature, content, fullCode, commands }: FeatureDemoProps) {
-  if (feature === "placeholder") {
-    return <PlaceholderDemo />;
-  }
-  if (feature === "color") {
-    return <ColorDemo />;
-  }
-
   const extensions = useMemo(
     () => (extensionMap[feature] || [Engine]) as ArkpadExtension[],
     [feature]
@@ -346,6 +349,32 @@ export default function Demo() {
                 <div className="flex-1 px-6 sm:px-8 py-6">
                   <ArkpadEditorContent editor={editor} />
                 </div>
+                {feature === "color" && (
+                  <div className="flex items-center gap-2 px-6 sm:px-8 py-3 border-t border-fd-border bg-fd-secondary/30">
+                    {[
+                      { color: "#ef4444", label: "Red" },
+                      { color: "#3b82f6", label: "Blue" },
+                      { color: "#10b981", label: "Green" },
+                      { color: "#f59e0b", label: "Amber" },
+                      { color: "#8b5cf6", label: "Violet" },
+                    ].map(({ color, label }) => (
+                      <button
+                        key={color}
+                        onClick={() => editor.runCommand("setColor", color)}
+                        className="w-6 h-6 rounded border border-fd-border cursor-pointer transition-transform hover:scale-110"
+                        style={{ backgroundColor: color }}
+                        title={label}
+                      />
+                    ))}
+                    <div className="w-px h-4 bg-fd-border mx-1" />
+                    <button
+                      onClick={() => editor.runCommand("unsetColor")}
+                      className="text-xs px-2.5 py-1 text-fd-muted-foreground hover:text-fd-foreground border border-fd-border rounded transition-colors cursor-pointer"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                )}
                 {feature === "bubble-menu" && <BubbleMenu editor={editor} defaultToolbar />}
                 {feature === "floating-menu" && (
                   <FloatingMenu editor={editor}>
