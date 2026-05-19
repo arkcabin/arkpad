@@ -24,6 +24,7 @@ import { Heading } from "@arkpad/extension-heading";
 import { Blockquote } from "@arkpad/extension-blockquote";
 import { BulletList } from "@arkpad/extension-bullet-list";
 import { OrderedList } from "@arkpad/extension-ordered-list";
+import { ListItem } from "@arkpad/extension-list-item";
 import { TaskList } from "@arkpad/extension-task-list";
 import { Table } from "@arkpad/extension-table";
 import { FontFamily } from "@arkpad/extension-font-family";
