@@ -37,6 +37,8 @@ import { CodeBlock } from "@arkpad/extension-code-block";
 import { HorizontalRule } from "@arkpad/extension-horizontal-rule";
 import { Typography } from "@arkpad/extension-typography";
 import { createTextAlign } from "@arkpad/extension-alignment";
+import { BubbleMenuDemo } from "../demos/bubble-menu-demo";
+import { FloatingMenuDemo } from "../demos/floating-menu-demo";
 
 import {
   Bold as BoldIcon,
@@ -248,6 +250,13 @@ interface FeatureDemoProps {
 }
 
 export function FeatureDemo({ feature, content, fullCode, commands }: FeatureDemoProps) {
+  if (feature === "bubble-menu") {
+    return <BubbleMenuDemo />;
+  }
+  if (feature === "floating-menu") {
+    return <FloatingMenuDemo />;
+  }
+
   const extensions = useMemo(
     () => (extensionMap[feature] || [Engine]) as ArkpadExtension[],
     [feature]
