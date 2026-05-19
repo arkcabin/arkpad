@@ -17,4 +17,8 @@ describe("Table", () => {
       expect(Table.addCommands?.()).toBeDefined();
     });
   }
+
+  it("registers custom node view constructor for resizer mapping", () => {
+    expect((Table as any).config.addNodeView).toBeDefined();
+  });
 });

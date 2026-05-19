@@ -18,4 +18,12 @@ describe("Image", () => {
       expect(Image.addCommands?.()).toBeDefined();
     });
   }
+
+  it("registers layout role as WIDGET", () => {
+    expect((Image as any).config.role).toBe(4);
+  });
+
+  it("registers custom node view constructor", () => {
+    expect((Image as any).config.addNodeView).toBeDefined();
+  });
 });

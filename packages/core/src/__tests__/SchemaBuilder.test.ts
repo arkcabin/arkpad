@@ -44,7 +44,9 @@ describe("SchemaBuilder", () => {
     const inner = Extension.create({ name: "inner" });
     const outer = Extension.create({
       name: "outer",
-      addExtensions() { return [inner]; },
+      addExtensions() {
+        return [inner];
+      },
     });
     const builder = new SchemaBuilder([outer]);
     const schema = builder.build();
@@ -67,11 +69,28 @@ describe("SchemaBuilder", () => {
   });
 
   it("processes node with role and group", () => {
-    const roleNode = Node.create({ name: "layoutBlock", group: "block", role: 8, content: "block+" } as any);
+    const roleNode = Node.create({
+      name: "layoutBlock",
+      group: "block",
+      role: 8,
+      content: "block+",
+    } as any);
     const builder = new SchemaBuilder([roleNode]);
     const schema = builder.build();
     expect(schema.nodes.layoutBlock).toBeDefined();
     const group = (schema.nodes.layoutBlock.spec as any).group;
     expect(group).toContain("block");
+  });
+
+  it("does not force structural or root nodes into block/layout/widget groups", () => {
+    const docNode = Node.create({ name: "doc", role: 16 } as any);
+    const cellNode = Node.create({ name: "table_cell", role: 8, tableRole: "cell" } as any);
+    const listItemNode = Node.create({ name: "listItem", role: 8 } as any);
+    const builder = new SchemaBuilder([docNode, cellNode, listItemNode]);
+    const schema = builder.build();
+
+    expect((schema.nodes.doc.spec as any).group).toBeUndefined();
+    expect((schema.nodes.table_cell.spec as any).group).toBeUndefined();
+    expect((schema.nodes.listItem.spec as any).group).toBeUndefined();
   });
 });
