@@ -40,6 +40,7 @@ import { CodeBlock } from "@arkpad/extension-code-block";
 import { HorizontalRule } from "@arkpad/extension-horizontal-rule";
 import { Typography } from "@arkpad/extension-typography";
 import { createTextAlign } from "@arkpad/extension-alignment";
+import { PlaceholderDemo } from "../demos/placeholder-demo";
 
 import {
   Bold as BoldIcon,
@@ -265,6 +266,10 @@ interface FeatureDemoProps {
 }
 
 export function FeatureDemo({ feature, content, fullCode, commands }: FeatureDemoProps) {
+  if (feature === "placeholder") {
+    return <PlaceholderDemo />;
+  }
+
   const extensions = useMemo(
     () => (extensionMap[feature] || [Engine]) as ArkpadExtension[],
     [feature]
