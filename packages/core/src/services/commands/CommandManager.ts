@@ -18,6 +18,22 @@ import {
 import { parseContent } from "../../utils";
 
 /**
+ * Safely sets the selection on a transaction, preventing crashes from invalid selections.
+ */
+function safeSetSelection(tr: Transaction, selection: Selection): void {
+  try {
+    tr.setSelection(selection);
+  } catch {
+    try {
+      const resolvedSelection = Selection.near(tr.doc.resolve(selection.from));
+      tr.setSelection(resolvedSelection);
+    } catch {
+      // Ignore if even near fallback fails
+    }
+  }
+}
+
+/**
  * CommandManager handles the chaining of commands in a single transaction.
  * Shadow Engine architecture for high-performance virtual state simulation.
  */
@@ -94,7 +110,7 @@ class CommandManagerInstance {
                     localTr.doc,
                     localTr.mapping.slice(stepCountBefore)
                   );
-                  localTr.setSelection(mappedSelection);
+                  safeSetSelection(localTr, mappedSelection);
                 }
               },
               view: this.view,
@@ -107,7 +123,7 @@ class CommandManagerInstance {
                   view: this.view,
                   dispatch: (tr) => {
                     tr.steps.forEach((step) => localTr.step(step));
-                    if (tr.selectionSet) localTr.setSelection(tr.selection);
+                    if (tr.selectionSet) safeSetSelection(localTr, tr.selection);
                   },
                   // Preserve dispatch mode for nested chains.
                   // This prevents can()/capability checks from behaving like real runs.
@@ -213,7 +229,7 @@ class CommandManagerInstance {
               localTr.doc,
               localTr.mapping.slice(stepCountBefore)
             );
-            localTr.setSelection(mappedSelection);
+            safeSetSelection(localTr, mappedSelection);
           }
         },
         view: this.view,
@@ -336,23 +352,34 @@ class CommandManagerInstance {
         const safeFrom = Math.max(0, Math.min(selection.from, docSizeNow));
         const safeTo = Math.max(0, Math.min(selection.to, docSizeNow));
 
-        if (selection instanceof NodeSelection) {
-          // Verify that a node actually exists at safeFrom
-          const nodeAtPos = this.masterTransaction.doc.nodeAt(safeFrom);
-          if (nodeAtPos && nodeAtPos.type.spec.selectable !== false) {
+        try {
+          if (selection instanceof NodeSelection) {
+            const nodeAtPos = this.masterTransaction.doc.nodeAt(safeFrom);
+            if (nodeAtPos && nodeAtPos.type.spec.selectable !== false) {
+              this.masterTransaction.setSelection(
+                NodeSelection.create(this.masterTransaction.doc, safeFrom)
+              );
+            } else {
+              this.masterTransaction.setSelection(
+                Selection.near(this.masterTransaction.doc.resolve(safeFrom))
+              );
+            }
+          } else if (selection.constructor.name === "TextSelection" || selection instanceof TextSelection) {
             this.masterTransaction.setSelection(
-              NodeSelection.create(this.masterTransaction.doc, safeFrom)
+              TextSelection.create(this.masterTransaction.doc, safeFrom, safeTo)
             );
           } else {
-            // Fallback to text selection if node is gone
-            this.masterTransaction.setSelection(
-              TextSelection.create(this.masterTransaction.doc, safeFrom)
-            );
+            // For custom selection types like CellSelection, apply directly.
+            this.masterTransaction.setSelection(selection);
           }
-        } else {
-          this.masterTransaction.setSelection(
-            TextSelection.create(this.masterTransaction.doc, safeFrom, safeTo)
-          );
+        } catch {
+          try {
+            this.masterTransaction.setSelection(
+              Selection.near(this.masterTransaction.doc.resolve(safeFrom))
+            );
+          } catch {
+            // Ignore failure
+          }
         }
       }
       return true;
@@ -502,7 +529,7 @@ class CommandManagerInstance {
             localTr.doc,
             localTr.mapping.slice(stepCountBefore)
           );
-          localTr.setSelection(mappedSelection);
+          safeSetSelection(localTr, mappedSelection);
         }
       },
 

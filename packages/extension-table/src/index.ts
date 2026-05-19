@@ -8,6 +8,7 @@ import { tableNode } from "./nodes/table";
 import { tableRowNode } from "./nodes/table-row";
 import { tableCellNode } from "./nodes/table-cell";
 import { tableHeaderNode } from "./nodes/table-header";
+import { TableView } from "./nodes/TableView";
 
 // Commands
 import { insertTable, deleteTable, exitTable, fixTables } from "./commands/table";
@@ -59,6 +60,10 @@ export const Table = Extension.create<TableOptions>({
       table_cell: tableCellNode,
       table_header: tableHeaderNode,
     };
+  },
+
+  addNodeView() {
+    return (props: any) => new TableView(props.node, this.options.cellMinWidth);
   },
 
   addCommands() {

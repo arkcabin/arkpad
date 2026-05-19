@@ -14,6 +14,7 @@ import {
   BetweenVerticalEnd,
   BetweenVerticalStart,
   Trash2,
+  TableProperties,
   Combine,
   Split,
   Plus,
@@ -152,6 +153,14 @@ export function TableDemo() {
           />
         ))}
       </div>
+      <div className="w-px h-4 bg-fd-border mx-1" />
+      <EditorButton
+        command="deleteTable"
+        title="Delete Table"
+        className="p-2 rounded hover:bg-fd-accent text-red-500 hover:text-red-600 transition-colors"
+      >
+        <TableProperties className="w-3.5 h-3.5" />
+      </EditorButton>
     </DemoContainer>
   );
 }

@@ -31,10 +31,11 @@ export const addColumnAfter: CommandFactory =
 export const deleteColumn: CommandFactory =
   () =>
   ({ chain }: ArkpadCommandProps) => {
-    return chain()
+    const res = chain()
       .command(
         ({ state, dispatch }: ArkpadCommandProps) => pmDeleteColumn(state, dispatch),
         "deleteColumn"
       )
       .run();
+    return res;
   };

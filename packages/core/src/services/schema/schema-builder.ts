@@ -103,6 +103,7 @@ export class SchemaBuilder {
           whitespace: config.whitespace,
           defining: config.defining,
           isolating: config.isolating,
+          tableRole: config.tableRole,
           attrs: this.collectAttributes(ext),
           trailingNode: config.trailingNode,
           // Governance Metadata (Passed to PM NodeSpec)
@@ -433,11 +434,21 @@ export class SchemaBuilder {
       // PRO-TIP: ProseMirror crashes if a block-level node is marked as inline.
       processedSpec.inline = false;
 
-      const roles: string[] = ["block"];
-      if (effectiveRole & 8 || processedSpec.isLayout) roles.push("layout");
-      if (effectiveRole & 4 || processedSpec.isWidget) roles.push("widget");
+      const isStructuralOrRoot =
+        name === "doc" ||
+        processedSpec.tableRole === "row" ||
+        processedSpec.tableRole === "cell" ||
+        processedSpec.tableRole === "header_cell" ||
+        name === "listItem" ||
+        name === "taskItem";
 
-      processedSpec.group = Array.from(new Set([...groupList, ...roles])).join(" ");
+      if (!isStructuralOrRoot) {
+        const roles: string[] = ["block"];
+        if (effectiveRole & 8 || processedSpec.isLayout) roles.push("layout");
+        if (effectiveRole & 4 || processedSpec.isWidget) roles.push("widget");
+
+        processedSpec.group = Array.from(new Set([...groupList, ...roles])).join(" ");
+      }
     }
 
     return processedSpec;

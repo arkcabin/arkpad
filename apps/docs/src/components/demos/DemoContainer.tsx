@@ -21,7 +21,7 @@ export function DemoContainer({ editor, children }: DemoContainerProps) {
     <ArkpadProvider editor={editor}>
       <div className="my-10 flex flex-col w-full bg-fd-background -mx-6 sm:-mx-8">
         {/* Minimalist Edge-to-Edge Toolbar */}
-        <div className="flex items-center px-6 sm:px-8 py-1.5 border-b border-fd-border sticky top-0 z-10 bg-fd-background">
+        <div className="flex items-center gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-6 sm:px-8 py-1.5 border-b border-fd-border sticky top-0 z-10 bg-fd-background">
           {children}
         </div>
 
