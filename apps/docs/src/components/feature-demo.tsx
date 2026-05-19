@@ -7,6 +7,8 @@ import {
   ArkpadProvider,
   EditorButton,
   BubbleMenu,
+  FloatingMenu,
+  DropdownMenu,
 } from "@arkpad/react";
 import { Engine, ArkpadExtension } from "@arkpad/core";
 import { Bold } from "@arkpad/extension-bold";
@@ -30,6 +32,7 @@ import { Color } from "@arkpad/extension-color";
 import { Image } from "@arkpad/extension-image";
 import { Youtube } from "@arkpad/extension-youtube";
 import { BubbleMenu as BubbleMenuExtension } from "@arkpad/extension-bubble-menu";
+import { FloatingMenu as FloatingMenuExtension } from "@arkpad/extension-floating-menu";
 import { EraserTool } from "@arkpad/extension-eraser";
 import { HighlighterTool } from "@arkpad/extension-highlighter";
 import { AI } from "@arkpad/extension-ai";
@@ -37,8 +40,6 @@ import { CodeBlock } from "@arkpad/extension-code-block";
 import { HorizontalRule } from "@arkpad/extension-horizontal-rule";
 import { Typography } from "@arkpad/extension-typography";
 import { createTextAlign } from "@arkpad/extension-alignment";
-import { BubbleMenuDemo } from "../demos/bubble-menu-demo";
-import { FloatingMenuDemo } from "../demos/floating-menu-demo";
 
 import {
   Bold as BoldIcon,
@@ -191,6 +192,20 @@ const extensionMap: Record<string, ArkpadExtension[]> = {
     Link,
     BubbleMenuExtension,
   ],
+  "floating-menu": [
+    Engine,
+    Bold,
+    Italic,
+    Underline,
+    Strike,
+    Heading,
+    Blockquote,
+    BulletList,
+    OrderedList,
+    Link,
+    Highlight,
+    FloatingMenuExtension,
+  ],
   superscript: [Engine, Superscript],
   subscript: [Engine, Subscript],
   ai: [Engine, Heading, AI],
@@ -250,13 +265,6 @@ interface FeatureDemoProps {
 }
 
 export function FeatureDemo({ feature, content, fullCode, commands }: FeatureDemoProps) {
-  if (feature === "bubble-menu") {
-    return <BubbleMenuDemo />;
-  }
-  if (feature === "floating-menu") {
-    return <FloatingMenuDemo />;
-  }
-
   const extensions = useMemo(
     () => (extensionMap[feature] || [Engine]) as ArkpadExtension[],
     [feature]
@@ -330,6 +338,72 @@ export default function Demo() {
                   <ArkpadEditorContent editor={editor} />
                 </div>
                 {feature === "bubble-menu" && <BubbleMenu editor={editor} defaultToolbar />}
+                {feature === "floating-menu" && (
+                  <FloatingMenu editor={editor}>
+                    <div className="flex items-center gap-0.5 px-2 py-1.5 bg-fd-background rounded-lg shadow-lg border border-fd-border">
+                      <EditorButton
+                        command="toggleBold"
+                        name="bold"
+                        className="p-1.5 rounded hover:bg-fd-accent text-fd-muted-foreground transition-colors [&.active]:bg-fd-primary [&.active]:text-fd-primary-foreground"
+                        activeClassName="active"
+                      >
+                        <BoldIcon className="w-3.5 h-3.5" />
+                      </EditorButton>
+                      <EditorButton
+                        command="toggleItalic"
+                        name="italic"
+                        className="p-1.5 rounded hover:bg-fd-accent text-fd-muted-foreground transition-colors [&.active]:bg-fd-primary [&.active]:text-fd-primary-foreground"
+                        activeClassName="active"
+                      >
+                        <ItalicIcon className="w-3.5 h-3.5" />
+                      </EditorButton>
+                      <EditorButton
+                        command="toggleUnderline"
+                        name="underline"
+                        className="p-1.5 rounded hover:bg-fd-accent text-fd-muted-foreground transition-colors [&.active]:bg-fd-primary [&.active]:text-fd-primary-foreground"
+                        activeClassName="active"
+                      >
+                        <UnderlineIcon className="w-3.5 h-3.5" />
+                      </EditorButton>
+                      <EditorButton
+                        command="toggleStrike"
+                        name="strike"
+                        className="p-1.5 rounded hover:bg-fd-accent text-fd-muted-foreground transition-colors [&.active]:bg-fd-primary [&.active]:text-fd-primary-foreground"
+                        activeClassName="active"
+                      >
+                        <StrikeIcon className="w-3.5 h-3.5" />
+                      </EditorButton>
+                      <div className="w-px h-4 bg-fd-border mx-1" />
+                      <DropdownMenu layout="vertical">
+                        <DropdownMenu.Trigger className="p-1.5 rounded hover:bg-fd-accent text-fd-muted-foreground text-[10px] font-bold px-1">
+                          H<span className="text-[8px] opacity-60">▾</span>
+                        </DropdownMenu.Trigger>
+                        <DropdownMenu.Content align="start" side="top" minWidth={140}>
+                          {[1, 2, 3, 4, 5, 6].map((level) => (
+                            <DropdownMenu.Item
+                              key={level}
+                              command="toggleHeading"
+                              name="heading"
+                              attrs={{ level }}
+                            >
+                              <span className="font-semibold text-fd-muted-foreground mr-2 w-5 text-right">
+                                H{level}
+                              </span>
+                              <span>Heading {level}</span>
+                            </DropdownMenu.Item>
+                          ))}
+                          <DropdownMenu.Separator />
+                          <DropdownMenu.Item command="setParagraph" name="paragraph">
+                            <span className="text-fd-muted-foreground mr-2 w-5 text-right font-mono">
+                              ¶
+                            </span>
+                            <span>Paragraph</span>
+                          </DropdownMenu.Item>
+                        </DropdownMenu.Content>
+                      </DropdownMenu>
+                    </div>
+                  </FloatingMenu>
+                )}
               </div>
             </ArkpadProvider>
           </div>
