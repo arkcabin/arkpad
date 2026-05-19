@@ -24,7 +24,7 @@ export const Blockquote = Node.create<BlockquoteOptions>({
   content: "paragraph block*",
   marks: "_",
   group: "block",
-  role: NodeRole.CONTENT,
+  role: NodeRole.LAYOUT,
   defining: true,
   trailingNode: true,
 
