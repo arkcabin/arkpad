@@ -9,7 +9,6 @@ interface DemoContainerProps {
   children?: React.ReactNode;
 }
 
-
 /**
  * A standardized container for Arkpad demos in the documentation.
  * Provides a premium look with the Emerald (Fumadocs) theme.
@@ -25,7 +24,6 @@ export function DemoContainer({ editor, children }: DemoContainerProps) {
           {children}
         </div>
 
-
         {/* Flat Editor Canvas */}
         <div className="flex-1">
           <ArkpadEditorContent editor={editor} />
@@ -34,6 +32,3 @@ export function DemoContainer({ editor, children }: DemoContainerProps) {
     </ArkpadProvider>
   );
 }
-
-
-

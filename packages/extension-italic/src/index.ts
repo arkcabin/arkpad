@@ -22,11 +22,7 @@ export const Italic = Mark.create({
   },
 
   parseHTML() {
-    return [
-      { tag: "em" },
-      { tag: "i" },
-      { style: "font-style=italic" },
-    ];
+    return [{ tag: "em" }, { tag: "i" }, { style: "font-style=italic" }];
   },
 
   renderHTML({ HTMLAttributes }: { node: PMNode; HTMLAttributes: Record<string, any> }) {
@@ -71,9 +67,7 @@ export const Italic = Mark.create({
   addInputRules(schema: Schema) {
     const markType = schema.marks.italic;
     if (!markType) return [];
-    return [
-      markInputRule(/(?:^|[^*_])(?:\*|_)([^*_]+)(?:\*|_)$/, markType),
-    ];
+    return [markInputRule(/(?:^|[^*_])(?:\*|_)([^*_]+)(?:\*|_)$/, markType)];
   },
 });
 

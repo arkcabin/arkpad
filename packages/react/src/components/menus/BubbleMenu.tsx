@@ -324,12 +324,20 @@ const LinkInput: React.FC<LinkInputProps> = ({ initialValue, onApply, onCancel }
   }, []);
 
   return (
-    <div 
+    <div
       className="flex items-center gap-2 px-2 py-1.5 bg-[var(--menu-bg)] rounded-lg shadow-lg border border-[var(--menu-border)] min-w-[320px]"
       onMouseDown={(e) => e.stopPropagation()} // Prevent editor blur
     >
       <div className="flex-1 flex items-center gap-2 px-2 py-1 bg-[rgba(255,255,255,0.05)] rounded border border-[rgba(255,255,255,0.1)]">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="opacity-40">
+        <svg
+          width="12"
+          height="12"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          className="opacity-40"
+        >
           <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
           <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
         </svg>
@@ -352,11 +360,15 @@ const LinkInput: React.FC<LinkInputProps> = ({ initialValue, onApply, onCancel }
       >
         Apply
       </button>
-      <button
-        onClick={onCancel}
-        className="toolbar-btn p-1"
-      >
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+      <button onClick={onCancel} className="toolbar-btn p-1">
+        <svg
+          width="12"
+          height="12"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+        >
           <line x1="18" y1="6" x2="6" y2="18" />
           <line x1="6" y1="6" x2="18" y2="18" />
         </svg>
@@ -442,8 +454,7 @@ export const BubbleMenu: React.FC<BubbleMenuProps> = ({
     const menuEngine = (editor as any).extensionManager?.menuEngine;
     if (menuEngine) {
       const effectiveShouldShow =
-        shouldShow ??
-        (({ editor: e, empty }: any) => !empty && e.isFocused());
+        shouldShow ?? (({ editor: e, empty }: any) => !empty && e.isFocused());
 
       menuEngine.registerExtensionMenus("bubbleMenu", {
         type: "bubble",
@@ -487,12 +498,7 @@ export const BubbleMenu: React.FC<BubbleMenuProps> = ({
           />
         );
       }
-      return (
-        <DefaultToolbar
-          onLinkClick={() => setShowLinkInput(true)}
-          isOnlyLink={isOnlyLink}
-        />
-      );
+      return <DefaultToolbar onLinkClick={() => setShowLinkInput(true)} isOnlyLink={isOnlyLink} />;
     }
 
     return null;

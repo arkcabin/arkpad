@@ -40,8 +40,14 @@ describe("CommandManager", () => {
     const state = EditorState.create({ schema: testSchema });
     const calls: string[] = [];
     const commands = {
-      cmdA: () => () => { calls.push("A"); return true; },
-      cmdB: () => () => { calls.push("B"); return true; },
+      cmdA: () => () => {
+        calls.push("A");
+        return true;
+      },
+      cmdB: () => () => {
+        calls.push("B");
+        return true;
+      },
     };
     const cm = new CommandManager({
       state,

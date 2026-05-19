@@ -27,8 +27,9 @@ export const ClipboardTextSerializer = Extension.create<ClipboardTextSerializerO
             const { state } = this.editor!.getView();
             const { doc, selection } = state;
             const { from, to } = selection;
-            const separator = this.options.blockSeparator !== undefined ? this.options.blockSeparator : "\n\n";
-            
+            const separator =
+              this.options.blockSeparator !== undefined ? this.options.blockSeparator : "\n\n";
+
             return doc.textBetween(from, to, separator);
           },
         },

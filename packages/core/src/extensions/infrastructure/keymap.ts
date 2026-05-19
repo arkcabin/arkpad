@@ -19,7 +19,7 @@ export const Keymap = Extension.create({
             const { selection, doc } = tr;
             const { empty, $anchor } = selection;
             const { pos, parent } = $anchor;
-            
+
             if (
               !empty ||
               !parent.type.isTextblock ||
@@ -71,12 +71,16 @@ export const Keymap = Extension.create({
       new Plugin({
         key: new PluginKey("clearDocument"),
         appendTransaction: (transactions, oldState, newState) => {
-          if (transactions.some(tr => tr.getMeta("composition"))) {
+          if (transactions.some((tr) => tr.getMeta("composition"))) {
             return;
           }
 
-          const docChanges = transactions.some(transaction => transaction.docChanged) && !oldState.doc.eq(newState.doc);
-          const ignoreTr = transactions.some(transaction => transaction.getMeta("preventClearDocument"));
+          const docChanges =
+            transactions.some((transaction) => transaction.docChanged) &&
+            !oldState.doc.eq(newState.doc);
+          const ignoreTr = transactions.some((transaction) =>
+            transaction.getMeta("preventClearDocument")
+          );
 
           if (!docChanges || ignoreTr) {
             return;

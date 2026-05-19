@@ -60,4 +60,3 @@ export function EraserToolDemo() {
     </ArkpadProvider>
   );
 }`;
-

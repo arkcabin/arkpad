@@ -9,7 +9,9 @@ export class BlockRegistry implements IBlockRegistry {
 
   public registerBlock(definition: BlockDefinition): void {
     if (this.blocks.has(definition.type)) {
-      console.warn(`[BlockRegistry] Block type "${definition.type}" is already registered. Overwriting.`);
+      console.warn(
+        `[BlockRegistry] Block type "${definition.type}" is already registered. Overwriting.`
+      );
     }
     this.blocks.set(definition.type, definition);
   }

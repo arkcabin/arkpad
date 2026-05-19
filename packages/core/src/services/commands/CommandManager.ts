@@ -364,7 +364,10 @@ class CommandManagerInstance {
                 Selection.near(this.masterTransaction.doc.resolve(safeFrom))
               );
             }
-          } else if (selection.constructor.name === "TextSelection" || selection instanceof TextSelection) {
+          } else if (
+            selection.constructor.name === "TextSelection" ||
+            selection instanceof TextSelection
+          ) {
             this.masterTransaction.setSelection(
               TextSelection.create(this.masterTransaction.doc, safeFrom, safeTo)
             );

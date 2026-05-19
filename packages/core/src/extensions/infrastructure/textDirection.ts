@@ -13,7 +13,8 @@ export const TextDirection = Extension.create({
         attributes: {
           textDirection: {
             default: "ltr",
-            parseHTML: (element: HTMLElement) => element.style.direction || element.getAttribute("dir") || "ltr",
+            parseHTML: (element: HTMLElement) =>
+              element.style.direction || element.getAttribute("dir") || "ltr",
             renderHTML: (attributes: any) => {
               if (attributes.textDirection === "ltr") return {};
               return {
@@ -34,12 +35,19 @@ export const TextDirection = Extension.create({
         ({ state, dispatch }: any) => {
           const { selection } = state;
           const { $from, $to } = selection;
-          
+
           const tr = state.tr;
           let hasChanged = false;
-          
-          const supportedTypes = ["paragraph", "heading", "blockquote", "listItem", "table_cell", "table_header"];
-          
+
+          const supportedTypes = [
+            "paragraph",
+            "heading",
+            "blockquote",
+            "listItem",
+            "table_cell",
+            "table_header",
+          ];
+
           state.doc.nodesBetween($from.pos, $to.pos, (node: any, pos: number) => {
             if (node.type.isBlock && supportedTypes.includes(node.type.name)) {
               tr.setNodeMarkup(pos, undefined, {
@@ -50,17 +58,15 @@ export const TextDirection = Extension.create({
             }
             return true;
           });
-          
+
           if (hasChanged && dispatch) {
             dispatch(tr);
           }
           return hasChanged;
         },
-      unsetTextDirection:
-        () =>
-        () => {
-          return this.editor!.runCommand("setTextDirection", "ltr");
-        },
+      unsetTextDirection: () => () => {
+        return this.editor!.runCommand("setTextDirection", "ltr");
+      },
     };
   },
 });

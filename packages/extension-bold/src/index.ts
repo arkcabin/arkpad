@@ -74,8 +74,6 @@ export const Bold = Mark.create({
   addInputRules(schema: Schema) {
     const markType = schema.marks.bold;
     if (!markType) return [];
-    return [
-      markInputRule(/(?:\*\*|__)([^*_]+)(?:\*\*|__)$/, markType),
-    ];
+    return [markInputRule(/(?:\*\*|__)([^*_]+)(?:\*\*|__)$/, markType)];
   },
 });

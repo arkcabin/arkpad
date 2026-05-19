@@ -11,7 +11,7 @@ const schema = new Schema({
   marks: {
     superscript: {
       parseDOM: Superscript.parseHTML() || [],
-      toDOM: (m: any) => ["sup", (m.attrs?.class ? { class: m.attrs.class } : {})],
+      toDOM: (m: any) => ["sup", m.attrs?.class ? { class: m.attrs.class } : {}],
     },
   },
 });
@@ -30,9 +30,7 @@ describe("Superscript", () => {
 
   it("round-trips HTML: serialize then re-parse superscript mark", () => {
     const doc = schema.node("doc", null, [
-      schema.node("paragraph", null, [
-        schema.text("styled", [schema.mark("superscript")]),
-      ]),
+      schema.node("paragraph", null, [schema.text("styled", [schema.mark("superscript")])]),
     ]);
     const div = document.createElement("div");
     div.appendChild(DOMSerializer.fromSchema(schema).serializeFragment(doc.content));

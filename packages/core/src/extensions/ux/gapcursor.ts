@@ -6,7 +6,7 @@ import { Extension } from "../../sdk/Extension";
  */
 export const Gapcursor = Extension.create({
   name: "gapcursor",
-  
+
   addProseMirrorPlugins() {
     return [gapCursor()];
   },

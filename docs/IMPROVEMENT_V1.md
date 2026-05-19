@@ -51,6 +51,7 @@ Simplifying the barrier to entry.
 ## 3. Enhancement Roadmap
 
 ### Phase 1: DX & Flexibility (COMPLETED)
+
 1.  **Refactor `ArkpadExtension`:** Added `onEnterNode` / `onExitNode` context hooks.
 2.  **Snapshot API:** Implemented in `StateManager`.
 3.  **Command Telemetry:** Integrated into `CommandManager` and `ArkpadEditor`.

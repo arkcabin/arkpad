@@ -11,7 +11,7 @@ const schema = new Schema({
   marks: {
     underline: {
       parseDOM: Underline.parseHTML() || [],
-      toDOM: (m: any) => ["u", (m.attrs?.class ? { class: m.attrs.class } : {})],
+      toDOM: (m: any) => ["u", m.attrs?.class ? { class: m.attrs.class } : {}],
     },
   },
 });
@@ -30,9 +30,7 @@ describe("Underline", () => {
 
   it("round-trips HTML: serialize then re-parse underline mark", () => {
     const doc = schema.node("doc", null, [
-      schema.node("paragraph", null, [
-        schema.text("styled", [schema.mark("underline")]),
-      ]),
+      schema.node("paragraph", null, [schema.text("styled", [schema.mark("underline")])]),
     ]);
     const div = document.createElement("div");
     div.appendChild(DOMSerializer.fromSchema(schema).serializeFragment(doc.content));

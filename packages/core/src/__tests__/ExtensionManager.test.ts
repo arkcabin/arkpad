@@ -13,7 +13,9 @@ describe("ExtensionManager", () => {
     const inner = Extension.create({ name: "inner" });
     const outer = Extension.create({
       name: "outer",
-      addExtensions() { return [inner]; },
+      addExtensions() {
+        return [inner];
+      },
     });
     const schema = createSchema();
     new ExtensionManager(schema, [outer]);

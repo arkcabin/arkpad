@@ -199,17 +199,19 @@ The core package contains:
 Arkpad v2 introduced **Edge Governance**, a structural integrity system that prevents document corruption before transactions are committed.
 
 ### Structural Governance (Bitmasks)
+
 Nodes are assigned a `NodeRole` that determines their valid parents and children using bitmask validation.
 
-| Role | Bitmask | Description |
-| :--- | :--- | :--- |
-| `ATOM` | 1 | Leaf nodes (Text, HardBreak) |
-| `CONTENT` | 2 | Basic blocks (Paragraph, Heading) |
-| `WIDGET` | 4 | Self-contained nodes (Image, Table) |
-| `LAYOUT` | 8 | Structural containers (Section, Column) |
-| `ROOT` | 16 | The document root |
+| Role      | Bitmask | Description                             |
+| :-------- | :------ | :-------------------------------------- |
+| `ATOM`    | 1       | Leaf nodes (Text, HardBreak)            |
+| `CONTENT` | 2       | Basic blocks (Paragraph, Heading)       |
+| `WIDGET`  | 4       | Self-contained nodes (Image, Table)     |
+| `LAYOUT`  | 8       | Structural containers (Section, Column) |
+| `ROOT`    | 16      | The document root                       |
 
 ### Edge Guards & Shadow Engine
+
 Commands are validated by the **Shadow Engine** before execution. If a command violates a governance rule, it is silently rejected at the "Edge," saving CPU cycles.
 
 ---
@@ -217,6 +219,7 @@ Commands are validated by the **Shadow Engine** before execution. If a command v
 ## Advanced Core APIs
 
 ### Async Interceptors (Transaction Queue)
+
 Allows for "Agentic Approval" of transactions. Interceptors can be asynchronous, pausing the editor until a policy check or AI scan is complete.
 
 ```ts
@@ -227,6 +230,7 @@ editor.addInterceptor(async ({ transaction, editor }) => {
 ```
 
 ### Checkpoint Engine (State Diffing)
+
 Snapshots now support high-performance diffing for audit trails and version history.
 
 ```ts
@@ -236,6 +240,7 @@ const diff = editor.getDiff("v1"); // Returns semantic changes
 ```
 
 ### Virtual Selection API
+
 Provides a "Ghost Selection" for AI Agents, allowing them to focus and edit content without moving the user's actual cursor.
 
 ---
@@ -249,7 +254,6 @@ Arkpad is evolving into a full **Agent-Ready Platform**:
 - **Collaboration** - Real-time editing via Y.js integration.
 - **Slash Commands** - Command menu with structural intelligence.
 - **Drag Handles** - Notion-style block handles with Governance-aware drop zones.
-
 
 ---
 

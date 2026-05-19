@@ -12,7 +12,7 @@ export type DropcursorOptions = {
 
 export const Dropcursor = Extension.create<DropcursorOptions>({
   name: "dropcursor",
-  
+
   addOptions() {
     return {
       width: 2,
@@ -21,7 +21,6 @@ export const Dropcursor = Extension.create<DropcursorOptions>({
     };
   },
 
-  
   addProseMirrorPlugins() {
     return [
       dropCursor({

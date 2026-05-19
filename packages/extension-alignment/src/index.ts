@@ -19,32 +19,20 @@ export function createTextAlign(): Extension {
        * Set text alignment for the current block.
        * Handles both direct string and object arguments.
        */
-      setTextAlign:
-        (args: string | { align: string }) =>
-        (props: ArkpadCommandProps) => {
-          const align = typeof args === "string" ? args : args.align;
-          return setTextAlign(align)(props);
-        },
+      setTextAlign: (args: string | { align: string }) => (props: ArkpadCommandProps) => {
+        const align = typeof args === "string" ? args : args.align;
+        return setTextAlign(align)(props);
+      },
 
       /**
        * Convenience commands for common alignments.
        */
-      setTextAlignLeft:
-        () =>
-        (props: ArkpadCommandProps) =>
-          setTextAlign(TEXT_ALIGN.LEFT)(props),
-      setTextAlignCenter:
-        () =>
-        (props: ArkpadCommandProps) =>
-          setTextAlign(TEXT_ALIGN.CENTER)(props),
-      setTextAlignRight:
-        () =>
-        (props: ArkpadCommandProps) =>
-          setTextAlign(TEXT_ALIGN.RIGHT)(props),
-      setTextAlignJustify:
-        () =>
-        (props: ArkpadCommandProps) =>
-          setTextAlign(TEXT_ALIGN.JUSTIFY)(props),
+      setTextAlignLeft: () => (props: ArkpadCommandProps) => setTextAlign(TEXT_ALIGN.LEFT)(props),
+      setTextAlignCenter: () => (props: ArkpadCommandProps) =>
+        setTextAlign(TEXT_ALIGN.CENTER)(props),
+      setTextAlignRight: () => (props: ArkpadCommandProps) => setTextAlign(TEXT_ALIGN.RIGHT)(props),
+      setTextAlignJustify: () => (props: ArkpadCommandProps) =>
+        setTextAlign(TEXT_ALIGN.JUSTIFY)(props),
     }),
     addKeyboardShortcuts: () => ({
       "Mod-Shift-l": () => setTextAlign(TEXT_ALIGN.LEFT),

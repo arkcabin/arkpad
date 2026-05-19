@@ -14,10 +14,7 @@ export function parseHtmlContent(content: string, schema: Schema): PMNode {
 /**
  * Parses various content formats (HTML, Markdown, JSON) into a ProseMirror Document.
  */
-export function parseContent(
-  content: ArkpadContent,
-  schema: Schema
-): PMNode {
+export function parseContent(content: ArkpadContent, schema: Schema): PMNode {
   if (typeof content === "string") {
     // Note: Markdown parsing is no longer hardcoded in core to avoid circular dependencies.
     // If format is markdown, we assume it's already been handled or should be handled by an extension.

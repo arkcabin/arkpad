@@ -23,20 +23,23 @@ export const ListKeymap = Extension.create({
 
       Backspace: () =>
         this.editor!.runCommand("first", [
-          ({ editor }: any) => 
+          ({ editor }: any) =>
             editor.commands.command(({ state }: any) => {
               const { $anchor } = state.selection;
               const { nodeBefore } = $anchor;
-              
+
               if (nodeBefore || $anchor.parentOffset > 0) {
                 return false;
               }
 
               const parent = $anchor.parent;
-              if (!parent.type.name.includes("listItem") && !parent.type.name.includes("taskItem")) {
+              if (
+                !parent.type.name.includes("listItem") &&
+                !parent.type.name.includes("taskItem")
+              ) {
                 return false;
               }
-              
+
               // Use liftListItem to safely outdent/convert the item without losing children
               return editor.runCommand("liftListItem", parent.type.name);
             }),

@@ -112,4 +112,3 @@ export function ImageDemo() {
     </ArkpadProvider>
   );
 }`;
-

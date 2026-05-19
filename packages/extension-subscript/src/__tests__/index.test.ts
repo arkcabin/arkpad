@@ -11,7 +11,7 @@ const schema = new Schema({
   marks: {
     subscript: {
       parseDOM: Subscript.parseHTML() || [],
-      toDOM: (m: any) => ["sub", (m.attrs?.class ? { class: m.attrs.class } : {})],
+      toDOM: (m: any) => ["sub", m.attrs?.class ? { class: m.attrs.class } : {}],
     },
   },
 });
@@ -30,9 +30,7 @@ describe("Subscript", () => {
 
   it("round-trips HTML: serialize then re-parse subscript mark", () => {
     const doc = schema.node("doc", null, [
-      schema.node("paragraph", null, [
-        schema.text("styled", [schema.mark("subscript")]),
-      ]),
+      schema.node("paragraph", null, [schema.text("styled", [schema.mark("subscript")])]),
     ]);
     const div = document.createElement("div");
     div.appendChild(DOMSerializer.fromSchema(schema).serializeFragment(doc.content));

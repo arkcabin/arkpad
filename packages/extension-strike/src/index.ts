@@ -72,9 +72,7 @@ export const Strike = Mark.create({
   addInputRules(schema: Schema) {
     const markType = schema.marks.strike;
     if (!markType) return [];
-    return [
-      markInputRule(/(?:^|[^*_])(?:~~)([^*_]+)(?:~~)$/, markType),
-    ];
+    return [markInputRule(/(?:^|[^*_])(?:~~)([^*_]+)(?:~~)$/, markType)];
   },
 });
 

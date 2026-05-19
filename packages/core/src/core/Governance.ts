@@ -45,12 +45,18 @@ export class Governance {
     // Default "Best of Best" Industry Rules:
     // 1. ROOT accepts LAYOUT, CONTENT, WIDGET, and ISOLATED (Tables/CodeBlocks)
     if (this.hasRole(parentRole, NodeRole.ROOT)) {
-      return (childRole & (NodeRole.LAYOUT | NodeRole.CONTENT | NodeRole.WIDGET | NodeRole.ISOLATED)) !== 0;
+      return (
+        (childRole & (NodeRole.LAYOUT | NodeRole.CONTENT | NodeRole.WIDGET | NodeRole.ISOLATED)) !==
+        0
+      );
     }
 
     // 2. LAYOUT accepts LAYOUT, CONTENT, WIDGET, and ISOLATED
     if (this.hasRole(parentRole, NodeRole.LAYOUT)) {
-      return (childRole & (NodeRole.LAYOUT | NodeRole.CONTENT | NodeRole.WIDGET | NodeRole.ISOLATED)) !== 0;
+      return (
+        (childRole & (NodeRole.LAYOUT | NodeRole.CONTENT | NodeRole.WIDGET | NodeRole.ISOLATED)) !==
+        0
+      );
     }
 
     // 3. CONTENT (Paragraph, Heading) accepts ATOM and WIDGETS
@@ -60,7 +66,9 @@ export class Governance {
 
     // 4. ISOLATED nodes (Tables, CodeBlocks) act as containers
     if (this.hasRole(parentRole, NodeRole.ISOLATED)) {
-      return (childRole & (NodeRole.LAYOUT | NodeRole.CONTENT | NodeRole.ATOM | NodeRole.WIDGET)) !== 0;
+      return (
+        (childRole & (NodeRole.LAYOUT | NodeRole.CONTENT | NodeRole.ATOM | NodeRole.WIDGET)) !== 0
+      );
     }
 
     // 5. ATOM cannot accept anything (Leaf)

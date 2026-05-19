@@ -8,7 +8,10 @@ describe("FontFamily", () => {
   });
 
   it("renderHTML returns span tag", () => {
-    const result = FontFamily.renderHTML({ node: {} as any, HTMLAttributes: { style: "fontFamily: blue" } });
+    const result = FontFamily.renderHTML({
+      node: {} as any,
+      HTMLAttributes: { style: "fontFamily: blue" },
+    });
     expect(result[0]).toBe("span");
   });
 

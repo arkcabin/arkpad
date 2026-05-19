@@ -34,7 +34,9 @@ describe("Governance", () => {
     });
 
     it("respects explicit allowedMask", () => {
-      expect(Governance.canAccept(NodeRole.CONTENT, NodeRole.LAYOUT, NodeRole.LAYOUT | NodeRole.CONTENT)).toBe(true);
+      expect(
+        Governance.canAccept(NodeRole.CONTENT, NodeRole.LAYOUT, NodeRole.LAYOUT | NodeRole.CONTENT)
+      ).toBe(true);
       expect(Governance.canAccept(NodeRole.CONTENT, NodeRole.ATOM, NodeRole.LAYOUT)).toBe(false);
     });
 
@@ -47,23 +49,33 @@ describe("Governance", () => {
 
   describe("resolveHealingAction", () => {
     it("LIFTS LAYOUT out of CONTENT", () => {
-      expect(Governance.resolveHealingAction(NodeRole.CONTENT, NodeRole.LAYOUT)).toBe(HealingAction.LIFT);
+      expect(Governance.resolveHealingAction(NodeRole.CONTENT, NodeRole.LAYOUT)).toBe(
+        HealingAction.LIFT
+      );
     });
 
     it("LIFTS CONTENT out of CONTENT", () => {
-      expect(Governance.resolveHealingAction(NodeRole.CONTENT, NodeRole.CONTENT)).toBe(HealingAction.LIFT);
+      expect(Governance.resolveHealingAction(NodeRole.CONTENT, NodeRole.CONTENT)).toBe(
+        HealingAction.LIFT
+      );
     });
 
     it("WRAPS ATOM in ROOT", () => {
-      expect(Governance.resolveHealingAction(NodeRole.ROOT, NodeRole.ATOM)).toBe(HealingAction.WRAP);
+      expect(Governance.resolveHealingAction(NodeRole.ROOT, NodeRole.ATOM)).toBe(
+        HealingAction.WRAP
+      );
     });
 
     it("WRAPS ATOM in LAYOUT", () => {
-      expect(Governance.resolveHealingAction(NodeRole.LAYOUT, NodeRole.ATOM)).toBe(HealingAction.WRAP);
+      expect(Governance.resolveHealingAction(NodeRole.LAYOUT, NodeRole.ATOM)).toBe(
+        HealingAction.WRAP
+      );
     });
 
     it("DELETES other violations", () => {
-      expect(Governance.resolveHealingAction(NodeRole.ATOM, NodeRole.CONTENT)).toBe(HealingAction.DELETE);
+      expect(Governance.resolveHealingAction(NodeRole.ATOM, NodeRole.CONTENT)).toBe(
+        HealingAction.DELETE
+      );
     });
   });
 

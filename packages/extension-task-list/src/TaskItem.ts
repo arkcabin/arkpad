@@ -78,7 +78,8 @@ export const TaskItem = Node.create({
 
           // Smart Exit (Breakout): If the task item is empty, lift it
           // We check textContent and child count to be robust.
-          const isEmpty = taskItemNode.textContent.trim().length === 0 && taskItemNode.childCount <= 1;
+          const isEmpty =
+            taskItemNode.textContent.trim().length === 0 && taskItemNode.childCount <= 1;
 
           if (isEmpty) {
             if (dispatch) {

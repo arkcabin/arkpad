@@ -11,7 +11,7 @@ const schema = new Schema({
   marks: {
     strike: {
       parseDOM: Strike.parseHTML() || [],
-      toDOM: (m: any) => ["s", (m.attrs?.class ? { class: m.attrs.class } : {})],
+      toDOM: (m: any) => ["s", m.attrs?.class ? { class: m.attrs.class } : {}],
     },
   },
 });
@@ -30,9 +30,7 @@ describe("Strike", () => {
 
   it("round-trips HTML: serialize then re-parse strike mark", () => {
     const doc = schema.node("doc", null, [
-      schema.node("paragraph", null, [
-        schema.text("styled", [schema.mark("strike")]),
-      ]),
+      schema.node("paragraph", null, [schema.text("styled", [schema.mark("strike")])]),
     ]);
     const div = document.createElement("div");
     div.appendChild(DOMSerializer.fromSchema(schema).serializeFragment(doc.content));

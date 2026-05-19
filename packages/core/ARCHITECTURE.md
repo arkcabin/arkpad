@@ -21,12 +21,12 @@ graph TD
 When you create a new `ArkpadEditor` instance, the following sequence occurs:
 
 1.  **Extension Collection**: All provided extensions are flattened and sorted by **Priority**.
-2.  **Schema Building**: 
+2.  **Schema Building**:
     - `SchemaBuilder` collects nodes and marks from all extensions.
     - `extendNodeSchema` / `extendMarkSchema` hooks are called.
     - Global attributes are patched into all relevant node/mark specs.
     - The final `Schema` is generated.
-3.  **Extension Initialization**: 
+3.  **Extension Initialization**:
     - `ExtensionManager` initializes each extension with the editor instance.
     - Extensions register their storage, commands, and interceptors.
 4.  **View Mounting**: ProseMirror is initialized with the built schema and plugins.
@@ -45,9 +45,9 @@ Every change in the editor flows through the Interceptor pipeline. This is where
 
 Priority controls the order in which extensions contribute to the schema and interceptors.
 
--   **Priority 200+**: Global modifiers (e.g., Unique ID, Typography).
--   **Priority 100**: Standard nodes/marks (Default).
--   **Priority < 100**: Low-level overrides.
+- **Priority 200+**: Global modifiers (e.g., Unique ID, Typography).
+- **Priority 100**: Standard nodes/marks (Default).
+- **Priority < 100**: Low-level overrides.
 
 ## 💎 Command Proxy & Chaining
 

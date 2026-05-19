@@ -110,7 +110,9 @@ export const Placeholder = Extension.create<PlaceholderOptions>({
               const text = resolvePlaceholder(opts.placeholder, opts.types, node, pos, editor);
               if (!text) return false;
 
-              decorations.push(Decoration.widget(pos + 1, () => makeWidget(text, "ark-placeholder")));
+              decorations.push(
+                Decoration.widget(pos + 1, () => makeWidget(text, "ark-placeholder"))
+              );
 
               if (opts.emptyNodeClass) {
                 decorations.push(

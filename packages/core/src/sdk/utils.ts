@@ -114,7 +114,6 @@ export function getNodeAttributes(state: EditorState, type: NodeType): Record<st
   return attrs;
 }
 
-
 /**
  * Finds the parent node of a selection that matches the predicate.
  */

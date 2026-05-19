@@ -140,9 +140,13 @@ export function useArkpadEditor(options: UseArkpadEditorOptions = {}) {
     // PERFORMANCE FIX: Only sync if the content prop itself has changed compared to what we last pushed.
     // This prevents resets during typing when the editor content is transformed (e.g. by UniqueId)
     // but the input prop remains the same literal string.
-    const contentString = typeof options.content === "string" ? options.content : JSON.stringify(options.content);
-    const lastContentString = typeof lastSentContent.current === "string" ? lastSentContent.current : JSON.stringify(lastSentContent.current);
-    
+    const contentString =
+      typeof options.content === "string" ? options.content : JSON.stringify(options.content);
+    const lastContentString =
+      typeof lastSentContent.current === "string"
+        ? lastSentContent.current
+        : JSON.stringify(lastSentContent.current);
+
     if (contentString === lastContentString) return;
 
     const isHtmlContent = typeof options.content === "string";
@@ -163,7 +167,7 @@ export function useArkpadEditor(options: UseArkpadEditorOptions = {}) {
       }
       editor.setContent(options.content, false);
     }
-    
+
     lastSentContent.current = options.content;
   }, [editor, options.content]);
 

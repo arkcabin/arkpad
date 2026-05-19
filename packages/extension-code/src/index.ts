@@ -22,9 +22,7 @@ export const Code = Mark.create({
   },
 
   parseHTML() {
-    return [
-      { tag: "code" },
-    ];
+    return [{ tag: "code" }];
   },
 
   renderHTML({ HTMLAttributes }: { node: PMNode; HTMLAttributes: Record<string, any> }) {
@@ -68,9 +66,7 @@ export const Code = Mark.create({
   addInputRules(schema: Schema) {
     const markType = schema.marks.code;
     if (!markType) return [];
-    return [
-      markInputRule(/(?:^|[^`])(?:`)([^`]+)(?:`)$/, markType),
-    ];
+    return [markInputRule(/(?:^|[^`])(?:`)([^`]+)(?:`)$/, markType)];
   },
 });
 

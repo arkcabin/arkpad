@@ -72,7 +72,7 @@ const Toolbar = ({ editor }) => {
       >
         <Heading2 className="w-4 h-4" />
       </Toggle>
-      
+
       {/* Add more Shadcn components here! */}
     </div>
   );
@@ -104,21 +104,21 @@ console.log(editor.getHTML());
 
 ## 📖 Full API Reference
 
-| Method | Returns | Description |
-| :--- | :--- | :--- |
-| `getHTML()` | `string` | Returns the current document as an HTML string. |
-| `getJSON()` | `object` | Returns the document as a clean JSON object (ProseMirror schema). |
-| `getText()` | `string` | Extracts all plain text from the editor. |
-| `getMarkdown()` | `string` | Returns a serialized Markdown version of the document. |
-| `runCommand(name, ...args)` | `boolean` | Executes a command (e.g., `toggleBold`, `setHeading`). Returns success. |
-| `canRunCommand(name)` | `boolean` | Checks if a command can currently be executed at the selection. |
-| `isActive(name, attrs?)` | `boolean` | Checks if a mark (e.g., `bold`) or node (e.g., `heading`) is active. |
-| `getAttributes(name)` | `object` | Returns the attributes of the active mark/node (e.g., heading level). |
-| `setContent(data, format?)` | `void` | Replaces the entire document. Format can be `html`, `json`, or `markdown`. |
-| `clearContent()` | `void` | Resets the editor to a single empty paragraph. |
-| `setEditable(boolean)` | `void` | Toggles whether the editor is read-only. |
-| `focus()` / `blur()` | `void` | Programmatically manages focus. |
-| `destroy()` | `void` | Cleans up the instance and removes event listeners. |
+| Method                      | Returns   | Description                                                                |
+| :-------------------------- | :-------- | :------------------------------------------------------------------------- |
+| `getHTML()`                 | `string`  | Returns the current document as an HTML string.                            |
+| `getJSON()`                 | `object`  | Returns the document as a clean JSON object (ProseMirror schema).          |
+| `getText()`                 | `string`  | Extracts all plain text from the editor.                                   |
+| `getMarkdown()`             | `string`  | Returns a serialized Markdown version of the document.                     |
+| `runCommand(name, ...args)` | `boolean` | Executes a command (e.g., `toggleBold`, `setHeading`). Returns success.    |
+| `canRunCommand(name)`       | `boolean` | Checks if a command can currently be executed at the selection.            |
+| `isActive(name, attrs?)`    | `boolean` | Checks if a mark (e.g., `bold`) or node (e.g., `heading`) is active.       |
+| `getAttributes(name)`       | `object`  | Returns the attributes of the active mark/node (e.g., heading level).      |
+| `setContent(data, format?)` | `void`    | Replaces the entire document. Format can be `html`, `json`, or `markdown`. |
+| `clearContent()`            | `void`    | Resets the editor to a single empty paragraph.                             |
+| `setEditable(boolean)`      | `void`    | Toggles whether the editor is read-only.                                   |
+| `focus()` / `blur()`        | `void`    | Programmatically manages focus.                                            |
+| `destroy()`                 | `void`    | Cleans up the instance and removes event listeners.                        |
 
 ---
 
@@ -126,11 +126,11 @@ console.log(editor.getHTML());
 
 The `Essentials` kit bundles the following features by default:
 
-*   **Structure**: Paragraphs, Headings (H1-H6), Horizontal Rules.
-*   **Formatting**: Bold, Italic, Underline, Strike, Code, Highlight, Sub/Superscript.
-*   **Lists**: Bulleted, Ordered, and Task Lists (with checkboxes).
-*   **Media**: Images and Hyperlinks.
-*   **System**: History (Undo/Redo), Placeholder, Markdown support, Text Alignment.
+- **Structure**: Paragraphs, Headings (H1-H6), Horizontal Rules.
+- **Formatting**: Bold, Italic, Underline, Strike, Code, Highlight, Sub/Superscript.
+- **Lists**: Bulleted, Ordered, and Task Lists (with checkboxes).
+- **Media**: Images and Hyperlinks.
+- **System**: History (Undo/Redo), Placeholder, Markdown support, Text Alignment.
 
 ---
 
@@ -153,7 +153,7 @@ const MyCustomMark = {
 };
 
 // Use it!
-extensions: [Essentials, MyCustomMark]
+extensions: [Essentials, MyCustomMark];
 ```
 
 ---
@@ -162,9 +162,9 @@ extensions: [Essentials, MyCustomMark]
 
 We are moving towards a future where the editor is not just a tool, but a collaborator.
 
-*   **Interception Layer**: All commands can be routed through an AI agent for validation.
-*   **Natural Language API**: `editor.request("make this text sound more professional")`.
-*   **Context-Aware**: Agents that understand your document structure and suggest structural improvements.
+- **Interception Layer**: All commands can be routed through an AI agent for validation.
+- **Natural Language API**: `editor.request("make this text sound more professional")`.
+- **Context-Aware**: Agents that understand your document structure and suggest structural improvements.
 
 ---
 

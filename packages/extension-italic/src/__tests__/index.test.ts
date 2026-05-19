@@ -11,7 +11,7 @@ const schema = new Schema({
   marks: {
     italic: {
       parseDOM: Italic.parseHTML() || [],
-      toDOM: (m: any) => ["em", (m.attrs?.class ? { class: m.attrs.class } : {})],
+      toDOM: (m: any) => ["em", m.attrs?.class ? { class: m.attrs.class } : {}],
     },
   },
 });
@@ -30,9 +30,7 @@ describe("Italic", () => {
 
   it("round-trips HTML: serialize then re-parse italic mark", () => {
     const doc = schema.node("doc", null, [
-      schema.node("paragraph", null, [
-        schema.text("styled", [schema.mark("italic")]),
-      ]),
+      schema.node("paragraph", null, [schema.text("styled", [schema.mark("italic")])]),
     ]);
     const div = document.createElement("div");
     div.appendChild(DOMSerializer.fromSchema(schema).serializeFragment(doc.content));

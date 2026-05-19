@@ -8,7 +8,10 @@ describe("FontSize", () => {
   });
 
   it("renderHTML returns span tag", () => {
-    const result = FontSize.renderHTML({ node: {} as any, HTMLAttributes: { style: "fontSize: blue" } });
+    const result = FontSize.renderHTML({
+      node: {} as any,
+      HTMLAttributes: { style: "fontSize: blue" },
+    });
     expect(result[0]).toBe("span");
   });
 

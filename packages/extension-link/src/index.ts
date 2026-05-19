@@ -69,7 +69,9 @@ export const Link = Extension.create({
           }
 
           if (dispatch) {
-            dispatch(state.tr.addMark(linkRange.from, linkRange.to, markType.create({ href: url })));
+            dispatch(
+              state.tr.addMark(linkRange.from, linkRange.to, markType.create({ href: url }))
+            );
           }
           return true;
         },

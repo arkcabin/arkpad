@@ -11,7 +11,7 @@ const schema = new Schema({
   marks: {
     highlight: {
       parseDOM: Highlight.parseHTML() || [],
-      toDOM: (m: any) => ["mark", (m.attrs?.class ? { class: m.attrs.class } : {})],
+      toDOM: (m: any) => ["mark", m.attrs?.class ? { class: m.attrs.class } : {}],
     },
   },
 });
@@ -30,9 +30,7 @@ describe("Highlight", () => {
 
   it("round-trips HTML: serialize then re-parse highlight mark", () => {
     const doc = schema.node("doc", null, [
-      schema.node("paragraph", null, [
-        schema.text("styled", [schema.mark("highlight")]),
-      ]),
+      schema.node("paragraph", null, [schema.text("styled", [schema.mark("highlight")])]),
     ]);
     const div = document.createElement("div");
     div.appendChild(DOMSerializer.fromSchema(schema).serializeFragment(doc.content));

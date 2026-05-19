@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React from "react";
 import { useArkpadEditor, ArkpadEditorContent, ArkpadProvider, EditorButton } from "@arkpad/react";
@@ -28,10 +28,7 @@ export function BoldDemo() {
           </EditorButton>
         </div>
         <div className="p-6 min-h-[150px]">
-          <ArkpadEditorContent
-            editor={editor}
-            className="focus:outline-none"
-          />
+          <ArkpadEditorContent editor={editor} className="focus:outline-none" />
         </div>
       </div>
     </ArkpadProvider>
