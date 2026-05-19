@@ -88,3 +88,22 @@ Youtube.configure({
   },
 });
 ```
+
+## Advanced Interactive UX
+
+Arkpad's YouTube extension includes a fully custom, touch-enabled interactive node view that displays rich scaling and alignment controls on selection:
+
+### Interactive Resizing
+
+- **Pointer-Event Overlay:** Features a custom transparent overlay directly above the video player. This prevents the YouTube player from swallowing mouse/touch events, allowing seamless clicking, focusing, and drag-resizing inside the editor.
+- **16:9 Aspect Ratio Lock:** Automatically preserves the standard responsive 16:9 horizontal aspect ratio during resizing (padding-bottom `56.25%`), preventing any ugly black letterboxing.
+- **Symmetric Centered Scaling:** When the video is center-aligned, resizing coordinates scale symmetrically from both left and right directions.
+- **Real-time Percentage Tooltip:** Shows the current percentage width (e.g. `70%`) in a dark floating tooltip overlay as you drag.
+- **Mobile Touch Support:** Binds touch gestures (`touchstart`/`touchmove`/`touchend`) for smooth resizing on phone and tablet screens.
+
+### Contextual Action Toolbar
+
+A floating popover toolbar appears centered directly above the selected video block for quick attribute manipulation:
+
+- **Alignment Controls:** Quick left, center, and right alignments.
+- **Instant Deletion:** Single-click deletion with a red-accented trash button.
