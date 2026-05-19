@@ -250,7 +250,16 @@ export class DispatchEngine {
         const map = tr.mapping.maps[index];
         if (!map) return;
         map.forEach((_os, _oe, ns, ne) => {
-          tr.doc.nodesBetween(ns, ne, (node, pos, parent) => {
+          // Map positions from intermediate step coordinates to final document coordinates
+          const finalStart = tr.mapping.slice(index + 1).map(ns);
+          const finalEnd = tr.mapping.slice(index + 1).map(ne);
+
+          // Bound-guard against any dynamic document size modifications
+          const docSize = tr.doc.content.size;
+          const safeStart = Math.max(0, Math.min(finalStart, docSize));
+          const safeEnd = Math.max(0, Math.min(finalEnd, docSize));
+
+          tr.doc.nodesBetween(safeStart, safeEnd, (node, pos, parent) => {
             if (parent) {
               const parentRole = Governance.resolveRole(parent);
               const childRole = Governance.resolveRole(node);
