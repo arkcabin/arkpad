@@ -74,6 +74,7 @@ import {
   Split,
   Palette,
   TableProperties,
+  Eraser,
 } from "lucide-react";
 import { Tab, Tabs } from "fumadocs-ui/components/tabs";
 
@@ -261,6 +262,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Split,
   Palette,
   TableProperties,
+  Eraser: Eraser,
 };
 
 interface FeatureDemoProps {
