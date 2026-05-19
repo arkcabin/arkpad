@@ -55,7 +55,14 @@ export default function MyEditor() {
 <FeatureDemo
   feature="bubble-menu"
   content="<p>Select some text in the editor below to trigger the contextual bubble menu!</p>"
-  commands={[{ label: "Bold", command: "toggleBold", isActive: "bold", icon: "Bold" }]}
+  commands={[
+    { label: "Bold", command: "toggleBold", isActive: "bold", icon: "Bold" },
+    { label: "Italic", command: "toggleItalic", isActive: "italic", icon: "Italic" },
+    { label: "Underline", command: "toggleUnderline", isActive: "underline", icon: "Underline" },
+    { label: "Strike", command: "toggleStrike", isActive: "strike", icon: "Strike" },
+    { label: "Code", command: "toggleCode", isActive: "code", icon: "Code" },
+    { label: "Highlight", command: "toggleHighlight", isActive: "highlight", icon: "Highlighter" },
+  ]}
 />
 
 ## Installation
