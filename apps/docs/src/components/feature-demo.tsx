@@ -375,6 +375,33 @@ export default function Demo() {
                     </button>
                   </div>
                 )}
+                {feature === "font-family" && (
+                  <div className="flex items-center gap-1.5 px-6 sm:px-8 py-3 border-t border-fd-border bg-fd-secondary/30 flex-wrap">
+                    {[
+                      { label: "Serif", value: "serif" },
+                      { label: "Sans", value: "sans-serif" },
+                      { label: "Mono", value: "monospace" },
+                      { label: "Georgia", value: "Georgia, serif" },
+                      { label: "Arial", value: "Arial, sans-serif" },
+                    ].map((font) => (
+                      <button
+                        key={font.value}
+                        onClick={() => editor.runCommand("setFontFamily", font.value)}
+                        className="text-xs px-3 py-1.5 text-fd-muted-foreground hover:text-fd-foreground hover:bg-fd-accent border border-fd-border rounded transition-all cursor-pointer"
+                        style={{ fontFamily: font.value }}
+                      >
+                        {font.label}
+                      </button>
+                    ))}
+                    <div className="w-px h-4 bg-fd-border mx-1" />
+                    <button
+                      onClick={() => editor.runCommand("unsetFontFamily")}
+                      className="text-xs px-2.5 py-1 text-fd-muted-foreground hover:text-fd-foreground border border-fd-border rounded transition-colors cursor-pointer"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                )}
                 {feature === "bubble-menu" && <BubbleMenu editor={editor} defaultToolbar />}
                 {feature === "floating-menu" && (
                   <FloatingMenu editor={editor}>
