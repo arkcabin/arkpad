@@ -402,6 +402,28 @@ export default function Demo() {
                     </button>
                   </div>
                 )}
+                {feature === "font-size" && (
+                  <div className="flex items-center gap-1.5 px-6 sm:px-8 py-3 border-t border-fd-border bg-fd-secondary/30 flex-wrap">
+                    {["12px", "14px", "16px", "18px", "20px", "24px", "32px", "48px"].map(
+                      (size) => (
+                        <button
+                          key={size}
+                          onClick={() => editor.runCommand("setFontSize", size)}
+                          className="text-xs px-2.5 py-1.5 text-fd-muted-foreground hover:text-fd-foreground hover:bg-fd-accent border border-fd-border rounded transition-all cursor-pointer"
+                        >
+                          {size}
+                        </button>
+                      )
+                    )}
+                    <div className="w-px h-4 bg-fd-border mx-1" />
+                    <button
+                      onClick={() => editor.runCommand("unsetFontSize")}
+                      className="text-xs px-2.5 py-1 text-fd-muted-foreground hover:text-fd-foreground border border-fd-border rounded transition-colors cursor-pointer"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                )}
                 {feature === "bubble-menu" && <BubbleMenu editor={editor} defaultToolbar />}
                 {feature === "floating-menu" && (
                   <FloatingMenu editor={editor}>
