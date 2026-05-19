@@ -22,6 +22,7 @@ import { FontFamily } from "@arkpad/extension-font-family";
 import { FontSize } from "@arkpad/extension-font-size";
 import { Color } from "@arkpad/extension-color";
 import { Image } from "@arkpad/extension-image";
+import { Youtube } from "@arkpad/extension-youtube";
 import { EraserTool } from "@arkpad/extension-eraser";
 import { HighlighterTool } from "@arkpad/extension-highlighter";
 import { AI } from "@arkpad/extension-ai";
@@ -169,6 +170,7 @@ const extensionMap: Record<string, ArkpadExtension[]> = {
   code: [Engine, Code],
   link: [Engine, Heading, Link],
   image: [Engine, Heading, Image],
+  youtube: [Engine, Youtube],
   superscript: [Engine, Superscript],
   subscript: [Engine, Subscript],
   ai: [Engine, Heading, AI],

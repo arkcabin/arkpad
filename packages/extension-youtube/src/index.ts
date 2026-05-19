@@ -1,4 +1,4 @@
-import { Node, ArkpadCommandProps, PMNode, Plugin } from "@arkpad/core";
+import { Node, ArkpadCommandProps, PMNode, Plugin, NodeRole } from "@arkpad/core";
 
 declare module "@arkpad/core" {
   interface ArkpadCommands {
@@ -37,6 +37,7 @@ export function isYoutubeUrl(text: string): boolean {
 
 export const Youtube = Node.create<YoutubeOptions>({
   name: "youtube",
+  role: NodeRole.WIDGET,
 
   addOptions() {
     return {
