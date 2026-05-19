@@ -1,4 +1,4 @@
-import { Node, ArkpadCommandProps, PMNode } from "@arkpad/core";
+import { Node, ArkpadCommandProps, PMNode, NodeRole } from "@arkpad/core";
 import { NodeSelection } from "@arkpad/core";
 import { ImageNodeView } from "./ImageView";
 
@@ -27,6 +27,7 @@ export interface ImageOptions {
 
 export const Image = Node.create<ImageOptions>({
   name: "image",
+  role: NodeRole.WIDGET,
 
   addOptions() {
     return {
