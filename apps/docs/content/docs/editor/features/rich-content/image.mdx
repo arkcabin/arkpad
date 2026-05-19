@@ -95,3 +95,23 @@ Image.configure({
   },
 });
 ```
+
+## Advanced Interactive UX
+
+Arkpad's image extension includes a fully custom, touch-enabled interactive node view that displays rich scaling and styling controls on selection:
+
+### Interactive Resizing
+
+- **Aspect Ratio Lock:** Drag handles appear on the corners of the image on selection, allowing smooth, fluid width resizing.
+- **Symmetric Centered Scaling:** When the image is center-aligned, resizing coordinates scale symmetrically from both sides.
+- **Real-time Percentage Tooltip:** Shows the current percentage width (e.g. `65%`) in a dark floating tooltip overlay as you drag.
+- **Mobile Touch Support:** Binds touch gestures (`touchstart`/`touchmove`/`touchend`) for high-fidelity resizing on phones and tablets.
+- **Tailwind Margin Collapse:** Auto-collapses default typography margins on selection, pulling resizing corners flush with the image boundaries.
+
+### Contextual Action Toolbar
+
+A floating popover toolbar appears centered directly above the selected image for quick attribute manipulation:
+
+- **Alignment Controls:** Quick left, center, and right alignments.
+- **Alt Text Setter:** Opens an interactive prompt to write custom Alt / Caption text.
+- **Instant Deletion:** Single-click deletion with a red-accented trash button.

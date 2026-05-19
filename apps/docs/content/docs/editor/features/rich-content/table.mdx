@@ -120,3 +120,11 @@ Table.configure({
   },
 });
 ```
+
+## Interactive Column Resizing
+
+The table extension features a custom responsive `TableView` renderer that automatically registers handles inside the `<colgroup>` DOM layout:
+
+- **Border Drag Handles:** Hovering over column borders displays a horizontal resize cursor.
+- **Fluid Sizing Sync:** Dragging border handles dynamically maps mouse positions to direct CSS column widths.
+- **Attributes Mismatch Protection:** Synchronizes column resizes with ProseMirror cell elements, preventing baseline mismatches and rendering anomalies.
