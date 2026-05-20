@@ -1,5 +1,15 @@
 # @arkpad/react
 
+## 1.6.14
+
+### Patch Changes
+
+- automated release: code changes detected via CI
+- Updated dependencies
+  - @arkpad/core@1.6.14
+  - @arkpad/extension-bubble-menu@1.0.1
+  - @arkpad/extension-floating-menu@1.0.1
+
 ## 1.6.13
 
 ### Patch Changes
