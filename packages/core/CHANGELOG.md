@@ -1,5 +1,11 @@
 # @arkpad/core
 
+## 1.6.14
+
+### Patch Changes
+
+- automated release: code changes detected via CI
+
 ## 1.6.13
 
 ### Patch Changes
