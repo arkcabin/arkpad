@@ -12,6 +12,10 @@ export interface AIOptions {
   enableInterceptor?: boolean;
 }
 
+/**
+ * AI Extension for Arkpad editor.
+ * Provides autocomplete and text summarization commands.
+ */
 export const AI = Extension.create<AIOptions>({
   name: "ai",
 
