@@ -31,7 +31,6 @@ const getColSpanClass = (width: number) => {
 
 interface DroppableColumnProps {
   col: any;
-  rowId: string;
   removeColumn: (colId: string) => void;
   rowColumnsLength: number;
   allBlocks: any[];
@@ -40,7 +39,6 @@ interface DroppableColumnProps {
 
 const DroppableColumn: React.FC<DroppableColumnProps> = ({
   col,
-  rowId,
   removeColumn,
   rowColumnsLength,
   allBlocks,
@@ -222,7 +220,6 @@ export const Canvas: React.FC = () => {
                 <DroppableColumn
                   key={col.id}
                   col={col}
-                  rowId={row.id}
                   removeColumn={removeColumn}
                   rowColumnsLength={row.columns.length}
                   allBlocks={allBlocks}

@@ -14,7 +14,7 @@ export const exportToJSON = (layout: LayoutJSON): string => {
 export const exportToMarkdown = (layout: LayoutJSON): string => {
   let markdown = "";
 
-  layout.rows.forEach((row, rowIndex) => {
+  layout.rows.forEach((row) => {
     const colCount = row.columns.length;
 
     if (colCount > 1) {

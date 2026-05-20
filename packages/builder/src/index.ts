@@ -6,4 +6,5 @@ export * from "./components/Canvas";
 export * from "./components/Sidebar";
 export * from "./components/SortableBlock";
 export * from "./components/Palette";
+export * from "./components/Render";
 export * from "./core/schema";

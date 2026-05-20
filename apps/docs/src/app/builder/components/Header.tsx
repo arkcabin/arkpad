@@ -3,11 +3,11 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { LayoutGrid, ChevronLeft, RotateCcw, Monitor, Smartphone, Check, Sun, Moon, Undo, Redo } from "lucide-react";
-import { useBuilder } from "@arkpad/builder";
+import { LayoutJSON, useBuilder } from "@arkpad/builder";
 import { useTheme } from "next-themes";
 
 interface HeaderProps {
-  initialLayout: any;
+  initialLayout: LayoutJSON;
 }
 
 export const Header: React.FC<HeaderProps> = ({ initialLayout }) => {
@@ -170,6 +170,15 @@ export const Header: React.FC<HeaderProps> = ({ initialLayout }) => {
           )}
           {resetting ? "Reset Done" : "Reset Canvas"}
         </button>
+
+        {/* Open Live Preview Route */}
+        <Link
+          href="/builder/preview"
+          target="_blank"
+          className="flex items-center gap-1.5 px-3 py-1.5 border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/50 hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-550 dark:text-neutral-450 hover:text-neutral-900 hover:dark:text-white text-xs font-semibold transition-all duration-150 active:scale-95 cursor-pointer"
+        >
+          Open Preview ↗
+        </Link>
         
         <div className="w-px h-4 bg-neutral-200 dark:bg-neutral-800" />
 
