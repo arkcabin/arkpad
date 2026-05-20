@@ -1,5 +1,11 @@
 # @arkpad/extension-highlight
 
+## 1.0.2
+
+### Patch Changes
+
+- automated release: code changes detected via CI
+
 ## 1.0.1
 
 ### Patch Changes
