@@ -102,6 +102,15 @@ jobs:
           # We use --if-present and we'll let npm handle the version check
           # To avoid errors on existing versions, we can wrap it in a check
 
+          # If NPM_TOKEN is provided as a secret, configure npm to use it for authentication.
+          # Otherwise, the CLI will naturally fall back to OIDC Trusted Publishing.
+          if [ -n "$NPM_TOKEN" ]; then
+            echo "NPM_TOKEN found. Configuring npm registry authentication..."
+            npm config set //registry.npmjs.org/:_authToken "$NPM_TOKEN"
+          else
+            echo "NPM_TOKEN not found. Using OIDC Trusted Publisher (OIDC settings must be configured on npmjs.com for each package)."
+          fi
+
           # Only attempt to publish if the version is NOT on npm yet
           for pkg_dir in packages/*; do
             if [ -d "$pkg_dir" ] && [ -f "$pkg_dir/package.json" ]; then
@@ -128,5 +137,7 @@ jobs:
           done
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
