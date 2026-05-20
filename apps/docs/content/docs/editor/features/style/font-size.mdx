@@ -1,0 +1,74 @@
+---
+title: Font Size
+description: Change the font size of selected text.
+---
+
+Type: **Mark** · Category: **Style**
+
+Font Size allows users to resize text with precise CSS sizing values (such as `px`, `rem`, `em`, or `%`). Renders as a `<span>` element with an inline `font-size` CSS style in HTML output.
+
+## Demo
+
+<FeatureDemo
+  feature="font-size"
+  content="<p>Try selecting text in the editor below and clicking the button to apply a large 24px font size!</p>"
+  commands={[
+    {
+      label: "24px Size",
+      command: "setFontSize",
+      args: "24px",
+      isActive: ["fontSize", { fontSize: "24px" }],
+    },
+  ]}
+/>
+
+## Installation
+
+```ts
+import { FontSize } from "@arkpad/extension-font-size";
+```
+
+## Commands
+
+The extension registers two commands for managing font sizes:
+
+```ts
+// Applies the specified CSS font-size to the selected text range
+editor.runCommand("setFontSize", "18px");
+editor.runCommand("setFontSize", "1.5rem");
+
+// Resets the font size of the selection back to the editor default
+editor.runCommand("unsetFontSize");
+```
+
+### Chaining Commands
+
+You can chain commands to set font size and immediately focus the editor:
+
+```ts
+editor.chain().focus().setFontSize("20px").run();
+```
+
+## Active State
+
+Check if a specific font size is active on the selection:
+
+```ts
+const isLargeActive = editor.isActive("fontSize", { fontSize: "24px" });
+```
+
+## Configuration
+
+### Options
+
+| Name             | Type                  | Default | Description                                                                        |
+| :--------------- | :-------------------- | :------ | :--------------------------------------------------------------------------------- |
+| `HTMLAttributes` | `Record<string, any>` | `{}`    | Key-value pairs of attributes to render on the generated `<span>` wrapper element. |
+
+```ts
+FontSize.configure({
+  HTMLAttributes: {
+    class: "custom-size-wrapper",
+  },
+});
+```

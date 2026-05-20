@@ -5,16 +5,20 @@ This document tracks the vision for pre-built, "ready-to-use" UI components for 
 ## 🎨 Proposed Components
 
 ### 1. `ArkpadStandardToolbar`
+
 A fully-featured horizontal toolbar with buttons for:
+
 - Basic formatting (Bold, Italic, etc.)
 - Headings & Paragraph styles
 - List toggles
 - History controls (Undo/Redo)
 
 ### 2. `ArkpadFloatingMenu`
+
 A context-aware menu that appears next to empty lines to suggest blocks (images, headings, tables).
 
 ### 3. `ArkpadBubbleMenu`
+
 A refined popup for text selection with quick formatting and link tools.
 
 ## 🛠️ Implementation Strategy
@@ -24,4 +28,5 @@ A refined popup for text selection with quick formatting and link tools.
 - **Opinionated Defaults**: While headless gives total control, these will provide a "Golden Path" for UI.
 
 ---
-*Note: This is a placeholder for future implementation. Current development is focused on the Headless Core API.*
+
+_Note: This is a placeholder for future implementation. Current development is focused on the Headless Core API._

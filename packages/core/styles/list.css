@@ -1,0 +1,20 @@
+/* List Styles (Bullet & Ordered) - Scoped to Arkpad Content Area */
+.arkpad-content-area ul,
+.arkpad-content-area ol {
+  padding: 0 1rem;
+  margin: 1.25rem 1rem 1.25rem 0.4rem;
+}
+
+.arkpad-content-area ul li p,
+.arkpad-content-area ol li p {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.arkpad-content-area ul {
+  list-style-type: disc;
+}
+
+.arkpad-content-area ol {
+  list-style-type: decimal;
+}

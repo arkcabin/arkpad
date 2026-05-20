@@ -1,0 +1,625 @@
+import {
+  EditorState,
+  Transaction,
+  TextSelection,
+  Selection,
+  NodeSelection,
+} from "prosemirror-state";
+import { EditorView } from "prosemirror-view";
+import { Slice, Schema, Fragment } from "prosemirror-model";
+import {
+  ChainedCommands,
+  ArkpadCommand,
+  ArkpadCommandRegistry,
+  ArkpadContent,
+  IArkpadEditor,
+  ArkpadCommandProps,
+} from "../../api";
+import { parseContent } from "../../utils";
+
+/**
+ * Safely sets the selection on a transaction, preventing crashes from invalid selections.
+ */
+function safeSetSelection(tr: Transaction, selection: Selection): void {
+  try {
+    tr.setSelection(selection);
+  } catch {
+    try {
+      const resolvedSelection = Selection.near(tr.doc.resolve(selection.from));
+      tr.setSelection(resolvedSelection);
+    } catch {
+      // Ignore if even near fallback fails
+    }
+  }
+}
+
+/**
+ * CommandManager handles the chaining of commands in a single transaction.
+ * Shadow Engine architecture for high-performance virtual state simulation.
+ */
+class CommandManagerInstance {
+  private view?: EditorView;
+  private commands: ArkpadCommandRegistry;
+  private dispatch?: (tr: Transaction) => void;
+  private shouldDispatch: boolean;
+  private schema: Schema;
+  private editor: IArkpadEditor;
+  private virtualState: EditorState;
+  private masterTransaction: Transaction;
+  private allSuccessful = true;
+  private executionLog: { command: string; status: string; duration: string }[] = [];
+
+  constructor(options: {
+    state: EditorState;
+    commands: Record<string, ArkpadCommand>;
+    view?: EditorView;
+    dispatch?: (tr: Transaction) => void;
+    shouldDispatch?: boolean;
+    schema: Schema;
+    editor: IArkpadEditor;
+  }) {
+    // console.log("[Arkpad] CommandManager created. shouldDispatch:", options.shouldDispatch ?? true);
+    this.commands = options.commands;
+    this.view = options.view;
+    this.dispatch = options.dispatch;
+    this.shouldDispatch = options.shouldDispatch ?? true;
+    this.schema = options.schema;
+    this.editor = options.editor;
+
+    // Initialize the shadow state and master transaction
+    this.virtualState = options.state;
+    this.masterTransaction = options.state.tr;
+
+    // Build the proxy to allow calling commands as methods
+    return new Proxy(this, {
+      get: (target: CommandManagerInstance, prop: string) => {
+        if (prop in target) {
+          return (target as any)[prop];
+        }
+
+        const command = this.commands[prop];
+        if (!command) {
+          return undefined;
+        }
+
+        return (...args: any[]) => {
+          if (!this.allSuccessful) return this;
+
+          const startTime = performance.now();
+          const result = (command as any)(...args);
+
+          if (typeof result === "function") {
+            // Shadow Execution: Run command against virtual state
+            const localTr = this.virtualState.tr;
+
+            const props: ArkpadCommandProps = {
+              state: this.virtualState,
+              dispatch: (tr2: Transaction) => {
+                const stepCountBefore = localTr.steps.length;
+                // Sync all steps from the dispatched transaction into our local tracker
+                tr2.steps.forEach((step) => {
+                  try {
+                    localTr.step(step);
+                  } catch {
+                    console.error("[Arkpad] Shadow engine step failure");
+                  }
+                });
+                if (tr2.selectionSet) {
+                  // Map selection through the newly added steps to ensure it's relative to the new doc
+                  const mappedSelection = tr2.selection.map(
+                    localTr.doc,
+                    localTr.mapping.slice(stepCountBefore)
+                  );
+                  safeSetSelection(localTr, mappedSelection);
+                }
+              },
+              view: this.view,
+              tr: localTr,
+              editor: this.editor,
+              chain: () =>
+                new CommandManager({
+                  state: this.virtualState,
+                  commands: this.commands,
+                  view: this.view,
+                  dispatch: (tr) => {
+                    tr.steps.forEach((step) => localTr.step(step));
+                    if (tr.selectionSet) safeSetSelection(localTr, tr.selection);
+                  },
+                  // Preserve dispatch mode for nested chains.
+                  // This prevents can()/capability checks from behaving like real runs.
+                  shouldDispatch: this.shouldDispatch,
+                  schema: this.schema,
+                  editor: this.editor,
+                }),
+              can: () => undefined as any,
+            };
+
+            try {
+              const success =
+                result.length >= 2
+                  ? (result as any)(this.virtualState, props.dispatch, this.view)
+                  : (result as any)(props);
+
+              if (success) {
+                const merged = this.merge(localTr);
+                if (this.shouldDispatch) {
+                  this.executionLog.push({
+                    command: prop,
+                    status: merged ? "✅ Success" : "💥 Merge Failed",
+                    duration: `${(performance.now() - startTime).toFixed(2)}ms`,
+                  });
+                }
+              } else {
+                this.allSuccessful = false;
+                if (this.shouldDispatch) {
+                  this.executionLog.push({
+                    command: prop,
+                    status: "❌ Rejected",
+                    duration: "0ms",
+                  });
+                }
+              }
+            } catch {
+              // Gracefully handle shadow execution crashes
+              this.allSuccessful = false;
+              this.executionLog.push({
+                command: prop,
+                status: "❌ Unsatisfied",
+                duration: "0ms",
+              });
+            }
+          } else if (!result) {
+            this.allSuccessful = false;
+            this.executionLog.push({
+              command: prop,
+              status: "❌ Rejected (Bool)",
+              duration: "0ms",
+            });
+          } else {
+            this.executionLog.push({
+              command: prop,
+              status: "✅ Success (Static)",
+              duration: `${(performance.now() - startTime).toFixed(2)}ms`,
+            });
+          }
+
+          return this;
+        };
+      },
+    });
+  }
+
+  /**
+   * Returns the execution log for telemetry.
+   */
+  public getLog() {
+    return [...this.executionLog];
+  }
+
+  /**
+   * Internal helper to run a command by name within the chain.
+   */
+  private runCommandByName(name: string, ...args: any[]): ChainedCommands {
+    const command = this.commands[name];
+    if (!command) {
+      this.allSuccessful = false;
+      return this as unknown as ChainedCommands;
+    }
+
+    if (!this.allSuccessful) return this as unknown as ChainedCommands;
+
+    const startTime = performance.now();
+    const result = (command as any)(...args);
+
+    if (typeof result === "function") {
+      const localTr = this.virtualState.tr;
+      const props: ArkpadCommandProps = {
+        state: this.virtualState,
+        dispatch: (tr2: Transaction) => {
+          const stepCountBefore = localTr.steps.length;
+          tr2.steps.forEach((step) => {
+            try {
+              localTr.step(step);
+            } catch {
+              console.error(`[Arkpad] Step apply failed inside "${name}" shadow chain`);
+            }
+          });
+          if (tr2.selectionSet) {
+            const mappedSelection = tr2.selection.map(
+              localTr.doc,
+              localTr.mapping.slice(stepCountBefore)
+            );
+            safeSetSelection(localTr, mappedSelection);
+          }
+        },
+        view: this.view,
+        tr: localTr,
+        editor: this.editor,
+        chain: () => this as unknown as ChainedCommands,
+        can: () => undefined as any,
+      };
+
+      try {
+        const success =
+          result.length >= 2
+            ? (result as any)(this.virtualState, props.dispatch, this.view)
+            : (result as any)(props);
+
+        if (success) {
+          const merged = this.merge(localTr);
+          if (this.shouldDispatch) {
+            this.executionLog.push({
+              command: name,
+              status: merged ? "✅ Success" : "💥 Merge Failed",
+              duration: `${(performance.now() - startTime).toFixed(2)}ms`,
+            });
+          }
+        } else {
+          this.allSuccessful = false;
+          if (this.shouldDispatch) {
+            this.executionLog.push({
+              command: name,
+              status: "❌ Rejected",
+              duration: "0ms",
+            });
+          }
+        }
+      } catch {
+        // Shadow execution crashes are expected for commands with required attributes
+        // (like 'link' needing 'href') when checked for availability without args.
+        this.allSuccessful = false;
+        this.executionLog.push({
+          command: name,
+          status: "❌ Unsatisfied",
+          duration: "0ms",
+        });
+      }
+    } else if (!result) {
+      this.allSuccessful = false;
+      this.executionLog.push({
+        command: name,
+        status: "❌ Rejected (Bool)",
+        duration: "0ms",
+      });
+    } else {
+      this.executionLog.push({
+        command: name,
+        status: "✅ Success (Static)",
+        duration: `${(performance.now() - startTime).toFixed(2)}ms`,
+      });
+    }
+
+    return this as unknown as ChainedCommands;
+  }
+
+  public updateAttributes(typeOrName: string, attributes: Record<string, any>): ChainedCommands {
+    return this.runCommandByName("updateAttributes", typeOrName, attributes);
+  }
+
+  public toggleMark(typeOrName: string, attributes?: Record<string, any>): ChainedCommands {
+    return this.runCommandByName("toggleMark", typeOrName, attributes);
+  }
+
+  public setMark(typeOrName: string, attributes?: Record<string, any>): ChainedCommands {
+    return this.runCommandByName("setMark", typeOrName, attributes);
+  }
+
+  public unsetMark(typeOrName: string): ChainedCommands {
+    return this.runCommandByName("unsetMark", typeOrName);
+  }
+
+  public setNodeMarkup(typeOrName: string, attributes?: Record<string, any>): ChainedCommands {
+    return this.runCommandByName("setNodeMarkup", typeOrName, attributes);
+  }
+
+  public deleteRange(from: number, to: number): ChainedCommands {
+    if (!this.allSuccessful) return this as unknown as ChainedCommands;
+    const localTr = this.virtualState.tr.delete(from, to);
+    this.merge(localTr);
+    if (this.shouldDispatch) {
+      this.executionLog.push({
+        command: "deleteRange",
+        status: "✅ Success",
+        duration: "0ms",
+      });
+    }
+    return this as unknown as ChainedCommands;
+  }
+
+  /**
+   * Refined Merge Strategy:
+   * 1. Updates master transaction steps.
+   * 2. Updates virtual state.
+   * 3. Syncs selection from the updated virtual state back to the master transaction.
+   */
+  private merge(localTr: Transaction): boolean {
+    try {
+      // 1. Accumulate steps into master transaction (Only if we are actually going to dispatch)
+      if (this.shouldDispatch) {
+        localTr.steps.forEach((step) => this.masterTransaction.step(step));
+      }
+
+      // 2. Move virtual state forward (Always, to allow chaining)
+      this.virtualState = this.virtualState.apply(localTr);
+
+      // 3. Sync Selection-Last: Derive selection from the NEW state to ensure document integrity
+      if (localTr.selectionSet && this.shouldDispatch) {
+        const { selection } = this.virtualState;
+        if (!selection) return true;
+
+        // Size Guard: Safety clamp to prevent RangeErrors
+        const docSizeNow = this.masterTransaction.doc.content.size;
+        const safeFrom = Math.max(0, Math.min(selection.from, docSizeNow));
+        const safeTo = Math.max(0, Math.min(selection.to, docSizeNow));
+
+        try {
+          if (selection instanceof NodeSelection) {
+            const nodeAtPos = this.masterTransaction.doc.nodeAt(safeFrom);
+            if (nodeAtPos && nodeAtPos.type.spec.selectable !== false) {
+              this.masterTransaction.setSelection(
+                NodeSelection.create(this.masterTransaction.doc, safeFrom)
+              );
+            } else {
+              this.masterTransaction.setSelection(
+                Selection.near(this.masterTransaction.doc.resolve(safeFrom))
+              );
+            }
+          } else if (
+            selection.constructor.name === "TextSelection" ||
+            selection instanceof TextSelection
+          ) {
+            this.masterTransaction.setSelection(
+              TextSelection.create(this.masterTransaction.doc, safeFrom, safeTo)
+            );
+          } else {
+            // For custom selection types like CellSelection, apply directly.
+            this.masterTransaction.setSelection(selection);
+          }
+        } catch {
+          try {
+            this.masterTransaction.setSelection(
+              Selection.near(this.masterTransaction.doc.resolve(safeFrom))
+            );
+          } catch {
+            // Ignore failure
+          }
+        }
+      }
+      return true;
+    } catch {
+      console.error("[Arkpad] Shadow merge failed (Refined)");
+      this.allSuccessful = false;
+      return false;
+    }
+  }
+
+  public focus(position?: "start" | "end" | number | null): ChainedCommands {
+    if (!this.allSuccessful) return this as unknown as ChainedCommands;
+
+    if (this.view && this.shouldDispatch) {
+      this.view.focus();
+    }
+
+    if (position === undefined || position === null) {
+      return this as unknown as ChainedCommands;
+    }
+
+    const doc = this.virtualState.doc;
+    let selection: Selection;
+
+    if (position === "start") {
+      selection = Selection.near(doc.resolve(0));
+    } else if (position === "end") {
+      selection = Selection.near(doc.resolve(doc.content.size), -1);
+    } else {
+      const pos = Math.max(0, Math.min(position, doc.content.size));
+      selection = Selection.near(doc.resolve(pos));
+    }
+
+    const localTr = this.virtualState.tr.setSelection(selection);
+    const merged = this.merge(localTr);
+
+    if (merged) {
+      if (this.shouldDispatch) {
+        this.executionLog.push({
+          command: `focus(${position})`,
+          status: "✅ Success",
+          duration: "N/A",
+        });
+      }
+    } else {
+      if (this.shouldDispatch) {
+        this.executionLog.push({
+          command: `focus(${position})`,
+          status: "❌ Error",
+          duration: "N/A",
+        });
+      }
+    }
+
+    return this as unknown as ChainedCommands;
+  }
+
+  public insertContent(content: ArkpadContent): ChainedCommands {
+    if (!this.allSuccessful) return this as unknown as ChainedCommands;
+    const parsedDoc = parseContent(content, this.schema);
+    // If we get a doc node, extract its content; otherwise use the node itself
+    const contentToInsert =
+      parsedDoc.type.name === "doc" ? parsedDoc.content : Fragment.from(parsedDoc);
+    const slice = new Slice(contentToInsert, 0, 0);
+    const localTr = this.virtualState.tr.replaceSelection(slice);
+    this.merge(localTr);
+    return this as unknown as ChainedCommands;
+  }
+
+  public insertContentAt(
+    position: number | { from: number; to: number },
+    content: ArkpadContent
+  ): ChainedCommands {
+    if (!this.allSuccessful) return this as unknown as ChainedCommands;
+
+    try {
+      const parsedDoc = parseContent(content, this.schema);
+      const slice = new Slice(parsedDoc.content, 0, 0);
+      const localTr = this.virtualState.tr;
+      const docSize = localTr.doc.content.size;
+
+      if (typeof position === "number") {
+        const safePos = Math.max(0, Math.min(position, docSize));
+        localTr.insert(safePos, slice.content);
+      } else {
+        const safeFrom = Math.max(0, Math.min(position.from, docSize));
+        const safeTo = Math.max(0, Math.min(position.to, docSize));
+        localTr.replaceRange(safeFrom, safeTo, slice);
+      }
+
+      const merged = this.merge(localTr);
+
+      if (this.shouldDispatch) {
+        this.executionLog.push({
+          command: "insertContentAt",
+          status: merged ? "✅ Success" : "💥 Merge Failed",
+          duration: "N/A",
+        });
+      }
+    } catch {
+      console.warn("[Arkpad] insertContentAt failed");
+      this.allSuccessful = false;
+      this.executionLog.push({
+        command: "insertContentAt",
+        status: "❌ Error",
+        duration: "N/A",
+      });
+    }
+
+    return this as unknown as ChainedCommands;
+  }
+
+  public scrollIntoView(): ChainedCommands {
+    if (!this.allSuccessful) return this as unknown as ChainedCommands;
+    this.masterTransaction.scrollIntoView();
+    return this as unknown as ChainedCommands;
+  }
+
+  public setMeta(key: any, value: any): ChainedCommands {
+    if (!this.allSuccessful) return this as unknown as ChainedCommands;
+    this.masterTransaction.setMeta(key, value);
+    return this as unknown as ChainedCommands;
+  }
+
+  public command(
+    fn: (props: import("../../api").ArkpadCommandProps) => boolean,
+    label: string = "custom_command"
+  ): ChainedCommands {
+    if (!this.allSuccessful) return this as unknown as ChainedCommands;
+
+    const localTr = this.virtualState.tr;
+    const success = fn({
+      state: this.virtualState,
+      tr: localTr,
+      dispatch: (tr2: Transaction) => {
+        const stepCountBefore = localTr.steps.length;
+        // Sync steps from dispatched transaction into our local transaction
+        tr2.steps.forEach((step) => {
+          try {
+            localTr.step(step);
+          } catch {
+            console.error("[Arkpad] Command step failure");
+          }
+        });
+        if (tr2.selectionSet) {
+          const mappedSelection = tr2.selection.map(
+            localTr.doc,
+            localTr.mapping.slice(stepCountBefore)
+          );
+          safeSetSelection(localTr, mappedSelection);
+        }
+      },
+
+      view: this.view,
+      editor: this.editor,
+      chain: () => this as unknown as ChainedCommands,
+      can: () => undefined as any,
+    });
+
+    if (success) {
+      const merged = this.merge(localTr);
+      if (this.shouldDispatch) {
+        this.executionLog.push({
+          command: label,
+          status: merged ? "✅ Success" : "💥 Merge Failed",
+          duration: "N/A",
+        });
+      }
+    } else {
+      this.allSuccessful = false;
+      if (this.shouldDispatch) {
+        this.executionLog.push({
+          command: label,
+          status: "❌ Rejected",
+          duration: "N/A",
+        });
+      }
+    }
+
+    return this as unknown as ChainedCommands;
+  }
+
+  public run(): boolean {
+    if (this.shouldDispatch && this.executionLog.length > 0) {
+      if (this.editor.shouldLogCommandRuns()) {
+        console.group("🚀 Arkpad Shadow Engine Refinement Log");
+        console.table(this.executionLog);
+        console.groupEnd();
+      }
+      // Report to editor for telemetry API
+      if ((this.editor as any)._setLastCommandLog) {
+        (this.editor as any)._setLastCommandLog(this.executionLog);
+      }
+    }
+
+    if (!this.allSuccessful) {
+      return false;
+    }
+
+    if (this.shouldDispatch && this.dispatch) {
+      // High-Grade Guard: Never dispatch empty transactions to the engine
+      if (this.masterTransaction.steps.length === 0 && !this.masterTransaction.selectionSet) {
+        return true;
+      }
+      try {
+        this.dispatch(this.masterTransaction);
+        return true;
+      } catch {
+        console.error("[Arkpad] Final shadow dispatch failed");
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  /**
+   * Returns the final master transaction without dispatching it.
+   * Useful for input rules and other plugins that need to return a transaction.
+   */
+  public getTransaction(): Transaction | null {
+    if (!this.allSuccessful) return null;
+    return this.masterTransaction;
+  }
+}
+
+/**
+ * Type-safe export for CommandManager.
+ */
+export const CommandManager = CommandManagerInstance as unknown as {
+  new (options: {
+    state: EditorState;
+    commands: ArkpadCommandRegistry;
+    view?: EditorView;
+    dispatch?: (tr: Transaction) => void;
+    shouldDispatch?: boolean;
+    schema: Schema;
+    editor: IArkpadEditor;
+  }): CommandManagerInstance & ChainedCommands;
+};

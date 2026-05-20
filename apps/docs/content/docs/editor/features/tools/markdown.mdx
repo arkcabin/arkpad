@@ -1,0 +1,40 @@
+---
+title: Markdown
+description: Parse and import Markdown pastes seamlessly.
+---
+
+Type: **Extension** · Category: **Tools**
+
+Markdown provides custom paste interception, automatically parsing pasted Markdown formatting strings (such as `# Heading`, `**bold**`, or `*lists*`) and converting them instantly into native rich text ProseMirror nodes.
+
+## Demo
+
+<FeatureDemo
+  feature="markdown"
+  content="<p>Try pasting some raw Markdown text (e.g. <code># Header</code> or <code>Some **bold** text</code>) into the editor below to see it automatically convert into rich formatting!</p>"
+  commands={[]}
+/>
+
+## Installation
+
+```ts
+import { createMarkdownPaste } from "@arkpad/extension-markdown";
+```
+
+## Paste Handler Feature
+
+The paste handler scans pasted plain text for standard Markdown triggers (such as headings, bullet list markers, checkboxes, blockquotes, bold/italic symbols, code delimiters, or dividers).
+
+If standard Markdown is matched, and the clipboard does not already contain rich HTML formatting, the extension intercepts the paste event, compiles the markdown into clean HTML, and inserts it directly as formatted ProseMirror nodes!
+
+## Editor API Exports
+
+The core editor's `contentService` natively links with the markdown serializer when this extension is loaded:
+
+```ts
+// Export editor content as a formatted Markdown string
+const markdownOutput = editor.getMarkdown();
+
+// Import and render Markdown strings directly
+editor.setContent("# Title\n\nThis is **bold** text", true);
+```

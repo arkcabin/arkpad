@@ -1,0 +1,88 @@
+---
+title: AI Assistant
+description: AI-powered autocomplete, summarization, and content generation.
+---
+
+Type: **Extension** · Category: **Tools**
+
+The AI Assistant brings intelligent, agentic editing capabilities to Arkpad. It enables powerful features like inline autocomplete, selection-based summarization, and tone transformation by linking the editor core with custom LLM endpoints.
+
+## Demo
+
+<FeatureDemo
+  feature="ai"
+  content="<p>Click inside the editor below, write a prompt, and trigger the AI complete action!</p>"
+  commands={[{ label: "AI Complete", command: "aiComplete", isActive: "ai", icon: "Palette" }]}
+/>
+
+## Installation
+
+```ts
+import { AI } from "@arkpad/extension-ai";
+```
+
+## Commands
+
+The extension registers two asynchronous commands for managing AI content operations:
+
+```ts
+// Autocompletes content based on the 500 characters preceding the selection cursor
+editor.runCommand("aiComplete");
+
+// Summarizes the active selected range and appends/inserts the summary text
+editor.runCommand("aiSummarize");
+```
+
+### Chaining Commands
+
+You can chain commands to trigger AI autocomplete and immediately refocus the editor view:
+
+```ts
+editor.chain().focus().aiComplete().run();
+```
+
+## Configuration
+
+### Options
+
+| Name                | Type       | Default     | Description                                                                                                                                                  |
+| :------------------ | :--------- | :---------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `onAIRequest`       | `Function` | `undefined` | The async handler callback `({ command, text, context }) => Promise<string>` used to connect the editor to your LLM API (OpenAI, Gemini, local model, etc.). |
+| `enableInterceptor` | `boolean`  | `true`      | Enables the built-in Transaction Interceptor, allowing real-time prompt validation or formatting checks before transactions are committed.                   |
+
+### Connecting to an LLM Endpoint
+
+Here is a standard example of linking the Arkpad AI extension to an OpenAI / local server completion endpoint:
+
+```ts
+const editor = useArkpadEditor({
+  extensions: [
+    Engine,
+    AI.configure({
+      enableInterceptor: true,
+      onAIRequest: async ({ command, text }) => {
+        const response = await fetch("/api/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ command, text }),
+        });
+
+        const data = await response.json();
+        return data.result; // Return the generated text string
+      },
+    }),
+  ],
+});
+```
+
+## Storage (Reactivity)
+
+The AI extension exposes reactive storage variables so that UI components (like loader spinners or progress bars) can cleanly track generator state:
+
+```ts
+// Check if the AI model is currently generating text
+const isGenerating = editor.storage.ai.isGenerating; // returns boolean
+
+// Check for the last encountered generation error
+const lastError = editor.storage.ai.lastError; // returns string | null
+```

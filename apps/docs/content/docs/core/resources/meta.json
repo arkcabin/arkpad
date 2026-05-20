@@ -1,0 +1,10 @@
+{
+  "title": "Resources",
+  "pages": [
+    "architecture-plan",
+    "implementation-notes",
+    "future-vision",
+    "migration-guide",
+    "contributing"
+  ]
+}

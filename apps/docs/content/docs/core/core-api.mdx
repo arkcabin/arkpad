@@ -1,0 +1,192 @@
+---
+title: Core API
+description: Every function on the ArkpadEditor — what it does and how to use it.
+---
+
+## Content
+
+### `getHTML()`
+
+Returns the current document as an HTML string.
+
+```ts
+const html = editor.getHTML();
+// "<h1>Title</h1><p>Content</p>"
+```
+
+### `getJSON()`
+
+Returns the document as a ProseMirror JSON object.
+
+```ts
+const json = editor.getJSON();
+// { type: "doc", content: [{ type: "paragraph", content: [...] }] }
+```
+
+### `getText()`
+
+Extracts all plain text, stripping all markup.
+
+```ts
+const text = editor.getText();
+// "Title Content"
+```
+
+### `getMarkdown()`
+
+Returns a Markdown string of the document.
+
+```ts
+const md = editor.getMarkdown();
+// "# Title\n\nContent"
+```
+
+### `setContent(content, format?)`
+
+Replaces all content in the editor.
+
+```ts
+editor.setContent("<h1>New</h1><p>Content</p>");
+editor.setContent({ type: "doc", content: [...] }, "json");
+editor.setContent("# Title", "markdown");
+```
+
+### `clearContent()`
+
+Resets the editor to a single empty paragraph.
+
+```ts
+editor.clearContent();
+```
+
+## Commands
+
+### `runCommand(name, ...args)`
+
+Execute a command by name. Returns `true` if successful.
+
+```ts
+editor.runCommand("toggleBold");
+editor.runCommand("toggleHeading", { level: 2 });
+editor.runCommand("insertTable", { rows: 3, cols: 3 });
+```
+
+### `canRunCommand(name)`
+
+Check if a command can execute at the current selection.
+
+```ts
+if (editor.canRunCommand("toggleBold")) {
+  editor.runCommand("toggleBold");
+}
+```
+
+Useful to enable/disable toolbar buttons.
+
+### `chain()`
+
+Start a command chain. All commands run as a single transaction.
+
+```ts
+editor.chain().focus("end").insertContent("Hello ").toggleBold().insertContent("World").run();
+```
+
+### `isActive(name, attrs?)`
+
+Check if a mark or node is active at the cursor.
+
+```ts
+editor.isActive("strong"); // Is bold active?
+editor.isActive("heading", { level: 2 }); // Is H2 active?
+editor.isActive("textAlign", { align: "center" }); // Is center alignment active?
+```
+
+### `getAttributes(name)`
+
+Get attributes of the active node or mark.
+
+```ts
+editor.getAttributes("heading"); // { level: 2 }
+editor.getAttributes("link"); // { href: "https://..." }
+```
+
+## Control
+
+### `focus()`
+
+Focus the editor. Optionally move cursor to `"start"` or `"end"`.
+
+```ts
+editor.focus();
+editor.focus("end");
+editor.focus("start");
+```
+
+### `blur()`
+
+Remove focus from the editor.
+
+```ts
+editor.blur();
+```
+
+### `setEditable(boolean)`
+
+Toggle the editor between editable and read-only.
+
+```ts
+editor.setEditable(false); // Read-only
+editor.setEditable(true); // Editable
+```
+
+### `destroy()`
+
+Clean up the editor. Removes event listeners, unmounts NodeViews.
+
+```ts
+editor.destroy();
+```
+
+## Extensions
+
+### `registerExtension(ext)`
+
+Add a single extension at runtime.
+
+```ts
+editor.registerExtension(Table.configure({ resizable: true }));
+```
+
+### `registerExtensions(exts)`
+
+Add multiple extensions at runtime.
+
+```ts
+editor.registerExtensions([ExtensionA, ExtensionB]);
+```
+
+## State
+
+### `getState()`
+
+Get the raw ProseMirror editor state.
+
+```ts
+const state = editor.getState();
+console.log(state.selection, state.doc);
+```
+
+## Configuration
+
+```ts
+const editor = new ArkpadEditor({
+  element: document.querySelector("#editor")!,
+  content: "<p>Hello</p>", // HTML, JSON, or Markdown
+  editable: true,
+  extensions: [], // Extensions to load
+  autofocus: true,
+  onCreate: (editor) => {}, // Editor ready
+  onUpdate: ({ editor }) => {}, // Content changed
+  onDestroy: (editor) => {}, // Editor destroyed
+});
+```

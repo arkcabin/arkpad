@@ -34,6 +34,7 @@ bash scripts/preflight.sh major    # major bump
 ```
 
 Version logic:
+
 - **local == npm** → bumps version (patch/minor/major)
 - **local == npm+1** → no bump needed, ready to publish
 - **local > npm+1** → gap detected (abandoned bumps), resets to npm+1
@@ -53,6 +54,7 @@ bash scripts/release.sh --access public  # scoped @org/pkg
 ### publish.sh
 
 Attempts `echo "" | bun publish`. Returns status codes:
+
 - `PUBLISH_SUCCESS` — done
 - `AUTH_FAILED` — token expired/missing, agent should run setup-token.sh
 
@@ -63,12 +65,14 @@ The piped ENTER auto-opens the OTP checkbox page when the token is valid but OTP
 Two-phase token creation via agent-browser + Chrome:
 
 **Phase 1 — `setup-token.sh fill`:**
+
 1. Navigates to npmjs.com, detects username from DOM
 2. Opens granular token creation page
 3. Fills form: name "cli-publish", All packages, Read+write on packages and organizations, 7-day expiry
 4. Returns `FORM_READY:<username>` — agent tells user to click Generate
 
 **Phase 2 — `setup-token.sh capture`:**
+
 1. Polls page for Copy button (token appears after user clicks Generate)
 2. Clicks Copy → reads from clipboard via `pbpaste`
 3. Writes `//registry.npmjs.org/:_authToken=<token>` to `~/.npmrc`
@@ -94,6 +98,7 @@ Backoff: 5s → 10s → 20s → 40s → 60s. Exits 0 when the version appears on
 The skill uses **granular access tokens** (7-day expiry) stored in `~/.npmrc`. This replaces the old approach of piping ENTER to `bun publish` for browser auth, which broke in bun 1.3.8 when tokens were fully expired (404 instead of auth prompt).
 
 Token lifecycle:
+
 1. **Token valid** → `bun publish` succeeds, may show OTP checkbox (piped ENTER opens it)
 2. **Token expired** → `bun publish` returns 404 → `setup-token.sh` creates new token via Chrome → retry succeeds
 3. **No token** → same as expired

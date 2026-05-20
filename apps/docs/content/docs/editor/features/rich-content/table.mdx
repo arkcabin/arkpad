@@ -1,0 +1,130 @@
+---
+title: Table
+description: Create structured data tables with Arkpad's advanced table system.
+---
+
+Type: **Node** · Category: **Rich Content**
+
+Table inserts a grid of rows and columns for structured data. Supports column resizing, cell selection/merging, custom background styling, and smart keyboard navigation.
+
+## Demo
+
+<FeatureDemo
+  feature="table"
+  content="<table><tr><th>Header 1</th><th>Header 2</th></tr><tr><td>Cell 1</td><td>Cell 2</td></tr></table>"
+  commands={[
+    { label: "Insert Table", command: "insertTable", icon: "Table", isActive: "table" },
+    { label: "Add Column Before", command: "addColumnBefore", icon: "BetweenVerticalStart" },
+    { label: "Add Column After", command: "addColumnAfter", icon: "BetweenVerticalEnd" },
+    { label: "Delete Column", command: "deleteColumn", icon: "Trash2" },
+    { label: "Add Row Before", command: "addRowBefore", icon: "BetweenHorizontalStart" },
+    { label: "Add Row After", command: "addRowAfter", icon: "BetweenHorizontalEnd" },
+    { label: "Delete Row", command: "deleteRow", icon: "Trash2" },
+    { label: "Merge Cells", command: "mergeCells", icon: "Combine" },
+    { label: "Split Cell", command: "splitCell", icon: "Split" },
+    { label: "Delete Table", command: "deleteTable", icon: "TableProperties" },
+  ]}
+/>
+
+## Installation
+
+```ts
+import { Table } from "@arkpad/extension-table";
+```
+
+## Commands
+
+The table extension registers a comprehensive set of commands for managing grids, rows, columns, and cell properties:
+
+### Grids & Structure
+
+```ts
+// Inserts a table with the specified dimensions (defaults: rows: 3, cols: 3, withHeaderRow: true)
+editor.runCommand("insertTable", { rows: 4, cols: 4, withHeaderRow: true });
+
+// Deletes the entire table containing the current cursor
+editor.runCommand("deleteTable");
+
+// Exits the table container and inserts or moves focus to a paragraph below the table
+editor.runCommand("exitTable");
+```
+
+### Rows & Columns
+
+```ts
+editor.runCommand("addRowBefore"); // Add row above selection
+editor.runCommand("addRowAfter"); // Add row below selection
+editor.runCommand("deleteRow"); // Delete active rows
+
+editor.runCommand("addColumnBefore"); // Add column to the left
+editor.runCommand("addColumnAfter"); // Add column to the right
+editor.runCommand("deleteColumn"); // Delete active columns
+```
+
+### Cells & Styling
+
+```ts
+editor.runCommand("mergeCells"); // Merges selected cells
+editor.runCommand("splitCell"); // Splits a merged cell back to individuals
+editor.runCommand("setCellBackground", "#e0f2fe"); // Set cell background color
+
+// Header Toggles
+editor.runCommand("toggleHeaderRow");
+editor.runCommand("toggleHeaderColumn");
+editor.runCommand("toggleHeaderCell");
+```
+
+### Selections
+
+```ts
+editor.runCommand("selectRow"); // Selects the active row
+editor.runCommand("selectColumn"); // Selects the active column
+editor.runCommand("selectTable"); // Selects the entire table
+```
+
+## Keyboard Shortcuts & Navigation
+
+The table system features deep, smart keyboard shortcuts designed for quick data entry and navigation:
+
+| Key / Shortcut                 | Action                                                                                                                                                  |
+| :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Tab`                          | Moves cursor to the next cell. If pressed in the last cell of the table, **automatically appends a new row** and focuses the first cell of the new row. |
+| `Shift-Tab`                    | Moves cursor to the previous cell.                                                                                                                      |
+| `Shift-Enter`                  | Exits the table container and puts the cursor in a paragraph below it.                                                                                  |
+| `Mod-a`                        | First press selects all text _inside_ the current cell. Second press bubbles to select all text in the document.                                        |
+| `Ctrl + Click` / `Cmd + Click` | Starts rectangular cell selection. Drag across cells to select ranges for merging/styling.                                                              |
+
+## Active State
+
+```ts
+const inTable = editor.isActive("table");
+```
+
+## Configuration
+
+### Options
+
+| Name                  | Type      | Default | Description                                                    |
+| :-------------------- | :-------- | :------ | :------------------------------------------------------------- |
+| `resizable`           | `boolean` | `true`  | Enables column resizing by hovering over borders and dragging. |
+| `handleWidth`         | `number`  | `5`     | Drag handle width in pixels.                                   |
+| `cellMinWidth`        | `number`  | `25`    | Minimum width a cell column can be resized to in pixels.       |
+| `lastColumnResizable` | `boolean` | `true`  | Allows the rightmost column to be individually resized.        |
+
+```ts
+Table.configure({
+  resizable: true,
+  cellMinWidth: 50,
+  HTMLAttributes: {
+    class: "custom-table-styles",
+  },
+});
+```
+
+## Interactive Column Resizing
+
+The table extension features a custom responsive `TableView` renderer that automatically registers handles inside the `<colgroup>` DOM layout:
+
+- **Border Drag Handles:** Hovering over column borders displays a horizontal resize cursor.
+- **Fluid Sizing Sync:** Dragging border handles dynamically maps mouse positions to direct CSS column widths.
+- **Attributes Mismatch Protection:** Synchronizes column resizes with ProseMirror cell elements, preventing baseline mismatches and rendering anomalies.

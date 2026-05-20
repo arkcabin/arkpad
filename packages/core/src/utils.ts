@@ -1,6 +1,5 @@
 import { DOMParser as PMDOMParser, Node as PMNode, type Schema } from "prosemirror-model";
-import type { ArkpadContent, ArkpadEditorOptions, ResolvedArkpadEditorOptions } from "./types";
-import { markdownToHtml } from "./extensions/markdown/parser";
+import type { ArkpadContent, ArkpadEditorOptions, ResolvedArkpadEditorOptions } from "./api";
 
 /**
  * Parses HTML string into a ProseMirror Document.
@@ -8,23 +7,17 @@ import { markdownToHtml } from "./extensions/markdown/parser";
 export function parseHtmlContent(content: string, schema: Schema): PMNode {
   const parser = PMDOMParser.fromSchema(schema);
   const element = document.createElement("div");
-  element.innerHTML = content.trim().length > 0 ? content : "<p></p>";
+  element.innerHTML = content.trim();
   return parser.parse(element);
 }
 
 /**
  * Parses various content formats (HTML, Markdown, JSON) into a ProseMirror Document.
  */
-export function parseContent(
-  content: ArkpadContent,
-  schema: Schema,
-  format?: "html" | "markdown" | "json"
-): PMNode {
+export function parseContent(content: ArkpadContent, schema: Schema): PMNode {
   if (typeof content === "string") {
-    // Auto-detect markdown if not specified but looks like markdown
-    if (format === "markdown" || (format === undefined && /^[#*_\-+>=\s]|^\d+\. /m.test(content))) {
-      return parseHtmlContent(markdownToHtml(content), schema);
-    }
+    // Note: Markdown parsing is no longer hardcoded in core to avoid circular dependencies.
+    // If format is markdown, we assume it's already been handled or should be handled by an extension.
     return parseHtmlContent(content, schema);
   }
   return PMNode.fromJSON(schema, content);
@@ -36,10 +29,11 @@ export function parseContent(
 export function resolveEditorOptions(options: ArkpadEditorOptions): ResolvedArkpadEditorOptions {
   return {
     element: options.element,
-    content: options.content ?? "<p></p>",
+    content: options.content ?? "",
     editable: options.editable ?? true,
     extensions: options.extensions ?? [],
     nodeViews: options.nodeViews ?? {},
+    debug: options.debug ?? {},
     autofocus: options.autofocus ?? false,
     onCreate: options.onCreate,
     onUpdate: options.onUpdate,
@@ -48,5 +42,6 @@ export function resolveEditorOptions(options: ArkpadEditorOptions): ResolvedArkp
     onPaste: options.onPaste,
     onInterceptor: options.onInterceptor,
     onDestroy: options.onDestroy,
+    contentTag: options.contentTag ?? "main",
   };
 }

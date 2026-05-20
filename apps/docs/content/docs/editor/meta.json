@@ -1,0 +1,6 @@
+{
+  "title": "Editor",
+  "description": "User-facing documentation for building with Arkpad",
+  "root": true,
+  "pages": ["index", "getting-started", "features", "guides", "playground"]
+}

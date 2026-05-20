@@ -1,0 +1,53 @@
+import { Extension } from "@arkpad/core";
+import { Plugin, PluginKey, PMDOMParser, Slice } from "@arkpad/core";
+import { markdownToHtml } from "./parser";
+export { MarkdownSerializer } from "./serializer";
+export { markdownToHtml as markdownToHtml };
+
+export function createMarkdownPaste(): Extension {
+  return Extension.create({
+    name: "markdownPaste",
+    addProseMirrorPlugins: () => [
+      new Plugin({
+        key: new PluginKey("markdownPaste"),
+        props: {
+          handlePaste(view, event) {
+            const text = event.clipboardData?.getData("text/plain");
+            const html = event.clipboardData?.getData("text/html");
+
+            if (!text) return false;
+
+            const isMarkdown = /^(#+|[*+-] |\[[ x]\] |> |==|\*\*|_|~~|`|---|___|\*\*\*)/m.test(
+              text
+            );
+
+            // If it's not markdown, or if it's rich HTML (contains tags other than simple wrappers), let PM handle it
+            if (!isMarkdown) return false;
+            if (
+              html &&
+              (/<h[1-6]\b/i.test(html) ||
+                html.includes("<ul") ||
+                html.includes("<li") ||
+                html.includes("<strong"))
+            ) {
+              return false;
+            }
+
+            const convertedHtml = markdownToHtml(text);
+
+            // Parse converted HTML and insert it
+            const parser = PMDOMParser.fromSchema(view.state.schema);
+            const element = document.createElement("div");
+            element.innerHTML = convertedHtml;
+            const doc = parser.parse(element);
+
+            const tr = view.state.tr.replaceSelection(new Slice(doc.content, 0, 0));
+            view.dispatch(tr);
+
+            return true;
+          },
+        },
+      }),
+    ],
+  });
+}

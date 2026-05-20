@@ -1,0 +1,80 @@
+---
+title: Bold
+description: Make text bold with `toggleBold`.
+---
+
+Type: **Mark** · Category: **Marks**
+
+Bold emphasizes text by making it thicker and darker. Renders as `<strong>` in HTML output.
+
+## Demo
+
+<FeatureDemo
+  feature="bold"
+  content="<p>Arkpad provides <strong>structural governance</strong> with a seamless user experience. You can easily toggle <strong>bold</strong> text to emphasize key points.</p>"
+  commands={[{ label: "Bold", command: "toggleBold", isActive: "bold", icon: "Bold" }]}
+/>
+
+## Installation
+
+```ts
+import { Bold } from "@arkpad/extension-bold";
+```
+
+## Commands
+
+The extension registers three commands for managing bold styling:
+
+```ts
+// Toggles bold styling on and off for the active selection
+editor.runCommand("toggleBold");
+
+// Explicitly applies bold styling to the selection
+editor.runCommand("setBold");
+
+// Explicitly removes bold styling from the selection
+editor.runCommand("unsetBold");
+```
+
+### Chaining Commands
+
+You can chain commands to toggle bold styling and immediately focus the editor:
+
+```ts
+editor.chain().focus().toggleBold().run();
+```
+
+## Keyboard Shortcuts
+
+| Shortcut           | Action               |
+| :----------------- | :------------------- |
+| `Mod-b` or `Mod-B` | Toggles bold styling |
+
+## Markdown Input Rules
+
+Type these patterns at both ends of a word or phrase to quickly make it bold:
+
+- `**bold**`
+- `__bold__`
+
+## Active State
+
+```ts
+const isActive = editor.isActive("bold");
+```
+
+## Configuration
+
+### Options
+
+| Name             | Type                  | Default | Description                                                                 |
+| :--------------- | :-------------------- | :------ | :-------------------------------------------------------------------------- |
+| `HTMLAttributes` | `Record<string, any>` | `{}`    | Key-value pairs of attributes to be rendered on the `<strong>` DOM element. |
+
+```ts
+Bold.configure({
+  HTMLAttributes: {
+    class: "custom-bold-styling",
+  },
+});
+```

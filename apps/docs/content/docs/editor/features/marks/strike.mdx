@@ -1,0 +1,79 @@
+---
+title: Strike
+description: Strikethrough text with `toggleStrike`.
+---
+
+Type: **Mark** · Category: **Marks**
+
+Strike draws a line through text to indicate deletion. Renders as `<s>` in HTML output.
+
+## Demo
+
+<FeatureDemo
+  feature="strike"
+  content="<p>Sometimes you need to <s>strike through</s> text to show corrections or outdated information.</p>"
+  commands={[{ label: "Strike", command: "toggleStrike", isActive: "strike", icon: "Strike" }]}
+/>
+
+## Installation
+
+```ts
+import { Strike } from "@arkpad/extension-strike";
+```
+
+## Commands
+
+The extension registers three commands for managing strikethrough styling:
+
+```ts
+// Toggles strikethrough styling on and off for the active selection
+editor.runCommand("toggleStrike");
+
+// Explicitly applies strikethrough styling to the selection
+editor.runCommand("setStrike");
+
+// Explicitly removes strikethrough styling from the selection
+editor.runCommand("unsetStrike");
+```
+
+### Chaining Commands
+
+You can chain commands to toggle strikethrough styling and immediately focus the editor:
+
+```ts
+editor.chain().focus().toggleStrike().run();
+```
+
+## Keyboard Shortcuts
+
+| Shortcut                       | Action                        |
+| :----------------------------- | :---------------------------- |
+| `Mod-Shift-s` or `Mod-Shift-S` | Toggles strikethrough styling |
+
+## Markdown Input Rules
+
+Type this pattern at both ends of a word or phrase to quickly apply a strikethrough:
+
+- `~~strike~~`
+
+## Active State
+
+```ts
+const isActive = editor.isActive("strike");
+```
+
+## Configuration
+
+### Options
+
+| Name             | Type                  | Default | Description                                                            |
+| :--------------- | :-------------------- | :------ | :--------------------------------------------------------------------- |
+| `HTMLAttributes` | `Record<string, any>` | `{}`    | Key-value pairs of attributes to be rendered on the `<s>` DOM element. |
+
+```ts
+Strike.configure({
+  HTMLAttributes: {
+    class: "custom-strike-styling",
+  },
+});
+```

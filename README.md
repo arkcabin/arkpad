@@ -19,9 +19,9 @@ Arkpad is an enterprise-grade rich text editor built on ProseMirror. It provides
 
 ## 📦 Packages
 
-| Package | Version | Description |
-| :--- | :--- | :--- |
-| [`@arkpad/core`](./packages/core) | `1.6.4` | The core editor engine. |
+| Package                             | Version | Description                 |
+| :---------------------------------- | :------ | :-------------------------- |
+| [`@arkpad/core`](./packages/core)   | `1.6.4` | The core editor engine.     |
 | [`@arkpad/react`](./packages/react) | `1.6.4` | React hooks and components. |
 
 ## 🚀 Quick Start
@@ -31,13 +31,13 @@ npm install @arkpad/react @arkpad/core
 ```
 
 ```tsx
-import { useArkpadEditor, ArkpadEditorContent } from '@arkpad/react';
-import { Essentials } from '@arkpad/core';
+import { useArkpadEditor, ArkpadEditorContent } from "@arkpad/react";
+import { Essentials } from "@arkpad/core";
 
 export default function App() {
   const editor = useArkpadEditor({
     extensions: [Essentials],
-    content: '<h1>The Ultimate Arkpad UI</h1>',
+    content: "<h1>The Ultimate Arkpad UI</h1>",
   });
 
   if (!editor) return null;
@@ -45,9 +45,9 @@ export default function App() {
   return (
     <div className="ark-editor">
       <div className="toolbar">
-        <button 
+        <button
           onClick={() => editor.commands.toggleBold()}
-          className={editor.isActive('strong') ? 'is-active' : ''}
+          className={editor.isActive("strong") ? "is-active" : ""}
         >
           Bold
         </button>

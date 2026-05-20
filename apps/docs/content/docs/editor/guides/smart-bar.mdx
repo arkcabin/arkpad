@@ -1,0 +1,56 @@
+---
+title: Smart Bar Guide
+description: Contextual floating menu system with 120fps performance.
+---
+
+The Smart Bar is Arkpad's world-class floating menu system. It provides a Notion-like contextual experience with zero performance overhead.
+
+## The "Virtual Mirror" Engine
+
+Unlike traditional floating menus that rely on heavy React state updates, Arkpad uses a **CSS Variable-driven positioning engine**:
+
+- **120fps Movement** — Positioning handled by a headless core plugin synced with `requestAnimationFrame`
+- **Zero React Jitter** — Menu moves at native speeds by updating CSS variables (`--sb-x`, `--sb-y`) directly on the DOM
+- **Adaptive Flip** — Automatically flips to the top or bottom and stays within viewport
+
+## The Slot-Based API
+
+```tsx
+import { SmartBar, EditorButton } from "@arkpad/react";
+
+function MyToolbar() {
+  return (
+    <SmartBar>
+      <SmartBar.Group showIf={(editor) => !editor.getSelection().empty}>
+        <EditorButton command="toggleBold" name="strong">
+          Bold
+        </EditorButton>
+        <EditorButton command="toggleItalic" name="em">
+          Italic
+        </EditorButton>
+      </SmartBar.Group>
+
+      <SmartBar.Group showIf={(editor) => editor.isActive("table")}>
+        <EditorButton command="addColumnAfter">Add Column</EditorButton>
+        <EditorButton command="addRowAfter">Add Row</EditorButton>
+      </SmartBar.Group>
+    </SmartBar>
+  );
+}
+```
+
+## Pre-Built vs. Custom
+
+### The "Easy Path"
+
+Use `SmartBar.Group` and `EditorButton` for a professional menu in minutes. Buttons automatically handle `disabled` and `active` states.
+
+### The "Headless Path"
+
+Use the low-level `BubbleMenu` portal and listen to CSS variable updates for completely custom UI (radial menus, cursor-following sidebars).
+
+## Performance Tips
+
+- **Keep Groups Focused** — Only use `showIf` for large context shifts
+- **Z-Index** — Default Z-Index of `1000` to stay above all content
+- **Styling** — Default "Glassmorphism" style, override with `className`

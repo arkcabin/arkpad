@@ -1,0 +1,365 @@
+---
+title: Public API
+description: Complete API reference with usage examples for every editor method and command.
+---
+
+Arkpad provides a small, stable API surface. Every method has a specific purpose and consistent behavior.
+
+## Editor Initialization
+
+### Vanilla JS
+
+```ts
+import { ArkpadEditor } from "@arkpad/core";
+
+const editor = new ArkpadEditor({
+  element: document.querySelector("#editor")!,
+  content: "<p>Hello World</p>",
+  autofocus: true,
+  editable: true,
+  extensions: [],
+  onCreate: (editor) => console.log("Editor ready"),
+  onUpdate: ({ editor, transaction }) => console.log("Content changed"),
+  onDestroy: (editor) => console.log("Cleanup"),
+});
+```
+
+### React
+
+```tsx
+import { useArkpadEditor, ArkpadEditorContent } from "@arkpad/react";
+
+function App() {
+  const editor = useArkpadEditor({
+    content: "<p>Write here</p>",
+    extensions: [StarterKit],
+    onUpdate: ({ editor }) => console.log(editor.getHTML()),
+    onReady: (editor) => console.log("Ready!"),
+  });
+
+  return <ArkpadEditorContent editor={editor} />;
+}
+```
+
+## Editor Methods
+
+### `getState()`
+
+Returns the current ProseMirror editor state.
+
+```typescript
+const state = editor.getState();
+console.log(state.selection, state.doc);
+```
+
+### `getHTML()`
+
+Serializes the current document to an HTML string.
+
+```typescript
+const html = editor.getHTML();
+// Returns: "<h1>Hello</h1><p>World</p>"
+```
+
+Useful for saving content to a database or sending to an API.
+
+### `getJSON()`
+
+Returns the document as a clean ProseMirror JSON object.
+
+```typescript
+const json = editor.getJSON();
+// Returns: { type: "doc", content: [{ type: "paragraph", content: [...] }] }
+```
+
+Useful for portable document storage or collaboration.
+
+### `getText()`
+
+Extracts all plain text from the editor.
+
+```typescript
+const text = editor.getText();
+// Returns: "Hello World" (strips all markup)
+```
+
+### `getMarkdown()`
+
+Returns a serialized Markdown version of the document.
+
+```typescript
+const md = editor.getMarkdown();
+// Returns: "# Title\n\nParagraph text here"
+```
+
+### `runCommand(name, ...args)`
+
+Executes a command by name. Returns `true` if successful.
+
+```typescript
+// Basic commands
+editor.runCommand("toggleBold");
+editor.runCommand("toggleHeading", { level: 2 });
+
+// With arguments
+editor.runCommand("setImage", { src: "https://example.com/photo.jpg", alt: "Photo" });
+
+// Check success
+const success = editor.runCommand("toggleBold");
+if (success) console.log("Bold toggled");
+```
+
+### `canRunCommand(name)`
+
+Checks if a command can currently be executed at the current selection.
+
+```typescript
+if (editor.canRunCommand("toggleBold")) {
+  editor.runCommand("toggleBold");
+}
+```
+
+Useful for enabling/disabling toolbar buttons.
+
+### `isActive(name, attrs?)`
+
+Checks if a mark or node is currently active at the cursor position.
+
+```typescript
+// Check if bold is active
+const isBold = editor.isActive("strong");
+
+// Check if specific heading level
+const isH2 = editor.isActive("heading", { level: 2 });
+
+// Check alignment
+const isCentered = editor.isActive("textAlign", { align: "center" });
+```
+
+### `getAttributes(name)`
+
+Returns the attributes of the active mark or node.
+
+```typescript
+const attrs = editor.getAttributes("heading");
+// Returns: { level: 2 } if cursor is in an H2
+
+const linkAttrs = editor.getAttributes("link");
+// Returns: { href: "https://..." } if cursor is on a link
+```
+
+### `setContent(content, format?)`
+
+Replaces the entire document content.
+
+```typescript
+// HTML
+editor.setContent("<h1>New Title</h1><p>New paragraph</p>");
+
+// JSON
+editor.setContent({ type: "doc", content: [...] });
+
+// Markdown
+editor.setContent("# New Title\n\nNew paragraph", "markdown");
+```
+
+### `clearContent()`
+
+Resets the editor to a single empty paragraph.
+
+```typescript
+editor.clearContent();
+// Editor now contains only: <p></p>
+```
+
+### `focus()` / `blur()`
+
+Programmatically manages editor focus.
+
+```typescript
+editor.focus(); // Focus at current position
+editor.focus("end"); // Focus at the end of the document
+editor.focus("start"); // Focus at the start of the document
+
+editor.blur(); // Remove focus from editor
+```
+
+### `setEditable(boolean)`
+
+Toggles whether the editor is read-only.
+
+```typescript
+editor.setEditable(false); // Make read-only
+editor.setEditable(true); // Make editable again
+```
+
+### `registerExtension(ext)` / `registerExtensions(exts)`
+
+Adds extensions at runtime after the editor is initialized.
+
+```typescript
+import { Table } from "@arkpad/core";
+
+// Single extension
+editor.registerExtension(Table.configure({ resizable: true }));
+
+// Multiple extensions
+editor.registerExtensions([ExtensionA, ExtensionB]);
+```
+
+### `destroy()`
+
+Cleans up the editor instance, removes event listeners, and unmounts NodeViews.
+
+```typescript
+editor.destroy();
+// Editor is no longer usable after this call
+```
+
+## Configuration Options
+
+```ts
+interface ArkpadEditorOptions {
+  element: HTMLElement; // Required: DOM element to mount
+  content?: string | object; // Initial content (HTML, JSON, or Markdown)
+  editable?: boolean; // Default: true
+  extensions?: Extension[]; // Extensions to use
+  autofocus?: boolean; // Focus on mount
+  onCreate?: (editor) => void;
+  onUpdate?: (payload) => void;
+  onDestroy?: (editor) => void;
+}
+```
+
+## Full Command Reference
+
+### Text Formatting
+
+| Command             | Shortcut    | Description          |
+| :------------------ | :---------- | :------------------- |
+| `toggleBold`        | Mod+B       | Toggle bold          |
+| `toggleItalic`      | Mod+I       | Toggle italic        |
+| `toggleUnderline`   | Mod+U       | Toggle underline     |
+| `toggleStrike`      | Mod+Shift+S | Toggle strikethrough |
+| `toggleCode`        | Mod+E       | Toggle inline code   |
+| `toggleHighlight`   | -           | Toggle highlight     |
+| `toggleSuperscript` | -           | Toggle superscript   |
+| `toggleSubscript`   | -           | Toggle subscript     |
+
+### Block Formatting
+
+| Command             | Shortcut      | Description            |
+| :------------------ | :------------ | :--------------------- |
+| `setParagraph`      | -             | Set paragraph block    |
+| `toggleHeading`     | Mod+Alt+1/2/3 | Set heading (1-6)      |
+| `toggleBlockquote`  | Mod+Shift+B   | Toggle blockquote      |
+| `toggleCodeBlock`   | Mod+Alt+C     | Toggle code block      |
+| `toggleBulletList`  | Mod+Shift+8   | Toggle bullet list     |
+| `toggleOrderedList` | Mod+Shift+7   | Toggle ordered list    |
+| `toggleTaskList`    | Mod+Shift+9   | Toggle task list       |
+| `setHorizontalRule` | -             | Insert horizontal rule |
+| `setImage`          | -             | Insert image           |
+
+### History
+
+| Command | Shortcut |
+| :------ | :------- |
+| `undo`  | Mod+Z    |
+| `redo`  | Mod+Y    |
+
+## Extension System
+
+### Creating Custom Extensions
+
+```ts
+interface Extension {
+  name: string;
+  addCommands?: () => Record<string, Command>;
+  addKeyboardShortcuts?: () => Record<string, Command>;
+  addInputRules?: () => Plugin[];
+  addPasteRules?: () => Plugin[];
+  addProseMirrorPlugins?: () => Plugin[];
+}
+```
+
+### Example: Runtime Extension Registration
+
+```ts
+function createHighlight() {
+  return {
+    name: "highlight",
+    addCommands: () => ({
+      toggleHighlight: (state, dispatch) => {
+        return true;
+      },
+    }),
+  };
+}
+
+editor.registerExtension(createHighlight());
+editor.runCommand("toggleHighlight");
+```
+
+## Keyboard Shortcuts
+
+| Shortcut  | Action    |
+| :-------- | :-------- |
+| Mod+B     | Bold      |
+| Mod+I     | Italic    |
+| Mod+U     | Underline |
+| Mod+E     | Code      |
+| Mod+Z     | Undo      |
+| Mod+Y     | Redo      |
+| Mod+Alt+1 | Heading 1 |
+| Mod+Alt+2 | Heading 2 |
+| Mod+Alt+3 | Heading 3 |
+
+## Project Organization
+
+```
+@arkpad/core       # Core editor (vanilla JS) — class, schema, extensions
+@arkpad/react      # React hooks, context, content component
+@arkpad/app        # Demo application
+```
+
+The `@arkpad/core` package contains:
+
+- `ArkpadEditor` — Main editor class with all methods above
+- `arkpadSchema` — ProseMirror schema
+- `ExtensionManager` — Manages extension lifecycle
+- All type definitions
+
+## Core Architecture: Edge Governance
+
+Arkpad v2 introduced **Edge Governance**, a structural integrity system that prevents document corruption before transactions are committed.
+
+### Structural Governance (Bitmasks)
+
+| Role      | Bitmask | Description                             |
+| :-------- | :------ | :-------------------------------------- |
+| `ATOM`    | 1       | Leaf nodes (Text, HardBreak)            |
+| `CONTENT` | 2       | Basic blocks (Paragraph, Heading)       |
+| `WIDGET`  | 4       | Self-contained nodes (Image, Table)     |
+| `LAYOUT`  | 8       | Structural containers (Section, Column) |
+| `ROOT`    | 16      | The document root                       |
+
+### Async Interceptors
+
+Interceptors allow async validation of transactions — useful for AI-powered editing:
+
+```ts
+editor.addInterceptor(async ({ transaction, editor }) => {
+  const isAllowed = await checkPermission(transaction);
+  return isAllowed ? transaction : null; // null cancels the transaction
+});
+```
+
+## Migration from Old API
+
+```diff
+- import { createArkpadEditor } from '@arkpad/core'
++ import { ArkpadEditor } from '@arkpad/core'
+
+- const editor = createArkpadEditor({ ... })
++ const editor = new ArkpadEditor({ ... })
+```

@@ -1,0 +1,97 @@
+---
+title: Text Alignment
+description: Control horizontal text alignment with `setTextAlign`.
+---
+
+Type: **Functionality**
+
+Text Alignment controls how text is horizontally positioned within block elements. Supports left, center, right, and justify alignments.
+
+## Demo
+
+<FeatureDemo
+  feature="text-alignment"
+  content={`<p data-align="left">Left-aligned paragraph. Use the toolbar buttons above to change alignment of this text block.</p>
+<p data-align="center">Center-aligned text brings focus and elegance.</p>
+<p data-align="right">Right-aligned text is commonly used for special formatting.</p>`}
+  commands={[
+    {
+      label: "Left",
+      command: "setTextAlign",
+      args: "left",
+      icon: "AlignLeft",
+      isActive: ["textAlign", { align: "left" }],
+    },
+    {
+      label: "Center",
+      command: "setTextAlign",
+      args: "center",
+      icon: "AlignCenter",
+      isActive: ["textAlign", { align: "center" }],
+    },
+    {
+      label: "Right",
+      command: "setTextAlign",
+      args: "right",
+      icon: "AlignRight",
+      isActive: ["textAlign", { align: "right" }],
+    },
+    {
+      label: "Justify",
+      command: "setTextAlign",
+      args: "justify",
+      icon: "AlignJustify",
+      isActive: ["textAlign", { align: "justify" }],
+    },
+  ]}
+/>
+
+## Installation
+
+```ts
+import { createTextAlign } from "@arkpad/extension-alignment";
+```
+
+## Commands
+
+The extension registers a highly flexible main alignment command along with convenience commands for every specific alignment:
+
+```ts
+// Main alignment command (accepts string or configuration object)
+editor.runCommand("setTextAlign", "center");
+editor.runCommand("setTextAlign", { align: "right" });
+
+// Convenience alignment commands
+editor.runCommand("setTextAlignLeft");
+editor.runCommand("setTextAlignCenter");
+editor.runCommand("setTextAlignRight");
+editor.runCommand("setTextAlignJustify");
+```
+
+### Chaining Commands
+
+You can chain commands to set alignment and immediately focus the editor:
+
+```ts
+editor.chain().focus().setTextAlignCenter().run();
+```
+
+## Keyboard Shortcuts
+
+| Shortcut      | Action       |
+| :------------ | :----------- |
+| `Mod-Shift-l` | Align Left   |
+| `Mod-Shift-e` | Align Center |
+| `Mod-Shift-r` | Align Right  |
+
+## Active State
+
+Use the active API state with the alignment attribute to check active positioning:
+
+```ts
+const isCenter = editor.isActive("textAlign", { align: "center" });
+```
+
+## Configuration
+
+The alignment extension behaves as a Notion-style, modern block tool. By default, alignment settings are automatically suppressed inside lists to maintain high layout readability and visual structure.

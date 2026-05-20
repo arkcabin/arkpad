@@ -1,0 +1,66 @@
+---
+title: Implementation Notes
+description: Specialized logic and architectural fixes.
+---
+
+This document tracks specialized logic and fixes implemented to maintain the "Premium & Ultra-Fast" Arkpad experience.
+
+## Tailwind v4 Monorepo Scanning
+
+### The Problem
+
+Tailwind v4's `@source` directive can fail to scan workspace packages if their `src` folders are not explicitly exposed.
+
+### The Solution
+
+Use direct relative paths in CSS:
+
+```css
+@source "../../../packages/react/src";
+```
+
+## Dynamic Alignment Protection
+
+### The Problem
+
+Applying `text-align: right` to a paragraph inside a list item causes the text to disconnect from its checkbox/bullet.
+
+### The Solution
+
+Implemented a **Dynamic Ancestor Guard**. Before applying alignment, the engine climbs the node tree. If it detects any ancestor with "list" in its name, it suppresses the command — matching Notion's behavior.
+
+## Safe List-Type Switching
+
+### The Problem
+
+Switching a list type (e.g., Task List → Bullet List) causes `RangeError` because children become invalid for the new wrapper.
+
+### The Solution
+
+**Full Node Reconstruction** — Instead of changing just the wrapper, the `toggleList` function recreates all items as the new type and replaces the entire range with a schema-valid list.
+
+## TaskView Centering
+
+### The Problem
+
+Checkbox visual misalignment due to browser font rendering differences.
+
+### The Solution
+
+1. Switched from `items-start` to `items-center` in flexbox
+2. Applied `!m-0` and `!leading-snug` to paragraphs inside `.task-item`
+3. Removed padding and margins for tight vertical stacking
+
+## Modular Markdown & MDX System
+
+### The Problem
+
+Standard editors treat Markdown only as an input trigger, not a data format.
+
+### The Solution
+
+Implemented a **Unified Markdown Module**:
+
+1. **Semantic Parsing** — Regex-based mapping for nested lists and complex marks
+2. **State-to-Text Serialization** — Walks the ProseMirror node tree to reconstruct clean Markdown
+3. **Format-Aware Initialization** — `setContent` accepts `'html'`, `'markdown'`, or `'json'` format

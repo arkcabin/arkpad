@@ -1,0 +1,219 @@
+[data-arkpad-content] .ark-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #3b82f6;
+  color: white;
+  border: none;
+}
+
+[data-arkpad-content] .ark-button:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+[data-arkpad-content] .ark-button.ark-button-secondary {
+  background: transparent;
+  color: #3b82f6;
+  border: 2px solid #3b82f6;
+}
+
+[data-arkpad-content] .ark-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+[data-arkpad-content] .ark-card-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #111827;
+}
+
+[data-arkpad-content] .ark-spacer {
+  width: 100%;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    #f3f4f6 10px,
+    #f3f4f6 20px
+  );
+  opacity: 0.5;
+}
+
+[data-arkpad-content] .ark-divider {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 16px 0;
+}
+
+[data-arkpad-content] .ark-container {
+  width: 100%;
+  margin: 0 auto;
+}
+
+[data-arkpad-content] .ark-grid {
+  display: grid;
+  width: 100%;
+}
+
+[data-arkpad-content] .ark-video {
+  width: 100%;
+  border-radius: 8px;
+  background: #000;
+}
+
+[data-arkpad-content] .ark-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+[data-arkpad-content] .ark-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 9999px;
+  background: #e5e7eb;
+  color: #374151;
+}
+
+[data-arkpad-content] .ark-badge.ark-badge-success {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+[data-arkpad-content] .ark-badge.ark-badge-warning {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+[data-arkpad-content] .ark-badge.ark-badge-error {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+[data-arkpad-content] .ark-alert {
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid;
+}
+
+[data-arkpad-content] .ark-alert-info {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #1e40af;
+}
+
+[data-arkpad-content] .ark-alert-success {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+  color: #065f46;
+}
+
+[data-arkpad-content] .ark-alert-warning {
+  background: #fffbeb;
+  border-color: #fde68a;
+  color: #92400e;
+}
+
+[data-arkpad-content] .ark-alert-error {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+[data-arkpad-content] .ark-tabs {
+  width: 100%;
+}
+
+[data-arkpad-content] .ark-tabs-header {
+  display: flex;
+  border-bottom: 1px solid #e5e7eb;
+  gap: 8px;
+}
+
+[data-arkpad-content] .ark-tab {
+  padding: 12px 24px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+[data-arkpad-content] .ark-tab:hover {
+  color: #111827;
+}
+
+[data-arkpad-content] .ark-tab.ark-tab-active {
+  color: #3b82f6;
+  border-bottom-color: #3b82f6;
+}
+
+[data-arkpad-content] .ark-accordion {
+  width: 100%;
+}
+
+[data-arkpad-content] .ark-accordion-item {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+[data-arkpad-content] .ark-accordion-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  cursor: pointer;
+  background: #f9fafb;
+}
+
+[data-arkpad-content] .ark-accordion-content {
+  padding: 16px;
+}
+
+[data-arkpad-content] .ark-block-selected {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+[data-arkpad-content] .ark-block-drag-handle {
+  position: absolute;
+  left: -24px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+[data-arkpad-content] .ark-block:hover .ark-block-drag-handle {
+  opacity: 1;
+}
+
+[data-arkpad-content] .ark-block-drag-handle:active {
+  cursor: grabbing;
+}

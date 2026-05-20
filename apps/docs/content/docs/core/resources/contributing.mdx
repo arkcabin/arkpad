@@ -1,0 +1,103 @@
+---
+title: Contributing
+description: How to contribute to Arkpad.
+---
+
+We welcome contributions! This guide will help you set up your development environment and understand the contribution process.
+
+## Prerequisites
+
+- Node.js v20 or higher
+- npm v10 or higher
+- Git
+- A code editor (VS Code recommended)
+
+## Setup
+
+### 1. Fork and Clone
+
+```bash
+git clone https://github.com/arkcabin/arkpad.git
+cd arkpad
+```
+
+### 2. Install Dependencies
+
+```bash
+npm install
+```
+
+### 3. Build Packages
+
+```bash
+npm run build -w @arkpad/core
+```
+
+### 4. Run the Dev Server
+
+```bash
+npm run dev
+```
+
+## Development Workflow
+
+### Branch Strategy
+
+- `main` — Stable release branch
+- Create feature branches from `main`
+- Use descriptive names: `feat/extension-name`, `fix/bug-description`
+
+### Code Style
+
+- TypeScript strict mode with `noUncheckedIndexedAccess`
+- Follow existing code patterns and conventions
+- Use Prettier for formatting: `npm run format`
+- Run ESLint: `npm run lint`
+
+### Testing
+
+```bash
+npm run test        # Run core tests
+npm run test:all    # Run all tests including extensions
+```
+
+### Type Checking
+
+```bash
+npm run build -w @arkpad/core
+npm run typecheck --workspaces
+```
+
+## Pull Request Process
+
+1. Ensure your code builds and passes all tests
+2. Update documentation if adding new features
+3. Include tests for new functionality
+4. Describe your changes clearly in the PR description
+5. Reference any related issues
+
+### PR Checklist
+
+- [ ] Code builds successfully
+- [ ] All tests pass
+- [ ] TypeScript type checks pass
+- [ ] Linting passes
+- [ ] Documentation updated (if applicable)
+- [ ] Tests added (if applicable)
+
+## Package Structure
+
+```
+packages/
+├── core/              # Core editor engine
+├── react/             # React component wrapper
+├── extension-*/       # Individual extensions
+├── starter-kit/       # Meta-package
+apps/
+├── arkpad/            # Demo application
+└── docs/              # Documentation site
+```
+
+## Need Help?
+
+Open an issue on GitHub for bugs, feature requests, or questions.

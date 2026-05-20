@@ -10,13 +10,23 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@arkpad/core": "1.6.13",
-    "@arkpad/react": "1.6.13",
+    "@arkpad/core": "*",
+    "@arkpad/extension-ai": "*",
+    "@arkpad/extension-color": "*",
+    "@arkpad/extension-font-family": "*",
+    "@arkpad/extension-font-size": "*",
+    "@arkpad/extension-highlight": "*",
+    "@arkpad/extension-placeholder": "*",
+    "@arkpad/extension-typography": "*",
+    "@arkpad/extension-youtube": "*",
+    "@arkpad/react": "*",
+    "@arkpad/starter-kit": "*",
     "@tailwindcss/vite": "^4.1.13",
     "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
     "lucide-react": "^0.542.0",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "react-router-dom": "^7.14.2",
+    "tailwind-merge": "^2.6.1"
   },
   "devDependencies": {
     "@types/react": "^19.1.12",

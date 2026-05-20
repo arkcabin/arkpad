@@ -1,0 +1,98 @@
+---
+title: Bubble Menu
+description: A contextual formatting menu that appears when text is selected.
+---
+
+Type: **Extension** · Category: **Interaction**
+
+The Bubble Menu is a contextual menu that automatically displays above selected text, providing quick formatting operations (such as bold, italic, highlights, or links) right at the cursor.
+
+## Usage
+
+In Arkpad, the bubble menu is completely headless and built for zero-flicker performance. You configure it in your editor extensions, and then mount the `<BubbleMenu>` React wrapper component in your render tree:
+
+```tsx
+import React from "react";
+import { useArkpadEditor, ArkpadEditorContent, ArkpadProvider, BubbleMenu } from "@arkpad/react";
+import { Engine } from "@arkpad/core";
+import { Bold } from "@arkpad/extension-bold";
+import { Italic } from "@arkpad/extension-italic";
+import { BubbleMenu as BubbleMenuExtension } from "@arkpad/extension-bubble-menu";
+
+const extensions = [Engine, Bold, Italic, BubbleMenuExtension];
+
+export default function MyEditor() {
+  const editor = useArkpadEditor({ extensions, content: "<p>Select this text...</p>" });
+
+  return (
+    <ArkpadProvider editor={editor}>
+      <div className="editor-wrapper relative">
+        {/* Mount the BubbleMenu component */}
+        <BubbleMenu className="flex gap-1 p-1 bg-fd-popover border border-fd-border rounded-lg shadow-lg">
+          <button
+            onClick={() => editor.runCommand("toggleBold")}
+            className="px-2 py-1 hover:bg-fd-accent rounded text-sm"
+          >
+            Bold
+          </button>
+          <button
+            onClick={() => editor.runCommand("toggleItalic")}
+            className="px-2 py-1 hover:bg-fd-accent rounded text-sm"
+          >
+            Italic
+          </button>
+        </BubbleMenu>
+
+        <ArkpadEditorContent editor={editor} />
+      </div>
+    </ArkpadProvider>
+  );
+}
+```
+
+## Demo
+
+<FeatureDemo
+  feature="bubble-menu"
+  content="<p>Select some text in the editor below to trigger the contextual bubble menu!</p>"
+  commands={[
+    { label: "Bold", command: "toggleBold", isActive: "bold", icon: "Bold" },
+    { label: "Italic", command: "toggleItalic", isActive: "italic", icon: "Italic" },
+    { label: "Underline", command: "toggleUnderline", isActive: "underline", icon: "Underline" },
+    { label: "Strike", command: "toggleStrike", isActive: "strike", icon: "Strike" },
+    { label: "Code", command: "toggleCode", isActive: "code", icon: "Code" },
+    { label: "Highlight", command: "toggleHighlight", isActive: "highlight", icon: "Highlighter" },
+  ]}
+/>
+
+## Installation
+
+```ts
+import { BubbleMenu } from "@arkpad/extension-bubble-menu";
+```
+
+## Configuration
+
+### Options
+
+| Name         | Type       | Default                                               | Description                                                                  |
+| :----------- | :--------- | :---------------------------------------------------- | :--------------------------------------------------------------------------- |
+| `shouldShow` | `Function` | `({ editor, empty }) => !empty && editor.isFocused()` | Custom callback to conditionally determine when the menu should be rendered. |
+
+### Custom Trigger Conditions
+
+You can override the default visibility logic to hide the menu inside specific blocks (such as code blocks or headings):
+
+```ts
+BubbleMenu.configure({
+  shouldShow: ({ editor, state, from, to }) => {
+    // Hide inside code blocks
+    if (editor.isActive("codeBlock")) {
+      return false;
+    }
+
+    // Only show if the selection is a non-empty text selection
+    return !state.selection.empty;
+  },
+});
+```

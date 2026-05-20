@@ -1,0 +1,183 @@
+---
+title: Headless Approach
+description: Build complete editors with zero UI assumptions using Arkpad's headless architecture.
+---
+
+Arkpad is **100% headless**. The core engine provides pure logic — document model, transactions, commands, and extensions — with zero UI dependencies. You bring your own UI, whether that is React, Vue, Svelte, or vanilla JavaScript.
+
+This makes Arkpad ideal for:
+
+- **Custom white-label editors** — Brand the editor however you want
+- **Design tool integration** — Embed editing in any environment
+- **Mobile/desktop apps** — Use with any rendering framework
+- **AI-powered interfaces** — Headless control without DOM dependency
+
+## What Headless Means in Practice
+
+### The Core has no CSS
+
+The core engine (`@arkpad/core`) ships zero styles. Every visual aspect is controlled by your UI layer:
+
+```typescript
+// The core only handles logic
+import { ArkpadEditor, Extension } from "@arkpad/core";
+
+const editor = new ArkpadEditor({
+  element: document.querySelector("#editor")!,
+  extensions: [MyExtension],
+  content: "<p>Pure logic, no styles</p>",
+});
+
+// All commands work without any UI
+editor.runCommand("toggleBold");
+editor.runCommand("toggleHeading", { level: 2 });
+console.log(editor.getHTML());
+```
+
+### You Control Every Pixel
+
+Because Arkpad provides no UI, you can style the editor output however you want:
+
+```tsx
+function MyEditor() {
+  const editor = useArkpadEditor({
+    extensions: [StarterKit],
+    content: "<p>Custom styled editor</p>",
+  });
+
+  return (
+    <div className="my-custom-theme">
+      <MyToolbar editor={editor} />
+      <ArkpadEditorContent
+        editor={editor}
+        className="prose prose-lg dark:prose-invert max-w-none"
+      />
+    </div>
+  );
+}
+```
+
+## Building a Headless Toolbar
+
+Since there is no built-in toolbar, you build your own. The editor exposes everything you need via hooks:
+
+```tsx
+function MyToolbar({ editor }) {
+  return (
+    <div className="flex gap-1 p-2 bg-white border rounded-lg shadow-sm">
+      <button
+        className={editor.isActive("strong") ? "bg-blue-100" : ""}
+        onClick={() => editor.runCommand("toggleBold")}
+      >
+        Bold
+      </button>
+      <button
+        className={editor.isActive("heading", { level: 2 }) ? "bg-blue-100" : ""}
+        onClick={() => editor.runCommand("toggleHeading", { level: 2 })}
+      >
+        H2
+      </button>
+      <button onClick={() => editor.runCommand("toggleBulletList")}>List</button>
+    </div>
+  );
+}
+```
+
+You can use **any** UI library for the toolbar: Shadcn UI, Material UI, Tailwind, plain CSS, or a custom design system.
+
+## Framework Integration Patterns
+
+### Vanilla JS
+
+```typescript
+import { ArkpadEditor, StarterKit } from "@arkpad/core";
+
+const editor = new ArkpadEditor({
+  element: document.querySelector("#app")!,
+  extensions: [StarterKit],
+});
+
+// Full programmatic control
+editor.focus();
+editor.runCommand("toggleBold");
+editor.chain().insertContent("Hello ").toggleItalic().insertContent("World").run();
+```
+
+### React
+
+```tsx
+import { useArkpadEditor, ArkpadEditorContent } from "@arkpad/react";
+import { StarterKit } from "@arkpad/starter-kit";
+
+function App() {
+  const editor = useArkpadEditor({
+    extensions: [StarterKit],
+    content: "<p>React integration</p>",
+  });
+
+  return <ArkpadEditorContent editor={editor} />;
+}
+```
+
+### Any Framework
+
+The vanilla `ArkpadEditor` class works in **any** JavaScript environment. Framework packages are thin wrappers around the same core:
+
+- React → `@arkpad/react` (hooks + component)
+- Vue → Community can build `@arkpad/vue`
+- Svelte → Community can build `@arkpad/svelte`
+- Angular → Community can build `@arkpad/angular`
+
+## Chained Commands (Fluent API)
+
+Headless control means you can programmatically orchestrate complex editing operations:
+
+```typescript
+editor
+  .chain()
+  .focus("end") // Move cursor to end
+  .insertContent("Hello ") // Insert text
+  .toggleBold() // Toggle bold
+  .insertContent("World") // Insert more text
+  .selectAll() // Select everything
+  .toggleBold() // Un-bold the selection
+  .run(); // Execute all as one transaction
+```
+
+## State-Aware Commands
+
+Because the chain updates state internally, each command sees the result of the previous one:
+
+```typescript
+editor
+  .chain()
+  .insertContent("Hello World") // Document now has "Hello World"
+  .selectAll() // Correctly selects "Hello World"
+  .toggleBold() // Bold applied correctly
+  .run();
+```
+
+## React Hooks for Precision Rendering
+
+The headless approach includes fine-grained hooks to avoid unnecessary re-renders:
+
+```tsx
+// Only re-renders when bold state changes
+function BoldButton({ editor }) {
+  const isBold = useEditorState(editor, (state) => state.isActive("strong"));
+  return (
+    <button className={isBold ? "active" : ""} onClick={() => editor.runCommand("toggleBold")}>
+      Bold
+    </button>
+  );
+}
+```
+
+## Summary
+
+Building an editor with Arkpad means:
+
+1. **Initialize** the headless core with extensions
+2. **Build your UI** — toolbar, menus, sidebars — using whatever framework you prefer
+3. **Connect** UI to the editor using commands and state hooks
+4. **Style** everything your way with zero framework-imposed CSS

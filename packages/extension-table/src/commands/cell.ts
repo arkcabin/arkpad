@@ -1,0 +1,91 @@
+import type { ArkpadCommandProps } from "@arkpad/core";
+import {
+  mergeCells as pmMergeCells,
+  splitCell as pmSplitCell,
+  toggleHeaderColumn as pmToggleHeaderColumn,
+  toggleHeaderRow as pmToggleHeaderRow,
+  toggleHeaderCell as pmToggleHeaderCell,
+  setCellAttr as pmSetCellAttr,
+  goToNextCell as pmGoToNextCell,
+} from "@arkpad/core";
+import type { CommandFactory } from "../types";
+
+export const mergeCells: CommandFactory =
+  () =>
+  ({ chain }: ArkpadCommandProps) => {
+    return chain()
+      .command(
+        ({ state, dispatch }: ArkpadCommandProps) => pmMergeCells(state, dispatch),
+        "mergeCells"
+      )
+      .run();
+  };
+
+export const splitCell: CommandFactory =
+  () =>
+  ({ chain }: ArkpadCommandProps) => {
+    return chain()
+      .command(
+        ({ state, dispatch }: ArkpadCommandProps) => pmSplitCell(state, dispatch),
+        "splitCell"
+      )
+      .run();
+  };
+
+export const toggleHeaderColumn: CommandFactory =
+  () =>
+  ({ chain }: ArkpadCommandProps) => {
+    return chain()
+      .command(
+        ({ state, dispatch }: ArkpadCommandProps) => pmToggleHeaderColumn(state, dispatch),
+        "toggleHeaderColumn"
+      )
+      .run();
+  };
+
+export const toggleHeaderRow: CommandFactory =
+  () =>
+  ({ chain }: ArkpadCommandProps) => {
+    return chain()
+      .command(
+        ({ state, dispatch }: ArkpadCommandProps) => pmToggleHeaderRow(state, dispatch),
+        "toggleHeaderRow"
+      )
+      .run();
+  };
+
+export const toggleHeaderCell: CommandFactory =
+  () =>
+  ({ chain }: ArkpadCommandProps) => {
+    return chain()
+      .command(
+        ({ state, dispatch }: ArkpadCommandProps) => pmToggleHeaderCell(state, dispatch),
+        "toggleHeaderCell"
+      )
+      .run();
+  };
+
+export const setCellAttr: CommandFactory =
+  (name: string, value: any) =>
+  ({ chain }: ArkpadCommandProps) => {
+    if (!name) return false;
+    return chain()
+      .command(
+        ({ state, dispatch }: ArkpadCommandProps) => pmSetCellAttr(name, value)(state, dispatch),
+        "setCellAttr"
+      )
+      .run();
+  };
+
+export const setCellBackground: CommandFactory =
+  (color: string) =>
+  ({ chain }: ArkpadCommandProps) => {
+    if (!color) return false;
+    return chain().setCellAttr("background", color).run();
+  };
+
+export const goToNextCell: CommandFactory =
+  (direction: number = 1) =>
+  ({ state, dispatch }: ArkpadCommandProps) => {
+    return pmGoToNextCell(direction as any)(state, dispatch);
+  };

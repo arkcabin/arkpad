@@ -1,0 +1,62 @@
+---
+title: Playground
+description: Try Arkpad interactively in your browser.
+---
+
+Experiment with Arkpad's editor right here. Edit the content, switch extensions, and see how it behaves in real-time.
+
+## Basic Editor
+
+A minimal editor with the Essentials bundle:
+
+<Playground
+  content="<h2>Welcome to Arkpad</h2><p>This is a live editor. Try editing this text!</p><ul><li>Lists work out of the box</li><li>So do <strong>bold</strong> and <em>italic</em></li></ul>"
+  showToolbar={false}
+/>
+
+## Editor with Toolbar
+
+A full-featured editor with formatting controls:
+
+<Playground
+  content="<h2>Try the Toolbar</h2><p>Select text and use the toolbar above to <strong>bold</strong>, <em>italicize</em>, or add <u>underline</u>.</p><p>You can also add headings, lists, and tables.</p>"
+  extensions="full"
+/>
+
+## Full StarterKit Example
+
+The complete StarterKit with all available extensions:
+
+<Playground
+  content="<h2>All Features Enabled</h2><p>This editor includes <strong>bold</strong>, <em>italic</em>, <u>underline</u>, <s>strike</s>, <code>code</code>, and <mark>highlight</mark>.</p><h3>Tables</h3><table><tr><th>Feature</th><th>Status</th></tr><tr><td>Resizable columns</td><td>✓</td></tr><tr><td>Cell merging</td><td>✓</td></tr></table><h3>Task List</h3><ul data-type='taskList'><li data-type='taskItem' data-checked='true'>Completed task</li><li data-type='taskItem' data-checked='false'>Pending task</li></ul>"
+  extensions="full"
+/>
+
+## Try Your Own Content
+
+Here's a blank editor ready for you to experiment:
+
+<Playground content="<h1>Blank Canvas</h1><p>Start typing here...</p>" extensions="full" />
+
+## Code Example
+
+Here's the code used to create the basic editor above:
+
+```tsx
+import { useArkpadEditor, ArkpadEditorContent } from "@arkpad/react";
+import { Essentials } from "@arkpad/core";
+
+function MyEditor() {
+  const editor = useArkpadEditor({
+    extensions: [Essentials],
+    content: "<h1>Hello, Arkpad!</h1>",
+  });
+
+  return <ArkpadEditorContent editor={editor} />;
+}
+```
+
+<Callout type="info">
+  The playground uses real Arkpad packages (`@arkpad/react` and `@arkpad/core`). All features work
+  exactly as they would in your own application.
+</Callout>

@@ -1,0 +1,120 @@
+---
+title: Heading
+description: Structure content with headings using `toggleHeading`.
+---
+
+Type: **Node**
+
+Headings organize content into sections. Supports levels 1 through 6, rendering as `<h1>` through `<h6>` in HTML output.
+
+## Demo
+
+<FeatureDemo 
+  feature="heading" 
+  content={`<h1>H1: Main Title</h1>
+<p>The primary heading level.</p>
+<h2>H2: Section Header</h2>
+<p>Used for major sections.</p>
+<h3>H3: Sub-section</h3>
+<p>Detailed sub-topics.</p>
+<h4>H4: Minor Header</h4>
+<h5>H5: Detail Header</h5>
+<h6>H6: Technical Note</h6>`}
+
+commands={[
+{ label: 'H1', command: 'toggleHeading', args: { level: 1 }, icon: 'Heading1', isActive: ['heading', { level: 1 }] },
+{ label: 'H2', command: 'toggleHeading', args: { level: 2 }, icon: 'Heading2', isActive: ['heading', { level: 2 }] },
+{ label: 'H3', command: 'toggleHeading', args: { level: 3 }, icon: 'Heading3', isActive: ['heading', { level: 3 }] },
+{ label: 'H4', command: 'toggleHeading', args: { level: 4 }, icon: 'Heading4', isActive: ['heading', { level: 4 }] },
+{ label: 'H5', command: 'toggleHeading', args: { level: 5 }, icon: 'Heading5', isActive: ['heading', { level: 5 }] },
+{ label: 'H6', command: 'toggleHeading', args: { level: 6 }, icon: 'Heading6', isActive: ['heading', { level: 6 }] }
+]}
+/>
+
+## Installation
+
+```ts
+import { Heading } from "@arkpad/extension-heading";
+```
+
+## Commands
+
+The extension provides two primary commands for managing headings:
+
+```ts
+// Toggles the current block between the specified heading level and a paragraph
+editor.runCommand("toggleHeading", { level: 1 });
+
+// Strictly sets the current block to the specified heading level
+editor.runCommand("setHeading", { level: 2 });
+```
+
+### Chaining Commands
+
+For optimal user experience, chain the focus command together with heading toggles to ensure focus is maintained:
+
+```ts
+editor.chain().focus().toggleHeading({ level: 3 }).run();
+```
+
+## Keyboard Shortcuts
+
+The keyboard shortcuts are automatically registered for all configured heading levels:
+
+| Heading | Shortcut    |
+| :------ | :---------- |
+| H1      | `Mod-Alt-1` |
+| H2      | `Mod-Alt-2` |
+| H3      | `Mod-Alt-3` |
+| H4      | `Mod-Alt-4` |
+| H5      | `Mod-Alt-5` |
+| H6      | `Mod-Alt-6` |
+
+## Markdown Input Rules
+
+Type markdown hashes at the beginning of a line followed by a space ` ` to quickly transform the block:
+
+| Shortcut  | Result |
+| :-------- | :----- |
+| `# `      | H1     |
+| `## `     | H2     |
+| `### `    | H3     |
+| `#### `   | H4     |
+| `##### `  | H5     |
+| `###### ` | H6     |
+
+## Active States & Shorthands
+
+You can check if a heading level is active using standard active state methods or convenient shorthands provided by the engine's `activeMapping`:
+
+```ts
+// Standard API
+editor.isActive("heading", { level: 1 });
+
+// Shorthand API (Mapped automatically by the engine)
+editor.isActive("h1");
+editor.isActive("h2");
+```
+
+## Configuration
+
+### Options
+
+| Name             | Type                  | Default              | Description                                                               |
+| :--------------- | :-------------------- | :------------------- | :------------------------------------------------------------------------ |
+| `levels`         | `number[]`            | `[1, 2, 3, 4, 5, 6]` | Configures which heading levels are enabled, shortcutted, and parsed.     |
+| `HTMLAttributes` | `Record<string, any>` | `{}`                 | Key-value pairs of attributes to be rendered on all heading DOM elements. |
+
+```ts
+Heading.configure({
+  // Only enable H1, H2, and H3
+  levels: [1, 2, 3],
+
+  // Apply a custom CSS class to all headings
+  HTMLAttributes: {
+    class: "arkpad-heading",
+  },
+});
+```
+
+> **Note on Robust Rendering:** If an invalid level (e.g., `99`) is passed to a heading node, the editor's renderer will gracefully fall back to the first level in your configured list (defaulting to `1`).

@@ -1,0 +1,61 @@
+.arkpad-content-area .ark-block-handle {
+  position: absolute;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 24px;
+  cursor: grab;
+  color: #94a3b8;
+  border-radius: 4px;
+  transition:
+    background-color 0.1s ease,
+    color 0.1s ease;
+  z-index: 50;
+}
+
+.arkpad-content-area .ark-block-handle:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+.arkpad-content-area .ark-block-handle:active {
+  cursor: grabbing;
+}
+
+.arkpad-content-area .ark-block-handle svg {
+  pointer-events: none;
+}
+
+.arkpad-content-area .ark-editor-selectednode {
+  outline: 2px solid #3b82f6 !important;
+  outline-offset: 4px;
+  background-color: rgba(59, 130, 246, 0.05);
+}
+
+.arkpad-content-area .ark-drag-active {
+  background-color: rgba(0, 0, 0, 0.01);
+  transition: background-color 0.2s ease;
+}
+
+.arkpad-content-area .ark-drop-gap {
+  height: 40px;
+  margin: 10px 0;
+  border: 2px dashed #cbd5e1;
+  border-radius: 8px;
+  background-color: #f8fafc;
+  pointer-events: none;
+  animation: ark-gap-pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes ark-gap-pulse {
+  0% {
+    border-color: #cbd5e1;
+  }
+  50% {
+    border-color: #94a3b8;
+  }
+  100% {
+    border-color: #cbd5e1;
+  }
+}

@@ -1,0 +1,36 @@
+/* Arkpad Design Tokens - Scoped to Editor Container */
+[data-arkpad-content] {
+  /* Colors */
+  --ark-primary: #7c3aed; /* Notion-like Purple */
+  --ark-border: #eeeeee;
+  --ark-text: #000000;
+  --ark-text-muted: #666666;
+  --ark-selection: rgba(59, 130, 246, 0.1);
+
+  /* Table Specific Tokens */
+  --ark-table-border: var(--ark-border);
+  --ark-table-header-bg: rgba(0, 0, 0, 0.05);
+  --ark-table-selected-cell-bg: rgba(59, 130, 246, 0.05);
+  --ark-table-selection-color: var(--ark-primary);
+  --ark-table-selection-width: 2px;
+
+  /* Resizer Grips */
+  --ark-table-resizer-color: var(--ark-primary);
+  --ark-table-resizer-width: 4px;
+
+  /* Spacing */
+  --ark-cell-padding: 6px 10px;
+  --ark-table-margin-bottom: 1.5rem;
+}
+
+/* Dark Mode Tokens - Scoped to Editor Only */
+[data-arkpad-content].dark,
+.dark [data-arkpad-content] {
+  --ark-border: #222222;
+  --ark-text: #ffffff;
+  --ark-text-muted: #888888;
+  --ark-selection: rgba(255, 255, 255, 0.1);
+
+  --ark-table-header-bg: rgba(255, 255, 255, 0.05);
+  --ark-table-selected-cell-bg: rgba(255, 255, 255, 0.1);
+}

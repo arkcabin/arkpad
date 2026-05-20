@@ -1,0 +1,55 @@
+/* Arkpad Core Editor Styling - Production Isolation */
+
+/* 1. Global Tokens (Safe - Namespace Prefixed) */
+@import "./tokens.css";
+
+/* 2. Self-Scoped Base Elements (Safe to import at top level) */
+@import "./headings.css";
+@import "./list.css";
+@import "./blockquote.css";
+@import "./code-block.css";
+
+/* 3. Self-Scoped Extensions */
+@import "./table.css";
+@import "./table-grips.css";
+@import "./task-list.css";
+@import "./ghost-text.css";
+@import "./block-handle.css";
+@import "./ui-blocks.css";
+@import "./placeholder.css";
+
+  /* 4. Strictly Scoped Core Logic & Library Styles */
+.arkpad-content-area {
+  /* ProseMirror Core Styles - Isolated to our namespace */
+  & .ProseMirror {
+    /* Handled by direct injection or top-level import to avoid leak */
+    outline: none !important;
+    min-height: inherit;
+    color: inherit;
+    font-family: inherit;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+
+  display: block;
+  width: 100%;
+
+  & .arkpad-editor-canvas {
+    padding: 1rem 2rem;
+  }
+
+  /* Scrollbar Utilities */
+  & .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  & .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Code Wrapping Utility */
+  & .arkpad-code-pre {
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+}

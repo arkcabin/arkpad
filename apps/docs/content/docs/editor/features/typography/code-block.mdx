@@ -1,0 +1,79 @@
+---
+title: Code Block
+description: Add code blocks with `toggleCodeBlock`.
+---
+
+Type: **Node**
+
+Code Block displays multi-line code in a monospace block. Renders as `<pre><code>` in HTML output.
+
+## Demo
+
+<FeatureDemo
+  feature="code-block"
+  content={`<p>The code block extension allows you to embed source code with preserved whitespace.</p>
+<pre><code class="language-javascript">function hello() {
+  console.log("Hello from Arkpad!");
+}</code></pre>`}
+  commands={[{ label: "{}", command: "toggleCodeBlock", isActive: "codeBlock", icon: "code" }]}
+/>
+
+## Installation
+
+```ts
+import { CodeBlock } from "@arkpad/extension-code-block";
+```
+
+## Commands
+
+The extension registers two commands for managing code blocks:
+
+```ts
+// Toggles the current block between code block and paragraph
+editor.runCommand("toggleCodeBlock", { language: "javascript" });
+
+// Explicitly sets the current block to a code block
+editor.runCommand("setCodeBlock", { language: "typescript" });
+```
+
+### Chaining Commands
+
+You can chain commands to set up the code block and focus the editor in a single transaction:
+
+```ts
+editor.chain().focus().toggleCodeBlock({ language: "css" }).run();
+```
+
+## Keyboard Shortcuts
+
+| Shortcut    | Action                 |
+| :---------- | :--------------------- |
+| `Mod-Alt-c` | Toggles the code block |
+
+## Active State
+
+```ts
+// Check if a code block is active
+const isActive = editor.isActive("codeBlock");
+
+// Check if a code block with a specific language is active
+const isJSActive = editor.isActive("codeBlock", { language: "javascript" });
+```
+
+## Configuration
+
+### Options
+
+| Name                  | Type                  | Default       | Description                                                                   |
+| :-------------------- | :-------------------- | :------------ | :---------------------------------------------------------------------------- |
+| `HTMLAttributes`      | `Record<string, any>` | `{}`          | Key-value pairs of attributes to render on the outer `<pre>` wrapper element. |
+| `languageClassPrefix` | `string`              | `"language-"` | Prefix added to the CSS class representing the language of the code block.    |
+
+```ts
+CodeBlock.configure({
+  languageClassPrefix: "lang-",
+  HTMLAttributes: {
+    class: "custom-pre-styles",
+  },
+});
+```

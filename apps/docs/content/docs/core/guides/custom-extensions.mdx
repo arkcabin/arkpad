@@ -1,0 +1,279 @@
+---
+title: Custom Extensions Guide
+description: Build production-ready extensions with real-world patterns.
+---
+
+Arkpad is built on a "Headless + Extensions" architecture. This guide covers everything you need to build custom extensions — from the basic template to production patterns.
+
+## The Extension Template
+
+Every feature in Arkpad is an extension. Start with this template:
+
+```typescript
+import { Extension } from "@arkpad/core";
+
+export const MyCustomExtension = Extension.create({
+  name: "myCustomExtension",
+
+  // Configuration options (merged with user overrides)
+  addOptions() {
+    return { defaultColor: "red" };
+  },
+
+  // Private reactive data store
+  addStorage() {
+    return { counter: 0 };
+  },
+
+  // Expose commands to the editor
+  addCommands() {
+    return {
+      setMyFeature:
+        (value: string) =>
+        ({ editor }) => {
+          this.storage.counter++;
+          return true;
+        },
+    };
+  },
+
+  // Register keyboard shortcuts
+  addKeyboardShortcuts() {
+    return {
+      "Mod-Shift-x": () => this.editor.runCommand("setMyFeature", "shortcut"),
+    };
+  },
+
+  // Register input rules (Markdown-style triggers)
+  addInputRules() {
+    return [
+      new InputRule(/\(c\)$/, (state, match, start, end) => {
+        return state.tr.replaceWith(start, end, state.schema.text("©"));
+      }),
+    ];
+  },
+});
+```
+
+## Real-World Pattern: Character Counter
+
+An extension that tracks document statistics without adding any visible nodes:
+
+```typescript
+const CharacterCounter = Extension.create({
+  name: "characterCounter",
+
+  addOptions() {
+    return { maxCharacters: 1000 };
+  },
+
+  addStorage() {
+    return { characters: 0, words: 0 };
+  },
+
+  addCommands() {
+    return {
+      getStats:
+        () =>
+        ({ storage }) => {
+          return storage;
+        },
+    };
+  },
+
+  onUpdate({ editor }) {
+    const text = editor.getText();
+    this.storage.characters = text.length;
+    this.storage.words = text.split(/\s+/).filter((s) => s.length > 0).length;
+  },
+
+  onTransaction({ transaction }) {
+    if (this.storage.characters > this.options.maxCharacters) {
+      // Prevent further input if over limit
+      return false;
+    }
+    return true;
+  },
+});
+
+// Usage: editor.storage.characterCounter.characters
+```
+
+## Real-World Pattern: Auto-Save Extension
+
+Persists document changes automatically:
+
+```typescript
+const AutoSave = Extension.create({
+  name: "autoSave",
+
+  addOptions() {
+    return {
+      interval: 5000, // Save every 5 seconds
+      key: "arkpad-draft",
+    };
+  },
+
+  addStorage() {
+    return { timer: null as NodeJS.Timeout | null };
+  },
+
+  onUpdate({ editor }) {
+    // Debounce: reset timer on each change
+    if (this.storage.timer) clearTimeout(this.storage.timer);
+    this.storage.timer = setTimeout(() => {
+      const content = editor.getJSON();
+      localStorage.setItem(this.options.key, JSON.stringify(content));
+      console.log("Auto-saved draft");
+    }, this.options.interval);
+  },
+
+  onDestroy() {
+    if (this.storage.timer) clearTimeout(this.storage.timer);
+  },
+});
+```
+
+## Real-World Pattern: Custom Node with React Component
+
+Creating a custom node extension with a React NodeView:
+
+```typescript
+import { Node } from "@arkpad/core";
+
+const CalloutNode = Node.create({
+  name: "callout",
+
+  group: "block",
+  content: "inline*",
+
+  addAttributes() {
+    return {
+      type: { default: "info" }, // "info" | "warning" | "error"
+    };
+  },
+
+  parseHTML() {
+    return [{ tag: "div[data-callout]" }];
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    return [
+      "div",
+      { "data-callout": HTMLAttributes.type, class: `callout-${HTMLAttributes.type}` },
+      0,
+    ];
+  },
+
+  addCommands() {
+    return {
+      setCallout:
+        (type: string) =>
+        ({ commands }) => {
+          return commands.setNode(this.name, { type });
+        },
+    };
+  },
+});
+```
+
+Then in React:
+
+```tsx
+import { NodeViewWrapper } from "@arkpad/react";
+
+function CalloutComponent({ node, updateAttributes, editor }) {
+  return (
+    <NodeViewWrapper className={`callout callout-${node.attrs.type}`}>
+      <select value={node.attrs.type} onChange={(e) => updateAttributes({ type: e.target.value })}>
+        <option value="info">Info</option>
+        <option value="warning">Warning</option>
+        <option value="error">Error</option>
+      </select>
+      <div contentEditable>{node.textContent}</div>
+    </NodeViewWrapper>
+  );
+}
+```
+
+## Building the UI for Your Extension
+
+Once your extension is registered, build a toolbar button:
+
+```tsx
+import { EditorButton } from "@arkpad/react";
+
+function Toolbar() {
+  return (
+    <div className="flex gap-2">
+      <EditorButton
+        command="toggleBold"
+        name="strong"
+        className="btn"
+        activeClassName="bg-blue-500 text-white"
+      >
+        Bold
+      </EditorButton>
+
+      <EditorButton command="setTable" args={[{ rows: 5, cols: 5 }]} className="btn">
+        Insert Table
+      </EditorButton>
+    </div>
+  );
+}
+```
+
+## Global Attributes
+
+Inject attributes into multiple node types without modifying each extension:
+
+```typescript
+addGlobalAttributes() {
+  return [
+    {
+      types: ["heading", "paragraph"],
+      attributes: {
+        id: {
+          default: null,
+          renderHTML: (attributes) => ({ "data-arkpad-id": attributes.id }),
+        },
+        align: {
+          default: "left",
+          parseHTML: (element) => element.style.textAlign || "left",
+          renderHTML: (attributes) => ({ style: `text-align: ${attributes.align}` }),
+        },
+      },
+    },
+  ];
+}
+```
+
+## Middleware: Transaction Interceptors
+
+Interceptors give you full control over the transaction pipeline:
+
+```typescript
+const editor = useArkpadEditor({
+  extensions: [StarterKit],
+  onInterceptor: ({ transaction, editor }) => {
+    if (myAppState.isLocked) {
+      return false; // Block the change
+    }
+    return transaction; // Allow
+  },
+});
+```
+
+## Developer Checklist
+
+| What you need       | Where to implement                        |
+| :------------------ | :---------------------------------------- |
+| Logic (commands)    | `addCommands()`                           |
+| Keyboard shortcuts  | `addKeyboardShortcuts()`                  |
+| Markdown shortcuts  | `addInputRules()`                         |
+| Paste behavior      | `addPasteRules()`                         |
+| ProseMirror plugins | `addProseMirrorPlugins()`                 |
+| UI buttons          | `EditorButton` component in React         |
+| Data storage        | `addStorage()` + `this.storage`           |
+| Permissions         | `onInterceptor()` hook                    |
+| Lifecycle hooks     | `onCreate()`, `onUpdate()`, `onDestroy()` |

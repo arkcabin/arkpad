@@ -1,0 +1,71 @@
+---
+title: Overview
+description: Welcome to Arkpad documentation — a high-performance, modular rich text editor framework built on ProseMirror.
+---
+
+Arkpad is an enterprise-grade rich text editor built on ProseMirror. It provides a sophisticated, developer-first API designed for building powerful, reliable, and highly customizable editing experiences.
+
+## What is Arkpad?
+
+Arkpad is a **headless**, **modular** rich text editor framework. It gives you complete control over the UI while handling the complex state management, schema validation, and command execution under the hood.
+
+- **Extreme Performance** — Optimized for large, complex documents
+- **100% Modular** — Tiny core, infinite extensions
+- **Type-Safe** — First-class TypeScript support
+- **Headless** — Complete CSS/UI freedom
+- **Agent-Ready** — Built-in interceptor layer for AI integration
+
+## Quick Start
+
+```bash
+npm install @arkpad/react @arkpad/core
+```
+
+```tsx
+import { useArkpadEditor, ArkpadEditorContent } from "@arkpad/react";
+import { Essentials } from "@arkpad/core";
+
+export default function App() {
+  const editor = useArkpadEditor({
+    extensions: [Essentials],
+    content: "<h1>Hello, Arkpad!</h1>",
+  });
+
+  return <ArkpadEditorContent editor={editor} />;
+}
+```
+
+## Documentation
+
+<Cards>
+  <Card title="Editor" href="/docs/editor/getting-started/installation" icon="pencil">
+    Getting started guides for building with Arkpad — installation, quick start, and practical
+    guides.
+  </Card>
+  <Card title="Core" href="/docs/core/architecture" icon="compass">
+    Deep-dive reference for the engine, extension system, API, and resources.
+  </Card>
+</Cards>
+
+## Browse by Section
+
+<Cards>
+  <Card title="Installation" href="/docs/editor/getting-started/installation" icon="rocket">
+    Install and configure Arkpad in your project.
+  </Card>
+  <Card title="Quick Start" href="/docs/editor/getting-started/quick-start" icon="zap">
+    Build your first editor in minutes.
+  </Card>
+  <Card title="Extension Catalog" href="/docs/core/extensions/catalog" icon="puzzle">
+    Browse all available Arkpad packages.
+  </Card>
+  <Card title="API Reference" href="/docs/core/api-reference/public-api" icon="code">
+    Complete editor API documentation.
+  </Card>
+  <Card title="Commands" href="/docs/core/api-reference/commands" icon="terminal">
+    Full list of editor commands.
+  </Card>
+  <Card title="Playground" href="/docs/editor/playground" icon="play">
+    Try Arkpad interactively in your browser.
+  </Card>
+</Cards>

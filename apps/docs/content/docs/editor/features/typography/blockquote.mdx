@@ -1,0 +1,75 @@
+---
+title: Blockquote
+description: Display quoted text with `toggleBlockquote`.
+---
+
+Type: **Node**
+
+Blockquote displays quoted text in an indented block. Renders as `<blockquote>` in HTML output.
+
+## Demo
+
+<FeatureDemo
+  feature="blockquote"
+  content="<blockquote><p>Architecture should be a surgical tool for solving problems, not a monument to complexity.</p></blockquote>"
+  commands={[
+    { label: "Quote", command: "toggleBlockquote", isActive: "blockquote", icon: "Quote" },
+  ]}
+/>
+
+## Installation
+
+```ts
+import { Blockquote } from "@arkpad/extension-blockquote";
+```
+
+## Commands
+
+The extension registers three commands for managing blockquotes:
+
+```ts
+// Toggles the current block between blockquote and a paragraph
+editor.runCommand("toggleBlockquote");
+
+// Explicitly wraps the current block inside a blockquote
+editor.runCommand("setBlockquote");
+
+// Explicitly unwraps the blockquote back into a standard paragraph
+editor.runCommand("unsetBlockquote");
+```
+
+### Chaining Commands
+
+You can chain commands to focus the editor after toggling a blockquote:
+
+```ts
+editor.chain().focus().toggleBlockquote().run();
+```
+
+## Keyboard Shortcuts
+
+| Shortcut      | Action             |
+| :------------ | :----------------- |
+| `Mod-Shift-b` | Toggles blockquote |
+
+## Active State
+
+```ts
+const isActive = editor.isActive("blockquote");
+```
+
+## Configuration
+
+### Options
+
+| Name             | Type                  | Default | Description                                                                     |
+| :--------------- | :-------------------- | :------ | :------------------------------------------------------------------------------ |
+| `HTMLAttributes` | `Record<string, any>` | `{}`    | Key-value pairs of attributes to be rendered on the `<blockquote>` DOM element. |
+
+```ts
+Blockquote.configure({
+  HTMLAttributes: {
+    class: "custom-quote-styling",
+  },
+});
+```

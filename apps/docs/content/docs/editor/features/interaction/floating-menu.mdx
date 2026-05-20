@@ -1,0 +1,98 @@
+---
+title: Floating Menu
+description: A contextual toolbar that appears on empty lines to suggest block insertions.
+---
+
+Type: **Extension** · Category: **Interaction**
+
+The Floating Menu appears next to empty lines in the editor, offering quick access to insert headings, lists, tables, and other block-level elements without needing a toolbar.
+
+## Usage
+
+In Arkpad, the floating menu is completely headless and built for zero-flicker performance. You configure it in your editor extensions, and then mount the `<FloatingMenu>` React wrapper component in your render tree:
+
+```tsx
+import React from "react";
+import { useArkpadEditor, ArkpadEditorContent, ArkpadProvider, FloatingMenu } from "@arkpad/react";
+import { Engine } from "@arkpad/core";
+import { Heading } from "@arkpad/extension-heading";
+import { BulletList } from "@arkpad/extension-bullet-list";
+import { FloatingMenu as FloatingMenuExtension } from "@arkpad/extension-floating-menu";
+
+const extensions = [Engine, Heading, BulletList, FloatingMenuExtension];
+
+export default function MyEditor() {
+  const editor = useArkpadEditor({ extensions, content: "<p></p>" });
+
+  return (
+    <ArkpadProvider editor={editor}>
+      <div className="editor-wrapper relative">
+        {/* Mount the FloatingMenu component */}
+        <FloatingMenu className="flex gap-1 p-1 bg-fd-popover border border-fd-border rounded-lg shadow-lg">
+          <button
+            onClick={() => editor.runCommand("toggleHeading", { level: 2 })}
+            className="px-2 py-1 hover:bg-fd-accent rounded text-sm"
+          >
+            H2
+          </button>
+          <button
+            onClick={() => editor.runCommand("toggleBulletList")}
+            className="px-2 py-1 hover:bg-fd-accent rounded text-sm"
+          >
+            Bullet List
+          </button>
+        </FloatingMenu>
+
+        <ArkpadEditorContent editor={editor} />
+      </div>
+    </ArkpadProvider>
+  );
+}
+```
+
+## Demo
+
+<FeatureDemo
+  feature="floating-menu"
+  content="<p>Click on an empty line in the editor below to see the floating menu trigger!</p>"
+  commands={[
+    {
+      label: "H2",
+      command: "toggleHeading",
+      args: { level: 2 },
+      isActive: ["heading", { level: 2 }],
+    },
+  ]}
+/>
+
+## Installation
+
+```ts
+import { FloatingMenu } from "@arkpad/extension-floating-menu";
+```
+
+## Configuration
+
+### Options
+
+| Name         | Type       | Default                                                                        | Description                                                                           |
+| :----------- | :--------- | :----------------------------------------------------------------------------- | :------------------------------------------------------------------------------------ |
+| `shouldShow` | `Function` | `({ editor, state }) => empty && isParagraph && isEmpty && editor.isFocused()` | Custom callback to conditionally determine when the floating menu should be rendered. |
+
+### Custom Trigger Conditions
+
+You can override the default visibility logic to show the menu in custom empty blocks or under different focus conditions:
+
+```ts
+FloatingMenu.configure({
+  shouldShow: ({ editor, state }) => {
+    const { $from, empty } = state.selection;
+
+    // Only show inside empty paragraph blocks
+    const isParagraph = $from.parent.type.name === "paragraph";
+    const isEmpty = $from.parent.content.size === 0;
+
+    return empty && isParagraph && isEmpty && editor.isFocused();
+  },
+});
+```

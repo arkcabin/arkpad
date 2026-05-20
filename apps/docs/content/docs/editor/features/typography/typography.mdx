@@ -1,0 +1,65 @@
+---
+title: Typography
+description: Smart typographic replacements for special characters.
+---
+
+Type: **Extension**
+
+Typography automatically replaces plain text patterns with typographically correct characters, such as converting `(c)` to `©` or `!=` to `≠`.
+
+## Demo
+
+<FeatureDemo
+  feature="typography"
+  content="<p>Try typing text in the editor below: type --, ->, !=, (c), (tm), 1/2, or wrap words in 'quotes' to see smart typographic conversion in action!</p>"
+  commands={[]}
+/>
+
+## Installation
+
+```ts
+import { Typography } from "@arkpad/extension-typography";
+```
+
+## Typographic Rules
+
+The extension automatically replaces the following sequences as you type:
+
+### Symbols & Punctuation
+
+| Type sequence | Replaced character | Description          |
+| :------------ | :----------------- | :------------------- |
+| `---`         | `—`                | Em dash              |
+| `--`          | `–`                | En dash              |
+| `...`         | `…`                | Ellipsis             |
+| `(c)`         | `©`                | Copyright            |
+| `(r)`         | `®`                | Registered Trademark |
+| `(tm)`        | `™`                | Trademark            |
+
+### Arrows
+
+| Type sequence | Replaced character | Description        |
+| :------------ | :----------------- | :----------------- |
+| `->`          | `→`                | Right arrow        |
+| `<-`          | `←`                | Left arrow         |
+| `=>`          | `⇒`                | Double right arrow |
+| `<=`          | `⇐`                | Double left arrow  |
+
+### Math & Fractions
+
+| Type sequence | Replaced character | Description    |
+| :------------ | :----------------- | :------------- |
+| `1/2`         | `½`                | One half       |
+| `1/4`         | `¼`                | One quarter    |
+| `3/4`         | `¾`                | Three quarters |
+| `!=`          | `≠`                | Not equal to   |
+| `+-`          | `±`                | Plus-minus     |
+
+### Smart Quotes
+
+The extension embeds a custom ProseMirror plugin that dynamically converts standard straight quotes into curly "smart" quotes depending on context (e.g. inserting an opening quote after spaces or brackets, and a closing quote otherwise):
+
+| Quote character  | Context-aware replacements     |
+| :--------------- | :----------------------------- |
+| Double quote `"` | `“` (opening) or `”` (closing) |
+| Single quote `'` | `‘` (opening) or `’` (closing) |

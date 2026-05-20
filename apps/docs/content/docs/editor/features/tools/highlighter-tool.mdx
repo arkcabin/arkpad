@@ -1,0 +1,81 @@
+---
+title: Highlighter Tool
+description: Highlight text interactively by drawing over text blocks.
+---
+
+Type: **Tool** · Category: **Tools**
+
+The Highlighter Tool is an interactive "paint" highlight mode. When active, clicking and dragging over text blocks automatically applies highlight formatting in real-time.
+
+## Demo
+
+<FeatureDemo
+  feature="highlighter-tool"
+  content="<p>Click the highlighter icon below to activate the highlight paint mode, then select any text block to highlight it instantly!</p>"
+  commands={[
+    {
+      label: "Highlight Mode",
+      command: "toggleHighlighterTool",
+      isActive: "highlighterTool",
+      icon: "Highlighter",
+    },
+  ]}
+/>
+
+## Installation
+
+```ts
+import { HighlighterTool } from "@arkpad/extension-highlighter";
+```
+
+## Commands
+
+The extension registers two commands for controlling the highlighter drawing brush:
+
+```ts
+// Toggles the highlighter mode active state on and off
+editor.runCommand("toggleHighlighterTool");
+
+// Explicitly sets the highlighter mode active state
+editor.runCommand("setHighlighterTool", { active: true });
+```
+
+### Chaining Commands
+
+You can chain commands to activate the highlighter mode and focus the editor:
+
+```ts
+editor.chain().focus().toggleHighlighterTool().run();
+```
+
+## Interaction & Appended Transactions
+
+When the highlighter tool is activated, the editor is decorated with unique attributes and visual indicators:
+
+- **Classes:** The editor container is appended with the `ark-highlighter-mode` class.
+- **Attributes:** The editor view element is set with `data-ark-mode="highlighter"`.
+- **Appended Transactions:** A custom ProseMirror plugin monitors selection changes. Any selection made while the tool is active automatically triggers an appended transaction that paints highlight marks on any non-highlighted text within the selection range.
+- **Coexistence Guard:** Activating the highlighter tool automatically disables and turns off the `EraserTool` to prevent selection conflicts.
+
+## Storage (Reactivity)
+
+You can reactively query or bind UI elements to the tool's active state:
+
+```ts
+// Check if the highlighter tool is currently active
+const isHighlighterActive = editor.storage.highlighterTool.active; // returns boolean
+```
+
+## Configuration
+
+### Options
+
+| Name          | Type     | Default                  | Description                                                               |
+| :------------ | :------- | :----------------------- | :------------------------------------------------------------------------ |
+| `activeClass` | `string` | `"ark-highlighter-mode"` | The CSS class name applied to the editor element when the tool is active. |
+
+```ts
+HighlighterTool.configure({
+  activeClass: "custom-highlighter-active",
+});
+```

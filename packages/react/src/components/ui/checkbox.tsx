@@ -40,7 +40,9 @@ const Checkbox = React.forwardRef<React.ElementRef<typeof CheckboxPrimitive.Root
       )}
       {...props}
     >
-      <CheckboxPrimitive.Indicator className={cn("flex items-center justify-center text-current w-full h-full")}>
+      <CheckboxPrimitive.Indicator
+        className={cn("flex items-center justify-center text-current w-full h-full")}
+      >
         <svg
           width={iconSizes[size]}
           height={iconSizes[size]}

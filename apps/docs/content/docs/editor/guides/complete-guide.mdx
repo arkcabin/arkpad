@@ -1,0 +1,96 @@
+---
+title: Complete Developer Guide
+description: The full developer guide for building with Arkpad.
+---
+
+## React Experience (`@arkpad/react`)
+
+The React package is declarative and reactive. It handles synchronization between the editor state and the React render cycle.
+
+### Basic Setup
+
+```tsx
+import { useArkpadEditor, ArkpadEditorContent } from "@arkpad/react";
+import { Essentials } from "@arkpad/core";
+
+export function SimpleEditor() {
+  const editor = useArkpadEditor({
+    extensions: [Essentials],
+    content: "<p>Start your journey with Arkpad.</p>",
+  });
+
+  return <ArkpadEditorContent editor={editor} />;
+}
+```
+
+## Vanilla Experience (`@arkpad/core`)
+
+```ts
+import { ArkpadEditor, Essentials } from "@arkpad/core";
+
+const editor = new ArkpadEditor({
+  element: document.querySelector("#editor")!,
+  extensions: [Essentials],
+  content: "<h1>Pure Performance</h1>",
+});
+
+editor.focus();
+editor.runCommand("toggleItalic");
+console.log(editor.getHTML());
+```
+
+## The Essentials Kit
+
+The `Essentials` kit bundles by default:
+
+- **Structure** — Paragraphs, Headings (H1-H6), Horizontal Rules
+- **Formatting** — Bold, Italic, Underline, Strike, Code, Highlight, Sub/Superscript
+- **Lists** — Bulleted, Ordered, and Task Lists
+- **Media** — Images and Hyperlinks
+- **System** — History (Undo/Redo), Placeholder, Markdown, Text Alignment
+
+## Full API Reference
+
+| Method                      | Returns   | Description              |
+| :-------------------------- | :-------- | :----------------------- |
+| `getHTML()`                 | `string`  | Document as HTML         |
+| `getJSON()`                 | `object`  | Document as JSON         |
+| `getText()`                 | `string`  | Plain text from editor   |
+| `getMarkdown()`             | `string`  | Markdown version         |
+| `runCommand(name, ...args)` | `boolean` | Execute command          |
+| `canRunCommand(name)`       | `boolean` | Check if command can run |
+| `isActive(name, attrs?)`    | `boolean` | Check active mark/node   |
+| `getAttributes(name)`       | `object`  | Get active attributes    |
+| `setContent(data, format?)` | `void`    | Replace document         |
+| `clearContent()`            | `void`    | Reset to empty paragraph |
+| `setEditable(boolean)`      | `void`    | Toggle read-only         |
+| `focus()`/`blur()`          | `void`    | Manage focus             |
+| `destroy()`                 | `void`    | Cleanup editor           |
+
+## Extension System
+
+```ts
+const MyCustomMark = {
+  name: "customMark",
+  addCommands: () => ({
+    setMyMark: () => (state, dispatch) => {
+      return true;
+    },
+  }),
+  addKeyboardShortcuts: () => ({
+    "Mod-Alt-x": () => editor.runCommand("setMyMark"),
+  }),
+};
+
+extensions: [Essentials, MyCustomMark];
+```
+
+## Future: Agentic Editing
+
+- **Interception Layer** — Commands routed through AI for validation
+- **Natural Language API** — `editor.request("make this text more professional")`
+- **Context-Aware** — Agents that understand document structure
+
+## License
+
+Arkpad is open-source under the **MIT License**. Built by **ArkCabin**.

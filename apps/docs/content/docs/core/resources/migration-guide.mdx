@@ -1,0 +1,83 @@
+---
+title: Migration Guide
+description: Migrating from Tiptap, Slate, or older Arkpad versions.
+---
+
+## From Tiptap
+
+### Key Differences
+
+| Concept              | Tiptap                              | Arkpad                                                              |
+| :------------------- | :---------------------------------- | :------------------------------------------------------------------ |
+| Editor class         | `new Editor({...})`                 | `new ArkpadEditor({...})`                                           |
+| Command API          | `editor.chain().toggleBold().run()` | `editor.runCommand('toggleBold')` or `editor.commands.toggleBold()` |
+| React hook           | `useEditor`                         | `useArkpadEditor`                                                   |
+| Content component    | `EditorContent`                     | `ArkpadEditorContent`                                               |
+| Extension `create()` | Top-level import                    | `Extension.create()` from core                                      |
+
+### Command Migration
+
+```diff
+- editor.chain().toggleBold().focus().run()
++ editor.commands.toggleBold()
++ editor.focus()
+```
+
+Extensions are structured similarly but use Arkpad's **Extension Factory** pattern:
+
+```typescript
+// Tiptap
+import { Extension } from "@tiptap/core";
+
+// Arkpad
+import { Extension } from "@arkpad/core";
+```
+
+## From Old Arkpad API
+
+```diff
+- import { createArkpadEditor } from '@arkpad/core'
++ import { ArkpadEditor } from '@arkpad/core'
+
+- const editor = createArkpadEditor({ ... })
++ const editor = new ArkpadEditor({ ... })
+```
+
+### React Component Migration
+
+```diff
+- import { ArkpadEditorComponent } from '@arkpad/react'
++ import { useArkpadEditor, ArkpadEditorContent } from '@arkpad/react'
+
+- <ArkpadEditorComponent content="..." />
++ const editor = useArkpadEditor({ content: "..." })
++ <ArkpadEditorContent editor={editor} />
+```
+
+## From Slate
+
+### Architecture Comparison
+
+| Aspect     | Slate            | Arkpad                                  |
+| :--------- | :--------------- | :-------------------------------------- |
+| Schema     | Custom           | ProseMirror-based, strict               |
+| Extensions | Plugins          | Class-based Extension Factory           |
+| Commands   | Custom functions | Named commands with proxy               |
+| React      | Built-in hooks   | Framework-agnostic core + React package |
+
+### Key Migration Steps
+
+1. Replace Slate `<Editable>` with Arkpad's `<ArkpadEditorContent>`
+2. Convert custom Slate plugins to Arkpad extensions using `Extension.create()`
+3. Replace `Transforms` API with Arkpad's `editor.runCommand()` pattern
+
+## From Draft.js / Quill
+
+| Feature       | Draft.js / Quill | Arkpad                          |
+| :------------ | :--------------- | :------------------------------ |
+| Architecture  | Monolithic       | Modular, headless               |
+| Custom blocks | Complex          | Simple `Extension.create()` API |
+| TypeScript    | Partial          | First-class                     |
+| Framework     | React-only       | Any framework                   |
+
+The main shift is from a monolithic editor to Arkpad's modular extension system. Start with the [Quick Start](/docs/editor/getting-started/quick-start) guide and refer to the [Extension Factory](/docs/core/extensions/factory) for custom features.

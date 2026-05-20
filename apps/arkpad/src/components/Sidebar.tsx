@@ -1,0 +1,133 @@
+import React from "react";
+import { NavLink } from "react-router-dom";
+import { cn } from "../lib/utils";
+import { Sun, Moon } from "lucide-react";
+
+interface SidebarProps {
+  isCollapsed: boolean;
+}
+
+export function Sidebar({ isCollapsed }: SidebarProps) {
+  const sections = [
+    {
+      title: "PLATFORM",
+      items: [{ name: "Standard Editor", path: "/" }],
+    },
+    {
+      title: "TYPOGRAPHY",
+      items: [
+        { name: "Heading", path: "/extensions/heading" },
+        { name: "Blockquote", path: "/extensions/blockquote" },
+        { name: "CodeBlock", path: "/extensions/codeblock" },
+        { name: "Horizontal Rule", path: "/extensions/horizontal-rule" },
+        { name: "Alignment", path: "/extensions/alignment" },
+        { name: "Typography", path: "/extensions/typography" },
+      ],
+    },
+    {
+      title: "RICH CONTENT",
+      items: [
+        { name: "List", path: "/extensions/list" },
+        { name: "Task List", path: "/extensions/task-list" },
+        { name: "Table", path: "/extensions/table" },
+        { name: "Image", path: "/extensions/image" },
+        { name: "YouTube", path: "/extensions/youtube" },
+      ],
+    },
+    {
+      title: "MARKS",
+      items: [
+        { name: "Bold", path: "/extensions/bold" },
+        { name: "Italic", path: "/extensions/italic" },
+        { name: "Underline", path: "/extensions/underline" },
+        { name: "Strike", path: "/extensions/strike" },
+        { name: "Code", path: "/extensions/code" },
+        { name: "Link", path: "/extensions/link" },
+        { name: "Highlight", path: "/extensions/highlight" },
+        { name: "Superscript", path: "/extensions/superscript" },
+        { name: "Subscript", path: "/extensions/subscript" },
+      ],
+    },
+    {
+      title: "INTERACTION",
+      items: [
+        { name: "Bubble Menu", path: "/extensions/bubble-menu" },
+        { name: "Floating Menu", path: "/extensions/floating-menu" },
+        { name: "Placeholder", path: "/extensions/placeholder" },
+      ],
+    },
+    {
+      title: "STYLE",
+      items: [
+        { name: "Color", path: "/extensions/color" },
+        { name: "Font Family", path: "/extensions/font-family" },
+        { name: "Font Size", path: "/extensions/font-size" },
+      ],
+    },
+    {
+      title: "TOOLS",
+      items: [
+        { name: "Highlighter Tool", path: "/extensions/highlighter-tool" },
+        { name: "Eraser Tool", path: "/extensions/eraser-tool" },
+        { name: "Markdown Paste", path: "/extensions/markdown" },
+        { name: "AI Assistant", path: "/extensions/ai" },
+      ],
+    },
+  ];
+
+  const toggleTheme = () => {
+    const isDark = document.documentElement.classList.toggle("dark");
+    localStorage.setItem("arkpad-theme", isDark ? "dark" : "light");
+  };
+
+  return (
+    <aside
+      className={cn(
+        "h-screen bg-[var(--bg-main)] border-r border-[var(--border)] flex flex-col transition-all duration-300 ease-in-out",
+        isCollapsed ? "w-12" : "w-56"
+      )}
+    >
+      <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-6 scrollbar-hide">
+        {sections.map((section) => (
+          <div key={section.title} className="space-y-0.5">
+            {!isCollapsed && (
+              <div className="px-3 text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1.5 opacity-60">
+                {section.title}
+              </div>
+            )}
+            {section.items.map((item) => (
+              <NavLink
+                key={item.name}
+                to={item.path}
+                className={({ isActive }) =>
+                  cn(
+                    "flex items-center px-3 py-1.5 text-sm transition-colors",
+                    isActive && item.path !== "#"
+                      ? "bg-[var(--selection)] text-[var(--text-main)] font-medium"
+                      : "text-[var(--text-muted)] hover:text-[var(--text-main)]",
+                    item.path === "#" && "cursor-default opacity-50"
+                  )
+                }
+                onClick={(e) => {
+                  if (item.path === "#") e.preventDefault();
+                }}
+              >
+                {!isCollapsed && <span className="truncate">{item.name}</span>}
+              </NavLink>
+            ))}
+          </div>
+        ))}
+      </nav>
+
+      <div className="p-2 border-t border-[var(--border)]">
+        <button
+          onClick={toggleTheme}
+          className="w-full flex items-center justify-center p-2 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors"
+        >
+          <Sun className="w-4 h-4 dark:hidden" />
+          <Moon className="w-4 h-4 hidden dark:block" />
+        </button>
+      </div>
+    </aside>
+  );
+}

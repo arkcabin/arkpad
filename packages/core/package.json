@@ -36,29 +36,49 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./styles.css": "./styles/index.css"
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "sideEffects": false,
+  "sideEffects": [
+    "**/*.css"
+  ],
   "files": [
-    "dist"
+    "dist",
+    "styles"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
+    "nanoid": "^5.0.0",
     "prosemirror-commands": "^1.7.1",
+    "prosemirror-dropcursor": "^1.8.2",
+    "prosemirror-gapcursor": "^1.4.1",
     "prosemirror-history": "^1.5.0",
     "prosemirror-inputrules": "^1.5.1",
     "prosemirror-keymap": "^1.2.3",
     "prosemirror-model": "^1.25.4",
-    "prosemirror-placeholder": "^1.0.7",
     "prosemirror-schema-basic": "^1.2.4",
     "prosemirror-schema-list": "^1.5.1",
     "prosemirror-state": "^1.4.4",
-    "prosemirror-view": "^1.41.8",
-    "nanoid": "^5.0.0"
+    "prosemirror-tables": "^1.8.5",
+    "prosemirror-view": "^1.41.8"
+  },
+  "devDependencies": {
+    "@types/prosemirror-commands": "^1.0.4",
+    "@types/prosemirror-dropcursor": "^1.0.3",
+    "@types/prosemirror-gapcursor": "^1.0.4",
+    "@types/prosemirror-history": "^1.0.3",
+    "@types/prosemirror-inputrules": "^1.0.4",
+    "@types/prosemirror-keymap": "^1.0.4",
+    "@types/prosemirror-schema-list": "^1.0.3",
+    "@types/prosemirror-tables": "^0.8.0",
+    "jsdom": "^29.1.1",
+    "vitest": "^4.1.6"
   }
 }

@@ -1,0 +1,79 @@
+---
+title: Code
+description: Format inline code with `toggleCode`.
+---
+
+Type: **Mark** · Category: **Marks**
+
+Code renders inline text in a monospace font for code snippets or technical terms. Renders as `<code>` in HTML output.
+
+## Demo
+
+<FeatureDemo
+  feature="code"
+  content="<p>Use <code>inline code</code> for snippets, variable names, or technical terms within a sentence.</p>"
+  commands={[{ label: "Code", command: "toggleCode", isActive: "code", icon: "Code" }]}
+/>
+
+## Installation
+
+```ts
+import { Code } from "@arkpad/extension-code";
+```
+
+## Commands
+
+The extension registers three commands for managing inline code:
+
+```ts
+// Toggles inline code styling on and off for the active selection
+editor.runCommand("toggleCode");
+
+// Explicitly applies inline code styling to the selection
+editor.runCommand("setCode");
+
+// Explicitly removes inline code styling from the selection
+editor.runCommand("unsetCode");
+```
+
+### Chaining Commands
+
+You can chain commands to toggle inline code styling and immediately focus the editor:
+
+```ts
+editor.chain().focus().toggleCode().run();
+```
+
+## Keyboard Shortcuts
+
+| Shortcut | Action                      |
+| :------- | :-------------------------- |
+| `Mod-e`  | Toggles inline code styling |
+
+## Markdown Input Rules
+
+Type backticks at both ends of a word or phrase to quickly make it inline code:
+
+- `` `code` ``
+
+## Active State
+
+```ts
+const isActive = editor.isActive("code");
+```
+
+## Configuration
+
+### Options
+
+| Name             | Type                  | Default | Description                                                               |
+| :--------------- | :-------------------- | :------ | :------------------------------------------------------------------------ |
+| `HTMLAttributes` | `Record<string, any>` | `{}`    | Key-value pairs of attributes to be rendered on the `<code>` DOM element. |
+
+```ts
+Code.configure({
+  HTMLAttributes: {
+    class: "custom-code-styling",
+  },
+});
+```

@@ -1,0 +1,139 @@
+---
+title: Menu Engine
+description: Build floating menus, bubble menus, and toolbars using Arkpad's positioning engine.
+---
+
+The Menu Engine is a centralized positioning service for floating UI elements. It lives in the Core package so it works across all frameworks with maximum performance.
+
+## How It Works
+
+The engine uses a 3-step pipeline:
+
+```
+1. Headless Math
+   Engine calculates coordinates (DOMRects) for selections
+   and insertion points using ProseMirror's selection API.
+
+2. Reactive Storage
+   Coordinates stored in the editor's global storage as
+   CSS variables (--menu-x, --menu-y).
+
+3. Atomic Updates
+   Framework hooks (useMenuPositioner) subscribe to storage
+   updates and apply GPU-accelerated CSS transforms.
+```
+
+## Benefits
+
+- **Zero Flicker** — Updates synced with `requestAnimationFrame`, not React re-renders
+- **Zero Layout Thrashing** — Decouples editor rendering from menu rendering completely
+- **Unified Logic** — One engine handles bubble menus, table selection handles, and slash commands
+
+## Building a Bubble Menu
+
+A bubble menu appears when text is selected:
+
+```tsx
+function BubbleMenu({ editor }) {
+  if (editor.getSelection().empty) return null; // Hide when no selection
+
+  return (
+    <div
+      className="bubble-menu"
+      style={{
+        position: "absolute",
+        left: `var(--menu-x)`,
+        top: `var(--menu-y)`,
+      }}
+    >
+      <button onClick={() => editor.runCommand("toggleBold")}>Bold</button>
+      <button onClick={() => editor.runCommand("toggleItalic")}>Italic</button>
+      <button onClick={() => editor.runCommand("toggleLink", { href: prompt("URL:") })}>
+        Link
+      </button>
+    </div>
+  );
+}
+```
+
+## Building a Floating Toolbar
+
+A floating/top toolbar is always visible:
+
+```tsx
+function FixedToolbar({ editor }) {
+  return (
+    <div className="toolbar">
+      <button
+        className={editor.isActive("strong") ? "active" : ""}
+        onClick={() => editor.runCommand("toggleBold")}
+      >
+        <strong>B</strong>
+      </button>
+      <button
+        className={editor.isActive("em") ? "active" : ""}
+        onClick={() => editor.runCommand("toggleItalic")}
+      >
+        <em>I</em>
+      </button>
+      <button
+        className={editor.isActive("heading", { level: 2 }) ? "active" : ""}
+        onClick={() => editor.runCommand("toggleHeading", { level: 2 })}
+      >
+        H2
+      </button>
+    </div>
+  );
+}
+```
+
+## Registering Menus in Extensions
+
+Any extension can register a menu by implementing the `addMenu` method:
+
+```typescript
+export const MyExtension = Extension.create({
+  addMenu() {
+    return {
+      type: "bubble",
+      shouldShow: ({ state }) => !state.selection.empty,
+    };
+  },
+});
+```
+
+This allows extensions to self-register their own contextual menus without manual wiring.
+
+## Smart Bar Integration
+
+The Smart Bar is Arkpad's advanced contextual floating menu. It extends the Menu Engine with:
+
+- **Slot-based API** — Define multiple groups that morph based on editor state
+- **CSS Variable Positioning** — 120fps movement using `--sb-x` and `--sb-y`
+- **Adaptive Flip** — Automatically flips position to stay within viewport
+
+```tsx
+import { SmartBar, EditorButton } from "@arkpad/react";
+
+function MySmartBar() {
+  return (
+    <SmartBar>
+      <SmartBar.Group showIf={(editor) => !editor.getSelection().empty}>
+        <EditorButton command="toggleBold" name="strong">
+          Bold
+        </EditorButton>
+        <EditorButton command="toggleItalic" name="em">
+          Italic
+        </EditorButton>
+      </SmartBar.Group>
+
+      <SmartBar.Group showIf={(editor) => editor.isActive("table")}>
+        <EditorButton command="addColumnAfter">Add Column</EditorButton>
+        <EditorButton command="addRowAfter">Add Row</EditorButton>
+      </SmartBar.Group>
+    </SmartBar>
+  );
+}
+```
+
+See the [Smart Bar guide](/docs/editor/guides/smart-bar) for full details.

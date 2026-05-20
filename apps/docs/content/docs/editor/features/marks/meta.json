@@ -1,0 +1,14 @@
+{
+  "title": "Marks",
+  "pages": [
+    "bold",
+    "italic",
+    "underline",
+    "strike",
+    "code",
+    "link",
+    "highlight",
+    "superscript",
+    "subscript"
+  ]
+}

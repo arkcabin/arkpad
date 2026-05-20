@@ -1,0 +1,80 @@
+---
+title: Command Reference
+description: Comprehensive list of all available Arkpad commands.
+---
+
+Execute commands using `editor.runCommand(name, args)` or via the `editor.commands` proxy.
+
+## Toolbar Commands
+
+| Icon     | Name         | Command                | Arguments                                               |
+| :------- | :----------- | :--------------------- | :------------------------------------------------------ |
+| **B**    | Bold         | `toggleBold`           | -                                                       |
+| _I_      | Italic       | `toggleItalic`         | -                                                       |
+| <u>U</u> | Underline    | `toggleUnderline`      | -                                                       |
+| ~~S~~    | Strike       | `toggleStrike`         | -                                                       |
+| 🖍       | Highlighter  | `toggleHighlighter`    | -                                                       |
+| `<>`     | Code         | `toggleCode`           | -                                                       |
+| 🔗       | Link         | `toggleLink`           | `{ href: string }`                                      |
+| x²       | Superscript  | `toggleSuperscript`    | -                                                       |
+| x₂       | Subscript    | `toggleSubscript`      | -                                                       |
+| ⌫        | Eraser       | `toggleEraser`         | -                                                       |
+| **H1**   | Heading 1    | `toggleHeading`        | `{ level: 1 }`                                          |
+| **H2**   | Heading 2    | `toggleHeading`        | `{ level: 2 }`                                          |
+| **H3**   | Heading 3    | `toggleHeading`        | `{ level: 3 }`                                          |
+| **H4**   | Heading 4    | `toggleHeading`        | `{ level: 4 }`                                          |
+| `>_`     | Code Block   | `toggleCodeBlock`      | -                                                       |
+| —        | Divider      | `insertHorizontalRule` | -                                                       |
+| •        | Bullet List  | `toggleBulletList`     | -                                                       |
+| 1.       | Ordered List | `toggleOrderedList`    | -                                                       |
+| ☑        | Task List    | `toggleTaskList`       | -                                                       |
+| ≡        | Align        | `setTextAlign`         | `{ align: 'left' \| 'center' \| 'right' \| 'justify' }` |
+| 🔍       | Search       | `search`               | `query: string \| RegExp`                               |
+| 🖼       | Image        | `setImage`             | `{ src: string, alt?: string }`                         |
+| ↩        | Undo         | `undo`                 | -                                                       |
+| ↪        | Redo         | `redo`                 | -                                                       |
+
+## API Examples
+
+### Basic Command Execution
+
+```typescript
+editor.runCommand("toggleBold");
+editor.commands.toggleBold();
+editor.commands.toggleHeading({ level: 2 });
+```
+
+### Checking Active State
+
+```typescript
+const isBold = editor.isActive("strong");
+const isH2 = editor.isActive("heading", { level: 2 });
+const isCentered = editor.isActive("textAlign", { align: "center" });
+```
+
+### Chaining Commands
+
+```typescript
+editor.chain().focus().toggleBold().insertContent("Hello World").run();
+```
+
+### Search and Replace
+
+```typescript
+const results = editor.search("Arkpad");
+console.log(`Found ${results.length} matches`);
+
+editor.replace("old text", "new text");
+```
+
+## Painting Tools
+
+Arkpad includes unique "painting" tools for applying or removing marks by "drawing" over text.
+
+- **Highlighter** — Active when `toggleHighlighter` is on. Click and drag to apply highlight marks.
+- **Eraser** — Active when `toggleEraser` is on. Click and drag to remove all marks.
+
+```typescript
+editor.commands.toggleHighlighter();
+editor.commands.toggleEraser();
+```

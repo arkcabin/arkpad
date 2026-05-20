@@ -1,0 +1,75 @@
+---
+title: Underline
+description: Underline text with `toggleUnderline`.
+---
+
+Type: **Mark** · Category: **Marks**
+
+Underline adds a line below text. Renders as `<u>` in HTML output.
+
+## Demo
+
+<FeatureDemo
+  feature="underline"
+  content="<p>Use <u>underline</u> to emphasize specific terms or indicate text that was previously linked.</p>"
+  commands={[
+    { label: "Underline", command: "toggleUnderline", isActive: "underline", icon: "Underline" },
+  ]}
+/>
+
+## Installation
+
+```ts
+import { Underline } from "@arkpad/extension-underline";
+```
+
+## Commands
+
+The extension registers three commands for managing underline styling:
+
+```ts
+// Toggles underline styling on and off for the active selection
+editor.runCommand("toggleUnderline");
+
+// Explicitly applies underline styling to the selection
+editor.runCommand("setUnderline");
+
+// Explicitly removes underline styling from the selection
+editor.runCommand("unsetUnderline");
+```
+
+### Chaining Commands
+
+You can chain commands to toggle underline styling and immediately focus the editor:
+
+```ts
+editor.chain().focus().toggleUnderline().run();
+```
+
+## Keyboard Shortcuts
+
+| Shortcut           | Action                    |
+| :----------------- | :------------------------ |
+| `Mod-u` or `Mod-U` | Toggles underline styling |
+
+## Active State
+
+```ts
+const isActive = editor.isActive("underline");
+```
+
+## Configuration
+
+### Options
+
+| Name             | Type                  | Default | Description                                                            |
+| :--------------- | :-------------------- | :------ | :--------------------------------------------------------------------- |
+| `HTMLAttributes` | `Record<string, any>` | `{}`    | Key-value pairs of attributes to be rendered on the `<u>` DOM element. |
+
+```ts
+Underline.configure({
+  HTMLAttributes: {
+    class: "custom-underline-styling",
+  },
+});
+```
