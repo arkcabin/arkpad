@@ -20,5 +20,18 @@
   },
   "peerDependencies": {
     "@arkpad/core": "*"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arkcabin/arkpad.git",
+    "directory": "packages/extension-bubble-menu"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "bugs": {
+    "url": "https://github.com/arkcabin/arkpad/issues"
+  },
+  "homepage": "https://github.com/arkcabin/arkpad/tree/main/packages/extension-bubble-menu#readme"
 }

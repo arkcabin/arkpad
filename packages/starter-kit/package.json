@@ -45,5 +45,18 @@
   "peerDependencies": {
     "@arkpad/core": "*"
   },
-  "module": "./dist/index.js"
+  "module": "./dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arkcabin/arkpad.git",
+    "directory": "packages/starter-kit"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "bugs": {
+    "url": "https://github.com/arkcabin/arkpad/issues"
+  },
+  "homepage": "https://github.com/arkcabin/arkpad/tree/main/packages/starter-kit#readme"
 }

@@ -26,5 +26,18 @@
     "vitest": "^4.1.6",
     "jsdom": "^29.1.1",
     "prosemirror-model": "*"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arkcabin/arkpad.git",
+    "directory": "packages/extension-font-family"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "bugs": {
+    "url": "https://github.com/arkcabin/arkpad/issues"
+  },
+  "homepage": "https://github.com/arkcabin/arkpad/tree/main/packages/extension-font-family#readme"
 }
