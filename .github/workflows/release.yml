@@ -110,7 +110,8 @@ jobs:
               
               if ! npm info "$PKG_NAME@$PKG_VERSION" >/dev/null 2>&1; then
                 echo "Publishing $PKG_NAME@$PKG_VERSION..."
-                npm publish "$pkg_dir" --provenance --access public --registry https://registry.npmjs.org
+                # Prefix with ./ to prevent npm from parsing local directories as GitHub shortcuts (e.g. packages/core -> github:packages/core)
+                npm publish "./$pkg_dir" --provenance --access public --registry https://registry.npmjs.org
               else
                 echo "$PKG_NAME@$PKG_VERSION is already published. Skipping."
               fi
