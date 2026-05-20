@@ -18,7 +18,7 @@
 @import "./ui-blocks.css";
 @import "./placeholder.css";
 
-/* 4. Strictly Scoped Core Logic & Library Styles */
+  /* 4. Strictly Scoped Core Logic & Library Styles */
 .arkpad-content-area {
   /* ProseMirror Core Styles - Isolated to our namespace */
   & .ProseMirror {
@@ -27,6 +27,8 @@
     min-height: inherit;
     color: inherit;
     font-family: inherit;
+    white-space: pre-wrap;
+    word-wrap: break-word;
   }
 
   display: block;

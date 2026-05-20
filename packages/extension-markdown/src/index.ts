@@ -25,7 +25,7 @@ export function createMarkdownPaste(): Extension {
             if (!isMarkdown) return false;
             if (
               html &&
-              (html.includes("<h") ||
+              (/<h[1-6]\b/i.test(html) ||
                 html.includes("<ul") ||
                 html.includes("<li") ||
                 html.includes("<strong"))

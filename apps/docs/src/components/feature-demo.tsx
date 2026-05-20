@@ -223,7 +223,22 @@ const extensionMap: Record<string, ArkpadExtension[]> = {
       showOnlyCurrent: true,
     }),
   ],
-  ai: [Engine, Heading, AI],
+  ai: [
+    Engine,
+    Heading,
+    AI.configure({
+      onAIRequest: async ({ command }) => {
+        await new Promise((r) => setTimeout(r, 300));
+        if (command === "complete") {
+          return " This is AI-generated text. Configure a real AI handler to replace this mock.";
+        }
+        if (command === "summarize") {
+          return "Summary: This is a mock AI summary response.";
+        }
+        return "Mock AI response.";
+      },
+    }),
+  ],
   "eraser-tool": [Engine, Heading, Highlight, EraserTool],
   "highlighter-tool": [Engine, Heading, Highlight, HighlighterTool],
   markdown: [
