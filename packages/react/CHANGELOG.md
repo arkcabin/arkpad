@@ -1,5 +1,13 @@
 # @arkpad/react
 
+## 1.6.15
+
+### Patch Changes
+
+- Updated dependencies
+  - @arkpad/extension-bubble-menu@1.0.2
+  - @arkpad/extension-floating-menu@1.0.2
+
 ## 1.6.14
 
 ### Patch Changes
