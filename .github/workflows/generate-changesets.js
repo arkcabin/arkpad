@@ -58,12 +58,12 @@ for (const dir of dirsToScan) {
     const pkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'));
     const pkgName = pkgJson.name;
 
-    // Check if there are changes in this package/app (excluding docs/tests/markdown)
+    // Check if there are changes in this package/app (excluding tests)
     const diffCommand = `git diff --name-only ${baseSha} HEAD -- "${path.relative(process.cwd(), pkgDir)}"`;
     const changes = runGit(diffCommand)
       .split('\n')
       .filter(Boolean)
-      .filter(file => !/\.(md|txt|test\.ts|test\.js|test\.tsx|spec\.ts|spec\.js)$/i.test(file));
+      .filter(file => !/\.(test\.ts|test\.js|test\.tsx|spec\.ts|spec\.js)$/i.test(file));
 
     if (changes.length > 0) {
       console.log(`Workspace ${pkgName} has changes:`, changes);

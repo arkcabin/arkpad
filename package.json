@@ -28,7 +28,7 @@
     "changeset": "changeset",
     "version-packages": "changeset version",
     "check": "npm run build && npm run typecheck && npm run lint",
-    "prepare": "husky",
+    "prepare": "husky || true",
     "test": "npm run test -w @arkpad/core",
     "test:extensions": "for ext in bold italic underline strike code superscript subscript highlight color font-family font-size heading blockquote horizontal-rule code-block link image bullet-list ordered-list list-item task-list table alignment markdown placeholder; do npx vitest run --config packages/extension-$ext/vitest.config.ts packages/extension-$ext/src/__tests__/ > /dev/null 2>&1 && echo PASS: $ext || echo FAIL: $ext; done",
     "test:all": "npm run test && npm run test:extensions"
