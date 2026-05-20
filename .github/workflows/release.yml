@@ -46,10 +46,17 @@ jobs:
           if [ ! -f .changeset/*.md ] || [ "$(ls -A .changeset/*.md 2>/dev/null | grep -v 'README.md')" = "" ]; then
             echo "No manual changesets found. Running Pro-Max auto-detection..."
             
-            # Determine the base SHA for comparison (entire push history)
-            BASE_SHA="${{ github.event.before }}"
-            if [ "$BASE_SHA" = "0000000000000000000000000000000000000000" ] || [ -z "$BASE_SHA" ]; then
-              BASE_SHA="HEAD^"
+            # Determine the base SHA for comparison (changes since the last release commit if available)
+            LAST_RELEASE_COMMIT=$(git log --grep="release: version packages" -n 1 --format="%H" 2>/dev/null || true)
+            if [ -n "$LAST_RELEASE_COMMIT" ]; then
+              echo "Comparing changes against the last release commit: $LAST_RELEASE_COMMIT"
+              BASE_SHA="$LAST_RELEASE_COMMIT"
+            else
+              echo "No previous release commit found. Falling back to push event before SHA."
+              BASE_SHA="${{ github.event.before }}"
+              if [ "$BASE_SHA" = "0000000000000000000000000000000000000000" ] || [ -z "$BASE_SHA" ]; then
+                BASE_SHA="HEAD^"
+              fi
             fi
             
             echo "---" > .changeset/automated-release.md

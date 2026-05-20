@@ -9,6 +9,7 @@ This folder contains the complete planning and delivery documentation for Arkpad
 - [Roadmap](ROADMAP.md): Phased delivery plan.
 - [Architecture](ARCHITECTURE.md): Technical design and system boundaries.
 - [Setup](SETUP.md): Local development setup and environment checklist.
+- [Publishing](PUBLISHING.md): NPM release, granular token 2FA configuration, and OIDC setup.
 - [TODO](TODO.md): Actionable task list for implementation.
 - [QA Plan](QA_PLAN.md): Testing strategy and release quality gates.
 - [Developer Guide](./DEVELOPER_GUIDE.md): Advanced architectural patterns.
