@@ -143,6 +143,14 @@ const HighPriorityExt = Extension.create({
 - `onUpdate()`: Called on every content change.
 - `onDestroy()`: Called during editor cleanup.
 
+## 🚀 Versioning & Release Flow
+
+Arkpad uses an automated, conventional-commit-driven release workflow:
+
+- **Automatic Version Bumps**: Any code changes in `@arkpad/core` trigger package version updates and generate changesets automatically on merge to `main`.
+- **Beautiful Emojified Changelogs**: Changes are grouped into clean categories like `✨ Features`, `🐛 Bug Fixes`, `⚡ Performance Improvements`, `📝 Documentation`, `♻️ Refactoring`, `🎨 Styles & UI`, and `📦 Others`.
+- **GitHub Releases**: Releases are automatically published on GitHub with the release description matching the version changelog exactly.
+
 ---
 
 Built by **ArkCabin**

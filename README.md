@@ -74,6 +74,24 @@ The following features are available in the `@arkpad/core` Essentials bundle:
 - **Tools**: Highlighter, Eraser, Search/Replace, Undo/Redo.
 - **Alignment**: Left, Center, Right, Justify.
 
+## 🚀 Versioning & Release Flow
+
+Arkpad uses an automated, conventional-commit-driven monorepo release workflow:
+
+- **Automatic Version Bumps**: Any change to source code in `packages/*` or `apps/*` triggers version updates in `package.json` automatically on merge to `main`.
+- **Private Workspaces**: Workspaces marked as `private` (like the `@arkpad/app` demo and `docs` site) have their internal dependencies and version numbers bumped to keep everything in sync, but they are never published to npm.
+- **Beautiful Emojified Changelogs**: Commit messages are parsed and grouped using Conventional Commits, with categories formatted beautifully:
+  - `✨ Features`
+  - `🐛 Bug Fixes`
+  - `⚡ Performance Improvements`
+  - `📝 Documentation`
+  - `♻️ Refactoring`
+  - `🎨 Styles & UI`
+  - `📦 Others`
+- **GitHub Releases**: Each package release is accompanied by a GitHub Release populated with the exact changelog notes extracted from its `CHANGELOG.md`.
+
+For more details on setting up package authentication or trusted publishing, refer to [docs/PUBLISHING.md](file:///c:/Work/arkpad/docs/PUBLISHING.md).
+
 ---
 
 Built with ❤️ by **ArkCabin**
