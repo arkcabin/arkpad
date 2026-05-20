@@ -1,5 +1,15 @@
 # @arkpad/react
 
+## 1.6.16
+
+### Patch Changes
+
+- ### 📦 Others
+  - Internal maintenance and dependency updates
+
+- Updated dependencies
+  - @arkpad/core@1.6.15
+
 ## 1.6.15
 
 ### Patch Changes
