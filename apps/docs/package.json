@@ -47,6 +47,8 @@
     "@arkpad/extension-youtube": "*",
     "@arkpad/react": "*",
     "@arkpad/starter-kit": "*",
+    "@arkpad/builder": "*",
+    "@arkpad/builder-blocks": "*",
     "@openrouter/ai-sdk-provider": "^2.9.0",
     "@radix-ui/react-presence": "^1.1.5",
     "@tailwindcss/typography": "^0.5.16",
