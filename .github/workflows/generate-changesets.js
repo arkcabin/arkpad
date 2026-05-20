@@ -37,109 +37,115 @@ if (!fs.existsSync('.changeset')) {
   fs.mkdirSync('.changeset');
 }
 
-// 2. Scan packages
-const packagesDir = path.join(process.cwd(), 'packages');
-const packages = fs.readdirSync(packagesDir);
+// 2. Scan packages and apps
+const dirsToScan = [
+  path.join(process.cwd(), 'packages'),
+  path.join(process.cwd(), 'apps')
+];
 let anyChanged = false;
 
-for (const pkg of packages) {
-  const pkgDir = path.join(packagesDir, pkg);
-  if (!fs.statSync(pkgDir).isDirectory()) continue;
-  
-  const pkgJsonPath = path.join(pkgDir, 'package.json');
-  if (!fs.existsSync(pkgJsonPath)) continue;
-  
-  const pkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'));
-  const pkgName = pkgJson.name;
-  if (pkgJson.private) continue; // Skip private packages
+for (const dir of dirsToScan) {
+  if (!fs.existsSync(dir)) continue;
+  const folders = fs.readdirSync(dir);
 
-  // Check if there are changes in this package (excluding docs/tests/markdown)
-  const diffCommand = `git diff --name-only ${baseSha} HEAD -- "${path.relative(process.cwd(), pkgDir)}"`;
-  const changes = runGit(diffCommand)
-    .split('\n')
-    .filter(Boolean)
-    .filter(file => !/\.(md|txt|test\.ts|test\.js|test\.tsx|spec\.ts|spec\.js)$/i.test(file));
+  for (const folder of folders) {
+    const pkgDir = path.join(dir, folder);
+    if (!fs.statSync(pkgDir).isDirectory()) continue;
+    
+    const pkgJsonPath = path.join(pkgDir, 'package.json');
+    if (!fs.existsSync(pkgJsonPath)) continue;
+    
+    const pkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'));
+    const pkgName = pkgJson.name;
 
-  if (changes.length > 0) {
-    console.log(`Package ${pkgName} has changes:`, changes);
-    anyChanged = true;
+    // Check if there are changes in this package/app (excluding docs/tests/markdown)
+    const diffCommand = `git diff --name-only ${baseSha} HEAD -- "${path.relative(process.cwd(), pkgDir)}"`;
+    const changes = runGit(diffCommand)
+      .split('\n')
+      .filter(Boolean)
+      .filter(file => !/\.(md|txt|test\.ts|test\.js|test\.tsx|spec\.ts|spec\.js)$/i.test(file));
 
-    // Retrieve commit messages since baseSha that touched this package folder
-    const logCommand = `git log ${baseSha}..HEAD --format="%s (%h) by %an" -- "${path.relative(process.cwd(), pkgDir)}"`;
-    const commits = runGit(logCommand).split('\n').filter(Boolean);
+    if (changes.length > 0) {
+      console.log(`Workspace ${pkgName} has changes:`, changes);
+      anyChanged = true;
 
-    // Group commits by conventional commit types
-    const groups = {
-      Features: [],
-      'Bug Fixes': [],
-      'Performance Improvements': [],
-      Documentation: [],
-      Refactoring: [],
-      'Styles & UI': [],
-      Others: []
-    };
+      // Retrieve commit messages since baseSha that touched this package/app folder
+      const logCommand = `git log ${baseSha}..HEAD --format="%s (%h) by %an" -- "${path.relative(process.cwd(), pkgDir)}"`;
+      const commits = runGit(logCommand).split('\n').filter(Boolean);
 
-    for (const commit of commits) {
-      // Exclude release/ci/chore/skip-ci commits from changelog unless they are important
-      if (/release: version packages/i.test(commit) || /\[skip ci\]/i.test(commit) || /^ci:/i.test(commit)) {
-        continue;
-      }
+      // Group commits by conventional commit types
+      const groups = {
+        Features: [],
+        'Bug Fixes': [],
+        'Performance Improvements': [],
+        Documentation: [],
+        Refactoring: [],
+        'Styles & UI': [],
+        Others: []
+      };
 
-      if (/^(feat|Feat)(\([^)]+\))?:/i.test(commit)) {
-        groups.Features.push(commit.replace(/^(feat|Feat)(\([^)]+\))?:\s*/i, ''));
-      } else if (/^(fix|Fix)(\([^)]+\))?:/i.test(commit)) {
-        groups['Bug Fixes'].push(commit.replace(/^(fix|Fix)(\([^)]+\))?:\s*/i, ''));
-      } else if (/^(perf|Perf)(\([^)]+\))?:/i.test(commit)) {
-        groups['Performance Improvements'].push(commit.replace(/^(perf|Perf)(\([^)]+\))?:\s*/i, ''));
-      } else if (/^(docs|Docs)(\([^)]+\))?:/i.test(commit)) {
-        groups.Documentation.push(commit.replace(/^(docs|Docs)(\([^)]+\))?:\s*/i, ''));
-      } else if (/^(refactor|Refactor)(\([^)]+\))?:/i.test(commit)) {
-        groups.Refactoring.push(commit.replace(/^(refactor|Refactor)(\([^)]+\))?:\s*/i, ''));
-      } else if (/^(style|Style|ui|UI)(\([^)]+\))?:/i.test(commit)) {
-        groups['Styles & UI'].push(commit.replace(/^(style|Style|ui|UI)(\([^)]+\))?:\s*/i, ''));
-      } else {
-        // Only include other commits if they are not standard chores
-        if (!/^(chore|build|test|ci)(\([^)]+\))?:/i.test(commit)) {
-          groups.Others.push(commit);
+      for (const commit of commits) {
+        // Exclude release/ci/chore/skip-ci commits from changelog unless they are important
+        if (/release: version packages/i.test(commit) || /\[skip ci\]/i.test(commit) || /^ci:/i.test(commit)) {
+          continue;
+        }
+
+        if (/^(feat|Feat)(\([^)]+\))?:/i.test(commit)) {
+          groups.Features.push(commit.replace(/^(feat|Feat)(\([^)]+\))?:\s*/i, ''));
+        } else if (/^(fix|Fix)(\([^)]+\))?:/i.test(commit)) {
+          groups['Bug Fixes'].push(commit.replace(/^(fix|Fix)(\([^)]+\))?:\s*/i, ''));
+        } else if (/^(perf|Perf)(\([^)]+\))?:/i.test(commit)) {
+          groups['Performance Improvements'].push(commit.replace(/^(perf|Perf)(\([^)]+\))?:\s*/i, ''));
+        } else if (/^(docs|Docs)(\([^)]+\))?:/i.test(commit)) {
+          groups.Documentation.push(commit.replace(/^(docs|Docs)(\([^)]+\))?:\s*/i, ''));
+        } else if (/^(refactor|Refactor)(\([^)]+\))?:/i.test(commit)) {
+          groups.Refactoring.push(commit.replace(/^(refactor|Refactor)(\([^)]+\))?:\s*/i, ''));
+        } else if (/^(style|Style|ui|UI)(\([^)]+\))?:/i.test(commit)) {
+          groups['Styles & UI'].push(commit.replace(/^(style|Style|ui|UI)(\([^)]+\))?:\s*/i, ''));
+        } else {
+          // Only include other commits if they are not standard chores
+          if (!/^(chore|build|test|ci)(\([^)]+\))?:/i.test(commit)) {
+            groups.Others.push(commit);
+          }
         }
       }
-    }
 
-    // Build the changeset markdown description
-    const emojiMap = {
-      Features: '✨ Features',
-      'Bug Fixes': '🐛 Bug Fixes',
-      'Performance Improvements': '⚡ Performance Improvements',
-      Documentation: '📝 Documentation',
-      Refactoring: '♻️ Refactoring',
-      'Styles & UI': '🎨 Styles & UI',
-      Others: '📦 Others'
-    };
+      // Build the changeset markdown description
+      const emojiMap = {
+        Features: '✨ Features',
+        'Bug Fixes': '🐛 Bug Fixes',
+        'Performance Improvements': '⚡ Performance Improvements',
+        Documentation: '📝 Documentation',
+        Refactoring: '♻️ Refactoring',
+        'Styles & UI': '🎨 Styles & UI',
+        Others: '📦 Others'
+      };
 
-    let description = '';
-    for (const [groupName, msgs] of Object.entries(groups)) {
-      if (msgs.length > 0) {
-        const heading = emojiMap[groupName] || groupName;
-        description += `### ${heading}\n\n`;
-        msgs.forEach(msg => {
-          description += `- ${msg}\n`;
-        });
-        description += '\n';
+      let description = '';
+      for (const [groupName, msgs] of Object.entries(groups)) {
+        if (msgs.length > 0) {
+          const heading = emojiMap[groupName] || groupName;
+          description += `### ${heading}\n\n`;
+          msgs.forEach(msg => {
+            description += `- ${msg}\n`;
+          });
+          description += '\n';
+        }
       }
+
+      // If description is empty (e.g. only chores/tests were committed), add a default message
+      if (!description.trim()) {
+        description = '### 📦 Others\n\n- Internal maintenance and dependency updates\n\n';
+      }
+
+      // Write to a separate changeset file for this workspace
+      const safePkgName = pkgName.replace(/[^a-zA-Z0-9]/g, '_');
+      const changesetFilePath = path.join('.changeset', `auto-${safePkgName}.md`);
+      const fileContent = `---\n"${pkgName}": patch\n---\n\n${description.trim()}\n`;
+
+      fs.writeFileSync(changesetFilePath, fileContent, 'utf8');
+      console.log(`Created changeset: ${changesetFilePath}`);
     }
-
-    // If description is empty (e.g. only chores/tests were committed), add a default message
-    if (!description.trim()) {
-      description = '### 📦 Others\n\n- Internal maintenance and dependency updates\n\n';
-    }
-
-    // Write to a separate changeset file for this package
-    const safePkgName = pkg.replace(/[^a-zA-Z0-9]/g, '_');
-    const changesetFilePath = path.join('.changeset', `auto-${safePkgName}.md`);
-    const fileContent = `---\n"${pkgName}": patch\n---\n\n${description.trim()}\n`;
-
-    fs.writeFileSync(changesetFilePath, fileContent, 'utf8');
-    console.log(`Created changeset: ${changesetFilePath}`);
   }
 }
 
