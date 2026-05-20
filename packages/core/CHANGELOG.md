@@ -1,5 +1,12 @@
 # @arkpad/core
 
+## 1.6.15
+
+### Patch Changes
+
+- ### 📦 Others
+  - Internal maintenance and dependency updates
+
 ## 1.6.14
 
 ### Patch Changes
