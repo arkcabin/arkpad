@@ -42,58 +42,16 @@ jobs:
 
       - name: Version Packages
         run: |
-          # 1. If no manual changesets exist, create a smart automated patch changeset
+          # 1. If no manual changesets exist, dynamically generate automated patch changesets with conventional commit logs
           if [ ! -f .changeset/*.md ] || [ "$(ls -A .changeset/*.md 2>/dev/null | grep -v 'README.md')" = "" ]; then
-            echo "No manual changesets found. Running Pro-Max auto-detection..."
-            
-            # Determine the base SHA for comparison (changes since the last release commit if available)
-            LAST_RELEASE_COMMIT=$(git log --grep="release: version packages" -n 1 --format="%H" 2>/dev/null || true)
-            if [ -n "$LAST_RELEASE_COMMIT" ]; then
-              echo "Comparing changes against the last release commit: $LAST_RELEASE_COMMIT"
-              BASE_SHA="$LAST_RELEASE_COMMIT"
-            else
-              echo "No previous release commit found. Falling back to push event before SHA."
-              BASE_SHA="${{ github.event.before }}"
-              if [ "$BASE_SHA" = "0000000000000000000000000000000000000000" ] || [ -z "$BASE_SHA" ]; then
-                BASE_SHA="HEAD^"
-              fi
-            fi
-            
-            echo "---" > .changeset/automated-release.md
-            
-            # Dynamically detect all packages and check for meaningful code changes
-            ANY_CHANGED=false
-            for pkg_dir in packages/*; do
-              if [ -d "$pkg_dir" ] && [ -f "$pkg_dir/package.json" ]; then
-                PKG_NAME=$(node -p "require('./$pkg_dir/package.json').name")
-                
-                # Check for changes in this package, ignoring docs and tests
-                # This ensures we don't release new versions for just README fixes
-                PKG_CHANGES=$(git diff --name-only $BASE_SHA HEAD -- "$pkg_dir" | grep -vE "\.(md|txt|test\.ts|test\.js)$" || true)
-                
-                if [ -n "$PKG_CHANGES" ]; then
-                   echo "\"$PKG_NAME\": patch" >> .changeset/automated-release.md
-                   ANY_CHANGED=true
-                   echo "Detected code changes in $PKG_NAME"
-                fi
-              fi
-            done
-            
-            echo "---" >> .changeset/automated-release.md
-            echo "" >> .changeset/automated-release.md
-            echo "automated release: code changes detected via CI" >> .changeset/automated-release.md
-            
-            # Only keep the file if at least one package actually had code changes
-            if [ "$ANY_CHANGED" = false ]; then
-              rm .changeset/automated-release.md
-              echo "No meaningful code changes detected in any package. Skipping auto-versioning."
-            fi
+            echo "No manual changesets found. Running Pro-Max auto-detection and grouping commit messages..."
+            node .github/workflows/generate-changesets.js
           fi
 
           # 2. Bump versions locally based on changesets
           npx changeset version
 
-          # 2. Commit and push version bumps back to main (if any)
+          # 3. Commit and push version bumps back to main (if any)
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
@@ -102,6 +60,8 @@ jobs:
             git commit -m "release: version packages [skip ci]"
             git push
           fi
+        env:
+          GITHUB_EVENT_BEFORE: ${{ github.event.before }}
 
       - name: Publish to NPM
         run: |
@@ -138,10 +98,8 @@ jobs:
           npx changeset tag || echo "Tags already exist"
           git push --tags || echo "Tags already synced"
 
-          # Convert the new tags into official GitHub Releases
-          for tag in $(git tag --points-at HEAD); do
-            gh release create "$tag" --title "$tag" --generate-notes || echo "Release for $tag already exists"
-          done
+          # Convert the new tags into official GitHub Releases with proper changelog descriptions
+          node .github/workflows/create-releases.js
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
