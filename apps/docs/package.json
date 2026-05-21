@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "npm run build --prefix ../.. && next build",
+    "build:docs": "npm run build:packages --prefix ../.. && next build",
+    "build": "npm run build:packages --prefix ../.. && next build",
     "dev": "next dev",
     "start": "next start",
     "types:check": "fumadocs-mdx && next typegen && tsc --noEmit",
@@ -47,6 +48,8 @@
     "@arkpad/extension-youtube": "*",
     "@arkpad/react": "*",
     "@arkpad/starter-kit": "*",
+    "@arkpad/builder": "*",
+    "@arkpad/builder-blocks": "*",
     "@openrouter/ai-sdk-provider": "^2.9.0",
     "@radix-ui/react-presence": "^1.1.5",
     "@tailwindcss/typography": "^0.5.16",
