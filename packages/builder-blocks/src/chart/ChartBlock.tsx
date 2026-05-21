@@ -2,11 +2,18 @@ import React from "react";
 import { BlockComponentProps, BlockConfig } from "@arkpad/builder";
 import { BarChart3 } from "lucide-react";
 
-export const ChartBlock: React.FC<BlockComponentProps> = ({ properties }) => {
-  const title = properties.title || "Weekly Analytics";
-  const type = properties.chartType || "bar";
-  const themeColor = !properties.color || properties.color === "#ffffff" ? "#10b981" : properties.color;
-  const rawData = properties.dataset || "35,62,45,80,50,95";
+export const ChartBlock: React.FC<BlockComponentProps> = ({
+  id: _id,
+  props,
+  styles: _styles,
+  interactions: _interactions,
+  isEditing: _isEditing,
+  updateBlock: _updateBlock,
+}) => {
+  const title = props.title || "Weekly Analytics";
+  const type = props.chartType || "bar";
+  const themeColor = !props.color || props.color === "#ffffff" ? "#10b981" : props.color;
+  const rawData = props.dataset || "35,62,45,80,50,95";
 
   // Parse comma-separated dataset
   const dataPoints = rawData
@@ -178,7 +185,7 @@ export const ChartBlockConfig: BlockConfig = {
   description: "Dynamic visual representation of statistical data logs.",
   icon: BarChart3,
   component: ChartBlock,
-  defaultProperties: {
+  defaultProps: {
     title: "Weekly Analytics",
     chartType: "bar",
     color: "#10b981",

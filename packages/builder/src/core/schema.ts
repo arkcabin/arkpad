@@ -1,55 +1,63 @@
 import { z } from "zod";
-import { LayoutJSON } from "./types";
+import { PageBlock, NormalizedPageConfig, PageConfig } from "./types";
 
 /**
- * Zod schema to validate individual block data structures (Puck-style schema contract).
+ * Zod schema to validate Block Styles.
  */
-export const BlockSchema = z.object({
+export const BlockStylesSchema = z.record(z.string(), z.any());
+
+/**
+ * Zod schema to validate Block Interactions.
+ */
+export const BlockInteractionSchema = z.object({
   id: z.string(),
-  type: z.string(),
-  properties: z.record(z.string(), z.any())
+  trigger: z.string(),
+  action: z.string(),
+  settings: z.record(z.string(), z.any()),
 });
 
 /**
- * Zod schema to validate layout column grids.
+ * Zod schema to validate individual block data structures in the normalized graph.
  */
-export const ColumnSchema = z.object({
-  id: z.string(),
-  width: z.number().int().min(1).max(12),
-  blocks: z.array(BlockSchema)
+export const PageBlockSchema: z.ZodType<PageBlock> = z.lazy(() =>
+  z.object({
+    id: z.string(),
+    type: z.string(),
+    enabled: z.boolean(),
+    parentId: z.string().optional(),
+    children: z.union([z.array(z.string()), z.array(PageBlockSchema)]).optional(),
+    props: z.record(z.string(), z.any()).optional(),
+    styles: BlockStylesSchema.optional(),
+    data: z.record(z.string(), z.any()).optional(),
+    interactions: z.array(BlockInteractionSchema).optional(),
+  })
+);
+
+/**
+ * Zod schema to validate the entire normalized page configuration.
+ */
+export const NormalizedPageConfigSchema = z.object({
+  blocks: z.record(z.string(), PageBlockSchema),
+  rootIds: z.array(z.string()),
+  propertyProfiles: z.record(z.string(), z.any()).optional(),
 });
 
 /**
- * Zod schema to validate layout rows.
+ * Parses and validates an unknown normalized page configuration object.
  */
-export const RowSchema = z.object({
-  id: z.string(),
-  columns: z.array(ColumnSchema)
-});
-
-/**
- * Root Zod schema to validate the entire builder JSON state configuration tree.
- */
-export const LayoutSchema = z.object({
-  rows: z.array(RowSchema)
-});
-
-/**
- * Parses and validates an unknown JSON layout configuration object.
- * Returns a type-safe LayoutJSON or throws a detailed validation error.
- */
-export const validateLayout = (data: unknown): LayoutJSON => {
-  return LayoutSchema.parse(data);
+export const validatePageConfig = (data: unknown): NormalizedPageConfig => {
+  return NormalizedPageConfigSchema.parse(data);
 };
 
 /**
- * Safely parses layout configurations, returning a fallback empty layout if validation fails.
+ * Safely parses normalized page configurations, returning a fallback empty configuration if validation fails.
  */
-export const safeValidateLayout = (data: unknown): LayoutJSON => {
-  const result = LayoutSchema.safeParse(data);
+export const safeValidatePageConfig = (data: unknown): NormalizedPageConfig => {
+  const result = NormalizedPageConfigSchema.safeParse(data);
   if (result.success) {
     return result.data;
   }
-  console.warn("Arkpad Builder Schema validation failed, reverting to empty grid:", result.error);
-  return { rows: [] };
+  console.warn("Arkpad Builder Schema validation failed, reverting to empty page config:", result.error);
+  return { blocks: {}, rootIds: [] };
 };
+

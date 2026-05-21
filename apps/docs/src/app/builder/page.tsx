@@ -28,6 +28,8 @@ export default function BuilderDemoPage() {
 
   const [mounted, setMounted] = React.useState(false);
 
+  const [device, setDevice] = React.useState<"desktop" | "mobile">("desktop");
+
   React.useEffect(() => {
     setMounted(true);
   }, []);
@@ -50,12 +52,21 @@ export default function BuilderDemoPage() {
       <LocalStorageSync />
       <div className="flex flex-col h-screen w-full bg-white dark:bg-black text-neutral-800 dark:text-neutral-200 overflow-hidden font-sans transition-colors duration-200">
         {/* Modular Premium Header */}
-        <Header initialLayout={validatedLayout} />
+        <Header initialLayout={validatedLayout} device={device} setDevice={setDevice} />
 
         {/* Workspace Shell */}
-        <div className="flex-1 flex overflow-hidden">
-          {/* Main Visual grid Canvas */}
-          <Canvas />
+        <div className="flex-1 flex overflow-hidden bg-neutral-100 dark:bg-neutral-950">
+          <div className="flex-1 flex justify-center items-stretch overflow-hidden relative">
+            <div
+              className={`flex-1 flex flex-col transition-all duration-300 ease-in-out bg-white dark:bg-black ${
+                device === "mobile"
+                  ? "max-w-[390px] w-[390px] border-x border-neutral-200 dark:border-neutral-800 shadow-2xl my-4 rounded-[2px]"
+                  : "w-full"
+              }`}
+            >
+              <Canvas />
+            </div>
+          </div>
           
           {/* Exporter & block inspector Sidebar */}
           <Sidebar />
