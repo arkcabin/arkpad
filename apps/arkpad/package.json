@@ -1,7 +1,7 @@
 {
   "name": "@arkpad/app",
   "private": true,
-  "version": "1.6.13",
+  "version": "1.6.14",
   "author": "ArkCabin",
   "type": "module",
   "scripts": {

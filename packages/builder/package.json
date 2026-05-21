@@ -1,6 +1,6 @@
 {
   "name": "@arkpad/builder",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Core layout and drag-and-drop grid engine for the Arkpad builder.",
   "author": "ArkCabin",
   "type": "module",

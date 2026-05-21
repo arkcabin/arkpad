@@ -1,5 +1,12 @@
 # @arkpad/app
 
+## 1.6.14
+
+### Patch Changes
+
+- ### ✨ Features
+  - Update build scripts to use build:packages for consistent package building (aefab3f) by Vartik Anand
+
 ## 1.6.13
 
 ### Patch Changes
