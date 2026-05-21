@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
+    "build:docs": "npm run build:packages --prefix ../.. && next build",
     "build": "npm run build:packages --prefix ../.. && next build",
     "dev": "next dev",
     "start": "next start",
