@@ -1,5 +1,12 @@
 # @arkpad/react
 
+## 1.6.17
+
+### Patch Changes
+
+- ### ✨ Features
+  - simplify command execution in DropdownItem and EditorButton components (f978c82) by Vartik Anand
+
 ## 1.6.16
 
 ### Patch Changes

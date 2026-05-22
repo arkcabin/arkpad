@@ -1,5 +1,19 @@
 # docs
 
+## 0.0.2
+
+### Patch Changes
+
+- ### ✨ Features
+  - add WYSIWYG Text Editor block and Block Renderer components (f048c3c) by codeholic-vartik
+
+- Updated dependencies
+- Updated dependencies
+- Updated dependencies
+  - @arkpad/builder@1.0.2
+  - @arkpad/builder-blocks@1.0.2
+  - @arkpad/react@1.6.17
+
 ## 0.0.1
 
 ### Patch Changes

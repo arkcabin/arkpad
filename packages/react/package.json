@@ -1,6 +1,6 @@
 {
   "name": "@arkpad/react",
-  "version": "1.6.16",
+  "version": "1.6.17",
   "description": "React components and hooks for the Arkpad rich text editor.",
   "keywords": [
     "react",

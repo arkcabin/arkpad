@@ -1,5 +1,14 @@
 # @arkpad/builder
 
+## 1.0.2
+
+### Patch Changes
+
+- ### ✨ Features
+  - remove unnecessary dock mode logic in BlockWrapper component (b56c6f9) by Vartik Anand
+  - simplify command execution in DropdownItem and EditorButton components (f978c82) by Vartik Anand
+  - add WYSIWYG Text Editor block and Block Renderer components (f048c3c) by codeholic-vartik
+
 ## 1.0.1
 
 ### Patch Changes
