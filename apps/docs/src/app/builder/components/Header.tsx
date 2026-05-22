@@ -3,17 +3,17 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { LayoutGrid, ChevronLeft, RotateCcw, Monitor, Smartphone, Check, Sun, Moon, Undo, Redo } from "lucide-react";
-import { LayoutJSON, useBuilder } from "@arkpad/builder";
+import { PageConfig, useBuilder } from "@arkpad/builder";
 import { useTheme } from "next-themes";
 
 interface HeaderProps {
-  initialLayout: LayoutJSON;
+  initialLayout: PageConfig;
   device: "desktop" | "mobile";
   setDevice: (device: "desktop" | "mobile") => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({ initialLayout, device, setDevice }) => {
-  const { setLayout, undo, redo, past, future } = useBuilder();
+  const { setPageConfig, undo, redo, past, future } = useBuilder();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [resetting, setResetting] = useState(false);
@@ -53,7 +53,7 @@ export const Header: React.FC<HeaderProps> = ({ initialLayout, device, setDevice
 
   const handleReset = () => {
     setResetting(true);
-    setLayout(initialLayout);
+    setPageConfig(initialLayout);
     setTimeout(() => setResetting(false), 600);
   };
 

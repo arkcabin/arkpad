@@ -7,4 +7,5 @@ export * from "./components/Sidebar";
 export * from "./core/schema";
 export * from "./components/BlockRenderer";
 export * from "./components/BlockWrapper";
+export * from "./components/Render";
 export * from "./core/tailwind-container-maps";

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Render, LayoutJSON } from "@arkpad/builder";
+import { Render, NormalizedPageConfig } from "../../../../../../packages/builder/src";
 import { registerDefaultBlocks } from "@arkpad/builder-blocks";
 import Link from "next/link";
 import { ChevronLeft, RefreshCw, Eye } from "lucide-react";
@@ -10,7 +10,7 @@ import { ChevronLeft, RefreshCw, Eye } from "lucide-react";
 registerDefaultBlocks();
 
 export default function PreviewPage() {
-  const [layout, setLayout] = useState<LayoutJSON | null>(null);
+  const [layout, setLayout] = useState<NormalizedPageConfig | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Load layout from LocalStorage and listen for changes across other tabs
@@ -83,7 +83,7 @@ export default function PreviewPage() {
 
       {/* Main Preview Container */}
       <div className="max-w-5xl mx-auto p-8 my-6 bg-white dark:bg-neutral-950 shadow-sm border border-neutral-200 dark:border-neutral-850 rounded-xl">
-        {layout && layout.rows && layout.rows.length > 0 ? (
+        {layout && layout.rootIds && layout.rootIds.length > 0 ? (
           <Render data={layout} />
         ) : (
           <div className="flex flex-col items-center justify-center py-20 text-center text-neutral-450 dark:text-neutral-500">

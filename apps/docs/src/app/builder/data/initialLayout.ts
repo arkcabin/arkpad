@@ -1,3 +1,5 @@
-export const initialLayout = {
-  rows: []
+import type { PageConfig } from "@arkpad/builder";
+
+export const initialLayout: PageConfig = {
+  blocks: [],
 };

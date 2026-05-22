@@ -1,920 +1,112 @@
-@import "tailwindcss";
-@source "../../../packages/react/src";
-@import "@arkpad/core/styles.css";
-
 :root {
-  --bg-main: #ffffff;
-  --bg-canvas: #f8fafc;
-  --bg-editor: #ffffff;
-  --text-main: #0f172a;
-  --text-muted: #64748b;
-  --border: #e2e8f0;
-  --selection: rgba(59, 130, 246, 0.1);
-  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
-
-  --menu-bg: #ffffff;
-  --menu-border: #e5e7eb;
-  --menu-item-hover: #f3f4f6;
-  --menu-item-active-bg: #f3f4f6;
-  --menu-item-active-text: #111827;
-  --menu-item-text: #374151;
-  --menu-dim-text: #9ca3af;
-  --menu-separator: #e5e7eb;
-  --hover-bg: #f1f5f9;
-  --accent: #6366f1;
-  --accent-foreground: #ffffff;
+  color-scheme: dark;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(99, 102, 241, 0.34), transparent 36%),
+    radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.24), transparent 32%),
+    #09090b;
+  color: #f4f4f5;
 }
 
-.dark {
-  --bg-main: #020617;
-  --bg-canvas: #0f172a;
-  --bg-editor: #1e293b;
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  --border: #1e293b;
-  --selection: rgba(99, 102, 241, 0.15);
-
-  --menu-bg: #000000;
-  --menu-border: rgba(255, 255, 255, 0.1);
-  --menu-item-hover: rgba(255, 255, 255, 0.1);
-  --menu-item-active-bg: rgba(255, 255, 255, 0.2);
-  --menu-item-active-text: #ffffff;
-  --menu-item-text: rgba(255, 255, 255, 0.8);
-  --menu-dim-text: rgba(255, 255, 255, 0.4);
-  --menu-separator: rgba(255, 255, 255, 0.1);
-  --hover-bg: rgba(255, 255, 255, 0.1);
-  --accent: #818cf8;
-  --accent-foreground: #ffffff;
+* {
+  box-sizing: border-box;
 }
 
-@layer base {
-  body {
-    background-color: var(--bg-main);
-    color: var(--text-main);
-    font-family: var(--font-sans);
-    @apply antialiased m-0 p-0;
-  }
-}
-
-.arkpad-container {
-  outline: none !important;
-  min-height: 400px;
-  color: var(--text-main) !important;
-  font-size: 16px;
-}
-
-/* Simple flat toolbar */
-.toolbar-btn {
-  @apply p-2 rounded-md transition-all duration-200;
-  color: var(--text-muted);
-}
-
-.toolbar-btn:hover {
-  color: var(--text-main);
-  background-color: var(--selection);
-  transform: translateY(-1px);
-}
-
-.toolbar-btn.active {
-  color: #6366f1;
-  background-color: rgba(99, 102, 241, 0.1);
-}
-
-/* Link Bubble — clean, borderless URL input */
-.ark-link-bubble {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 8px;
-  background: var(--menu-bg);
-  border: 1px solid var(--menu-border);
-  border-radius: 10px;
-  box-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.12),
-    0 1px 4px rgba(0, 0, 0, 0.08);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-.dark .ark-link-bubble {
-  box-shadow:
-    0 4px 24px rgba(0, 0, 0, 0.4),
-    0 1px 4px rgba(0, 0, 0, 0.3);
-}
-.ark-link-bubble-input {
-  width: 200px;
-  font-size: 13px;
-  background: transparent;
-  border: none;
-  outline: none;
-  padding: 4px 0;
-  color: var(--text-main);
-}
-.ark-link-bubble-input::placeholder {
-  color: var(--text-muted);
-  opacity: 0.6;
-}
-.ark-link-bubble-actions {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  flex-shrink: 0;
-}
-.ark-link-bubble-apply {
-  padding: 4px 6px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--accent);
-  background: transparent;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-.ark-link-bubble-apply:hover {
-  background: var(--hover-bg);
-}
-.ark-link-bubble-apply:disabled {
-  opacity: 0.3;
-  cursor: default;
-}
-.ark-link-bubble-remove {
-  padding: 4px;
-  color: var(--text-muted);
-  background: transparent;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.ark-link-bubble-remove:hover {
-  color: #ef4444;
-  background: var(--hover-bg);
-}
-
-/* Placeholder text styling */
-.ark-placeholder {
-  color: var(--text-muted);
-  opacity: 0.6;
-  pointer-events: none;
-  user-select: none;
-  display: inline;
-  line-height: inherit;
-}
-.ark-placeholder:empty {
-  display: none;
-}
-
-/* Hide scrollbars but keep functionality */
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-/* Prose Mirror basic cleanup */
-.prose {
-  @apply max-w-none;
-  color: var(--text-main) !important;
-}
-
-/* Ensure block elements clear floats (for images) */
-.prose > * {
-  clear: both;
-}
-
-.prose h1 {
-  @apply text-4xl font-bold mt-12 mb-6;
-  letter-spacing: -0.025em;
-}
-
-.prose h2 {
-  @apply text-2xl font-bold mt-8 mb-4 border-b border-slate-100 dark:border-slate-800 pb-2;
-  letter-spacing: -0.01em;
-}
-
-.prose h3 {
-  @apply text-xl font-bold mt-7 mb-3 text-slate-800 dark:text-slate-200;
-}
-.prose h4 {
-  @apply text-lg font-bold mt-6 mb-2 text-slate-700 dark:text-slate-300;
-}
-.prose h5 {
-  @apply text-base font-bold mt-5 mb-2 text-slate-600 dark:text-slate-400;
-}
-.prose h6 {
-  @apply text-sm font-bold mt-4 mb-2 uppercase tracking-wider text-slate-500;
-}
-
-.prose h1,
-.prose h2,
-.prose h3,
-.prose h4,
-.prose h5,
-.prose h6 {
-  color: var(--text-main) !important;
-  line-height: 1.3;
-}
-
-.prose strong,
-.prose b {
-  @apply font-bold;
-}
-
-.prose em,
-.prose i {
-  @apply italic;
-}
-
-.prose a,
-.ark-link {
-  color: #2563eb;
-  text-decoration: underline;
-  cursor: pointer;
-}
-.dark .prose a,
-.dark .ark-link {
-  color: #60a5fa;
-}
-.prose a:hover,
-.ark-link:hover {
-  color: #1d4ed8;
-}
-.dark .prose a:hover,
-.dark .ark-link:hover {
-  color: #93c5fd;
-}
-
-.prose p,
-.prose li {
-  @apply mb-4 leading-relaxed;
-  color: var(--text-main) !important;
-}
-
-.prose ul,
-.prose ol {
-  @apply mb-6 pl-6;
-}
-
-.prose ul.task-list {
-  @apply pl-0 list-none;
-}
-
-.prose li.task-item {
-  @apply flex items-start gap-3 mb-2;
-}
-
-.prose li.task-item > div:first-child {
-  @apply mt-1 shrink-0;
-}
-
-.prose li.task-item > div:last-child {
-  @apply flex-1 min-w-0;
-}
-
-.prose li.task-item.checked > div:last-child {
-  @apply line-through text-[var(--text-muted)] opacity-60;
-}
-
-.prose li p {
-  @apply mb-1;
-}
-
-/* Prose code cleanup */
-.prose code {
-  background-color: var(--selection);
-  color: #3b82f6;
-  @apply px-1 rounded-sm font-mono text-[0.9em];
-}
-
-.dark .prose code {
-  color: #60a5fa;
-}
-
-.prose hr {
-  @apply my-6 border-none h-px bg-[var(--border)];
-  opacity: 0.4;
-}
-
-.dark .prose hr {
-  background-color: var(--border);
-}
-
-.prose hr + * {
-  @apply mt-0;
-}
-
-/* Transitions */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-page-in {
-  animation: fadeIn 0.3s ease-out forwards;
-}
-
-/* ── Global Scrollbar for Content ── */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
-}
-
-/* ── Page Builder ─────────────────────────────────────────────── */
-
-.bld-header {
-  @apply h-12 px-6 border-b border-[var(--border)] flex items-center justify-between shrink-0;
-}
-.bld-header-title {
-  @apply text-[11px] font-bold uppercase tracking-widest text-[var(--text-muted)];
-}
-.bld-header-meta {
-  @apply text-[10px] font-mono text-[var(--text-muted)];
-}
-
-.bld-canvas {
-  @apply max-w-3xl mx-auto px-16 py-16;
-}
-
-/* Block */
-.bld-block {
-  @apply relative;
-}
-.bld-body {
-  @apply px-1 py-1;
-}
-.bld-body .arkpad-editor {
-  outline: none !important;
-  min-height: 1.5em;
-}
-
-.arkpad-editor:focus,
-.arkpad-editor-focused,
-.ProseMirror,
-.ProseMirror:focus,
-.ProseMirror-focused {
-  outline: none !important;
-  border: none !important;
-  box-shadow: none !important;
-}
-
-/* Side handle - Hidden for clean UI */
-.bld-handle,
-.bld-handle--visible,
-.ark-block-handle {
-  display: none !important;
-}
-.bld-handle-grip {
-  @apply p-0.5 text-[var(--text-muted)] hover:text-[var(--text-main)] cursor-grab active:cursor-grabbing;
-}
-.bld-handle-delete {
-  @apply p-0.5 text-[var(--text-muted)] hover:text-red-500 transition-colors;
-}
-
-/* Divider */
-.bld-hr {
-  @apply border-t border-[var(--border)] my-2;
-}
-
-/* Columns */
-.bld-cols {
-  @apply grid grid-cols-2 gap-4;
-}
-.bld-col {
-  @apply border border-[var(--border)] p-3 min-h-[40px];
-}
-.bld-col .arkpad-editor {
-  outline: none !important;
-  min-height: 1.5em;
-}
-
-/* Inline add button */
-.bld-add-row {
-  @apply relative flex items-center h-8 opacity-40 hover:opacity-100 transition-opacity duration-200;
-}
-.bld-add-line {
-  @apply flex-1 border-t border-dashed border-[var(--border)];
-}
-.bld-add-btn {
-  @apply mx-2 w-5 h-5 flex items-center justify-center rounded-full border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:border-[var(--text-muted)] transition-colors bg-[var(--bg-main)];
-}
-
-/* Block palette */
-.bld-palette {
-  @apply absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-[var(--bg-main)] border border-[var(--border)] shadow-lg z-50 flex gap-0 p-1;
-  animation: fadeIn 0.1s ease-out;
-}
-.bld-palette-item {
-  @apply flex flex-col items-center gap-1 px-3 py-2 text-[9px] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--selection)] transition-colors whitespace-nowrap;
-}
-
-/* Right sidebar — Block Navigator */
-.bld-nav {
-  @apply w-48 border-l border-[var(--border)] flex flex-col shrink-0 overflow-hidden;
-}
-.bld-nav-header {
-  @apply h-10 px-3 border-b border-[var(--border)] flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)];
-}
-.bld-nav-count {
-  @apply text-[9px] font-mono text-[var(--text-muted)] bg-[var(--selection)] px-1.5 py-0.5;
-}
-.bld-nav-list {
-  @apply flex-1 overflow-y-auto py-1;
-}
-.bld-nav-item {
-  @apply flex items-center gap-2 px-3 py-1.5 text-xs text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--selection)] transition-colors cursor-default;
-}
-.bld-nav-icon {
-  @apply text-[var(--text-muted)] shrink-0;
-}
-.bld-nav-label {
-  @apply flex-1 capitalize text-[11px];
-}
-.bld-nav-delete {
-  @apply opacity-0 p-0.5 text-[var(--text-muted)] hover:text-red-500 transition-all;
-}
-.bld-nav-item:hover .bld-nav-delete {
-  opacity: 1;
-}
-
-/* ── Selection Outlines & Labels ─────────────────────────────── */
-
-.arkpad-editor-container .ark-selected-node {
-  outline: none !important;
-  border: none !important;
-  position: relative;
-  z-index: 1;
-}
-
-/* Ensure editor root has no focus rings */
-.arkpad-editor {
-  outline: none !important;
+html,
+body,
+#root {
+  margin: 0;
   min-height: 100%;
 }
 
-/* Empty Canvas Placeholder */
-.arkpad-editor:empty::before {
-  content: "Drag and drop blocks here";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: #e2e8f0;
-  font-size: 14px;
-  pointer-events: none;
-  text-align: center;
+body {
+  min-height: 100vh;
 }
 
-@keyframes labelIn {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+button,
+input,
+textarea,
+select {
+  font: inherit;
 }
 
-/* ── Premium Drag & Drop UI ──────────────────────────────────── */
-
-.ark-drop-gap {
-  @apply relative w-full h-0 pointer-events-none z-50;
+.app-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
 }
 
-.ark-drop-gap-line {
-  @apply absolute left-0 right-0 h-1 bg-[#2563eb] rounded-full;
-  box-shadow: 0 0 15px rgba(37, 99, 235, 0.5);
-  transform: translateY(-50%);
-  animation: gapPulse 1.5s infinite ease-in-out;
+.hero-card {
+  width: min(720px, 100%);
+  padding: clamp(28px, 5vw, 56px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 28px;
+  background: rgba(9, 9, 11, 0.72);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
 }
 
-@keyframes gapPulse {
-  0%,
-  100% {
-    opacity: 1;
-    transform: translateY(-50%) scaleX(1);
-  }
-  50% {
-    opacity: 0.6;
-    transform: translateY(-50%) scaleX(0.985);
-  }
-}
-
-.arkpad-editor-container.drag-active {
-  @apply ring-4 ring-[#2563eb]/10 transition-all duration-500;
-  transform: scale(0.99);
-  opacity: 0.98;
-}
-
-/* ── Section Selection & Clean UI ────────────────────────────── */
-
-.ark-section {
-  border: 1px solid transparent !important;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-}
-
-/* Subtle dashed border on hover for orientation */
-.ark-section:hover {
-  border: 1px dashed rgba(37, 99, 235, 0.2) !important;
-}
-
-/* Active Section: Blue border and light background */
-.ark-section.has-focus,
-.ark-section.ProseMirror-selectednode {
-  border: 2px solid #2563eb !important;
-  border-style: solid !important;
-  background-color: rgba(37, 99, 235, 0.04) !important;
-  outline: none !important;
-}
-
-/* Tree Structure - Nested Sections */
-.ark-section .ark-section {
-  margin: 1rem !important;
-  border-radius: 4px;
-}
-
-/* Visibility of UI elements (labels, handles) only on focus */
-.ark-section::before,
-.ark-section::after,
-.ark-section [class*="label"],
-.ark-section [class*="badge"],
-.ark-section .SECTION {
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease;
-}
-
-.ark-section.has-focus::before,
-.ark-section.has-focus::after,
-.ark-section.has-focus [class*="label"],
-.ark-section.has-focus [class*="badge"],
-.ark-section.has-focus .SECTION,
-.ark-section.ProseMirror-selectednode::before,
-.ark-section.ProseMirror-selectednode::after,
-.ark-section.ProseMirror-selectednode [class*="label"],
-.ark-section.ProseMirror-selectednode [class*="badge"],
-.ark-section.ProseMirror-selectednode .SECTION {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-/* ============================================
-   ELEMENTOR-LIKE UI ENHANCEMENTS
-   ============================================ */
-
-/* Elementor-style CSS Variables */
-:root {
-  --e-primary: #93003c;
-  --e-primary-light: #fae8ef;
-  --e-secondary: #495157;
-  --e-accent: #93003c;
-  --e-bg-canvas: #f1f3f5;
-  --e-bg-panel: #ffffff;
-  --e-bg-hover: #f5f5f5;
-  --e-border: #e6e8ea;
-  --e-border-dark: #d5d8dc;
-  --e-text: #495157;
-  --e-text-light: #a4afb7;
-  --e-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  --e-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.12);
-}
-
-/* Elementor-style Canvas Background */
-.arkpad-canvas-viewport {
-  background-color: var(--e-bg-canvas) !important;
-  background-image:
-    linear-gradient(45deg, #e5e5e5 25%, transparent 25%),
-    linear-gradient(-45deg, #e5e5e5 25%, transparent 25%),
-    linear-gradient(45deg, transparent 75%, #e5e5e5 75%),
-    linear-gradient(-45deg, transparent 75%, #e5e5e5 75%) !important;
-  background-size: 20px 20px !important;
-  background-position:
-    0 0,
-    0 10px,
-    10px -10px,
-    -10px 0px !important;
-}
-
-.dark .arkpad-canvas-viewport {
-  background-color: #1a1a1a !important;
-  background-image:
-    linear-gradient(45deg, #2a2a2a 25%, transparent 25%),
-    linear-gradient(-45deg, #2a2a2a 25%, transparent 25%),
-    linear-gradient(45deg, transparent 75%, #2a2a2a 75%),
-    linear-gradient(-45deg, transparent 75%, #2a2a2a 75%) !important;
-}
-
-/* Center page on canvas like Elementor */
-.arkpad-canvas-container {
-  background-color: #ffffff;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-  margin: 40px auto;
-  min-height: calc(100vh - 80px);
-}
-
-.dark .arkpad-canvas-container {
-  background-color: #0a0a0a;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-}
-
-/* Elementor-style Selection (Primary Red Color) */
-.arkpad-builder-canvas .ProseMirror .ark-section {
-  border: 1px dashed var(--e-border-dark);
-  transition: all 0.2s ease;
-  position: relative;
-}
-
-.arkpad-builder-canvas .ProseMirror .ark-section:hover {
-  border-color: var(--e-primary);
-  border-style: dashed;
-}
-
-.arkpad-builder-canvas .ProseMirror .ark-section.ProseMirror-selectednode {
-  border-color: var(--e-primary) !important;
-  border-style: solid !important;
-  box-shadow:
-    0 0 0 1px var(--e-primary),
-    0 0 0 4px rgba(147, 0, 60, 0.1) !important;
-}
-
-/* Elementor-style Section Label */
-.arkpad-builder-canvas .ProseMirror .ark-section::before {
-  content: "SECTION";
-  position: absolute;
-  top: -24px;
-  left: 0;
-  background: var(--e-primary);
-  color: white;
-  font-size: 9px;
-  font-weight: 700;
-  padding: 4px 10px;
-  border-radius: 3px 3px 0 0;
-  opacity: 0;
-  transition: all 0.2s ease;
-  pointer-events: none;
-  z-index: 100;
+.eyebrow {
+  margin: 0 0 14px;
+  font-size: 0.8rem;
+  letter-spacing: 0.24em;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: #a5b4fc;
 }
 
-.arkpad-builder-canvas .ProseMirror .ark-section:hover::before,
-.arkpad-builder-canvas .ProseMirror .ark-section.ProseMirror-selectednode::before {
-  opacity: 1;
-  top: -24px;
+h1 {
+  margin: 0;
+  font-size: clamp(3rem, 9vw, 6rem);
+  line-height: 0.95;
+  letter-spacing: -0.06em;
 }
 
-/* Column Styling */
-.arkpad-builder-canvas .ProseMirror [data-type="column"] {
-  border: 1px dashed transparent;
-  min-height: 50px;
-  transition: all 0.2s ease;
+.lede {
+  max-width: 36rem;
+  margin: 20px 0 0;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: rgba(244, 244, 245, 0.78);
 }
 
-.arkpad-builder-canvas .ProseMirror [data-type="column"]:hover {
-  border-color: var(--e-primary);
-  background-color: rgba(147, 0, 60, 0.02);
-}
-
-/* Container Styling */
-.arkpad-builder-canvas .ProseMirror [data-type="container"] {
-  border: 1px dashed transparent;
-  transition: all 0.2s ease;
-}
-
-.arkpad-builder-canvas .ProseMirror [data-type="container"]:hover {
-  border-color: var(--e-primary);
-}
-
-/* Grid Styling */
-.arkpad-builder-canvas .ProseMirror [data-type="grid"] {
-  border: 1px dashed transparent;
-  min-height: 50px;
-  transition: all 0.2s ease;
-}
-
-.arkpad-builder-canvas .ProseMirror [data-type="grid"]:hover {
-  border-color: var(--e-primary);
-}
-
-/* Widget Elements Hover */
-.arkpad-builder-canvas .ProseMirror [data-type="button"],
-.arkpad-builder-canvas .ProseMirror [data-type="card"],
-.arkpad-builder-canvas .ProseMirror [data-type="image"] {
-  position: relative;
-  outline: 1px solid transparent;
-  outline-offset: 2px;
-  transition: all 0.2s ease;
-}
-
-.arkpad-builder-canvas .ProseMirror [data-type="button"]:hover,
-.arkpad-builder-canvas .ProseMirror [data-type="card"]:hover,
-.arkpad-builder-canvas .ProseMirror [data-type="image"]:hover {
-  outline-color: var(--e-primary);
-}
-
-/* Elementor-style Drag & Drop */
-.ark-drop-indicator,
-.ark-drop-gap {
-  z-index: 200 !important;
-}
-
-.ark-drop-indicator-line,
-.ark-drop-gap-line {
-  background: var(--e-primary) !important;
-  box-shadow: 0 0 15px rgba(147, 0, 60, 0.6) !important;
-  height: 4px !important;
-  border-radius: 2px !important;
-  animation: pulse 1.5s infinite !important;
-}
-
-.ark-drop-indicator-line::before,
-.ark-drop-indicator-line::after,
-.ark-drop-gap-line::before,
-.ark-drop-gap-line::after {
-  background: var(--e-primary) !important;
-  width: 12px !important;
-  height: 12px !important;
-  border-radius: 50% !important;
-  box-shadow: 0 0 8px rgba(147, 0, 60, 0.8) !important;
-}
-
-/* Drag Active State */
-.drag-active {
-  background-color: rgba(147, 0, 60, 0.08) !important;
-  transition: background-color 0.3s ease !important;
-}
-
-/* Enhanced Drag Over States */
-.arkpad-builder-canvas .ProseMirror [data-type]:hover {
-  outline-color: var(--e-primary) !important;
-  outline-width: 2px !important;
-  background-color: rgba(147, 0, 60, 0.02) !important;
-  transform: scale(1.01) !important;
-  transition: all 0.2s ease !important;
-}
-
-/* Container Drag Over State */
-.arkpad-builder-canvas .ProseMirror [data-type="container"]:hover {
-  border: 2px dashed var(--e-primary) !important;
-  background-color: rgba(147, 0, 60, 0.03) !important;
-}
-
-/* Drop Animation */
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-    transform: scaleY(1);
-  }
-  50% {
-    opacity: 0.7;
-    transform: scaleY(1.2);
-  }
-}
-
-/* Enhanced Selection Ring */
-.arkpad-builder-canvas .ProseMirror .ark-container.ProseMirror-selectednode {
-  border: 2px solid var(--e-primary) !important;
-  box-shadow:
-    0 0 0 1px var(--e-primary),
-    0 0 0 4px rgba(147, 0, 60, 0.15) !important;
-  animation: selectionGlow 0.3s ease !important;
-}
-
-@keyframes selectionGlow {
-  from {
-    box-shadow:
-      0 0 0 1px var(--e-primary),
-      0 0 0 8px rgba(147, 0, 60, 0.3);
-  }
-  to {
-    box-shadow:
-      0 0 0 1px var(--e-primary),
-      0 0 0 4px rgba(147, 0, 60, 0.15);
-  }
-}
-
-/* Elementor-style Empty State */
-.arkpad-page-root-container:empty::before,
-.arkpad-builder-canvas .ProseMirror:empty::before {
-  content: "Drag widgets here";
+.action-row {
   display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.action-pill {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  height: 200px;
-  color: var(--e-text-light);
-  font-size: 14px;
-  font-style: italic;
-  border: 2px dashed var(--e-border);
-  border-radius: 4px;
-  margin: 20px;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fafafa;
 }
 
-/* Responsive Device Preview Styles */
-.arkpad-canvas-container[data-device="desktop"] {
-  max-width: 100%;
+.action-pill.muted {
+  color: rgba(250, 250, 250, 0.72);
 }
 
-.arkpad-canvas-container[data-device="tablet"] {
-  max-width: 768px;
-  border-radius: 4px;
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #34d399, #22c55e);
+  box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.12);
 }
 
-.arkpad-canvas-container[data-device="mobile"] {
-  max-width: 375px;
-  border-radius: 8px;
-}
-
-/* Elementor-style Add New Section Placeholder */
-.arkpad-builder-canvas .ProseMirror .ark-section:empty::after {
-  content: "Click to edit or drag widgets here";
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 40px;
-  color: var(--e-text-light);
-  font-size: 13px;
-  border: 1px dashed var(--e-border);
-  border-radius: 4px;
-  margin: 20px;
-  min-height: 100px;
-}
-
-/* Better Focus States */
-.arkpad-builder-canvas .ProseMirror:focus {
-  outline: none;
-}
-
-/* Elementor-style Context Menu Animation */
-.arkpad-smart-bar {
-  animation: slideDown 0.2s ease;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
+@media (max-width: 640px) {
+  .hero-card {
+    border-radius: 22px;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+
+  .action-pill {
+    width: 100%;
+    justify-content: center;
   }
-}
-
-/* Toolbar Button Active State */
-.toolbar-btn {
-  transition: all 0.2s ease;
-}
-
-.toolbar-btn:hover {
-  background-color: var(--e-bg-hover);
-}
-
-.toolbar-btn.active {
-  background-color: var(--e-primary-light);
-  color: var(--e-primary);
-}
-
-/* Elementor-style Section Handle (resize handle) */
-.ark-section::after {
-  content: "";
-  position: absolute;
-  bottom: -5px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 40px;
-  height: 4px;
-  background: var(--e-primary);
-  border-radius: 2px;
-  opacity: 0;
-  transition: all 0.2s ease;
-}
-
-.ark-section:hover::after,
-.ark-section.ProseMirror-selectednode::after {
-  opacity: 1;
 }

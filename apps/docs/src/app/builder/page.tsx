@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { BuilderProvider, Canvas, Sidebar, useBuilder, safeValidateLayout } from "@arkpad/builder";
+import { BuilderProvider, Canvas, Sidebar, useBuilder } from "@arkpad/builder";
 import { registerDefaultBlocks } from "@arkpad/builder-blocks";
 import { Header } from "./components/Header";
 import { initialLayout } from "./data/initialLayout";
@@ -11,7 +11,7 @@ registerDefaultBlocks();
 
 // Auto-sync layout changes from Zustand state to LocalStorage so the preview tab picks it up
 const LocalStorageSync = () => {
-  const { layout } = useBuilder();
+  const layout = useBuilder((state) => state.pageConfig);
 
   React.useEffect(() => {
     if (layout) {
@@ -23,8 +23,7 @@ const LocalStorageSync = () => {
 };
 
 export default function BuilderDemoPage() {
-  // Validate layout config using Zod schema prior to loading
-  const validatedLayout = safeValidateLayout(initialLayout);
+  const validatedLayout = initialLayout;
 
   const [mounted, setMounted] = React.useState(false);
 
@@ -48,7 +47,7 @@ export default function BuilderDemoPage() {
   }
 
   return (
-    <BuilderProvider initialLayout={validatedLayout}>
+    <BuilderProvider initialConfig={validatedLayout}>
       <LocalStorageSync />
       <div className="flex flex-col h-screen w-full bg-white dark:bg-black text-neutral-800 dark:text-neutral-200 overflow-hidden font-sans transition-colors duration-200">
         {/* Modular Premium Header */}
@@ -60,9 +59,14 @@ export default function BuilderDemoPage() {
             <div
               className={`flex-1 flex flex-col transition-all duration-300 ease-in-out bg-white dark:bg-black ${
                 device === "mobile"
-                  ? "max-w-[390px] w-[390px] border-x border-neutral-200 dark:border-neutral-800 shadow-2xl my-4 rounded-[2px]"
+                  ? "border-x border-neutral-200 dark:border-neutral-800 shadow-2xl my-4"
                   : "w-full"
               }`}
+              style={
+                device === "mobile"
+                  ? { maxWidth: "390px", width: "390px", borderRadius: "2px" }
+                  : undefined
+              }
             >
               <Canvas />
             </div>
