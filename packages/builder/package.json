@@ -3,6 +3,19 @@
   "version": "1.0.1",
   "description": "Core layout and drag-and-drop grid engine for the Arkpad builder.",
   "author": "ArkCabin",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arkcabin/arkpad.git",
+    "directory": "packages/builder"
+  },
+  "bugs": {
+    "url": "https://github.com/arkcabin/arkpad/issues"
+  },
+  "homepage": "https://github.com/arkcabin/arkpad/tree/main/packages/builder#readme",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "type": "module",
   "exports": {
     ".": {
