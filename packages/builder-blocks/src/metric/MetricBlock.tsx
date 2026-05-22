@@ -3,12 +3,14 @@ import { BlockComponentProps, BlockConfig } from "@arkpad/builder";
 import { TrendingUp, TrendingDown, Minus, Hash } from "lucide-react";
 import clsx from "clsx";
 
-export const MetricBlock: React.FC<BlockComponentProps> = ({ properties }) => {
-  const title = properties.title || "Monthly Sales";
-  const value = properties.value || "$0.00";
-  const change = properties.change || "0%";
-  const trend = properties.trend || "neutral";
-  const suffix = properties.suffix || "";
+export const MetricBlock: React.FC<BlockComponentProps> = ({
+  props,
+}) => {
+  const title = props.title || "Monthly Sales";
+  const value = props.value || "$0.00";
+  const change = props.change || "0%";
+  const trend = props.trend || "neutral";
+  const suffix = props.suffix || "";
 
   return (
     <div className="flex flex-col gap-1 text-left select-none">
@@ -56,7 +58,7 @@ export const MetricBlockConfig: BlockConfig = {
   description: "Display numerical KPIs, growth trends, and statistics.",
   icon: Hash,
   component: MetricBlock,
-  defaultProperties: {
+  defaultProps: {
     title: "Active Users",
     value: "14,892",
     change: "+8.3%",

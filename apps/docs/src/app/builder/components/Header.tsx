@@ -8,13 +8,14 @@ import { useTheme } from "next-themes";
 
 interface HeaderProps {
   initialLayout: LayoutJSON;
+  device: "desktop" | "mobile";
+  setDevice: (device: "desktop" | "mobile") => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ initialLayout }) => {
+export const Header: React.FC<HeaderProps> = ({ initialLayout, device, setDevice }) => {
   const { setLayout, undo, redo, past, future } = useBuilder();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
   const [resetting, setResetting] = useState(false);
 
   // Sync mounting state to avoid SSR hydration mismatches with next-themes icons

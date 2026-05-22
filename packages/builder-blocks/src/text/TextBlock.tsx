@@ -26,14 +26,14 @@ function useDebouncedCallback<T extends (...args: any[]) => void>(
 }
 
 export const TextBlock: React.FC<BlockComponentProps> = ({
-  properties,
-  updateProperties,
-  isEditing
+  props,
+  isEditing,
+  updateBlock
 }) => {
-  const initialContent = useRef(properties.content || "<p>Start typing here...</p>");
+  const initialContent = useRef(props.content || "<p>Start typing here...</p>");
 
   const debouncedUpdate = useDebouncedCallback((html: string, markdown: string) => {
-    updateProperties({ content: html, markdown });
+    updateBlock({ props: { content: html, markdown } });
   }, 350);
 
   const editor = useArkpadEditor({
@@ -131,7 +131,7 @@ export const TextBlockConfig: BlockConfig = {
   description: "Standard document writing block with headings and lists.",
   icon: FileText,
   component: TextBlock,
-  defaultProperties: {
+  defaultProps: {
     content: "<p>Enter rich text here...</p>",
     markdown: "Enter rich text here..."
   },
