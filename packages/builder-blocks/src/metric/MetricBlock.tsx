@@ -4,12 +4,7 @@ import { TrendingUp, TrendingDown, Minus, Hash } from "lucide-react";
 import clsx from "clsx";
 
 export const MetricBlock: React.FC<BlockComponentProps> = ({
-  id: _id,
   props,
-  styles: _styles,
-  interactions: _interactions,
-  isEditing: _isEditing,
-  updateBlock: _updateBlock,
 }) => {
   const title = props.title || "Monthly Sales";
   const value = props.value || "$0.00";

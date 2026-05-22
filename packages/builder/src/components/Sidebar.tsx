@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useBuilder, isBlockInsideForm } from "../core/BuilderContext";
 import { blockRegistry } from "../core/registry";
 import { exportToJSON, exportToMarkdown } from "../core/export";
-import { PageBlock, NormalizedPageConfig, BlockStyles, BlockInteraction } from "../core/types";
+import { PageBlock, NormalizedPageConfig } from "../core/types";
 import {
   FileJson,
   FileText,
@@ -12,9 +12,7 @@ import {
   Layers,
   Settings,
   Trash2,
-  LayoutGrid,
   Paintbrush,
-  Columns,
   Eye,
   EyeOff,
   ChevronDown,

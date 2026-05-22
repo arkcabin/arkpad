@@ -1,10 +1,9 @@
 import React, { createContext, useContext, useRef, useState } from "react";
 import { useStore } from "zustand";
-import { PageBlock, PageConfig, NormalizedPageConfig } from "./types";
+import { PageBlock, PageConfig } from "./types";
 import { blockRegistry } from "./registry";
 import {
   DndContext,
-  closestCenter,
   KeyboardSensor,
   PointerSensor,
   useSensor,

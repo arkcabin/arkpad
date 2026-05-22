@@ -5,7 +5,6 @@ import { Minus } from "lucide-react";
 export const FormFieldBlock: React.FC<BlockComponentProps> = ({
   id,
   props,
-  styles: _styles,
   isEditing,
 }) => {
   const {

@@ -4,10 +4,8 @@ import { Image, Video } from "lucide-react";
 import clsx from "clsx";
 
 export const MediaBlock: React.FC<BlockComponentProps> = ({
-  id: _id,
   props = {},
   styles = {},
-  isEditing: _isEditing,
 }) => {
   const {
     src = "",

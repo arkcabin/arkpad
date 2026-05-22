@@ -3,12 +3,7 @@ import { BlockComponentProps, BlockConfig } from "@arkpad/builder";
 import { BarChart3 } from "lucide-react";
 
 export const ChartBlock: React.FC<BlockComponentProps> = ({
-  id: _id,
   props,
-  styles: _styles,
-  interactions: _interactions,
-  isEditing: _isEditing,
-  updateBlock: _updateBlock,
 }) => {
   const title = props.title || "Weekly Analytics";
   const type = props.chartType || "bar";

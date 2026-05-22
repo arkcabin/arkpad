@@ -4,7 +4,6 @@ import { Heading } from "lucide-react";
 import clsx from "clsx";
 
 export const HeaderBlock: React.FC<BlockComponentProps> = ({
-  id: _id,
   props = {},
   styles = {},
 }) => {

@@ -30,9 +30,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = React.memo(function B
   forceViewMode,
   parentId,
 }) {
-  const selectBlock = useBuilder((s) => s.selectBlock);
   const updateBlock = useBuilder((s) => s.updateBlock);
-  const currentPageSlug = useBuilder((s) => s.currentPageSlug);
   const context = useBlockRendererContext();
   
   const blocksFromStore = useBuilder((s) => s.pageConfig?.blocks);

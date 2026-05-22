@@ -4,12 +4,10 @@ import { Play } from "lucide-react";
 import clsx from "clsx";
 
 export const ButtonBlock: React.FC<BlockComponentProps> = ({
-  id: _id,
   props = {},
   styles = {},
   interactions = [],
   isEditing,
-  updateBlock: _updateBlock,
 }) => {
   const {
     text = "Button",

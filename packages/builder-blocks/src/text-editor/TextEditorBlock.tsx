@@ -22,7 +22,6 @@ function useDebounce<T extends (...args: any[]) => void>(callback: T, delay: num
 }
 
 export const TextEditorBlock: React.FC<BlockComponentProps> = ({
-  id,
   props = {},
   styles = {},
   isEditing,

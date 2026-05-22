@@ -4,10 +4,8 @@ import { FileText } from "lucide-react";
 import clsx from "clsx";
 
 export const ContentBlock: React.FC<BlockComponentProps> = ({
-  id: _id,
   props = {},
   styles = {},
-  isEditing: _isEditing,
 }) => {
   const {
     content = "<p>Standard prose writing content slot. Enter HTML or plain text strings.</p>",

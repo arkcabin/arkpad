@@ -31,7 +31,6 @@ export const LayoutBlock: React.FC<BlockComponentProps> = ({
   props,
   styles = {},
   children,
-  isEditing: _isEditing,
 }) => {
   const { addBlock, updateBlock } = useBuilder();
   const columns = Math.max(1, Math.trunc(Number(props.columns) || 1));

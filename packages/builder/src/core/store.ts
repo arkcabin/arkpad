@@ -1,6 +1,5 @@
 import { createStore } from "zustand";
-import { PageBlock, PageConfig, NormalizedPageConfig, BlockProperties } from "./types";
-import { blockRegistry } from "./registry";
+import { PageBlock, PageConfig, NormalizedPageConfig } from "./types";
 
 // Unique ID Generator
 export const generateId = () => Math.random().toString(36).substring(2, 9);
@@ -255,7 +254,7 @@ export const createBuilderStore = (initialConfig?: PageConfig) => {
       updatePageConfig(set, get, (pageConfig) => {
         const id = block.id;
         const newBlocks = { ...pageConfig.blocks };
-        let newRootIds = [...pageConfig.rootIds];
+        const newRootIds = [...pageConfig.rootIds];
 
         // Spread block first, then override parentId and children (no duplicate keys)
         newBlocks[id] = {
@@ -428,7 +427,7 @@ export const createBuilderStore = (initialConfig?: PageConfig) => {
 
       updatePageConfig(set, get, (currentConfig) => {
         const newBlocks = { ...currentConfig.blocks };
-        let newRootIds = [...currentConfig.rootIds];
+        const newRootIds = [...currentConfig.rootIds];
         const blockToDuplicate = newBlocks[id];
         if (!blockToDuplicate) return currentConfig;
         const parentId = blockToDuplicate.parentId;

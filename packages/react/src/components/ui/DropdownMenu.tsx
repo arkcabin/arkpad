@@ -182,20 +182,8 @@ function DropdownItem({
 
   const handleClick = useCallback(() => {
     if (command && editor) {
-      const cmd = editor.extensionManager.commands[command];
-      if (cmd) {
-        const cmdArgs = args.length > 0 ? args : attrs ? [attrs] : [];
-        const fn = (cmd as any)(...cmdArgs);
-        if (typeof fn === "function") {
-          fn({
-            state: editor.getView().state,
-            dispatch: (tr: any) => editor.getView().dispatch(tr),
-            view: editor.getView(),
-            editor,
-            chain: () => editor.chain(),
-          });
-        }
-      }
+      const cmdArgs = args.length > 0 ? args : attrs ? [attrs] : [];
+      editor.runCommand(command, ...cmdArgs);
     }
     setOpen(false);
   }, [command, args, attrs, editor, setOpen]);

@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { MoreHorizontal, Trash2, Eye, EyeOff, Copy } from "lucide-react";
+import { Trash2, Eye, EyeOff, Copy } from "lucide-react";
 import { useBuilder } from "../core/BuilderContext";
 import { toMarginSideTailwind, toMarginTailwind } from "../core/tailwind-container-maps";
-import { PageBlock, BlockStyles } from "../core/types";
+import { BlockStyles } from "../core/types";
 
 interface BlockWrapperProps {
   id: string;
@@ -19,37 +19,29 @@ interface BlockWrapperProps {
 interface BlockControlsProps {
   enabled: boolean;
   id: string;
-  isOpen: boolean;
   label?: string;
   icon?: React.ComponentType<{ className?: string }>;
   wrapperRef: React.RefObject<HTMLDivElement | null>;
   controlsRef: React.RefObject<HTMLDivElement | null>;
   setHoveredBlockId: (id: string | null) => void;
-  setIsOpen: (open: boolean) => void;
   onDelete: () => void;
   onDuplicate: () => void;
   onToggleVisibility: () => void;
   style?: React.CSSProperties;
-  dock?: "top" | "inside" | "bottom" | "free";
-  edge?: "left" | "right" | "none";
 }
 
 function BlockControls({
   enabled,
   id,
-  isOpen,
   label,
   icon: Icon,
   wrapperRef,
   controlsRef,
   setHoveredBlockId,
-  setIsOpen,
   onDelete,
   onDuplicate,
   onToggleVisibility,
   style,
-  dock = "free",
-  edge = "none",
 }: BlockControlsProps) {
   const selectBlock = useBuilder((s) => s.selectBlock);
   const hoveredBlockId = useBuilder((s) => s.hoveredBlockId);
@@ -128,7 +120,6 @@ export function BlockWrapper({
   enabled = true,
   label,
   icon,
-  index,
   styles,
 }: BlockWrapperProps) {
   const removeBlock = useBuilder((s) => s.removeBlock);
@@ -139,8 +130,6 @@ export function BlockWrapper({
 
   const isSelected = useBuilder((s) => s.selectedBlockId === id);
   const isHovered = useBuilder((s) => s.hoveredBlockId === id);
-  const [isOpen, setIsOpen] = useState(false);
-
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const controlsRef = useRef<HTMLDivElement | null>(null);
   const [controlsStyle, setControlsStyle] = useState<React.CSSProperties>({
@@ -148,9 +137,6 @@ export function BlockWrapper({
     top: -10000,
     visibility: "hidden",
   });
-  const [dockMode, setDockMode] = useState<"top" | "inside" | "bottom" | "free">("free");
-  const [edgeMode, setEdgeMode] = useState<"left" | "right" | "none">("none");
-
   const handleSelect = (e: React.MouseEvent) => {
     e.stopPropagation();
     selectBlock(id);
@@ -158,7 +144,6 @@ export function BlockWrapper({
 
   const handleDelete = () => {
     removeBlock(id);
-    setIsOpen(false);
   };
 
   const handleDuplicate = () => {
@@ -322,19 +307,15 @@ export function BlockWrapper({
             <BlockControls
               enabled={enabled}
               id={id}
-              isOpen={isOpen}
               label={label}
               icon={icon}
               wrapperRef={wrapperRef}
               controlsRef={controlsRef}
               setHoveredBlockId={setHoveredBlockId}
-              setIsOpen={setIsOpen}
               onDelete={handleDelete}
               onDuplicate={handleDuplicate}
               onToggleVisibility={toggleVisibility}
               style={controlsStyle}
-              dock={dockMode}
-              edge={edgeMode}
             />,
             document.body
           )

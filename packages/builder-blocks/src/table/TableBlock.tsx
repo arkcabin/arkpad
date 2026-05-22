@@ -28,11 +28,9 @@ const DEFAULT_COLUMNS = [
 ];
 
 export const TableBlock: React.FC<BlockComponentProps> = ({
-  id,
   props = {},
   styles = {},
   isEditing,
-  updateBlock,
 }) => {
   const {
     titleText = "Records List",
@@ -53,7 +51,7 @@ export const TableBlock: React.FC<BlockComponentProps> = ({
       try {
         const parsed = JSON.parse(columnsJson);
         if (Array.isArray(parsed)) return parsed;
-      } catch (e) {
+      } catch {
         // Fallback silently to default
       }
     }

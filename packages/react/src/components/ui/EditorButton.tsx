@@ -68,21 +68,7 @@ export const EditorButton: React.FC<EditorButtonProps> = ({
       onMouseDown={(e) => e.preventDefault()}
       onClick={() => {
         if (!editor) return;
-        const cmd = editor.extensionManager.commands[command];
-        if (cmd) {
-          const fn = (cmd as any)(...(args as any[]));
-          if (typeof fn === "function") {
-            const view = editor.getView();
-            fn({
-              state: view.state,
-              tr: view.state.tr,
-              dispatch: (tr: any) => view.dispatch(tr),
-              view,
-              editor,
-              chain: () => editor.chain(),
-            });
-          }
-        }
+        editor.runCommand(command, ...(args as any[]));
       }}
       disabled={!canRun || !!props.disabled || !editor}
       className={`${className} ${isActive ? activeClassName : ""}`.trim()}

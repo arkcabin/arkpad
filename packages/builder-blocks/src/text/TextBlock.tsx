@@ -26,10 +26,7 @@ function useDebouncedCallback<T extends (...args: any[]) => void>(
 }
 
 export const TextBlock: React.FC<BlockComponentProps> = ({
-  id,
   props,
-  styles,
-  interactions,
   isEditing,
   updateBlock
 }) => {

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { PageBlock, NormalizedPageConfig, PageConfig } from "./types";
+import { PageBlock, NormalizedPageConfig } from "./types";
 
 /**
  * Zod schema to validate Block Styles.
