@@ -3,6 +3,19 @@
   "version": "1.0.2",
   "description": "Default blocks and widgets library for the Arkpad builder.",
   "author": "ArkCabin",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arkcabin/arkpad.git",
+    "directory": "packages/builder-blocks"
+  },
+  "bugs": {
+    "url": "https://github.com/arkcabin/arkpad/issues"
+  },
+  "homepage": "https://github.com/arkcabin/arkpad/tree/main/packages/builder-blocks#readme",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "type": "module",
   "exports": {
     ".": {
