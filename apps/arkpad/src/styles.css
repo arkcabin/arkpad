@@ -261,6 +261,7 @@ button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
   width: 34px;
   height: 32px;
   border: 0;
@@ -447,7 +448,152 @@ div[data-arkpad-ignore="true"][style*="position: fixed"] button.active {
 
 .editor-surface .ProseMirror ul,
 .editor-surface .ProseMirror ol {
-  padding-left: 1.5rem;
+  padding-left: 1.75rem;
+  margin: 0.5em 0 1em;
+}
+
+.editor-surface .ProseMirror ul {
+  list-style-type: disc;
+}
+
+.editor-surface .ProseMirror ul ul {
+  list-style-type: circle;
+}
+
+.editor-surface .ProseMirror ul ul ul {
+  list-style-type: square;
+}
+
+.editor-surface .ProseMirror ol {
+  list-style-type: decimal;
+}
+
+.editor-surface .ProseMirror ol ol {
+  list-style-type: lower-alpha;
+}
+
+.editor-surface .ProseMirror li {
+  margin: 0.25em 0;
+}
+
+.editor-surface .ProseMirror table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.25em 0;
+  table-layout: fixed;
+}
+
+.editor-surface .ProseMirror th,
+.editor-surface .ProseMirror td {
+  position: relative;
+  padding: 8px 12px;
+  border: 1px solid var(--paper-border);
+  vertical-align: top;
+  min-width: 40px;
+}
+
+.editor-surface .ProseMirror th {
+  background: rgba(37, 99, 235, 0.06);
+  font-weight: 600;
+  text-align: left;
+}
+
+.editor-surface .ProseMirror .selectedCell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(37, 99, 235, 0.12);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.editor-surface .ProseMirror .column-resize-handle {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: #2563eb;
+  cursor: col-resize;
+  z-index: 20;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.editor-surface .ProseMirror td:hover .column-resize-handle,
+.editor-surface .ProseMirror th:hover .column-resize-handle {
+  opacity: 1;
+}
+
+.editor-surface .ProseMirror .tableWrapper {
+  overflow-x: auto;
+  margin: 1.25em 0;
+}
+
+.editor-surface .ProseMirror code {
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: rgba(15, 23, 42, 0.06);
+  font-family: 'Courier New', monospace;
+  font-size: 0.88em;
+}
+
+.editor-surface .ProseMirror pre {
+  padding: 1em 1.25em;
+  border-radius: 8px;
+  background: #1e293b;
+  color: #e2e8f0;
+  font-family: 'Courier New', monospace;
+  font-size: 0.88em;
+  overflow-x: auto;
+  margin: 1.25em 0;
+}
+
+.editor-surface .ProseMirror pre code {
+  padding: 0;
+  background: transparent;
+  color: inherit;
+}
+
+.editor-surface .ProseMirror hr {
+  border: none;
+  border-top: 2px solid var(--paper-border);
+  margin: 2em 0;
+}
+
+.editor-surface .ProseMirror input[type="checkbox"] {
+  margin-right: 6px;
+}
+
+.editor-surface .ProseMirror .task-list-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  list-style: none;
+}
+
+.editor-surface .ProseMirror ul[data-type="taskList"] {
+  padding-left: 0;
+}
+
+.editor-surface .ProseMirror a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.editor-surface .ProseMirror mark {
+  border-radius: 3px;
+  padding: 1px 2px;
+}
+
+.editor-surface .ProseMirror sup {
+  font-size: 0.72em;
+  vertical-align: super;
+}
+
+.editor-surface .ProseMirror sub {
+  font-size: 0.72em;
+  vertical-align: sub;
 }
 
 .loader-text {

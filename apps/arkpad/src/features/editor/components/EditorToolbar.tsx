@@ -1,6 +1,7 @@
 import React from "react";
-import { useArkpadContext } from "@arkpad/react";
+import { useArkpadContext, useEditorState } from "@arkpad/react";
 import { EditorButton } from "@arkpad/react";
+import type { ArkpadEditorAPI } from "@arkpad/core";
 import {
   Bold,
   Italic,
@@ -27,6 +28,11 @@ import {
   Youtube,
   Image,
   Pilcrow,
+  Table,
+  TableRowsSplit,
+  TableColumnsSplit,
+  Trash2,
+  RowsIcon,
 } from "lucide-react";
 
 function Sep() {
@@ -165,6 +171,95 @@ function TextColorButton() {
   );
 }
 
+function TableButton() {
+  const editor = useArkpadContext();
+  return (
+    <button
+      type="button"
+      className="tool-button"
+      title="Insert table"
+      onClick={() => {
+        if (!editor) return;
+        editor.runCommand("insertTable", { rows: 3, cols: 3, withHeaderRow: true });
+      }}
+    >
+      <Table className="tool-icon" />
+    </button>
+  );
+}
+
+function TableContextControls() {
+  const editor = useArkpadContext();
+  const selectInTable = React.useCallback((s: ArkpadEditorAPI) => s.isActive("table"), []);
+  const inTable = useEditorState(editor, selectInTable);
+
+  if (!inTable) return null;
+
+  return (
+    <>
+      <Sep />
+      <button
+        type="button"
+        className="tool-button"
+        title="Add row before"
+        onClick={() => editor?.runCommand("addRowBefore")}
+      >
+        <RowsIcon className="tool-icon" style={{ transform: "rotate(180deg)" }} />
+      </button>
+      <button
+        type="button"
+        className="tool-button"
+        title="Add row after"
+        onClick={() => editor?.runCommand("addRowAfter")}
+      >
+        <RowsIcon className="tool-icon" />
+      </button>
+      <button
+        type="button"
+        className="tool-button"
+        title="Delete row"
+        onClick={() => editor?.runCommand("deleteRow")}
+      >
+        <TableRowsSplit className="tool-icon" />
+      </button>
+      <Sep />
+      <button
+        type="button"
+        className="tool-button"
+        title="Add column before"
+        onClick={() => editor?.runCommand("addColumnBefore")}
+      >
+        <TableColumnsSplit className="tool-icon" style={{ transform: "rotate(90deg)" }} />
+      </button>
+      <button
+        type="button"
+        className="tool-button"
+        title="Add column after"
+        onClick={() => editor?.runCommand("addColumnAfter")}
+      >
+        <TableColumnsSplit className="tool-icon" style={{ transform: "rotate(-90deg)" }} />
+      </button>
+      <button
+        type="button"
+        className="tool-button"
+        title="Delete column"
+        onClick={() => editor?.runCommand("deleteColumn")}
+      >
+        <TableColumnsSplit className="tool-icon" />
+      </button>
+      <Sep />
+      <button
+        type="button"
+        className="tool-button"
+        title="Delete table"
+        onClick={() => editor?.runCommand("deleteTable")}
+      >
+        <Trash2 className="tool-icon" />
+      </button>
+    </>
+  );
+}
+
 export function EditorToolbar() {
   return (
     <div className="toolbar">
@@ -276,6 +371,8 @@ export function EditorToolbar() {
       {/* Insert */}
       <ImageButton />
       <YoutubeButton />
+      <TableButton />
+      <TableContextControls />
     </div>
   );
 }
