@@ -7,6 +7,7 @@ interface DropdownContextType {
   setOpen: (v: boolean | ((prev: boolean) => boolean)) => void;
   triggerRef: React.RefObject<HTMLDivElement | null>;
   contentRef: React.RefObject<HTMLDivElement | null>;
+  lastSelectionRef: React.RefObject<{ from: number; to: number } | null>;
   layout: "vertical" | "horizontal";
 }
 
@@ -42,6 +43,7 @@ function DropdownRoot({ children, layout = "vertical" }: DropdownMenuProps) {
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLDivElement | null>(null);
   const contentRef = useRef<HTMLDivElement | null>(null);
+  const lastSelectionRef = useRef<{ from: number; to: number } | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -67,7 +69,9 @@ function DropdownRoot({ children, layout = "vertical" }: DropdownMenuProps) {
   }, [open]);
 
   return (
-    <DropdownContext.Provider value={{ open, setOpen, triggerRef, contentRef, layout }}>
+    <DropdownContext.Provider
+      value={{ open, setOpen, triggerRef, contentRef, lastSelectionRef, layout }}
+    >
       {children}
     </DropdownContext.Provider>
   );
@@ -168,7 +172,7 @@ function DropdownItem({
   const ctx = useContext(DropdownContext);
   const editor = useArkpadContext();
   if (!ctx) throw new Error("DropdownItem must be used inside DropdownMenu");
-  const { setOpen, layout } = ctx;
+  const { setOpen, layout, lastSelectionRef } = ctx;
   const [isActive, setIsActive] = useState(false);
 
   useEffect(() => {
@@ -183,15 +187,24 @@ function DropdownItem({
   const handleClick = useCallback(() => {
     if (command && editor) {
       const cmdArgs = args.length > 0 ? args : attrs ? [attrs] : [];
+      if (lastSelectionRef.current) {
+        editor.setSelection(lastSelectionRef.current);
+      }
+      editor.focus();
       editor.runCommand(command, ...cmdArgs);
     }
     setOpen(false);
-  }, [command, args, attrs, editor, setOpen]);
+  }, [command, args, attrs, editor, setOpen, lastSelectionRef]);
 
   return (
     <button
       type="button"
-      onMouseDown={(e) => e.preventDefault()}
+      onMouseDown={(e) => {
+        e.preventDefault();
+        if (editor) {
+          lastSelectionRef.current = editor.getSelection();
+        }
+      }}
       onClick={handleClick}
       data-arkpad-ignore="true"
       className={`text-xs rounded transition-colors whitespace-nowrap ${

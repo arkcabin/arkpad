@@ -67,8 +67,10 @@ export const EditorButton: React.FC<EditorButtonProps> = ({
       type="button"
       onMouseDown={(e) => e.preventDefault()}
       onClick={() => {
+        console.log("[Arkpad EditorButton] clicked", { command, args, hasEditor: !!editor, canRun, isActive });
         if (!editor) return;
-        editor.runCommand(command, ...(args as any[]));
+        const result = editor.runCommand(command, ...(args as any[]));
+        console.log("[Arkpad EditorButton] runCommand result:", result);
       }}
       disabled={!canRun || !!props.disabled || !editor}
       className={`${className} ${isActive ? activeClassName : ""}`.trim()}
