@@ -1,6 +1,6 @@
 {
   "name": "@arkpad/builder-blocks",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Default blocks and widgets library for the Arkpad builder.",
   "author": "ArkCabin",
   "repository": {

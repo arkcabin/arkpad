@@ -1,5 +1,15 @@
 # @arkpad/builder
 
+## 1.0.3
+
+### Patch Changes
+
+- ### ✨ Features
+  - update package.json with repository, bugs, homepage, and publishConfig details (e021f79) by Vartik Anand
+
+  ### 📦 Others
+  - Merge pull request #8 from arkcabin/feat/builder (fddb175) by Vartik Anand
+
 ## 1.0.2
 
 ### Patch Changes
