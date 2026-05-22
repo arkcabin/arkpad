@@ -225,9 +225,6 @@ export function BlockWrapper({
       if (top < boundsRect.top + pad) {
         // Place inside if top is cut off
         top = wrapperRect.top + pad;
-        setDockMode("inside");
-      } else {
-        setDockMode("top");
       }
 
       let left = wrapperRect.left;
