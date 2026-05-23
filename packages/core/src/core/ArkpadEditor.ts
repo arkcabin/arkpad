@@ -186,6 +186,29 @@ export class ArkpadEditor implements IArkpadEditor {
 
   public runCommand(name: string, ...args: any[]): any {
     if (this.destroyed) return false;
+
+    // Table extension commands bypass governance + Shadow Engine (double-wrap).
+    // prosemirror-tables validates internally; the Shadow Engine's merge()
+    // silently fails on CellSelection-aware steps from table structure changes.
+    const ext = this.extensionManager.commandToExtension.get(name);
+    if (ext && (ext as any).name === "table") {
+      const rawCommand = this.extensionManager.commands[name];
+      if (!rawCommand) return false;
+      const result = (rawCommand as any)(...args);
+      if (typeof result === "function") {
+        return result({
+          state: this.view.state,
+          dispatch: (tr: any) => {
+            if (tr.steps.length > 0 || tr.selectionSet) this.view.dispatch(tr);
+          },
+          view: this.view,
+          editor: this,
+          chain: () => this.chain(),
+        } as any);
+      }
+      return !!result;
+    }
+
     if (!this.isCommandAllowed(name)) return false;
 
     // Using chain() ensures we use the Shadow Engine and collect Telemetry
