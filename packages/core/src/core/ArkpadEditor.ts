@@ -560,6 +560,9 @@ export class ArkpadEditor implements IArkpadEditor {
     const ext = this.extensionManager.commandToExtension.get(name);
     if (state.schema.marks[name] || (ext && (ext as any).config?.addMarks)) return true;
 
+    // Table extension commands manage their own structural constraints via prosemirror-tables.
+    if (ext && (ext as any).name === "table") return true;
+
     let targetRole = NodeRole.CONTENT;
     if (ext && ext.role !== undefined) targetRole = ext.role;
     else {
