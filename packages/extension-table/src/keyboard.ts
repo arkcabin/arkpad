@@ -6,6 +6,16 @@ import type { ArkpadEditor } from "@arkpad/core";
 import { findParentNode } from "@arkpad/core";
 
 export const keyboardShortcuts = {
+  Backspace: (state: EditorState) => {
+    if (!state.selection.empty) return false;
+
+    const { $from } = state.selection;
+    if ($from.parentOffset !== 0) return false;
+
+    if (isInTable(state)) {
+      return true;
+    }
+  },
   "Mod-a": (state: EditorState, dispatch?: (tr: any) => void) => {
     if (!isInTable(state)) return false;
 

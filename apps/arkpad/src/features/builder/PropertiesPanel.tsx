@@ -59,7 +59,7 @@ export function PropertiesPanel({ block, onChange }: Props) {
         {block.type === "heading" && (
           <>
             <Field label="Text">
-              <Input value={block.props.text} onChange={(e) => patch({ text: e.target.value })} />
+              <Input value={block.props.html} onChange={(e) => patch({ html: e.target.value })} />
             </Field>
             <Field label="Level">
               <Select
@@ -80,9 +80,9 @@ export function PropertiesPanel({ block, onChange }: Props) {
             <Field label="Text">
               <textarea
                 className="prop-textarea"
-                value={block.props.text}
+                value={block.props.html}
                 rows={5}
-                onChange={(e) => patch({ text: e.target.value })}
+                onChange={(e) => patch({ html: e.target.value })}
               />
             </Field>
             <AlignField value={block.props.align} onChange={(v) => patch({ align: v as "left" | "center" | "right" })} />
@@ -107,7 +107,7 @@ export function PropertiesPanel({ block, onChange }: Props) {
         {block.type === "button" && (
           <>
             <Field label="Label">
-              <Input value={block.props.label} onChange={(e) => patch({ label: e.target.value })} />
+              <Input value={block.props.html} onChange={(e) => patch({ html: e.target.value })} />
             </Field>
             <Field label="Link URL">
               <Input value={block.props.href} placeholder="https://..." onChange={(e) => patch({ href: e.target.value })} />
@@ -176,7 +176,7 @@ export function PropertiesPanel({ block, onChange }: Props) {
         {block.type === "quote" && (
           <>
             <Field label="Quote text">
-              <textarea className="prop-textarea" value={block.props.text} rows={4} onChange={(e) => patch({ text: e.target.value })} />
+              <textarea className="prop-textarea" value={block.props.html} rows={4} onChange={(e) => patch({ html: e.target.value })} />
             </Field>
             <Field label="Author">
               <Input value={block.props.author} placeholder="Author name" onChange={(e) => patch({ author: e.target.value })} />

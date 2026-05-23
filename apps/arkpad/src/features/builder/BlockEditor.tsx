@@ -17,7 +17,7 @@ interface Props {
   selected: boolean;
 }
 
-export function BlockEditor({ html, placeholder, onChange, selected }: Props) {
+export function BlockEditor({ html, onChange, selected }: Props) {
   const editor = useArkpadEditor({
     extensions: BLOCK_EXTENSIONS,
     content: html,
@@ -43,7 +43,6 @@ export function BlockEditor({ html, placeholder, onChange, selected }: Props) {
         {selected && <BubbleMenu editor={editor} defaultToolbar />}
         <ArkpadEditorContent
           editor={editor}
-          placeholder={placeholder ?? "Type something..."}
           className="block-editor-content"
         />
       </div>

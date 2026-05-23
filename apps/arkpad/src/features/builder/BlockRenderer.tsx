@@ -8,16 +8,17 @@ interface Props {
 export function BlockRenderer({ block }: Props) {
   switch (block.type) {
     case "heading": {
-      const { text, level, align } = block.props;
+      const { html, level, align } = block.props;
       const Tag = `h${level}` as "h1" | "h2" | "h3";
-      return <Tag style={{ textAlign: align, margin: 0 }}>{text}</Tag>;
+      return <Tag style={{ textAlign: align, margin: 0 }} dangerouslySetInnerHTML={{ __html: html }} />;
     }
 
     case "text":
       return (
-        <p style={{ textAlign: block.props.align, margin: 0, lineHeight: 1.7 }}>
-          {block.props.text}
-        </p>
+        <div
+          style={{ textAlign: block.props.align, margin: 0, lineHeight: 1.7 }}
+          dangerouslySetInnerHTML={{ __html: block.props.html }}
+        />
       );
 
     case "image": {
@@ -42,12 +43,15 @@ export function BlockRenderer({ block }: Props) {
     }
 
     case "button": {
-      const { label, href, variant, align } = block.props;
+      const { html, href, variant, align } = block.props;
       return (
         <div style={{ textAlign: align }}>
-          <a href={href} className={`bldr-btn bldr-btn-${variant}`} onClick={(e) => e.preventDefault()}>
-            {label}
-          </a>
+          <a
+            href={href}
+            className={`bldr-btn bldr-btn-${variant}`}
+            onClick={(e) => e.preventDefault()}
+            dangerouslySetInnerHTML={{ __html: html }}
+          />
         </div>
       );
     }
@@ -118,7 +122,7 @@ export function BlockRenderer({ block }: Props) {
     case "quote":
       return (
         <blockquote className="bldr-quote">
-          <p>"{block.props.text}"</p>
+          <div dangerouslySetInnerHTML={{ __html: block.props.html }} />
           {block.props.author && <cite>— {block.props.author}</cite>}
         </blockquote>
       );
