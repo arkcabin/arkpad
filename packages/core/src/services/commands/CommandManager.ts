@@ -122,8 +122,21 @@ class CommandManagerInstance {
                   commands: this.commands,
                   view: this.view,
                   dispatch: (tr) => {
-                    tr.steps.forEach((step) => localTr.step(step));
-                    if (tr.selectionSet) safeSetSelection(localTr, tr.selection);
+                    const stepCountBefore = localTr.steps.length;
+                    tr.steps.forEach((step) => {
+                      try {
+                        localTr.step(step);
+                      } catch {
+                        console.error("[Arkpad] Shadow engine step failure");
+                      }
+                    });
+                    if (tr.selectionSet) {
+                      const mappedSelection = tr.selection.map(
+                        localTr.doc,
+                        localTr.mapping.slice(stepCountBefore)
+                      );
+                      safeSetSelection(localTr, mappedSelection);
+                    }
                   },
                   // Preserve dispatch mode for nested chains.
                   // This prevents can()/capability checks from behaving like real runs.
@@ -373,7 +386,7 @@ class CommandManagerInstance {
             );
           } else {
             // For custom selection types like CellSelection, apply directly.
-            this.masterTransaction.setSelection(selection);
+            safeSetSelection(this.masterTransaction, selection);
           }
         } catch {
           try {
