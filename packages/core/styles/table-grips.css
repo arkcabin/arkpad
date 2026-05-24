@@ -6,7 +6,7 @@
   position: absolute;
   right: -2px;
   top: 0;
-  bottom: -1px;
+  bottom: 0;
   width: 4px;
   z-index: 100;
   background-color: var(--ark-table-resize-handle, #3b82f6);
