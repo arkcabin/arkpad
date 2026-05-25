@@ -15,6 +15,8 @@ import { BlockRegistry } from "../services/BlockRegistry";
 
 import { createCoreEssentials } from "../extensions";
 import { isMarkActive, isNodeActive, getMarkAttributes, getNodeAttributes } from "../sdk/utils";
+import { Node } from "../sdk/Node";
+import { Mark } from "../sdk/Mark";
 import { CommandManager } from "../services/commands/CommandManager";
 import { SchemaBuilder } from "../services/schema/schema-builder";
 import {
@@ -559,7 +561,16 @@ export class ArkpadEditor implements IArkpadEditor {
   private isCommandAllowed(name: string): boolean {
     const { state } = this.view;
     const ext = this.extensionManager.commandToExtension.get(name);
-    if (state.schema.marks[name] || (ext && (ext as any).config?.addMarks)) return true;
+    
+    // Marks and utility extensions (non-Node extensions) do not change document structure 
+    // and are always allowed anywhere (including inside tables, lists, and blockquotes).
+    if (
+      state.schema.marks[name] ||
+      (ext && ext instanceof Mark) ||
+      (ext && !(ext instanceof Node))
+    ) {
+      return true;
+    }
 
     let targetRole = NodeRole.CONTENT;
     if (ext && ext.role !== undefined) targetRole = ext.role;
